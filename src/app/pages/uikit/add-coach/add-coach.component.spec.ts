@@ -3,21 +3,21 @@ import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
-import { RoadGradeComponent } from './road-grade.component';
+import { AddCoachComponent } from './add-coach.component';
 
-describe('RoadGradeComponent', () => {
-  let component: RoadGradeComponent;
-  let fixture: ComponentFixture<RoadGradeComponent>;
+describe('AddCoachComponent', () => {
+  let component: AddCoachComponent;
+  let fixture: ComponentFixture<AddCoachComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ RoadGradeComponent ]
+      declarations: [ AddCoachComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(RoadGradeComponent);
+    fixture = TestBed.createComponent(AddCoachComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
