@@ -1,0 +1,47 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openServiceDialog()" />
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+    </ng-template>
+</p-toolbar>
+
+<p-table
+    #dt
+    [rows]="10"
+    [paginator]="true"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+>
+    <ng-template #caption>
+        <div class="flex items-center justify-between">
+            <h5 class="m-0">Manage Services</h5>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+            </p-iconfield>
+        </div>
+    </ng-template>
+    <ng-template #header>
+        <tr>
+            <th style="min-width: 16rem">Service code</th>
+            <th style="min-width: 8rem">Service name</th>
+            <th style="min-width: 8rem">No.of sub categories</th>
+            <th style="min-width: 12rem">Options</th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-appointment>
+        <tr></tr>
+    </ng-template>
+</p-table>
+
+<!-- here is the dialog needed to add a new service-->
+<p-dialog [(visible)]="isServiceDialog" [header]="'Add new service'" [modal]="true" [closable]="true" [dismissableMask]="true" [style]="{ width: '900px', height: '500px' }">
+    <p-card> < </p-card>
+</p-dialog>

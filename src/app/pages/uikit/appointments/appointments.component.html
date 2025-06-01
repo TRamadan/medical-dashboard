@@ -1,0 +1,71 @@
+<div class="grid grid-cols-12 gap-8 mb-4">
+    <div class="col-span-12 md:col-span-6 xl:col-span-3">
+        <div class="card !p-0 overflow-hidden flex flex-col">
+            <div class="flex items-center p-6">
+                <i class="pi pi-check !text-5xl text-green-500"></i>
+                <div class="ml-6"><span class="text-green-500 block whitespace-nowrap">Approved appointments</span><span class="text-green-500 block text-4xl font-bold">20</span></div>
+            </div>
+            <img alt="conversion" class="w-full" src="assets/users.svg" />
+        </div>
+    </div>
+
+    <div class="col-span-12 md:col-span-6 xl:col-span-3">
+        <div class="card !p-0 overflow-hidden flex flex-col">
+            <div class="flex items-center p-6">
+                <i class="pi pi-clock !text-5xl text-orange-500"></i>
+                <div class="ml-6"><span class="text-orange-500 block whitespace-nowrap">Pending appointments</span><span class="text-orange-500 block text-4xl font-bold">10</span></div>
+            </div>
+            <img alt="conversion" class="w-full" src="assets/users.svg" />
+        </div>
+    </div>
+</div>
+
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button icon="pi pi-plus" raised label="New" class="mr-2" />
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+    </ng-template>
+</p-toolbar>
+
+<p-table
+    #dt
+    [value]="allAppointments()"
+    [rows]="10"
+    [paginator]="true"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+>
+    <ng-template #caption>
+        <div class="flex items-center justify-between">
+            <h5 class="m-0">Manage Appointments</h5>
+            <p-iconfield>
+                <p-inputicon styleClass="pi pi-search" />
+                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+            </p-iconfield>
+        </div>
+    </ng-template>
+    <ng-template #header>
+        <tr>
+            <th pSortableColumn="customerName" style="min-width: 16rem">Customer name</th>
+            <th pSortableColumn="assignedTo" style="min-width: 8rem">Assigned to</th>
+            <th pSortableColumn="assignedTo" style="min-width: 8rem">Date</th>
+            <th pSortableColumn="assignedTo" style="min-width: 8rem">Time</th>
+            <th pSortableColumn="service" style="min-width: 10rem">Service</th>
+            <th pSortableColumn="duration" style="min-width: 12rem">Duration</th>
+            <th pSortableColumn="price" style="min-width: 12rem">Price</th>
+            <th pSortableColumn="place" style="min-width: 12rem">Place</th>
+            <th pSortableColumn="status" style="min-width: 12rem">Status</th>
+            <th style="min-width: 12rem">Options</th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-appointment>
+        <tr></tr>
+    </ng-template>
+</p-table>

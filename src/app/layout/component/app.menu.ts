@@ -21,8 +21,59 @@ export class AppMenu {
     ngOnInit() {
         this.model = [
             {
-                label: 'title will be here',
-                items: []
+                label: 'Home',
+                items: [
+                    {
+                        label: 'Dashboard',
+                        icon: 'pi pi-fw pi-home',
+                        routerLink: ['/']
+                    }
+                ]
+            },
+            {
+                label: 'User management',
+                items: [
+                    {
+                        label: 'Add user',
+                        icon: '',
+                        routerLink: ['/uikit/adduser']
+                    },
+                    {
+                        label: 'Add group',
+                        icon: '',
+                        routerLink: ['/uikit/addgroup']
+                    },
+                    {
+                        label: 'Add permission',
+                        icon: '',
+                        routerLink: ['/uikit/addpermission']
+                    }
+                    // {
+                    //     label: 'Add Permission',
+                    //     icon: ''
+                    // }
+                ]
+            },
+            {
+                label: 'Doctor',
+                items: [
+                    { label: 'Add service', icon: '', routerLink: ['/uikit/services'] },
+                    { label: 'Add location', icon: '', routerLink: ['/uikit/location'] },
+                    { label: 'Appointments', icon: '', routerLink: ['/uikit/appointments'] },
+                    { label: 'Add treatment plan', icon: '' }
+                    // {
+                    //     label: 'Calender',
+                    //     icon: ''
+                    // },
+                    // {
+                    //     label: 'Customers',
+                    //     icon: ''
+                    // },
+                    // {
+                    //     label: '',
+                    //     icon: ''
+                    // }
+                ]
             }
         ];
     }

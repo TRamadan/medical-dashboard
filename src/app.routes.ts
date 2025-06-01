@@ -6,7 +6,7 @@ export const appRoutes: Routes = [
     {
         path: '',
         component: AppLayout,
-        children: [{ path: 'basicData', loadChildren: () => import('./app/pages/uikit/uikit.routes') }]
+        children: [{ path: 'uikit', loadChildren: () => import('./app/pages/uikit/uikit.routes') }]
     },
     { path: 'landing', component: Landing },
     { path: 'auth', loadChildren: () => import('./app/pages/auth/auth.routes') }
