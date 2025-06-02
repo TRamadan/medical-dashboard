@@ -1,8 +1,8 @@
 export interface Services {
     id?: number;
     name?: string;
-    numberOfsubCatrgories: number;
-    subCategories: SubCategory[];
+    numberOfsubCatrgories?: number;
+    subCategories?: SubCategory[];
 }
 
 export interface SubCategory {

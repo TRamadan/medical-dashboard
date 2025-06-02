@@ -1,0 +1,12 @@
+label {
+    font-weight: bold;
+}
+
+::ng-deep .p-toggleswitch {
+    display: inline-block;
+    width: var(--p-toggleswitch-width);
+    height: var(--p-toggleswitch-height);
+    position: relative;
+    top: 5px;
+    left: 16px;
+}

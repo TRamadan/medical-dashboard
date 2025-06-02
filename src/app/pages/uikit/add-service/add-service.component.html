@@ -1,6 +1,6 @@
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
-        <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openServiceDialog()" />
+        <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="addServiceCategory()" />
     </ng-template>
 
     <ng-template #end>
@@ -42,6 +42,132 @@
 </p-table>
 
 <!-- here is the dialog needed to add a new service-->
-<p-dialog [(visible)]="isServiceDialog" [header]="'Add new service'" [modal]="true" [closable]="true" [dismissableMask]="true" [style]="{ width: '900px', height: '500px' }">
-    <p-card> < </p-card>
+<p-dialog [(visible)]="isServiceDialog" [header]="'Add new service'" [modal]="true" [closable]="true" [dismissableMask]="true" [style]="{ width: '690px', height: '615px' }">
+    <p-card>
+        @if (!isNewServiceSubCategory) {
+            <div class="row">
+                <form [formGroup]="addServiceForm">
+                    <div class="col-3">
+                        <p-floatlabel variant="on">
+                            <input pInputText formControlName="name" />
+                            <label for="value3">Service name</label>
+                        </p-floatlabel>
+                    </div>
+                </form>
+            </div>
+        } @else {
+            <p-tabs value="0">
+                <p-tablist>
+                    <p-tab value="0">Details</p-tab>
+                    <p-tab value="1">Configuration</p-tab>
+                </p-tablist>
+
+                <p-tabpanels>
+                    <form [formGroup]="serviceCategoryForm">
+                        <p-tabpanel value="0">
+                            <div formGroupName="detailsForm">
+                                <p-floatlabel variant="on">
+                                    <input pInputText formControlName="subCategoryName" />
+                                    <label for="value3">Sub category name</label>
+                                </p-floatlabel>
+                            </div>
+                        </p-tabpanel>
+
+                        <p-tabpanel value="1">
+                            <div formGroupName="configurationForm">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label>Show on Website</label>
+                                        <p-toggleswitch formControlName="isShowWebsite" />
+                                    </div>
+
+                                    <div class="col-6">
+                                        <label>Recurring Appointment</label>
+                                        <p-toggleswitch formControlName="isAppointmentRecurring" />
+                                    </div>
+                                </div>
+
+                                <div class="row my-3">
+                                    <div class="col-6">
+                                        <p-floatlabel class="w-full md:w-56" variant="on">
+                                            <p-cascadeselect inputId="on_label" optionLabel="cname" formControlName="duration" optionGroupLabel="name" [optionGroupChildren]="['states', 'cities']" styleClass="w-full" />
+                                            <label for="on_label">Duration</label>
+                                        </p-floatlabel>
+                                    </div>
+                                    <div class="col-6">
+                                        <p-floatlabel variant="on">
+                                            <input pInputText formControlName="price" />
+                                            <label for="value3">Price</label>
+                                        </p-floatlabel>
+                                    </div>
+                                </div>
+
+                                <div class="row my-3">
+                                    <div class="col-6">
+                                        <p-floatlabel class="w-full md:w-56" variant="on">
+                                            <p-cascadeselect inputId="on_label" formControlName="bufferTimeBefore" styleClass="w-full" />
+                                            <label for="on_label">Buffer time before</label>
+                                        </p-floatlabel>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <p-floatlabel class="w-full md:w-56" variant="on">
+                                            <p-cascadeselect inputId="on_label" formControlName="bufferTimeAfter" styleClass="w-full" />
+                                            <label for="on_label">Buffer time after</label>
+                                        </p-floatlabel>
+                                    </div>
+                                </div>
+
+                                <div class="row my-3">
+                                    <div class="col-6">
+                                        <p-floatlabel variant="on">
+                                            <input pInputText formControlName="minCapacity" />
+                                            <label for="value3">Min Capacity</label>
+                                        </p-floatlabel>
+                                    </div>
+
+                                    <div class="col-6">
+                                        <p-floatlabel variant="on">
+                                            <input pInputText formControlName="maxCapacity" />
+                                            <label for="value3">Max Capacity</label>
+                                        </p-floatlabel>
+                                    </div>
+                                </div>
+
+                                <div class="row my-3">
+                                    <div class="col-12">
+                                        <p-floatlabel variant="on">
+                                            <input pInputText class="w-75" formControlName="minimumTimeRequiredBeforeBooking" />
+                                            <label for="value3">Minimum time before booking</label>
+                                        </p-floatlabel>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <p-floatlabel variant="on">
+                                            <input pInputText class="w-75" formControlName="minimumTimeRequiredBeforeCancelation" />
+                                            <label for="value3">Minimum time before cancelation</label>
+                                        </p-floatlabel>
+                                    </div>
+                                </div>
+                                <div class="row my-3">
+                                    <div class="col-12">
+                                        <p-floatlabel variant="on">
+                                            <input pInputText class="w-75" formControlName="minimumTimeRequiredBeforeReschedueling" />
+                                            <label for="value3">Minimum time before reschecdueling</label>
+                                        </p-floatlabel>
+                                    </div>
+                                </div>
+                            </div>
+                        </p-tabpanel>
+                    </form>
+                </p-tabpanels>
+            </p-tabs>
+        }
+    </p-card>
+
+    <ng-template #footer>
+        <p-button label="Cancel" [text]="true" severity="danger" (click)="isServiceDialog = false" />
+        <p-button label="Save" [disabled]="addServiceForm.invalid" [outlined]="true" severity="success" (onClick)="addNewService()" />
+    </ng-template>
 </p-dialog>
