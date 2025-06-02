@@ -111,7 +111,7 @@ export class AddServiceComponent implements OnInit {
      *
      * @param chosedService
      */
-    addServiceCategory(chosedService?: Services): void {
+    addServiceCategory(chosedService: Services): void {
         this.isServiceDialog = true;
         this.isNewServiceSubCategory = true;
     }
