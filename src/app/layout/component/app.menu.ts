@@ -60,19 +60,12 @@ export class AppMenu {
                     { label: 'Add service', icon: '', routerLink: ['/uikit/services'] },
                     { label: 'Add location', icon: '', routerLink: ['/uikit/location'] },
                     { label: 'Appointments', icon: '', routerLink: ['/uikit/appointments'] },
-                    { label: 'Add treatment plan', icon: '' }
-                    // {
-                    //     label: 'Calender',
-                    //     icon: ''
-                    // },
-                    // {
-                    //     label: 'Customers',
-                    //     icon: ''
-                    // },
-                    // {
-                    //     label: '',
-                    //     icon: ''
-                    // }
+                    { label: 'Add treatment plan', icon: '', routerLink: ['/uikit/treatementplan'] },
+                    {
+                        label: 'Calendar',
+                        icon: '',
+                        routerLink: ['/uikit/calendar']
+                    }
                 ]
             }
         ];

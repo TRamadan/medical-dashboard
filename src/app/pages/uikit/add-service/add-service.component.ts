@@ -7,15 +7,10 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
-import { SelectModule } from 'primeng/select';
-import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
-import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
-import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CardModule } from 'primeng/card';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { Services } from './models/services';
@@ -38,15 +33,10 @@ import { CascadeSelectModule } from 'primeng/cascadeselect';
         ToastModule,
         ToolbarModule,
         InputTextModule,
-        TextareaModule,
-        SelectModule,
-        RadioButtonModule,
         InputNumberModule,
         DialogModule,
-        TagModule,
         InputIconModule,
         IconFieldModule,
-        ConfirmDialogModule,
         CardModule,
         ReactiveFormsModule
     ],
