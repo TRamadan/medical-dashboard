@@ -62,6 +62,11 @@ export class AppMenu {
                     { label: 'Appointments', icon: '', routerLink: ['/uikit/appointments'] },
                     { label: 'Add treatment plan', icon: '', routerLink: ['/uikit/treatementplan'] },
                     {
+                        label: 'Tracking attendance',
+                        icon: '',
+                        routerLink: ['/uikit/trackingattendance']
+                    },
+                    {
                         label: 'Calendar',
                         icon: '',
                         routerLink: ['/uikit/calendar']

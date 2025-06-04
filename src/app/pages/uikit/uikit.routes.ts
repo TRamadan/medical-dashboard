@@ -6,11 +6,17 @@ import { AppointmentsComponent } from './appointments/appointments.component';
 import { AddServiceComponent } from './add-service/add-service.component';
 import { AddLocationComponent } from './add-location/add-location.component';
 import { CalendarComponent } from './calendar/calendar.component';
+import { AttendanceTrackingComponent } from './attendance-tracking/attendance-tracking.component';
 export default [
     {
         path: 'adduser',
         data: { breadcrumb: 'Add user' },
         component: AddUserComponent
+    },
+    {
+        path: 'trackingattendance',
+        data: { breadcrumb: 'Tracking attendance' },
+        component: AttendanceTrackingComponent
     },
     {
         path: 'addgroup',

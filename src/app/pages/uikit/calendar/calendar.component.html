@@ -48,11 +48,11 @@
                 <tr>
                     <td>{{ time }}</td>
                     @for (emp of allAppointments; track emp) {
-                        <td [ngClass]="getStatusColor(getAppointment(emp, time)?.status)">
+                        <td class="text-center align-middle" [ngClass]="getStatusColor(getAppointment(emp, time)?.status)">
                             <ng-container *ngIf="getAppointment(emp, time) as appt">
                                 <div class="fw-bold text-white">{{ appt.patient }}</div>
                                 <div>{{ appt.service }}</div>
-                                <div class="text-muted small">{{ appt.time.from }} - {{ appt.time.to }}</div>
+                                <div class="text-muted duration">{{ appt.time.from }} - {{ appt.time.to }}</div>
                                 <span class="badge mt-1" [ngClass]="getStatusColor(appt.status)">
                                     {{ appt.status | titlecase }}
                                 </span>
