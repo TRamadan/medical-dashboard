@@ -34,9 +34,10 @@
                                         <p class="text-lg text-gray-600">Patient ID: {{ session.patientId }}</p>
                                         <p class="text-lg font-medium text-blue-600">{{ session.injury }}</p>
                                     </div>
-                                    <span class="px-3 py-1 rounded-full text-lg font-medium" [ngClass]="statusBadgeClasses(session.status)">
+                                    <p-tag [severity]="getSeverity(session.status)" [value]="session.status | titlecase" />
+                                    <!-- <span class="px-3 py-1 rounded-full text-lg font-medium" [ngClass]="statusBadgeClasses(session.status)">
                                         {{ session.status | titlecase }}
-                                    </span>
+                                    </span> -->
                                 </div>
 
                                 <div class="grid grid-cols-2 gap-2 mb-4 text-sm text-gray-600">
@@ -119,9 +120,11 @@
                                                 <p class="text-lg text-gray-600">Patient ID: {{ s.patientId }}</p>
                                                 <p class="text-lg font-medium text-blue-600">{{ s.injury }}</p>
                                             </div>
-                                            <span class="px-3 py-1 rounded-full text-lg font-medium" [ngClass]="statusBadgeClasses(s.status)">
+                                            <p-tag [severity]="getSeverity(s.status)" [value]="s.status | titlecase" />
+
+                                            <!-- <span class="px-3 py-1 rounded-full text-lg font-medium" [ngClass]="statusBadgeClasses(s.status)">
                                                 {{ s.status | titlecase }}
-                                            </span>
+                                            </span> -->
                                         </div>
 
                                         <div class="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-600">

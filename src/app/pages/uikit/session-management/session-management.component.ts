@@ -8,6 +8,7 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { FormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
+import { TagModule } from 'primeng/tag';
 
 export interface TreatmentPlan {
     phase: string;
@@ -40,7 +41,7 @@ export interface Coach {
 
 @Component({
     selector: 'app-session-management',
-    imports: [ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
+    imports: [TagModule, ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
     templateUrl: './session-management.component.html',
     styleUrls: ['./session-management.component.css']
 })
@@ -139,14 +140,27 @@ export class SessionManagementComponent implements OnInit {
         alert('Progress measurements saved successfully!');
     }
 
-    statusBadgeClasses(status: Session['status']): string {
+    // statusBadgeClasses(status: Session['status']): string {
+    //     switch (status) {
+    //         case 'completed':
+    //             return 'bg-green-100 text-green-800';
+    //         case 'scheduled':
+    //             return 'bg-yellow-100 text-yellow-800';
+    //         default:
+    //             return 'bg-gray-100 text-gray-800';
+    //     }
+    // }
+
+    getSeverity(status: Session['status']): 'success' | 'info' | 'warn' | 'danger' | 'contrast' {
         switch (status) {
             case 'completed':
-                return 'bg-green-100 text-green-800';
+                return 'success';
             case 'scheduled':
-                return 'bg-yellow-100 text-yellow-800';
+                return 'warn';
+            case 'not-completed':
+                return 'danger';
             default:
-                return 'bg-gray-100 text-gray-800';
+                return 'info';
         }
     }
 
