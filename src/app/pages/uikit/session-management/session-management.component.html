@@ -54,11 +54,16 @@
                                 </div>
 
                                 <div class="flex gap-2">
+                                    @if (session.status == 'scheduled') {
+                                        <ng-container>
+                                            <p-button label="Start session" icon="pi pi-play" [raised]="true" severity="info" [styleClass]="'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm'" />
+                                        </ng-container>
+                                    }
                                     <p-button
                                         label="View details"
                                         icon="pi pi-eye"
                                         [raised]="true"
-                                        severity="info"
+                                        severity="warn"
                                         (click)="openSession(session)"
                                         [styleClass]="'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm'"
                                     />
@@ -146,7 +151,7 @@
     </div>
 </section>
 
-<p-dialog [header]="'Session details'" [modal]="true" [visible]="isSessionDetails" [style]="{ width: '650px', height: '550px' }" [dismissableMask]="false">
+<p-dialog closable="false" [header]="'Session details'" [modal]="true" [visible]="isSessionDetails" [style]="{ width: '650px', height: '550px' }" [dismissableMask]="false">
     @if (selectedSession) {
         <div class="p-6">
             <div class="row">
@@ -209,4 +214,7 @@
             </div>
         </div>
     }
+    <ng-template #footer>
+        <p-button label="Cancel" [text]="true" severity="danger" (click)="isSessionDetails = false" />
+    </ng-template>
 </p-dialog>

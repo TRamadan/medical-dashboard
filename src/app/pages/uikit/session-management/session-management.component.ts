@@ -24,7 +24,7 @@ export interface Session {
     sessionType: string;
     scheduledDate: string;
     scheduledTime: string;
-    status: 'scheduled' | 'completed' | 'not-completed';
+    status: 'scheduled' | 'completed' | 'not-completed' | 'in progress';
     sessionNumber: number;
     totalSessions: number;
     otherCoaches: string[];
@@ -44,7 +44,6 @@ export interface Coach {
     styleUrls: ['./session-management.component.css']
 })
 export class SessionManagementComponent implements OnInit {
-    currentView: 'sessions' | 'schedule' = 'sessions';
     isSessionDetails: boolean = false;
 
     selectedSession: Session | null = null;
