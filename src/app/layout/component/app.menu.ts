@@ -62,7 +62,7 @@ export class AppMenu {
                     { label: 'Appointments', icon: '', routerLink: ['/uikit/appointments'] },
                     { label: 'Add treatment plan', icon: '', routerLink: ['/uikit/treatementplan'] },
                     {
-                        label: 'Tracking attendance',
+                        label: 'Tracking session attendance',
                         icon: '',
                         routerLink: ['/uikit/trackingattendance']
                     },
@@ -70,6 +70,16 @@ export class AppMenu {
                         label: 'Calendar',
                         icon: '',
                         routerLink: ['/uikit/calendar']
+                    }
+                ]
+            },
+            {
+                label: 'Coach',
+                items: [
+                    {
+                        label: 'session management',
+                        icon: '',
+                        routerLink: ['/uikit/sessionmanagement']
                     }
                 ]
             }

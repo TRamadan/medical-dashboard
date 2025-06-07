@@ -7,6 +7,7 @@ import { AddServiceComponent } from './add-service/add-service.component';
 import { AddLocationComponent } from './add-location/add-location.component';
 import { CalendarComponent } from './calendar/calendar.component';
 import { AttendanceTrackingComponent } from './attendance-tracking/attendance-tracking.component';
+import { SessionManagementComponent } from './session-management/session-management.component';
 export default [
     {
         path: 'adduser',
@@ -15,7 +16,7 @@ export default [
     },
     {
         path: 'trackingattendance',
-        data: { breadcrumb: 'Tracking attendance' },
+        data: { breadcrumb: 'Tracking session attendance' },
         component: AttendanceTrackingComponent
     },
     {
@@ -47,5 +48,10 @@ export default [
         path: 'calendar',
         data: { breadcrumb: 'Caledar' },
         component: CalendarComponent
+    },
+    {
+        path: 'sessionmanagement',
+        data: { breadcrumb: 'Caledar' },
+        component: SessionManagementComponent
     }
 ] as Routes;

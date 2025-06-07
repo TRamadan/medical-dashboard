@@ -1,0 +1,123 @@
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        section {
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin-bottom: 10px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .header p {
+            font-size: clamp(1rem, 2vw, 1.1rem);
+            opacity: 0.9;
+        }
+
+        i {
+            position: relative;
+            right: 10px;
+        }
+
+
+
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .stats-bar {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 15px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .btn-sm {
+                text-align: center;
+            }
+
+            .pagination {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .modal-content {
+                margin: 20px 10px;
+                padding: 20px;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .btn {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-bar {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                flex-direction: column;
+            }
+
+            th, td {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+        }

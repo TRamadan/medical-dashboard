@@ -1,3 +1,104 @@
-<p>
-  attendance-tracking works!
-</p>
+<section>
+    <div class="container">
+        <div class="header">
+            <h1>Tracking session attendance</h1>
+        </div>
+
+        <div class="content">
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-number scheduled">24</div>
+                    <div class="stat-label">Scheduled Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number completed">18</div>
+                    <div class="stat-label">Completed Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number canceled">3</div>
+                    <div class="stat-label">Canceled Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number rescheduled">5</div>
+                    <div class="stat-label">Rescheduled Sessions</div>
+                </div>
+            </div>
+            <div class="filters-section">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <div class="filter-group">
+                            <p-floatlabel class="w-full md:w-56" variant="on">
+                                <p-select inputId="on_label" [options]="allCoachs" optionLabel="name" styleClass="w-full" />
+                                <label for="on_label">Filter by status</label>
+                            </p-floatlabel>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <p-floatlabel variant="on">
+                            <p-datepicker styleClass="custom-datepicker" inputId="on_label" showIcon iconDisplay="input" />
+                            <label for="on_label">Filter by Date</label>
+                        </p-floatlabel>
+                    </div>
+                    <div class="filter-group">
+                        <p-floatlabel class="w-full md:w-56" variant="on">
+                            <p-select inputId="on_label" [options]="allCoachs" optionLabel="name" styleClass="w-full" />
+                            <label for="on_label">Filter by coach</label>
+                        </p-floatlabel>
+                    </div>
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <div class="filter-buttons">
+                            <p-button size="small" label="Apply Filters" [raised]="true" severity="primary" size="large" />
+                            <p-button size="small" label="Cancel" [raised]="true" severity="danger" size="large" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="sessions-table">
+                <div class="table-header">
+                    <div class="table-title">Sessions List</div>
+                </div>
+
+                <div class="table-container">
+                    <p-table [paginator]="true" [rows]="5" [value]="appointments" class="p-datatable-sm" showGridlines>
+                        <ng-template pTemplate="header">
+                            <tr class="bg-primary text-white">
+                                <th>Session ID</th>
+                                <th>Client Name</th>
+                                <th>Coach</th>
+                                <th>Service</th>
+                                <th>Date & Time</th>
+                                <th>Current Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </ng-template>
+
+                        <ng-template pTemplate="body" let-appointment>
+                            <tr>
+                                <td>{{ appointment.id }}</td>
+                                <td>{{ appointment.client }}</td>
+                                <td>{{ appointment.employee }}</td>
+                                <td>{{ appointment.service }}</td>
+                                <td>{{ appointment.datetime }}</td>
+                                <td>
+                                    <p-tag [severity]="getTagSeverity(appointment.status)">
+                                        {{ appointment.status }}
+                                    </p-tag>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-1 flex-wrap">
+                                        <p-button size="small" *ngIf="appointment.status !== 'completed' && appointment.status !== 'canceled'" label="Complete" [raised]="true" severity="success" />
+                                        <p-button size="small" label="Reschedule" [raised]="true" severity="info" />
+                                        <p-button size="small" *ngIf="appointment.status !== 'canceled'" label="Cancel" [raised]="true" severity="danger" />
+
+                                        <span *ngIf="appointment.status === 'canceled'" style="color: #999; font-size: 1.4rem; font-weight: bold">Session Canceled</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </ng-template>
+                    </p-table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

@@ -5,9 +5,14 @@ import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScroll
 import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
 import { appRoutes } from './app.routes';
-
+import { LucideAngularModule, Calendar, Home, User, Settings } from 'lucide-angular';
 export const appConfig: ApplicationConfig = {
     providers: [
+        {
+            provide: 'LUCIDE_ICONS',
+            useValue: { Calendar, Home, User, Settings },
+            multi: true
+        },
         provideRouter(appRoutes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), withEnabledBlockingInitialNavigation()),
         provideHttpClient(withFetch()),
         provideAnimationsAsync(),

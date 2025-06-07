@@ -1,0 +1,212 @@
+<p-toolbar>
+    <h1 class="text-2xl font-bold">Coach Dashboard</h1>
+    <p>Welcome back, {{ coachData.name }}</p>
+</p-toolbar>
+<!-- <p-toast /> -->
+<br />
+<section>
+    <div class="container">
+        <div class="header">
+            <h1>Session managment</h1>
+        </div>
+
+        <p-tabs value="0">
+            <p-tablist>
+                <p-tab value="0">Assingned sessions</p-tab>
+                <p-tab value="1">My Schedule</p-tab>
+            </p-tablist>
+
+            <p-tabpanels>
+                <p-tabpanel value="0">
+                    <section class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">Assigned Sessions</h2>
+                            <span class="text-lg text-gray-600">
+                                Showing sessions for: <strong>{{ coachData.specialization }}</strong>
+                            </span>
+                        </div>
+
+                        @for (session of assignedSessions; track session) {
+                            <div class="bg-white rounded-lg shadow-md p-6 mb-4 border-l-4 border-blue-500 my-3 p-3">
+                                <div class="flex justify-content-between items-start mb-4">
+                                    <div>
+                                        <h3 class="text-lg font-semibold text-gray-800">{{ session.patientName }}</h3>
+                                        <p class="text-lg text-gray-600">Patient ID: {{ session.patientId }}</p>
+                                        <p class="text-lg font-medium text-blue-600">{{ session.injury }}</p>
+                                    </div>
+                                    <span class="px-3 py-1 rounded-full text-lg font-medium" [ngClass]="statusBadgeClasses(session.status)">
+                                        {{ session.status | titlecase }}
+                                    </span>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-600">
+                                    <div class="flex items-center text-lg">{{ session.scheduledDate }}</div>
+                                    <div class="flex items-center text-lg"><i class="pi pi-clock"></i>{{ session.scheduledTime }}</div>
+                                    <div class="flex items-center text-lg">{{ session.sessionType }}</div>
+                                    <div class="flex items-center text-lg">Session&nbsp;{{ session.sessionNumber }}/{{ session.totalSessions }}</div>
+                                </div>
+
+                                <div *ngIf="session.otherCoaches.length" class="mb-4 p-3 bg-blue-50 rounded-md text-sm text-blue-800">
+                                    <div class="flex items-center">
+                                        <span class="font-bold text-lg">Collaborating Coaches:</span>
+                                    </div>
+                                    <span class="text-lg">{{ session.otherCoaches.join(', ') }}</span>
+                                </div>
+
+                                <div class="flex gap-2">
+                                    <p-button
+                                        label="View details"
+                                        icon="pi pi-eye"
+                                        [raised]="true"
+                                        severity="info"
+                                        (click)="openSession(session)"
+                                        [styleClass]="'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm'"
+                                    />
+
+                                    <ng-container *ngIf="session.status === 'scheduled'">
+                                        <p-button
+                                            severity="success"
+                                            label="Mark Complete"
+                                            icon="pi pi-check-circle"
+                                            [raised]="true"
+                                            [styleClass]="'flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm'"
+                                            (click)="updateSessionStatus(session.id, 'completed')"
+                                        />
+
+                                        <p-button
+                                            severity="danger"
+                                            label="Mark Incomplete"
+                                            icon="pi pi-times-circle"
+                                            [raised]="true"
+                                            [styleClass]="'flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm'"
+                                            (click)="updateSessionStatus(session.id, 'completed')"
+                                        />
+                                    </ng-container>
+                                </div>
+                            </div>
+                        }
+                    </section>
+                </p-tabpanel>
+
+                <p-tabpanel value="1">
+                    <section class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800">My schedule</h2>
+                        </div>
+
+                        @for (day of upcomingSchedule; track day) {
+                            <h3 class="text-lg font-semibold text-gray-700 mb-3">{{ day.date }}</h3>
+                            <div *ngIf="!day.sessions.length" class="bg-gray-50 p-4 rounded-md text-gray-900 text-center mb-6">No sessions scheduled for this day</div>
+                            @if (day.sessions.length) {
+                                @for (s of day.sessions; track s) {
+                                    <div class="bg-white rounded-lg shadow-md p-6 mb-4 border-l-4 border-blue-500 my-3 p-3">
+                                        <div class="flex justify-content-between items-start mb-4">
+                                            <div>
+                                                <h3 class="text-lg font-semibold text-gray-800">{{ s.patientName }}</h3>
+                                                <p class="text-lg text-gray-600">Patient ID: {{ s.patientId }}</p>
+                                                <p class="text-lg font-medium text-blue-600">{{ s.injury }}</p>
+                                            </div>
+                                            <span class="px-3 py-1 rounded-full text-lg font-medium" [ngClass]="statusBadgeClasses(s.status)">
+                                                {{ s.status | titlecase }}
+                                            </span>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-600">
+                                            <div class="flex items-center text-lg">{{ s.scheduledDate }}</div>
+                                            <div class="flex items-center text-lg"><i class="pi pi-clock"></i>{{ s.scheduledTime }}</div>
+                                            <div class="flex items-center text-lg">{{ s.sessionType }}</div>
+                                            <div class="flex items-center text-lg">Session&nbsp;{{ s.sessionNumber }}/{{ s.totalSessions }}</div>
+                                        </div>
+
+                                        <div *ngIf="s.otherCoaches.length" class="mb-4 p-3 bg-blue-50 rounded-md text-sm text-blue-800">
+                                            <div class="flex items-center">
+                                                <span class="font-bold text-lg">Collaborating Coaches:</span>
+                                            </div>
+                                            <span class="text-lg">{{ s.otherCoaches.join(', ') }}</span>
+                                        </div>
+
+                                        <div class="flex gap-2">
+                                            <p-button
+                                                label="View details"
+                                                icon="pi pi-eye"
+                                                [raised]="true"
+                                                severity="info"
+                                                (click)="openSession(s)"
+                                                [styleClass]="'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm'"
+                                            />
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        }
+                    </section>
+                </p-tabpanel>
+            </p-tabpanels>
+        </p-tabs>
+    </div>
+</section>
+
+<p-dialog [header]="'Session details'" [modal]="true" [visible]="isSessionDetails" [style]="{ width: '650px', height: '550px' }" [dismissableMask]="false">
+    @if (selectedSession) {
+        <div class="p-6">
+            <div class="row">
+                <div class="col-6">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">Patient Information</h3>
+                        <p><strong>Name:</strong> {{ selectedSession.patientName }}</p>
+                        <p><strong>Patient ID:</strong> {{ selectedSession.patientId }}</p>
+                        <p><strong>Injury:</strong> {{ selectedSession.injury }}</p>
+                        <p><strong>Session:</strong> {{ selectedSession.sessionNumber }}/{{ selectedSession.totalSessions }}</p>
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-2">Session Details</h3>
+                        <p><strong>Date:</strong> {{ selectedSession.scheduledDate }}</p>
+                        <p><strong>Time:</strong> {{ selectedSession.scheduledTime }}</p>
+                        <p><strong>Type:</strong> {{ selectedSession.sessionType }}</p>
+                        <p><strong>Status:</strong> {{ selectedSession.status }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="my-4">
+                <h3 class="text-lg font-semibold mb-4">Treatment Plan</h3>
+                <div class="bg-gray-50 p-4 rounded-md">
+                    <p><strong>Phase:</strong> {{ selectedSession.treatmentPlan.phase }}</p>
+                    <p><strong>Goals:</strong> {{ selectedSession.treatmentPlan.goals }}</p>
+
+                    <strong>Exercises:</strong>
+                    <ul class="list-disc list-inside ml-4 mt-1">
+                        <li *ngFor="let ex of selectedSession.treatmentPlan.exercises">{{ ex }}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-4">Progress Measurements</h3>
+
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4" *ngFor="let m of selectedSession.treatmentPlan.measurements">
+                        <label class="w-40 text-sm font-medium">{{ m }}:</label>
+                        <input class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter measurement" />
+                    </div>
+                </div>
+
+                <button class="mt-4 flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700" (click)="saveProgress(selectedSession.id)">Save Progress</button>
+            </div>
+
+            <div *ngIf="selectedSession.otherCoaches.length">
+                <h3 class="text-lg font-semibold my-2">Collaboration</h3>
+                <div class="bg-blue-50 p-4 rounded-md text-sm text-blue-800">
+                    <p class="mb-2"><strong>Other coaches assigned:</strong></p>
+                    <ul class="list-disc list-inside ml-4">
+                        <li *ngFor="let coach of selectedSession.otherCoaches">{{ coach }}</li>
+                    </ul>
+                    <p class="text-xs text-blue-600 mt-2">Coordinate with these coaches for comprehensive patient care.</p>
+                </div>
+            </div>
+        </div>
+    }
+</p-dialog>
