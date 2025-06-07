@@ -21,6 +21,7 @@ export interface Session {
     patientName: string;
     patientId: string;
     injury: string;
+    duration: string;
     sessionType: string;
     scheduledDate: string;
     scheduledTime: string;
@@ -63,6 +64,7 @@ export class SessionManagementComponent implements OnInit {
             sessionType: 'Strengthening',
             scheduledDate: '2025-06-06',
             scheduledTime: '10:00 AM',
+            duration: '30 min',
             status: 'scheduled',
             sessionNumber: 5,
             totalSessions: 12,
@@ -78,6 +80,7 @@ export class SessionManagementComponent implements OnInit {
             id: 'S002',
             patientName: 'Emily Davis',
             patientId: 'P002',
+            duration: '30 min',
             injury: 'Rotator Cuff Strain',
             sessionType: 'Mobility',
             scheduledDate: '2025-06-06',
@@ -97,6 +100,7 @@ export class SessionManagementComponent implements OnInit {
             id: 'S003',
             patientName: 'Robert Chen',
             patientId: 'P003',
+            duration: '30 min',
             injury: 'Lower Back Strain',
             sessionType: 'Core Strengthening',
             scheduledDate: '2025-06-05',
@@ -121,7 +125,6 @@ export class SessionManagementComponent implements OnInit {
     ];
 
     openSession(session: Session): void {
-        debugger;
         this.selectedSession = session;
         this.isSessionDetails = true;
     }

@@ -39,9 +39,10 @@
                                     </span>
                                 </div>
 
-                                <div class="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-600">
+                                <div class="grid grid-cols-2 gap-2 mb-4 text-sm text-gray-600">
                                     <div class="flex items-center text-lg">{{ session.scheduledDate }}</div>
-                                    <div class="flex items-center text-lg"><i class="pi pi-clock"></i>{{ session.scheduledTime }}</div>
+                                    <div class="flex items-center text-lg">{{ session.scheduledTime }}</div>
+                                    <div class="flex items-center text-lg">{{ session.duration }}</div>
                                     <div class="flex items-center text-lg">{{ session.sessionType }}</div>
                                     <div class="flex items-center text-lg">Session&nbsp;{{ session.sessionNumber }}/{{ session.totalSessions }}</div>
                                 </div>
@@ -56,7 +57,14 @@
                                 <div class="flex gap-2">
                                     @if (session.status == 'scheduled') {
                                         <ng-container>
-                                            <p-button label="Start session" icon="pi pi-play" [raised]="true" severity="info" [styleClass]="'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm'" />
+                                            <p-button
+                                                label="Start session"
+                                                icon="pi pi-play"
+                                                [raised]="true"
+                                                severity="info"
+                                                [styleClass]="'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm'"
+                                                (click)="updateSessionStatus(session.id, 'in progress')"
+                                            />
                                         </ng-container>
                                     }
                                     <p-button
@@ -68,7 +76,7 @@
                                         [styleClass]="'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm'"
                                     />
 
-                                    <ng-container *ngIf="session.status === 'scheduled'">
+                                    <ng-container *ngIf="session.status === 'scheduled' || session.status === 'in progress'">
                                         <p-button
                                             severity="success"
                                             label="Mark Complete"
@@ -84,7 +92,7 @@
                                             icon="pi pi-times-circle"
                                             [raised]="true"
                                             [styleClass]="'flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm'"
-                                            (click)="updateSessionStatus(session.id, 'completed')"
+                                            (click)="updateSessionStatus(session.id, 'not-completed')"
                                         />
                                     </ng-container>
                                 </div>
