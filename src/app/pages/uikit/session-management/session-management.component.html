@@ -64,7 +64,7 @@
                                                 [raised]="true"
                                                 severity="info"
                                                 [styleClass]="'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm'"
-                                                (click)="updateSessionStatus(session.id, 'in progress')"
+                                                (click)="updateSessionStatus(session, 'in progress')"
                                             />
                                         </ng-container>
                                     }
@@ -84,7 +84,7 @@
                                             icon="pi pi-check-circle"
                                             [raised]="true"
                                             [styleClass]="'flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm'"
-                                            (click)="updateSessionStatus(session.id, 'completed')"
+                                            (click)="updateSessionStatus(session, 'completed')"
                                         />
 
                                         <p-button
@@ -93,7 +93,7 @@
                                             icon="pi pi-times-circle"
                                             [raised]="true"
                                             [styleClass]="'flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm'"
-                                            (click)="updateSessionStatus(session.id, 'not-completed')"
+                                            (click)="updateSessionStatus(session, 'not-completed')"
                                         />
                                     </ng-container>
                                 </div>
@@ -121,10 +121,6 @@
                                                 <p class="text-lg font-medium text-blue-600">{{ s.injury }}</p>
                                             </div>
                                             <p-tag [severity]="getSeverity(s.status)" [value]="s.status | titlecase" />
-
-                                            <!-- <span class="px-3 py-1 rounded-full text-lg font-medium" [ngClass]="statusBadgeClasses(s.status)">
-                                                {{ s.status | titlecase }}
-                                            </span> -->
                                         </div>
 
                                         <div class="grid grid-cols-2 gap-4 mb-4 text-sm text-gray-600">

@@ -130,26 +130,18 @@ export class SessionManagementComponent implements OnInit {
         this.isSessionDetails = true;
     }
 
-    updateSessionStatus(sessionId: string, newStatus: Session['status']): void {
-        console.log(`Updating session ${sessionId} to ${newStatus}`);
-        this.assignedSessions = this.assignedSessions.map((s) => (s.id === sessionId ? { ...s, status: newStatus } : s));
+    updateSessionStatus(session: Session, newStatus: Session['status']): void {
+        if ((session.status === 'in progress' || session.status === 'scheduled') && (newStatus == 'not-completed' || newStatus === 'completed')) {
+            window.alert('msh hynf3 t3ml in complete aw complete mn 8er ma el session tkon start');
+            return;
+        }
+        this.assignedSessions = this.assignedSessions.map((s) => (s.id === session.id ? { ...s, status: newStatus } : s));
     }
 
     saveProgress(sessionId: string): void {
         console.log('Saving progress for', sessionId, this.progressData[sessionId]);
         alert('Progress measurements saved successfully!');
     }
-
-    // statusBadgeClasses(status: Session['status']): string {
-    //     switch (status) {
-    //         case 'completed':
-    //             return 'bg-green-100 text-green-800';
-    //         case 'scheduled':
-    //             return 'bg-yellow-100 text-yellow-800';
-    //         default:
-    //             return 'bg-gray-100 text-gray-800';
-    //     }
-    // }
 
     getSeverity(status: Session['status']): 'success' | 'info' | 'warn' | 'danger' | 'contrast' {
         switch (status) {

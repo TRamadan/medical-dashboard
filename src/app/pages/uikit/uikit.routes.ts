@@ -8,6 +8,7 @@ import { AddLocationComponent } from './add-location/add-location.component';
 import { CalendarComponent } from './calendar/calendar.component';
 import { AttendanceTrackingComponent } from './attendance-tracking/attendance-tracking.component';
 import { SessionManagementComponent } from './session-management/session-management.component';
+import { CoachManagerComponent } from './coach-manager/coach-manager.component';
 export default [
     {
         path: 'adduser',
@@ -53,5 +54,10 @@ export default [
         path: 'sessionmanagement',
         data: { breadcrumb: 'Caledar' },
         component: SessionManagementComponent
+    },
+    {
+        path: 'coachmanagement',
+        data: { breachcrumb: 'Coach management' },
+        component: CoachManagerComponent
     }
 ] as Routes;

@@ -82,6 +82,16 @@ export class AppMenu {
                         routerLink: ['/uikit/sessionmanagement']
                     }
                 ]
+            },
+            {
+                label: 'Coach manager',
+                items: [
+                    {
+                        label: 'coach management',
+                        icon: '',
+                        routerLink: ['/uikit/coachmanagement']
+                    }
+                ]
             }
         ];
     }
