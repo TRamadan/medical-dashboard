@@ -1,286 +1,33 @@
-<body>
+<p-toolbar>
+    <h1 class="text-2xl font-bold">Coaches Manager Dashboard</h1>
+    <p>Welcome back, test username</p>
+</p-toolbar>
+<br />
+
+<section>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <h1>Coaches Manager Dashboard</h1>
-            <div class="user-info">
-                <div class="avatar">CM</div>
-                <div>
-                    <strong>Coach Manager</strong>
-                    <br /><small>Downtown Branch</small>
-                </div>
-            </div>
+            <p>Overseeing treatment execution and coach coordination</p>
         </div>
 
-        <!-- Stats Row -->
-        <div class="stats-row">
-            <div class="stat-card">
-                <div class="stat-number">24</div>
-                <div class="stat-label">Active Patients</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">8</div>
-                <div class="stat-label">Available Coaches</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">156</div>
-                <div class="stat-label">Sessions This Week</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">12</div>
-                <div class="stat-label">Plans Updated</div>
-            </div>
-        </div>
+        <p-tabs value="0">
+            <p-tablist>
+                <p-tab value="0">Injury details</p-tab>
+                <p-tab value="1">Schedule Management</p-tab>
+                <p-tab value="2">Coach Assignment</p-tab>
+                <p-tab value="3">Treatment Plans</p-tab>
+            </p-tablist>
 
-        <!-- Main Dashboard Tabs -->
-        <div class="tabs">
-            <div class="tab active" onclick="showTab('injuries')">🏥 Patient Injuries</div>
-            <div class="tab" onclick="showTab('schedules')">📅 Schedule Management</div>
-            <div class="tab" onclick="showTab('assignments')">👥 Coach Assignments</div>
-            <div class="tab" onclick="showTab('treatments')">📋 Treatment Plans</div>
-        </div>
+            <p-tabpanels>
+                <p-tabpanel value="0">
+                    <section class="bg-white rounded-lg shadow-sm p-4"></section>
+                </p-tabpanel>
 
-        <!-- Tab Content: Patient Injuries -->
-        <div id="injuries" class="tab-content active">
-            <div class="main-grid">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon injury-icon">🏥</div>
-                        <h2>Patient Injury Details</h2>
-                    </div>
-                    <div class="patient-list">
-                        <div class="patient-item" onclick="showPatientModal('john')">
-                            <div class="patient-avatar">JD</div>
-                            <div class="patient-info">
-                                <h4>John Doe</h4>
-                                <p>Knee ACL Tear • Age 28</p>
-                            </div>
-                            <span class="status-badge status-active">Active</span>
-                        </div>
-                        <div class="patient-item" onclick="showPatientModal('sarah')">
-                            <div class="patient-avatar">SM</div>
-                            <div class="patient-info">
-                                <h4>Sarah Miller</h4>
-                                <p>Shoulder Impingement • Age 34</p>
-                            </div>
-                            <span class="status-badge status-review">Review</span>
-                        </div>
-                        <div class="patient-item" onclick="showPatientModal('mike')">
-                            <div class="patient-avatar">MJ</div>
-                            <div class="patient-info">
-                                <h4>Mike Johnson</h4>
-                                <p>Lower Back Strain • Age 45</p>
-                            </div>
-                            <span class="status-badge status-pending">Pending</span>
-                        </div>
-                        <div class="patient-item" onclick="showPatientModal('emma')">
-                            <div class="patient-avatar">EW</div>
-                            <div class="patient-info">
-                                <h4>Emma Wilson</h4>
-                                <p>Ankle Sprain • Age 22</p>
-                            </div>
-                            <span class="status-badge status-active">Active</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon injury-icon">📊</div>
-                        <h2>Injury Analytics</h2>
-                    </div>
-                    <div style="text-align: center; color: #6c757d; margin-top: 50px">
-                        <div style="font-size: 48px; margin-bottom: 20px">📈</div>
-                        <p>Most Common Injuries This Month:</p>
-                        <div style="margin-top: 20px">
-                            <div style="margin: 10px 0"><strong>Knee Injuries:</strong> 35%</div>
-                            <div style="margin: 10px 0"><strong>Shoulder Issues:</strong> 28%</div>
-                            <div style="margin: 10px 0"><strong>Back Problems:</strong> 22%</div>
-                            <div style="margin: 10px 0"><strong>Ankle Sprains:</strong> 15%</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab Content: Schedule Management -->
-        <div id="schedules" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon schedule-icon">📅</div>
-                    <h2>Weekly Schedule Overview</h2>
-                </div>
-                <div class="schedule-grid">
-                    <div class="day-header">Mon</div>
-                    <div class="day-header">Tue</div>
-                    <div class="day-header">Wed</div>
-                    <div class="day-header">Thu</div>
-                    <div class="day-header">Fri</div>
-                    <div class="day-header">Sat</div>
-                    <div class="day-header">Sun</div>
-
-                    <!-- Sample schedule slots -->
-                    <div>
-                        <div class="time-slot slot-booked">9:00 AM - Sarah K.</div>
-                        <div class="time-slot slot-booked">10:00 AM - Mike T.</div>
-                        <div class="time-slot slot-available">11:00 AM</div>
-                        <div class="time-slot slot-break">12:00 PM - Break</div>
-                        <div class="time-slot slot-booked">1:00 PM - Emma W.</div>
-                    </div>
-                    <div>
-                        <div class="time-slot slot-available">9:00 AM</div>
-                        <div class="time-slot slot-booked">10:00 AM - John D.</div>
-                        <div class="time-slot slot-booked">11:00 AM - Lisa M.</div>
-                        <div class="time-slot slot-break">12:00 PM - Break</div>
-                        <div class="time-slot slot-available">1:00 PM</div>
-                    </div>
-                    <div>
-                        <div class="time-slot slot-booked">9:00 AM - Tom R.</div>
-                        <div class="time-slot slot-available">10:00 AM</div>
-                        <div class="time-slot slot-booked">11:00 AM - Anna S.</div>
-                        <div class="time-slot slot-break">12:00 PM - Break</div>
-                        <div class="time-slot slot-booked">1:00 PM - David L.</div>
-                    </div>
-                    <div>
-                        <div class="time-slot slot-available">9:00 AM</div>
-                        <div class="time-slot slot-booked">10:00 AM - Kate B.</div>
-                        <div class="time-slot slot-available">11:00 AM</div>
-                        <div class="time-slot slot-break">12:00 PM - Break</div>
-                        <div class="time-slot slot-booked">1:00 PM - Peter J.</div>
-                    </div>
-                    <div>
-                        <div class="time-slot slot-booked">9:00 AM - Maria G.</div>
-                        <div class="time-slot slot-booked">10:00 AM - Chris H.</div>
-                        <div class="time-slot slot-booked">11:00 AM - Nina P.</div>
-                        <div class="time-slot slot-break">12:00 PM - Break</div>
-                        <div class="time-slot slot-available">1:00 PM</div>
-                    </div>
-                    <div>
-                        <div class="time-slot slot-available">9:00 AM</div>
-                        <div class="time-slot slot-available">10:00 AM</div>
-                        <div class="time-slot slot-booked">11:00 AM - Alex C.</div>
-                        <div class="time-slot slot-break">12:00 PM - Break</div>
-                        <div class="time-slot slot-available">1:00 PM</div>
-                    </div>
-                    <div>
-                        <div class="time-slot slot-available">9:00 AM</div>
-                        <div class="time-slot slot-available">10:00 AM</div>
-                        <div class="time-slot slot-available">11:00 AM</div>
-                        <div class="time-slot slot-available">12:00 PM</div>
-                        <div class="time-slot slot-available">1:00 PM</div>
-                    </div>
-                </div>
-                <div style="margin-top: 20px; text-align: center">
-                    <button class="btn btn-primary">Modify Schedule</button>
-                    <button class="btn btn-secondary">Export Schedule</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab Content: Coach Assignments -->
-        <div id="assignments" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon assign-icon">👥</div>
-                    <h2>Available Coaches</h2>
-                </div>
-                <div class="coach-list">
-                    <div class="coach-card selected">
-                        <div class="coach-avatar">DR</div>
-                        <h4>Dr. Rachel Smith</h4>
-                        <p>Senior Physical Therapist</p>
-                        <div style="margin: 10px 0">
-                            <span class="specialization">Orthopedic</span>
-                            <span class="specialization">Sports Injury</span>
-                        </div>
-                        <small>Available: Mon-Fri 9AM-5PM</small>
-                    </div>
-                    <div class="coach-card">
-                        <div class="coach-avatar">MJ</div>
-                        <h4>Mark Johnson</h4>
-                        <p>Rehabilitation Specialist</p>
-                        <div style="margin: 10px 0">
-                            <span class="specialization">Neurological</span>
-                            <span class="specialization">Geriatric</span>
-                        </div>
-                        <small>Available: Tue-Sat 10AM-6PM</small>
-                    </div>
-                    <div class="coach-card">
-                        <div class="coach-avatar">LC</div>
-                        <h4>Lisa Chen</h4>
-                        <p>Movement Therapist</p>
-                        <div style="margin: 10px 0">
-                            <span class="specialization">Pediatric</span>
-                            <span class="specialization">Manual Therapy</span>
-                        </div>
-                        <small>Available: Mon-Wed-Fri 8AM-4PM</small>
-                    </div>
-                    <div class="coach-card">
-                        <div class="coach-avatar">TB</div>
-                        <h4>Tom Bradley</h4>
-                        <p>Sports Therapist</p>
-                        <div style="margin: 10px 0">
-                            <span class="specialization">Athletic</span>
-                            <span class="specialization">Injury Prevention</span>
-                        </div>
-                        <small>Available: Daily 7AM-3PM</small>
-                    </div>
-                </div>
-                <div style="margin-top: 30px; text-align: center">
-                    <button class="btn btn-primary">Assign Selected Coach</button>
-                    <button class="btn btn-secondary">View All Assignments</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Tab Content: Treatment Plans -->
-        <div id="treatments" class="tab-content">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-icon plan-icon">📋</div>
-                    <h2>Treatment Plan Templates</h2>
-                </div>
-                <div class="treatment-editor">
-                    <h4 style="margin-bottom: 15px">Available Exercise Templates:</h4>
-                    <div class="exercise-template">
-                        <h5>Knee Rehabilitation Program</h5>
-                        <p>Comprehensive ACL recovery exercises including strength training and flexibility work.</p>
-                        <small>Created by: Super Admin • Last Updated: Jan 15, 2025</small>
-                    </div>
-                    <div class="exercise-template">
-                        <h5>Shoulder Mobility Enhancement</h5>
-                        <p>Range of motion exercises for shoulder impingement and rotator cuff injuries.</p>
-                        <small>Created by: Super Admin • Last Updated: Jan 10, 2025</small>
-                    </div>
-                    <div class="exercise-template">
-                        <h5>Lower Back Strengthening</h5>
-                        <p>Core stability and back strengthening exercises for chronic lower back pain.</p>
-                        <small>Created by: Super Admin • Last Updated: Jan 8, 2025</small>
-                    </div>
-                    <div class="exercise-template">
-                        <h5>Ankle Recovery Protocol</h5>
-                        <p>Progressive loading exercises for ankle sprains and instability.</p>
-                        <small>Created by: Super Admin • Last Updated: Jan 5, 2025</small>
-                    </div>
-                </div>
-                <div style="margin-top: 20px; text-align: center">
-                    <button class="btn btn-primary">Customize Plan</button>
-                    <button class="btn btn-secondary">Request Doctor Review</button>
-                </div>
-            </div>
-        </div>
+                <p-tabpanel value="1"> </p-tabpanel>
+                <p-tabpanel value="2"> </p-tabpanel>
+                <p-tabpanel value="3"> </p-tabpanel>
+            </p-tabpanels>
+        </p-tabs>
     </div>
-
-    <!-- Patient Detail Modal -->
-    <div id="patientModal" class="modal">
-        <div class="modal-content">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px">
-                <h2 id="patientName">Patient Details</h2>
-                <button style="background: none; border: none; font-size: 24px; cursor: pointer" onclick="closeModal()">&times;</button>
-            </div>
-            <div id="patientDetails">
-                <!-- Patient details will be loaded here -->
-            </div>
-        </div>
-    </div>
-</body>
+</section>
