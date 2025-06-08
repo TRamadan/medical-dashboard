@@ -75,7 +75,7 @@
                                                 <p-tabpanel value="5">
                                                     <div class="grid">
                                                         <div class="col-12 md:col-6">
-                                                            <h5>Injury Details</h5>
+                                                            <h5 class="mb-2">Injury Details</h5>
                                                             <ul class="list-none p-0">
                                                                 <li class="mb-2">
                                                                     Date of Injury: <strong>{{ currentPatient.dateOfInjury }}</strong>
@@ -92,27 +92,31 @@
                                                             </ul>
                                                         </div>
                                                         <div class="col-12 md:col-6">
-                                                            <h5>Current Symptoms</h5>
+                                                            <h5 class="mb-2">Current Symptoms</h5>
                                                             <ul class="list-none p-0">
                                                                 <li *ngFor="let symptom of currentPatient.symptoms" class="mb-1"><i class="pi pi-exclamation-triangle text-orange-500 mr-2"></i>{{ symptom }}</li>
                                                             </ul>
                                                         </div>
                                                     </div>
-                                                    <h5>Description</h5>
+                                                    <h5 class="mb-2">Description</h5>
                                                     <div class="p-3 bg-gray-100 border-round">{{ currentPatient.description }}</div>
                                                 </p-tabpanel>
 
                                                 <p-tabpanel value="6">
+                                                    <h5>Treatment history</h5>
+
                                                     @for (treatment of currentPatient.treatmentHistory; track treatment) {
-                                                        <div>
-                                                            <div class="flex justify-content-between">
-                                                                <!-- <div>
-                                                                    <strong>{{ treatment.treatment }}</strong
-                                                                    ><br />
-                                                                    <small class="text-muted">by {{ treatment.provider }}</small>
+                                                        <div class="mb-3">
+                                                            <p-card>
+                                                                <div class="flex justify-content-between">
+                                                                    <div>
+                                                                        <strong>{{ treatment.treatment }}</strong
+                                                                        ><br />
+                                                                        <small class="text-muted">by {{ treatment.provider }}</small>
+                                                                    </div>
+                                                                    <small class="text-muted">{{ treatment.date }}</small>
                                                                 </div>
-                                                                <small class="text-muted">{{ treatment.date }}</small> -->
-                                                            </div>
+                                                            </p-card>
                                                         </div>
                                                     }
                                                 </p-tabpanel>
@@ -124,22 +128,22 @@
                                                     </div>
                                                     <p-progressBar [value]="currentPatient.progress"></p-progressBar>
 
-                                                    <div class="grid mt-4">
-                                                        <div class="col-12 md:col-4">
+                                                    <div class="d-flex justify-content-center gap-3 mt-4">
+                                                        <div class="col-4">
                                                             <p-card class="text-center">
                                                                 <i class="pi pi-directions text-primary text-3xl mb-2"></i>
                                                                 <div>Mobility</div>
                                                                 <strong>75%</strong>
                                                             </p-card>
                                                         </div>
-                                                        <div class="col-12 md:col-4">
+                                                        <div class="col-4">
                                                             <p-card class="text-center">
                                                                 <i class="pi pi-chart-line text-success text-3xl mb-2"></i>
                                                                 <div>Strength</div>
                                                                 <strong>60%</strong>
                                                             </p-card>
                                                         </div>
-                                                        <div class="col-12 md:col-4">
+                                                        <div class="col-4">
                                                             <p-card class="text-center">
                                                                 <i class="pi pi-exclamation-triangle text-orange-500 text-3xl mb-2"></i>
                                                                 <div>Pain Level</div>
