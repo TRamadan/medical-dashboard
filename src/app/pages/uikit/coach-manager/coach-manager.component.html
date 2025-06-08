@@ -63,6 +63,46 @@
                                                 <p-tag value="{{ currentPatient?.status }}" severity="info" styleClass="p-tag-outlined"></p-tag>
                                             </div>
                                         </div>
+
+                                        <p-tabs value="5">
+                                            <p-tablist>
+                                                <p-tab value="5"> Overview </p-tab>
+                                                <p-tab value="6"> Treatment History </p-tab>
+                                                <p-tab value="7"> Progress </p-tab>
+                                            </p-tablist>
+
+                                            <p-tabpanels>
+                                                <p-tabpanel value="5">
+                                                    <div class="grid">
+                                                        <div class="col-12 md:col-6">
+                                                            <h5>Injury Details</h5>
+                                                            <ul class="list-none p-0">
+                                                                <li class="mb-2">
+                                                                    Date of Injury: <strong>{{ currentPatient.dateOfInjury }}</strong>
+                                                                </li>
+                                                                <li class="mb-2">
+                                                                    Treating Doctor: <strong>{{ currentPatient.doctor }}</strong>
+                                                                </li>
+                                                                <li class="mb-2">
+                                                                    Current Plan: <strong>{{ currentPatient.currentPlan }}</strong>
+                                                                </li>
+                                                                <li class="mb-2">
+                                                                    Next Appointment: <strong>{{ currentPatient.nextAppointment }}</strong>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col-12 md:col-6">
+                                                            <h5>Current Symptoms</h5>
+                                                            <ul class="list-none p-0">
+                                                                <li *ngFor="let symptom of currentPatient.symptoms" class="mb-1"><i class="pi pi-exclamation-triangle text-orange-500 mr-2"></i>{{ symptom }}</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                    <h5>Description</h5>
+                                                    <div class="p-3 bg-gray-100 border-round">{{ currentPatient.description }}</div>
+                                                </p-tabpanel>
+                                            </p-tabpanels>
+                                        </p-tabs>
                                     </p-card>
                                 } @else {
                                     <p-card>
