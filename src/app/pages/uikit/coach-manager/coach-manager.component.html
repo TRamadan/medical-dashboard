@@ -21,12 +21,71 @@
 
             <p-tabpanels>
                 <p-tabpanel value="0">
-                    <section class="bg-white rounded-lg shadow-sm p-4"></section>
+                    <section class="bg-white rounded-lg shadow-sm p-4">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold text-gray-800 my-3">Patient Injury Details</h2>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-5">
+                                <p-card header="Patient files">
+                                    @for (patient of patients; track patient) {
+                                        <div class="bg-white rounded-lg shadow-md p-6 mb-4 border-l-4 border-blue-500 my-3 p-3" (click)="setSelectedPatientDetail(patient)">
+                                            <div class="flex justify-content-between align-items-start">
+                                                <div class="flex align-items-center gap-3">
+                                                    <p-avatar label="{{ getInitials(patient.name) }}" shape="circle" class="bg-secondary text-white"></p-avatar>
+                                                    <div>
+                                                        <div class="font-medium mb-3">{{ patient.name }}</div>
+                                                        <small class="font-medium h5">{{ patient.injury }}</small>
+                                                    </div>
+                                                </div>
+                                                <p-tag [value]="patient.severity" [severity]="getSeveritySeverity(patient.severity)"></p-tag>
+                                            </div>
+                                        </div>
+                                    }
+                                </p-card>
+                            </div>
+
+                            <!-- here is the details for the selected patient-->
+                            <div class="col-7 p-4">
+                                @if (currentPatient) {
+                                    <p-card>
+                                        <div class="flex justify-content-between align-items-center">
+                                            <div class="flex align-items-center gap-3">
+                                                <p-avatar label="{{ getInitials(currentPatient?.name) }}" size="large" class="bg-secondary text-white"></p-avatar>
+                                                <div>
+                                                    <div class="text-xl font-semibold">{{ currentPatient?.name }}</div>
+                                                    <small class="text-muted text-lg">Age: {{ currentPatient?.age }} • {{ currentPatient?.injury }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <p-tag [value]="currentPatient?.severity + ' Priority'" [severity]="getSeveritySeverity(currentPatient?.severity)"></p-tag>
+                                                <p-tag value="{{ currentPatient?.status }}" severity="info" styleClass="p-tag-outlined"></p-tag>
+                                            </div>
+                                        </div>
+                                    </p-card>
+                                } @else {
+                                    <p-card>
+                                        <div class="d-flex flex-column align-items-center text-center" style="min-width: 100px; flex-shrink: 0">
+                                            <i class="pi pi-user" style="font-size: 5rem"></i>
+                                            <p class="mb-0 mt-2 medium text-nowrap fw-bold h4">Please, Selecte a patient to see full details</p>
+                                        </div>
+                                    </p-card>
+                                }
+                            </div>
+                        </div>
+                    </section>
                 </p-tabpanel>
 
-                <p-tabpanel value="1"> </p-tabpanel>
-                <p-tabpanel value="2"> </p-tabpanel>
-                <p-tabpanel value="3"> </p-tabpanel>
+                <p-tabpanel value="1">
+                    <section class="bg-white rounded-lg shadow-sm p-4"></section>
+                </p-tabpanel>
+                <p-tabpanel value="2">
+                    <section class="bg-white rounded-lg shadow-sm p-4"></section>
+                </p-tabpanel>
+                <p-tabpanel value="3">
+                    <section class="bg-white rounded-lg shadow-sm p-4"></section>
+                </p-tabpanel>
             </p-tabpanels>
         </p-tabs>
     </div>
