@@ -10,11 +10,12 @@ import { FormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { AvatarModule } from 'primeng/avatar';
+import { ProgressBarModule } from 'primeng/progressbar';
 
 @Component({
     selector: 'app-coach-manager',
     standalone: true,
-    imports: [AvatarModule, TagModule, ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
+    imports: [ProgressBarModule, AvatarModule, TagModule, ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
 
     templateUrl: './coach-manager.component.html',
     styleUrls: ['./coach-manager.component.css']

@@ -101,6 +101,53 @@
                                                     <h5>Description</h5>
                                                     <div class="p-3 bg-gray-100 border-round">{{ currentPatient.description }}</div>
                                                 </p-tabpanel>
+
+                                                <p-tabpanel value="6">
+                                                    @for (treatment of currentPatient.treatmentHistory; track treatment) {
+                                                        <div>
+                                                            <div class="flex justify-content-between">
+                                                                <!-- <div>
+                                                                    <strong>{{ treatment.treatment }}</strong
+                                                                    ><br />
+                                                                    <small class="text-muted">by {{ treatment.provider }}</small>
+                                                                </div>
+                                                                <small class="text-muted">{{ treatment.date }}</small> -->
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </p-tabpanel>
+
+                                                <p-tabpanel value="7">
+                                                    <div class="flex justify-content-between align-items-center mb-3">
+                                                        <h5>Recovery Progress</h5>
+                                                        <span class="text-green-600 text-2xl font-bold">{{ currentPatient.progress }}%</span>
+                                                    </div>
+                                                    <p-progressBar [value]="currentPatient.progress"></p-progressBar>
+
+                                                    <div class="grid mt-4">
+                                                        <div class="col-12 md:col-4">
+                                                            <p-card class="text-center">
+                                                                <i class="pi pi-directions text-primary text-3xl mb-2"></i>
+                                                                <div>Mobility</div>
+                                                                <strong>75%</strong>
+                                                            </p-card>
+                                                        </div>
+                                                        <div class="col-12 md:col-4">
+                                                            <p-card class="text-center">
+                                                                <i class="pi pi-chart-line text-success text-3xl mb-2"></i>
+                                                                <div>Strength</div>
+                                                                <strong>60%</strong>
+                                                            </p-card>
+                                                        </div>
+                                                        <div class="col-12 md:col-4">
+                                                            <p-card class="text-center">
+                                                                <i class="pi pi-exclamation-triangle text-orange-500 text-3xl mb-2"></i>
+                                                                <div>Pain Level</div>
+                                                                <strong>3/10</strong>
+                                                            </p-card>
+                                                        </div>
+                                                    </div>
+                                                </p-tabpanel>
                                             </p-tabpanels>
                                         </p-tabs>
                                     </p-card>
