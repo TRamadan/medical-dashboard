@@ -27,8 +27,9 @@
                                 </span>
                             </p>
                         </div>
-                        <div class="coach-actions">
+                        <div class="d-flex gap-3">
                             <p-button label="Edit Schedule" [raised]="true" severity="warn" (onClick)="editSchedule(coach)" />
+                            <p-button label="View Detailed" [raised]="true" severity="info" (onClick)="showFullCoachSchedule(coach)" />
                         </div>
                     </div>
 
@@ -38,7 +39,7 @@
                                 <div class="slot-day">{{ slot.day }}</div>
                                 <div class="slot-time">{{ slot.startTime }} - {{ slot.endTime }}</div>
                                 <div class="slot-status" [class]="slot.isAvailable ? 'available' : 'unavailable'">
-                                    {{ slot.isAvailable ? 'Available' : 'Booked' }}
+                                    {{ slot.isAvailable ? 'Working Day' : 'Day Off' }}
                                 </div>
                             </div>
                         }
@@ -46,7 +47,12 @@
                 </div>
             }
         </div>
-
-        <!-- Edit Schedule Modal -->
     </main>
+    <!-- here is the dialog needed to make coach manager able to edit the schedule for the selected coach-->
+    <p-dialog [header]="'Edit schedule'" [(visible)]="isEditScheduleDialog" [modal]="true" [style]="{ width: '50rem' }">
+        <ng-template #footer>
+            <p-button label="Cancel" [text]="true" severity="secondary" (click)="isEditScheduleDialog = false" />
+            <p-button label="Save" [outlined]="true" severity="secondary" />
+        </ng-template>
+    </p-dialog>
 </div>
