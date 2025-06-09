@@ -11,17 +11,18 @@ import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { AvatarModule } from 'primeng/avatar';
 import { ProgressBarModule } from 'primeng/progressbar';
-
+import { ManageScheduelsComponent } from './manage-scheduels/manage-scheduels.component';
 @Component({
     selector: 'app-coach-manager',
     standalone: true,
-    imports: [ProgressBarModule, AvatarModule, TagModule, ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
+    imports: [ManageScheduelsComponent, ProgressBarModule, AvatarModule, TagModule, ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
 
     templateUrl: './coach-manager.component.html',
     styleUrls: ['./coach-manager.component.css']
 })
 export class CoachManagerComponent implements OnInit {
     patients: any[] = [];
+    coachesSlots: any[] = [];
     searchTerm: string = '';
     currentPatient: any;
 
@@ -92,6 +93,46 @@ export class CoachManagerComponent implements OnInit {
                 currentPlan: 'Spinal Stabilization Protocol',
                 progress: 45,
                 nextAppointment: '2024-06-07'
+            }
+        ];
+    }
+
+    //here is the function needed to get all coaches with slots
+    getAllCoachesSlots(): void {
+        this.coachesSlots = [
+            {
+                id: 1,
+                name: 'Dr. Anderson',
+                specialization: 'Physical Therapy',
+                avatar: 'DA',
+                status: 'Available',
+                sessions: [
+                    { time: '09:00', patient: 'John Smith', type: 'ACL Recovery' },
+                    { time: '11:00', patient: 'Sarah Johnson', type: 'Shoulder Therapy' },
+                    { time: '14:00', patient: 'Mike Davis', type: 'Back Strengthening' }
+                ]
+            },
+            {
+                id: 2,
+                name: 'Coach Martinez',
+                specialization: 'Strength Training',
+                avatar: 'CM',
+                status: 'Busy',
+                sessions: [
+                    { time: '10:00', patient: 'Emma Wilson', type: 'Core Training' },
+                    { time: '13:00', patient: 'Alex Brown', type: 'Recovery Session' }
+                ]
+            },
+            {
+                id: 3,
+                name: 'Dr. Lee',
+                specialization: 'Sports Medicine',
+                avatar: 'DL',
+                status: 'Available',
+                sessions: [
+                    { time: '08:00', patient: 'Tom Wilson', type: 'Assessment' },
+                    { time: '15:00', patient: 'Lisa Garcia', type: 'Follow-up' }
+                ]
             }
         ];
     }
