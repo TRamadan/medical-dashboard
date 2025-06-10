@@ -99,33 +99,37 @@
 
 <!-- here is the dialog needed to show the full schedule for selected coach-->
 <p-dialog [draggable]="true" [header]="'Full schedule details'" [(visible)]="isAllSchedulesDialog" [modal]="true" [style]="{ width: '50rem' }">
+    <h3 class="mt-4">Weekly schedule for {{ selectedCoach?.name }}</h3>
     <div class="weekly-schedule">
-        @for (day of weekDays; track day) {
-            <div class="day-column">
-                <div class="day-header">
-                    {{ day }}
-                </div>
-                <div class="day-slots">
-                    @for (slot of getDetailedScheduleForDay(selectedCoach, day); track slot) {
-                        <div class="detailed-slot" [class]="'slot-' + slot.status">
-                            <div class="slot-time">
-                                {{ slot.timeSlot }}
+        @if (selectedCoach) {
+            @for (day of weekDays; track day) {
+                <div class="day-column">
+                    <div class="day-header">
+                        {{ day }}
+                    </div>
+
+                    <div class="day-slots">
+                        @for (slot of getDetailedScheduleForDay(selectedCoach, day); track slot.timeSlot) {
+                            <div class="detailed-slot" [class]="'slot-' + slot.status">
+                                <div class="slot-time">
+                                    {{ slot.timeSlot }}
+                                </div>
+                                <div class="slot-content">
+                                    @if (slot.status === 'booked') {
+                                        <span class="patient-name">
+                                            {{ slot.patientName }}
+                                        </span>
+                                    } @else if (slot.status === 'available') {
+                                        <span class="available-text"> Available </span>
+                                    } @else {
+                                        <span> OFF </span>
+                                    }
+                                </div>
                             </div>
-                            <div class="slot-content">
-                                @if (slot.status === 'booked') {
-                                    <span class="patient-name">
-                                        {{ slot.patientName }}
-                                    </span>
-                                } @else if (slot.status === 'available') {
-                                    <span class="available-text"> Available </span>
-                                } @else {
-                                    <span> OFF </span>
-                                }
-                            </div>
-                        </div>
-                    }
+                        }
+                    </div>
                 </div>
-            </div>
+            }
         }
     </div>
 </p-dialog>

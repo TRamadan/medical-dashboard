@@ -4,11 +4,11 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { DatePickerModule } from 'primeng/datepicker';
 import { CheckboxModule } from 'primeng/checkbox';
-
+import { CommonModule } from '@angular/common';
 @Component({
     selector: 'app-manage-scheduels',
     standalone: true,
-    imports: [CheckboxModule, DatePickerModule, DialogModule, ButtonModule, FormsModule],
+    imports: [CommonModule, CheckboxModule, DatePickerModule, DialogModule, ButtonModule, FormsModule],
     templateUrl: './manage-scheduels.component.html',
     styleUrls: ['./manage-scheduels.component.css']
 })
@@ -186,17 +186,40 @@ export class ManageScheduelsComponent implements OnInit {
     showFullCoachSchedule(coach: any): void {
         debugger;
         this.selectedCoach = coach;
-        coach.availability.forEach((element: any) => {
-            if (element.isAvailable) {
-                const startHour = parseInt(element.startTime.split(':')[0]);
-                const endHour = parseInt(element.endTime.split(':')[0]);
-            }
-        });
         this.isAllSchedulesDialog = true;
     }
 
+    private formatTime(d: Date): string {
+        return d.toTimeString().slice(0, 5);
+    }
+
     //here is the function needed to get schedule for day based on coach
-    getDetailedScheduleForDay(coach: any, day: string): any[] {
-        return [];
+    getDetailedScheduleForDay(coach: any | null, day: string, slotMinutes = 30): any[] {
+        if (!coach) return [];
+
+        const block = coach.availability.find((a: any) => a.day === day);
+        if (!block || !block.isAvailable) {
+            return [{ timeSlot: '', status: 'off' }];
+        }
+
+        const slots: any[] = [];
+
+        const [startH, startM] = block.startTime.split(':').map(Number);
+        const [endH, endM] = block.endTime.split(':').map(Number);
+
+        const startTime = new Date(0, 0, 0, startH, startM);
+        const endTime = new Date(0, 0, 0, endH, endM);
+
+        let current = new Date(startTime);
+
+        while (current < endTime) {
+            const next = new Date(current.getTime() + slotMinutes * 60 * 1000); // new instance
+            const label = `${this.formatTime(current)} – ${this.formatTime(next)}`;
+
+            slots.push({ timeSlot: label, status: 'available' });
+            current = next; // advance safely
+        }
+
+        return slots;
     }
 }
