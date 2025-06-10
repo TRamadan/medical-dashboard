@@ -131,10 +131,10 @@ export class SessionManagementComponent implements OnInit {
     }
 
     updateSessionStatus(session: Session, newStatus: Session['status']): void {
-        if ((session.status === 'in progress' || session.status === 'scheduled') && (newStatus == 'not-completed' || newStatus === 'completed')) {
-            window.alert('msh hynf3 t3ml in complete aw complete mn 8er ma el session tkon start');
-            return;
-        }
+        // if ((session.status === 'in progress' || session.status === 'scheduled') && (newStatus == 'not-completed' || newStatus === 'completed')) {
+        //     window.alert('msh hynf3 t3ml in complete aw complete mn 8er ma el session tkon start');
+        //     return;
+        // }
         this.assignedSessions = this.assignedSessions.map((s) => (s.id === session.id ? { ...s, status: newStatus } : s));
     }
 

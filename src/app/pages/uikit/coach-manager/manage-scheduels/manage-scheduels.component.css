@@ -70,6 +70,55 @@
       border-left: 4px solid #3b82f6;
   }
 
+  .weekly-schedule {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1rem;
+  }
+
+  .day-column {
+      min-height: 400px;
+  }
+
+  .day-header {
+      background-color: #1f2937;
+      color: white;
+      padding: 0.75rem;
+      text-align: center;
+      font-weight: 600;
+      border-radius: 6px 6px 0 0;
+      font-size: 0.9rem;
+  }
+
+  .detailed-slot {
+      border-bottom: 1px solid #f3f4f6;
+      padding: 0.5rem;
+      min-height: 45px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+  }
+
+  .detailed-slot:last-child {
+      border-bottom: none;
+  }
+
+  .slot-booked {
+      background-color: #fef3c7;
+      border-left: 3px solid #f59e0b;
+  }
+
+  .slot-available {
+      background-color: #dcfce7;
+      border-left: 3px solid #10b981;
+  }
+
+  .slot-unavailable {
+      background-color: #f3f4f6;
+      color: #9ca3af;
+  }
+
+
   .coach-header {
       display: flex;
       justify-content: space-between;

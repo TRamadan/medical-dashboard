@@ -2,10 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
+import { DatePickerModule } from 'primeng/datepicker';
+import { CheckboxModule } from 'primeng/checkbox';
+
 @Component({
     selector: 'app-manage-scheduels',
     standalone: true,
-    imports: [DialogModule, ButtonModule, FormsModule],
+    imports: [CheckboxModule, DatePickerModule, DialogModule, ButtonModule, FormsModule],
     templateUrl: './manage-scheduels.component.html',
     styleUrls: ['./manage-scheduels.component.css']
 })
@@ -15,9 +18,10 @@ export class ManageScheduelsComponent implements OnInit {
     filteredCoaches: any[] = [];
     isAllSchedulesDialog: boolean = false;
     isEditScheduleDialog: boolean = false;
+    selectedCoach: any;
     editingCoach: any;
     selectedBranchId: any;
-    weekDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    weekDays = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 
     constructor() {}
 
@@ -112,9 +116,87 @@ export class ManageScheduelsComponent implements OnInit {
         this.isEditScheduleDialog = true;
     }
 
+    isDayAvailable(day: string): boolean {
+        if (!this.editingCoach) return false;
+        return this.editingCoach.availability.some((slot: any) => slot.day === day && slot.isAvailable);
+    }
+
+    getDayStartTime(day: string): string {
+        if (!this.editingCoach) return '';
+        const slot = this.editingCoach.availability.find((s: any) => s.day === day);
+        return slot ? slot.startTime : '09:00';
+    }
+
+    getDayEndTime(day: string): string {
+        if (!this.editingCoach) return '';
+        const slot = this.editingCoach.availability.find((s: any) => s.day === day);
+        return slot ? slot.endTime : '17:00';
+    }
+
+    toggleDayAvailability(day: string, event: any) {
+        if (!this.editingCoach) return;
+
+        const isChecked = event.checked;
+        const existingSlotIndex = this.editingCoach.availability.findIndex((s: any) => s.day === day);
+
+        if (isChecked) {
+            if (existingSlotIndex === -1) {
+                this.editingCoach.availability.push({
+                    day,
+                    startTime: '09:00',
+                    endTime: '17:00',
+                    isAvailable: true
+                });
+            } else {
+                this.editingCoach.availability[existingSlotIndex].isAvailable = true;
+            }
+        } else {
+            if (existingSlotIndex !== -1) {
+                this.editingCoach.availability[existingSlotIndex].isAvailable = false;
+            }
+        }
+    }
+
+    updateDayStartTime(day: string, event: any) {
+        if (!this.editingCoach) return;
+
+        const slot = this.editingCoach.availability.find((s: any) => s.day === day);
+        if (slot) {
+            slot.startTime = event.target.value;
+        }
+    }
+
+    updateDayEndTime(day: string, event: any) {
+        if (!this.editingCoach) return;
+
+        const slot = this.editingCoach.availability.find((s: any) => s.day === day);
+        if (slot) {
+            slot.endTime = event.target.value;
+        }
+    }
+
+    updateMaxPatients(event: any) {
+        if (!this.editingCoach) return;
+        this.editingCoach.maxPatients = parseInt(event.target.value, 10);
+    }
     //here is the function needed to filter the coaches based on the location
     filterByBranch() {}
 
     //here is the functuon needed to open a dialog needed to show all time slots for the selected coach
-    showFullCoachSchedule(coach: any): void {}
+    showFullCoachSchedule(coach: any): void {
+        debugger;
+        this.selectedCoach = coach;
+        coach.availability.forEach((element: any) => {
+            if (element.isAvailable) {
+                const startHour = parseInt(element.startTime.split(':')[0]);
+                const endHour = parseInt(element.endTime.split(':')[0]);
+            }
+        });
+        this.isAllSchedulesDialog = true;
+    }
+
+    //here is the function needed to get schedule for day based on coach
+    getDetailedScheduleForDay(coach: any, day: string): any[] {
+        return [];
+    }
 }

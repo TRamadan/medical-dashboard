@@ -20,12 +20,6 @@
                             <h3>{{ coach.name }}</h3>
                             <p class="coach-branch">{{ coach.branch }} Branch</p>
                             <p class="coach-specializations"><strong>Specializations:</strong> {{ coach.specializations.join(', ') }}</p>
-                            <p class="coach-workload">
-                                <strong>Current Load:</strong> {{ coach.currentPatients }}/{{ coach.maxPatients }} patients
-                                <span class="workload-bar">
-                                    <span class="workload-fill" [style.width.%]="getWorkloadPercentage(coach)"></span>
-                                </span>
-                            </p>
                         </div>
                         <div class="d-flex gap-3">
                             <p-button label="Edit Schedule" [raised]="true" severity="warn" (onClick)="editSchedule(coach)" />
@@ -48,11 +42,90 @@
             }
         </div>
     </main>
-    <!-- here is the dialog needed to make coach manager able to edit the schedule for the selected coach-->
-    <p-dialog [header]="'Edit schedule'" [(visible)]="isEditScheduleDialog" [modal]="true" [style]="{ width: '50rem' }">
-        <ng-template #footer>
-            <p-button label="Cancel" [text]="true" severity="secondary" (click)="isEditScheduleDialog = false" />
-            <p-button label="Save" [outlined]="true" severity="secondary" />
-        </ng-template>
-    </p-dialog>
 </div>
+
+<!-- here is the dialog needed to make coach manager able to edit the schedule for the selected coach-->
+<p-dialog [draggable]="true" [header]="'Edit schedule'" [(visible)]="isEditScheduleDialog" [modal]="true" [style]="{ width: '50rem' }">
+    @if (editingCoach) {
+        <div class="schedule-edit-form">
+            <h3>Weekly Schedule</h3>
+            <div class="days-grid">
+                @for (day of weekDays; track day) {
+                    <div class="day-schedule">
+                        <h4>{{ day }}</h4>
+                        <div class="time-inputs">
+                            <label>
+                                <p-checkbox [binary]="true" [ngModel]="isDayAvailable(day)" (onChange)="toggleDayAvailability(day, $event)" inputId="available-"> </p-checkbox>
+
+                                <!-- <input type="checkbox" [checked]="isDayAvailable(day)" (change)="toggleDayAvailability(day, $event)" /> -->
+                                Working Day
+                            </label>
+                            @if (isDayAvailable(day)) {
+                                <div class="time-range">
+                                    <p-datepicker [ngModel]="getDayStartTime(day)" (onSelect)="updateDayStartTime(day, $event)" [timeOnly]="true" hourFormat="24" inputId="start-time-{{ day }}" class="time-input" [showIcon]="true" />
+
+                                    <span>to</span>
+
+                                    <p-datepicker [ngModel]="getDayEndTime(day)" (onSelect)="updateDayEndTime(day, $event)" [timeOnly]="true" hourFormat="24" inputId="end-time-{{ day }}" class="time-input" [showIcon]="true" />
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="workload-section">
+                <h3>Workload Management</h3>
+                <div class="workload-controls">
+                    <label>
+                        Maximum Patients:
+                        <input type="number" [value]="editingCoach.maxPatients" (change)="updateMaxPatients($event)" min="1" max="20" class="number-input" />
+                    </label>
+                    <p class="workload-info">Current: {{ editingCoach.currentPatients }} patients ({{ getWorkloadPercentage(editingCoach) }}% capacity)</p>
+                </div>
+            </div>
+
+            <!-- <div class="modal-actions">
+                    <button class="save-btn" (click)="saveScheduleChanges()">Save Changes</button>
+                    <button class="cancel-btn" (click)="closeEditModal()">Cancel</button>
+                </div> -->
+        </div>
+    }
+    <ng-template #footer>
+        <p-button label="Cancel" [text]="true" severity="secondary" (click)="isEditScheduleDialog = false" />
+        <p-button label="Save" [outlined]="true" severity="secondary" />
+    </ng-template>
+</p-dialog>
+
+<!-- here is the dialog needed to show the full schedule for selected coach-->
+<p-dialog [draggable]="true" [header]="'Full schedule details'" [(visible)]="isAllSchedulesDialog" [modal]="true" [style]="{ width: '50rem' }">
+    <div class="weekly-schedule">
+        @for (day of weekDays; track day) {
+            <div class="day-column">
+                <div class="day-header">
+                    {{ day }}
+                </div>
+                <div class="day-slots">
+                    @for (slot of getDetailedScheduleForDay(selectedCoach, day); track slot) {
+                        <div class="detailed-slot" [class]="'slot-' + slot.status">
+                            <div class="slot-time">
+                                {{ slot.timeSlot }}
+                            </div>
+                            <div class="slot-content">
+                                @if (slot.status === 'booked') {
+                                    <span class="patient-name">
+                                        {{ slot.patientName }}
+                                    </span>
+                                } @else if (slot.status === 'available') {
+                                    <span class="available-text"> Available </span>
+                                } @else {
+                                    <span> OFF </span>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</p-dialog>
