@@ -9,6 +9,7 @@ import { CalendarComponent } from './calendar/calendar.component';
 import { AttendanceTrackingComponent } from './attendance-tracking/attendance-tracking.component';
 import { SessionManagementComponent } from './session-management/session-management.component';
 import { CoachManagerComponent } from './coach-manager/coach-manager.component';
+import { TreatmentPlanComponent } from './treatment-plan/treatment-plan.component';
 export default [
     {
         path: 'adduser',
@@ -59,5 +60,10 @@ export default [
         path: 'coachmanagement',
         data: { breachcrumb: 'Coach management' },
         component: CoachManagerComponent
+    },
+    {
+        path: 'treatmentplan',
+        data: { breadcrumb: 'Treatment plan' },
+        component: TreatmentPlanComponent
     }
 ] as Routes;

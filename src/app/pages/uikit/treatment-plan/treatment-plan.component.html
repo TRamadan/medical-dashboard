@@ -1,3 +1,189 @@
-<p>
-  treatment-plan works!
-</p>
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="addTreatmentPlanDialog()" />
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+    </ng-template>
+</p-toolbar>
+
+<p-table
+    #dt
+    [value]="allTreatmentPlans"
+    [rows]="10"
+    [paginator]="true"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [rowHover]="true"
+    dataKey="id"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+    [showCurrentPageReport]="true"
+    [rowsPerPageOptions]="[10, 20, 30]"
+>
+    <ng-template #caption>
+        <div class="flex items-center justify-between">
+            <h5 class="m-0">Manage treatment plans</h5>
+        </div>
+    </ng-template>
+
+    <ng-template #header>
+        <tr>
+            <th style="min-width: 16rem">Treatment plan code</th>
+            <th style="min-width: 16rem">Assigned patient(s)</th>
+            <th style="min-width: 8rem">Description</th>
+            <th style="min-width: 8rem">No.of sessions</th>
+            <th style="min-width: 12rem">Start date</th>
+            <th style="min-width: 12rem">Options</th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-treatmentPlan>
+        <tr></tr>
+    </ng-template>
+</p-table>
+
+<!-- here is the dialog needed to add a treatment plan-->
+<p-dialog [modal]="true" [header]="'Add treatment plan'" [(visible)]="treatmentPlanDialog" [style]="{ width: '80rem', height: '80rem' }">
+    <p-card>
+        <h4 class="font-bold">Patient and injury type information</h4>
+        <form [formGroup]="addTreatmentPlanForm" class="my-3">
+            <div class="row">
+                <div class="col-6">
+                    <p-floatlabel class="w-full md:w-56" variant="on">
+                        <p-select inputId="on_label" formControlName="patient" [options]="allPatients" optionLabel="name" styleClass="w-full" />
+                        <label for="on_label">Select your patient</label>
+                    </p-floatlabel>
+                </div>
+
+                <div class="col-6">
+                    <p-floatlabel class="w-full md:w-56" variant="on">
+                        <p-select inputId="on_label" formControlName="injuryType" [options]="allPatients" optionLabel="name" styleClass="w-full" />
+                        <label for="on_label">Select injury type</label>
+                    </p-floatlabel>
+                </div>
+            </div>
+
+            <!-- here is the card to show patient details when the user choose a patient-->
+            <h4 class="font-bold">Selected patient information</h4>
+            <p-card>
+                <div class="row my-3">
+                    <div class="col-md-3">
+                        <label> Patient Name </label>
+                        <p>Name</p>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label> Patient Age </label>
+                        <p>Age</p>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label> Patient Injury </label>
+                        <p>Injury</p>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label> Patient Phone </label>
+                        <p>Phone</p>
+                    </div>
+                </div>
+                <p class="text-center font-bold">Show all primary data that help the dr for the choosed patient</p>
+            </p-card>
+
+            <!-- here is the card to add treatment plan configuration-->
+            <div class="my-3">
+                <p-card>
+                    <h4 class="font-bold">Treatment plan configuration</h4>
+                    <div formGroupName="treatmentplanDetails">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p-floatlabel class="w-full md:w-56" variant="on">
+                                    <input type="text" pInputText formControlName="description" />
+                                    <label for="on_label">Description</label>
+                                </p-floatlabel>
+                            </div>
+
+                            <div class="col-md-4">
+                                <p-floatlabel variant="on">
+                                    <p-datepicker formControlName="startDate" inputId="on_label" showIcon iconDisplay="input" />
+                                    <label for="on_label">Start date</label>
+                                </p-floatlabel>
+                            </div>
+
+                            <div class="col-md-4">
+                                <p-floatlabel variant="on">
+                                    <p-inputnumber mode="decimal" inputId="withoutgrouping" [useGrouping]="false" />
+                                    <label for="on_label">Total number fo sessions</label>
+                                </p-floatlabel>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- here is the section for add sessions for the treatment paln-->
+                    <div class="my-3">
+                        <h4 class="font-bold">Treatment plan sessions configuration</h4>
+                        <div formGroupName="treatmentplanDetails">
+                            <div formArrayName="sessions">
+                                @for (session of treatmentSessions.controls; track session; let i = $index) {
+                                    <p-card styleClass="my-2">
+                                        <div [formGroupName]="i">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <h5>Session {{ i + 1 }}</h5>
+                                                <p-button icon="pi pi-trash" severity="danger" size="small" [text]="true" (onClick)="removeTreatmentSession(i)" *ngIf="treatmentSessions.controls.length > 1"> </p-button>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <p-floatlabel variant="on">
+                                                        <input type="text" pInputText formControlName="sessionName" />
+                                                        <!-- <p-datepicker formControlName="sessionName" [inputId]="'session_date_' + i" showIcon iconDisplay="input" /> -->
+                                                        <label [for]="'session_date_' + i">Session Name</label>
+                                                    </p-floatlabel>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <p-floatlabel variant="on">
+                                                        <p-datepicker formControlName="sessionDate" [inputId]="'session_date_' + i" showIcon iconDisplay="input" />
+                                                        <label [for]="'session_date_' + i">Session Date</label>
+                                                    </p-floatlabel>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <p-floatlabel variant="on">
+                                                        <p-inputnumber formControlName="noOfSessionsPerWeek" [inputId]="'noOfSessionsPerWeek_' + i" />
+                                                        <label [for]="'noOfSessionsPerWeek_' + i">No. of sessions per week</label>
+                                                    </p-floatlabel>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <p-floatlabel variant="on">
+                                                        <p-inputnumber formControlName="noOSessionsPerMonth" [inputId]="'noOSessionsPerMonth_' + i" mode="decimal" [useGrouping]="false" />
+                                                        <label [for]="'noOSessionsPerMonth_' + i">No. of sessions per Month</label>
+                                                    </p-floatlabel>
+                                                </div>
+
+                                                <div class="col-md-3 my-2">
+                                                    <p-floatlabel variant="on">
+                                                        <p-inputnumber formControlName="duration" [inputId]="'duration_' + i" mode="decimal" [useGrouping]="false" suffix=" min" />
+                                                        <label [for]="'duration_' + i">Duration (minutes)</label>
+                                                    </p-floatlabel>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </p-card>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="text-start my-3">
+                            <p-button label="Add another session" [raised]="true" severity="info" (onClick)="addTreatmentSession()" />
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+        </form>
+    </p-card>
+    <ng-template #footer>
+        <p-button label="Cancel" [text]="true" severity="secondary" (click)="hideDialog()" />
+        <p-button label="Save" [outlined]="true" severity="secondary" />
+    </ng-template>
+</p-dialog>
