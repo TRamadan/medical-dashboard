@@ -43,6 +43,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 })
 export class TreatmentPlanComponent implements OnInit {
     allPatients: any[] = [];
+    sessionActivities: any[] = [];
     addTreatmentPlanForm!: FormGroup;
     allTreatmentPlans: TreatmentPlan[] = [];
     treatmentPlanDialog: boolean = false;
@@ -78,7 +79,8 @@ export class TreatmentPlanComponent implements OnInit {
             noOSessionsPerMonth: [null, Validators.required],
             duration: [null, Validators.required],
             sessionStatus: [null, Validators.required],
-            sessionDate: [null, Validators.required]
+            sessionDate: [null, Validators.required],
+            activities: this.fb.array([])
         });
     }
 
@@ -88,6 +90,14 @@ export class TreatmentPlanComponent implements OnInit {
 
     addTreatmentSession() {
         this.treatmentSessions.push(this.createTreatmentSession());
+    }
+
+    getActivitiesArray(sessionIndex: number): FormArray {
+        return this.treatmentSessions.at(sessionIndex).get('activities') as FormArray;
+    }
+
+    getActivitiesValue(sessionIndex: number): any[] {
+        return this.getActivitiesArray(sessionIndex).value;
     }
 
     //here is the function needed to remove a session configuration for the treatement plan
@@ -118,6 +128,30 @@ export class TreatmentPlanComponent implements OnInit {
         sessions.clear();
         this.addTreatmentPlanForm.reset();
         // this.treatmentSessions.clear();
+    }
+
+    //here is the function needed to push another session activity for a single session in treatment plan
+    pushAnotherSessionActivity(sessionIndex: number) {
+        debugger;
+        const sessionForm = this.treatmentSessions.at(sessionIndex);
+        const formValue = sessionForm.value;
+
+        if (!formValue.sessionName || !formValue.sessionDate) {
+            return;
+        }
+
+        const activitiesArray = this.getActivitiesArray(sessionIndex);
+
+        const newActivity = this.fb.group({
+            id: [Date.now()],
+            name: [formValue.sessionName],
+            date: [formValue.sessionDate],
+            numberPerWeek: [formValue.noOfSessionsPerWeek],
+            numberPerMonth: [formValue.noOSessionsPerMonth],
+            duration: [formValue.duration]
+        });
+
+        activitiesArray.push(newActivity);
     }
 
     /**

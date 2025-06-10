@@ -136,7 +136,7 @@
                                                     <p-floatlabel variant="on">
                                                         <input type="text" pInputText formControlName="sessionName" />
                                                         <!-- <p-datepicker formControlName="sessionName" [inputId]="'session_date_' + i" showIcon iconDisplay="input" /> -->
-                                                        <label [for]="'session_date_' + i">Session Name</label>
+                                                        <label [for]="'session_date_' + i">Session service name</label>
                                                     </p-floatlabel>
                                                 </div>
 
@@ -169,6 +169,54 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <div class="text-center">
+                                            <p-button label="Add" [raised]="true" severity="success" (onClick)="pushAnotherSessionActivity(i)" />
+                                        </div>
+
+                                        @if (getActivitiesValue(i).length) {
+                                            <p-table
+                                                #dt
+                                                [value]="getActivitiesValue(i)"
+                                                [rows]="10"
+                                                [paginator]="true"
+                                                [tableStyle]="{ 'min-width': '75rem' }"
+                                                [rowHover]="true"
+                                                dataKey="id"
+                                                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                                                [showCurrentPageReport]="true"
+                                                [rowsPerPageOptions]="[10, 20, 30]"
+                                            >
+                                                <ng-template #header>
+                                                    <tr>
+                                                        <th style="min-width: 8rem">Session service name</th>
+                                                        <th style="min-width: 8rem">Session date</th>
+                                                        <th style="min-width: 8rem">No. of sessions per week</th>
+                                                        <th style="min-width: 8rem">No. of sessions per month</th>
+                                                        <th style="min-width: 8rem">Duration</th>
+                                                        <th style="min-width: 8rem">Options</th>
+                                                    </tr>
+                                                </ng-template>
+                                                <ng-template #body let-sessionActivity>
+                                                    <tr>
+                                                        <td>
+                                                            {{ sessionActivity.name }}
+                                                        </td>
+
+                                                        <td>
+                                                            {{ sessionActivity.date }}
+                                                        </td>
+                                                        <td>
+                                                            {{ sessionActivity.numberPerWeek }}
+                                                        </td>
+                                                        <td>
+                                                            {{ sessionActivity.numberPerMonth }}
+                                                        </td>
+                                                        <td>{{ sessionActivity.duration }} Min</td>
+                                                    </tr>
+                                                </ng-template>
+                                            </p-table>
+                                        }
                                     </p-card>
                                 }
                             </div>
