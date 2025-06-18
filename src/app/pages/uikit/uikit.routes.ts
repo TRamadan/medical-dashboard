@@ -10,6 +10,13 @@ import { AttendanceTrackingComponent } from './attendance-tracking/attendance-tr
 import { SessionManagementComponent } from './session-management/session-management.component';
 import { CoachManagerComponent } from './coach-manager/coach-manager.component';
 import { TreatmentPlanComponent } from './treatment-plan/treatment-plan.component';
+import { SuperStarsComponent } from './super-stars/super-stars.component';
+import { PartnersComponent } from './partners/partners.component';
+import { AboutUsComponent } from './about-us/about-us.component';
+import { EducationalVideosComponent } from './educational-videos/educational-videos.component';
+import { OurServicesComponent } from './our-services/our-services.component';
+import { OurTeamComponent } from './our-team/our-team.component';
+import { JoinOurTeamComponent } from './join-our-team/join-our-team.component';
 export default [
     {
         path: 'adduser',
@@ -65,5 +72,45 @@ export default [
         path: 'treatmentplan',
         data: { breadcrumb: 'Treatment plan' },
         component: TreatmentPlanComponent
+    },
+    {
+        path: 'superstars',
+        data: { breadcrumb: 'super stars' },
+        component: SuperStarsComponent
+    },
+    {
+        path: 'partners',
+        data: { breadcrumb: 'Partners' },
+        component: PartnersComponent
+    },
+    {
+        path: 'aboutus',
+        data: { breadcrumb: 'About us' },
+        component: AboutUsComponent
+    },
+    {
+        path: 'educationalvideos',
+        data: { breadcrumb: 'Educational videos' },
+        component: EducationalVideosComponent
+    },
+    {
+        path: 'ourservices',
+        data: { breadcrumb: 'Our services' },
+        component: OurServicesComponent
+    },
+    {
+        path: 'ourteam',
+        data: { breadcrumb: 'Our team' },
+        component: OurTeamComponent
+    },
+    {
+        path: 'joinus',
+        data: { breadcrumb: 'Join us' },
+        component: JoinOurTeamComponent
+    },
+    {
+        path: 'contactus',
+        data: { breadcrumb: 'Join us' },
+        component: JoinOurTeamComponent
     }
 ] as Routes;

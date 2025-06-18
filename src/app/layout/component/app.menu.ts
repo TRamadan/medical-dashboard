@@ -92,6 +92,51 @@ export class AppMenu {
                         routerLink: ['/uikit/coachmanagement']
                     }
                 ]
+            },
+            {
+                label: 'Website control',
+                items: [
+                    {
+                        label: 'our super stars',
+                        icon: '',
+                        routerLink: ['/uikit/superstars']
+                    },
+                    {
+                        label: 'our partners',
+                        icon: '',
+                        routerLink: ['/uikit/partners']
+                    },
+                    {
+                        label: 'about us',
+                        icon: '',
+                        routerLink: ['/uikit/aboutus']
+                    },
+                    {
+                        label: 'educational videos',
+                        icon: '',
+                        routerLink: ['/uikit/educationalvideos']
+                    },
+                    {
+                        label: 'our services',
+                        icon: '',
+                        routerLink: ['/uikit/ourservices']
+                    },
+                    {
+                        label: 'our team',
+                        icon: '',
+                        routerLink: ['/uikit/ourteam']
+                    },
+                    {
+                        label: 'join us',
+                        icon: '',
+                        routerLink: ['/uikit/joinus']
+                    },
+                    {
+                        label: 'contact us',
+                        icon: '',
+                        routerLink: ['/uikit/contactus']
+                    }
+                ]
             }
         ];
     }

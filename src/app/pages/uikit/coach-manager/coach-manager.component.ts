@@ -26,6 +26,8 @@ export class CoachManagerComponent implements OnInit {
     searchTerm: string = '';
     currentPatient: any;
 
+    imgPath: string = '../../../../../public/Capture.PNG';
+
     constructor() {}
 
     ngOnInit() {

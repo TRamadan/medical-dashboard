@@ -1,0 +1,46 @@
+<div class="dashboard-layout">
+    <main class="main-content">
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="branchFilter">Filter by Branch:</label>
+                <select id="branchFilter" [(ngModel)]="selectedBranchId" (change)="filterByBranch()" class="filter-select">
+                    <option value="">All Branches</option>
+                    <option *ngFor="let branch of branches" [value]="branch.id">{{ branch.name }}</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Overview Mode -->
+        <div class="schedules-container">
+            <div *ngFor="let coach of filteredCoaches" class="coach-schedule-card">
+                <div class="coach-header">
+                    <div class="coach-info">
+                        <h3>{{ coach.name }}</h3>
+                        <p class="coach-branch">{{ coach.branch }} Branch</p>
+                        <p class="coach-specializations"><strong>Specializations:</strong> {{ coach.specializations.join(', ') }}</p>
+                        <p class="coach-specializations"><strong>Experience:</strong> {{ coach.experience }} years</p>
+                    </div>
+
+                    <div class="coach-actions">
+                        <button class="edit-schedule-btn" (click)="editSchedule(coach)">Edit Schedule</button>
+                        <button class="view-detailed-btn" (click)="viewDetailedSchedule(coach)">View Detailed</button>
+                    </div>
+                </div>
+
+                <div class="schedule-grid">
+                    <div *ngFor="let slot of coach.availability" class="time-slot">
+                        <div class="slot-day">{{ slot.day }}</div>
+                        <div class="slot-time">{{ slot.startTime }} - {{ slot.endTime }}</div>
+                        <div class="slot-status" [class]="slot.isAvailable ? 'available' : 'unavailable'">
+                            {{ slot.isAvailable ? 'Working Day' : 'Day Off' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- here is the dialog needed to edit the slots for the selected coach -->
+
+<!-- here is the dialog needed to show the full slots for the selected coach-->
