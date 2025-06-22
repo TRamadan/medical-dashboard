@@ -1,648 +1,378 @@
- .dashboard-layout {
-     display: flex;
-     min-height: 100vh;
-     background-color: #f8fafc;
- }
-
- .sidebar {
-     width: 280px;
-     background: linear-gradient(145deg, #1e40af, #3b82f6);
-     color: white;
-     padding: 2rem 0;
-     box-shadow: 4px 0 12px rgba(0, 0, 0, 0.1);
- }
-
- .sidebar-header {
-     padding: 0 2rem 2rem;
-     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-     margin-bottom: 2rem;
- }
-
- .sidebar-header h2 {
-     margin: 0 0 0.5rem 0;
-     font-size: 1.5rem;
-     font-weight: 600;
- }
-
- .sidebar-header p {
-     margin: 0;
-     opacity: 0.8;
-     font-size: 0.9rem;
- }
-
- .nav-menu {
-     list-style: none;
-     padding: 0;
-     margin: 0;
- }
-
- .nav-menu li {
-     margin-bottom: 0.5rem;
- }
-
- .nav-menu a {
-     display: flex;
-     align-items: center;
-     padding: 1rem 2rem;
-     color: white;
-     text-decoration: none;
-     transition: all 0.3s ease;
-     border-left: 4px solid transparent;
- }
-
- .nav-menu a:hover,
- .nav-menu a.active {
-     background-color: rgba(255, 255, 255, 0.1);
-     border-left-color: #fbbf24;
- }
-
- .nav-menu .icon {
-     margin-right: 1rem;
-     font-size: 1.2rem;
- }
-
- .main-content {
-     flex: 1;
-     padding: 2rem;
-     overflow-y: auto;
- }
-
- .content-header {
-     margin-bottom: 2rem;
- }
-
- .content-header h1 {
-     margin: 0 0 0.5rem 0;
-     color: #1f2937;
-     font-size: 2.5rem;
-     font-weight: 700;
- }
-
- .content-header p {
-     margin: 0;
-     color: #6b7280;
-     font-size: 1.1rem;
- }
-
- .filters-section {
-     margin-bottom: 2rem;
-     padding: 1.5rem;
-     background: white;
-     border-radius: 12px;
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-     display: flex;
-     gap: 2rem;
- }
-
- .filter-group {
-     display: flex;
-     align-items: center;
-     gap: 1rem;
- }
-
- .filter-group label {
-     font-weight: 500;
-     color: #374151;
- }
-
- .filter-select {
-     padding: 0.5rem 1rem;
-     border: 2px solid #e5e7eb;
-     border-radius: 6px;
-     font-size: 1rem;
-     min-width: 150px;
- }
-
- .filter-select:focus {
-     outline: none;
-     border-color: #3b82f6;
- }
-
- .schedules-container {
-     display: grid;
-     gap: 2rem;
- }
-
- .coach-schedule-card {
-     background: white;
-     border-radius: 12px;
-     padding: 2rem;
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-     border-left: 4px solid #10b981;
- }
-
- .coach-header {
-     display: flex;
-     justify-content: space-between;
-     align-items: flex-start;
-     margin-bottom: 2rem;
- }
-
- .coach-info h3 {
-     margin: 0 0 0.5rem 0;
-     color: #1f2937;
-     font-size: 1.5rem;
-     font-weight: 600;
- }
-
- .coach-branch {
-     margin: 0 0 0.5rem 0;
-     color: #6b7280;
-     font-weight: 500;
- }
-
- .coach-specializations {
-     margin: 0 0 1rem 0;
-     color: #4b5563;
-     font-size: 0.9rem;
- }
-
- .coach-workload {
-     margin: 0;
-     color: #4b5563;
-     font-size: 0.9rem;
- }
-
- .workload-bar {
-     display: inline-block;
-     width: 100px;
-     height: 8px;
-     background-color: #e5e7eb;
-     border-radius: 4px;
-     margin-left: 0.5rem;
-     position: relative;
-     overflow: hidden;
- }
-
- .workload-fill {
-     display: block;
-     height: 100%;
-     background: linear-gradient(90deg, #10b981, #fbbf24, #ef4444);
-     border-radius: 4px;
-     transition: width 0.3s ease;
- }
-
- .coach-actions {
-     display: flex;
-     gap: 0.5rem;
- }
-
- .edit-schedule-btn,
- .view-detailed-btn {
-     padding: 0.75rem 1.5rem;
-     border: none;
-     border-radius: 8px;
-     font-weight: 500;
-     cursor: pointer;
-     transition: background-color 0.3s ease;
- }
-
- .edit-schedule-btn {
-     background-color: #3b82f6;
-     color: white;
- }
-
- .edit-schedule-btn:hover {
-     background-color: #2563eb;
- }
-
- .view-detailed-btn {
-     background-color: #10b981;
-     color: white;
- }
-
- .view-detailed-btn:hover {
-     background-color: #059669;
- }
-
- .schedule-grid {
-     display: grid;
-     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-     gap: 1rem;
- }
-
- .time-slot {
-     background-color: #f9fafb;
-     border-radius: 8px;
-     padding: 1rem;
-     border-left: 3px solid #3b82f6;
- }
-
- .slot-day {
-     font-weight: 600;
-     color: #1f2937;
-     margin-bottom: 0.5rem;
- }
-
- .slot-time {
-     color: #4b5563;
-     font-size: 0.9rem;
-     margin-bottom: 0.5rem;
- }
-
- .slot-status {
-     font-size: 0.8rem;
-     font-weight: 500;
-     padding: 0.25rem 0.5rem;
-     border-radius: 12px;
-     text-align: center;
- }
-
- .slot-status.available {
-     background-color: #dcfce7;
-     color: #16a34a;
- }
-
- .slot-status.unavailable {
-     background-color: #fee2e2;
-     color: #dc2626;
- }
-
- /* Detailed Schedule Styles */
- .detailed-schedules {
-     display: grid;
-     gap: 2rem;
- }
-
- .detailed-coach-card {
-     background: white;
-     border-radius: 12px;
-     padding: 2rem;
-     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-     border-left: 4px solid #3b82f6;
- }
-
- .detailed-coach-card .coach-header {
-     display: flex;
-     justify-content: space-between;
-     align-items: center;
-     margin-bottom: 1.5rem;
-     padding-bottom: 1rem;
-     border-bottom: 1px solid #e5e7eb;
- }
-
- .detailed-coach-card h3 {
-     margin: 0;
-     color: #1f2937;
-     font-size: 1.3rem;
-     font-weight: 600;
- }
-
- .workload-info {
-     background-color: #f3f4f6;
-     padding: 0.5rem 1rem;
-     border-radius: 6px;
-     font-size: 0.9rem;
-     color: #4b5563;
-     font-weight: 500;
- }
-
- .weekly-schedule {
-     display: grid;
-     grid-template-columns: repeat(7, 1fr);
-     gap: 1rem;
- }
-
- .day-column {
-     min-height: 400px;
- }
-
- .day-header {
-     background-color: #1f2937;
-     color: white;
-     padding: 0.75rem;
-     text-align: center;
-     font-weight: 600;
-     border-radius: 6px 6px 0 0;
-     font-size: 0.9rem;
- }
-
- .day-slots {
-     border: 1px solid #e5e7eb;
-     border-top: none;
-     border-radius: 0 0 6px 6px;
-     min-height: 360px;
- }
-
- .detailed-slot {
-     border-bottom: 1px solid #f3f4f6;
-     padding: 0.5rem;
-     min-height: 45px;
-     display: flex;
-     flex-direction: column;
-     justify-content: center;
- }
-
- .detailed-slot:last-child {
-     border-bottom: none;
- }
-
- .slot-booked {
-     background-color: #fef3c7;
-     border-left: 3px solid #f59e0b;
- }
-
- .slot-available {
-     background-color: #dcfce7;
-     border-left: 3px solid #10b981;
- }
-
- .slot-unavailable {
-     background-color: #f3f4f6;
-     color: #9ca3af;
- }
-
- .slot-time {
-     font-size: 0.75rem;
-     font-weight: 600;
-     color: #6b7280;
-     margin-bottom: 0.25rem;
- }
-
- .slot-content {
-     font-size: 0.8rem;
- }
-
- .patient-name {
-     color: #d97706;
-     font-weight: 500;
- }
-
- .available-text {
-     color: #059669;
-     font-weight: 500;
- }
-
- .unavailable-text {
-     color: #9ca3af;
-     font-style: italic;
- }
-
- /* Modal Styles */
- .schedule-modal {
-     position: fixed;
-     top: 0;
-     left: 0;
-     width: 100%;
-     height: 100%;
-     z-index: 1000;
-     display: flex;
-     align-items: center;
-     justify-content: center;
- }
-
- .modal-overlay {
-     position: absolute;
-     top: 0;
-     left: 0;
-     width: 100%;
-     height: 100%;
-     background-color: rgba(0, 0, 0, 0.5);
- }
-
- .modal-content {
-     position: relative;
-     background: white;
-     border-radius: 12px;
-     max-width: 800px;
-     max-height: 90vh;
-     width: 90%;
-     overflow-y: auto;
-     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
- }
-
- .modal-header {
-     display: flex;
-     justify-content: space-between;
-     align-items: center;
-     padding: 2rem;
-     border-bottom: 1px solid #e5e7eb;
- }
-
- .modal-header h2 {
-     margin: 0;
-     color: #1f2937;
-     font-size: 1.5rem;
-     font-weight: 600;
- }
-
- .close-btn {
-     background: none;
-     border: none;
-     font-size: 2rem;
-     color: #6b7280;
-     cursor: pointer;
-     padding: 0;
-     width: 40px;
-     height: 40px;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-     border-radius: 50%;
-     transition: all 0.3s ease;
- }
-
- .close-btn:hover {
-     background-color: #f3f4f6;
-     color: #1f2937;
- }
-
- .modal-body {
-     padding: 2rem;
- }
-
- .schedule-edit-form h3 {
-     margin: 0 0 1.5rem 0;
-     color: #1f2937;
-     font-size: 1.2rem;
-     font-weight: 600;
-     border-bottom: 2px solid #3b82f6;
-     padding-bottom: 0.5rem;
- }
-
- .days-grid {
-     display: grid;
-     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-     gap: 1.5rem;
-     margin-bottom: 2rem;
- }
-
- .day-schedule {
-     background-color: #f9fafb;
-     border-radius: 8px;
-     padding: 1.5rem;
- }
-
- .day-schedule h4 {
-     margin: 0 0 1rem 0;
-     color: #1f2937;
-     font-weight: 600;
- }
-
- .time-inputs label {
-     display: flex;
-     align-items: center;
-     gap: 0.5rem;
-     margin-bottom: 1rem;
-     font-weight: 500;
- }
-
- .time-range {
-     display: flex;
-     align-items: center;
-     gap: 0.5rem;
- }
-
- .time-input {
-     padding: 0.5rem;
-     border: 1px solid #d1d5db;
-     border-radius: 4px;
-     font-size: 0.9rem;
- }
-
- .workload-section {
-     margin-bottom: 2rem;
-     padding-top: 2rem;
-     border-top: 1px solid #e5e7eb;
- }
-
- .workload-controls label {
-     display: flex;
-     align-items: center;
-     gap: 1rem;
-     margin-bottom: 1rem;
-     font-weight: 500;
- }
-
- .number-input {
-     padding: 0.5rem;
-     border: 1px solid #d1d5db;
-     border-radius: 4px;
-     width: 80px;
-     font-size: 1rem;
- }
-
- .workload-info {
-     color: #6b7280;
-     font-size: 0.9rem;
-     margin: 0;
- }
-
- .modal-actions {
-     display: flex;
-     gap: 1rem;
-     justify-content: flex-end;
-     padding-top: 2rem;
-     border-top: 1px solid #e5e7eb;
- }
-
- .save-btn {
-     padding: 0.75rem 1.5rem;
-     background-color: #10b981;
-     color: white;
-     border: none;
-     border-radius: 8px;
-     font-weight: 500;
-     cursor: pointer;
-     transition: background-color 0.3s ease;
- }
-
- .save-btn:hover {
-     background-color: #059669;
- }
-
- .cancel-btn {
-     padding: 0.75rem 1.5rem;
-     background-color: #6b7280;
-     color: white;
-     border: none;
-     border-radius: 8px;
-     font-weight: 500;
-     cursor: pointer;
-     transition: background-color 0.3s ease;
- }
-
- .cancel-btn:hover {
-     background-color: #4b5563;
- }
-
- @media (max-width: 1400px) {
-     .weekly-schedule {
-         grid-template-columns: repeat(4, 1fr);
-     }
- }
-
- @media (max-width: 1000px) {
-     .weekly-schedule {
-         grid-template-columns: repeat(2, 1fr);
-     }
- }
-
- @media (max-width: 768px) {
-     .dashboard-layout {
-         flex-direction: column;
-     }
-
-     .sidebar {
-         width: 100%;
-         padding: 1rem 0;
-     }
-
-     .nav-menu {
-         display: flex;
-         overflow-x: auto;
-         padding: 0 1rem;
-     }
-
-     .nav-menu li {
-         flex-shrink: 0;
-         margin-right: 1rem;
-         margin-bottom: 0;
-     }
-
-     .main-content {
-         padding: 1rem;
-     }
-
-     .filters-section {
-         flex-direction: column;
-         gap: 1rem;
-     }
-
-     .coach-header {
-         flex-direction: column;
-         gap: 1rem;
-     }
-
-     .coach-actions {
-         flex-direction: column;
-     }
-
-     .schedule-grid {
-         grid-template-columns: 1fr;
-     }
-
-     .weekly-schedule {
-         grid-template-columns: 1fr;
-     }
-
-     .days-grid {
-         grid-template-columns: 1fr;
-         gap: 1rem;
-     }
-
-     .modal-content {
-         width: 95%;
-         margin: 1rem;
-         max-height: 85vh;
-     }
-
-     .modal-header,
-     .modal-body {
-         padding: 1rem;
-     }
-
-     .modal-actions {
-         flex-direction: column;
-     }
- }
+.dashboard-layout {
+    padding: 1rem;
+}
+
+.filters-section {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.filter-group {
+    margin-bottom: 1rem;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.filter-select {
+    width: 100%;
+    max-width: 300px;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+}
+
+.schedules-container {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.coach-schedule-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.coach-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+}
+
+.coach-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: #1f2937;
+    font-size: 1.25rem;
+}
+
+.coach-branch,
+.coach-specializations,
+.coach-workload {
+    margin: 0.25rem 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.coach-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.edit-schedule-btn,
+.view-detailed-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.edit-schedule-btn {
+    background: #3b82f6;
+    color: white;
+}
+
+.edit-schedule-btn:hover {
+    background: #2563eb;
+}
+
+.view-detailed-btn {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.view-detailed-btn:hover {
+    background: #e5e7eb;
+}
+
+.schedule-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.time-slot {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.slot-day {
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.slot-time {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.slot-status {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.slot-status.available {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.slot-status.unavailable {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+/* Edit Schedule Dialog Styles */
+.schedule-grid-edit {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.time-slot-edit {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.slot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.slot-header h4 {
+    margin: 0;
+    color: #1f2937;
+}
+
+.time-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.time-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.time-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    min-width: 80px;
+}
+
+.time-input {
+    padding: 0.25rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    flex: 1;
+}
+
+.slot-status-display {
+    text-align: center;
+    padding: 1rem;
+}
+
+.unavailable-label {
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.workload-info {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.workload-info h4 {
+    margin: 0 0 1rem 0;
+    color: #0369a1;
+}
+
+.workload-controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.workload-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.workload-item label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* Detailed Schedule Dialog Styles */
+.coach-info-detailed {
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: #f8fafc;
+    border-radius: 8px;
+}
+
+.coach-profile h3 {
+    margin: 0 0 0.5rem 0;
+    color: #1f2937;
+}
+
+.coach-profile p {
+    margin: 0.25rem 0;
+    color: #6b7280;
+}
+
+.weekly-schedule {
+    margin-bottom: 2rem;
+}
+
+.weekly-schedule h4 {
+    margin: 0 0 1rem 0;
+    color: #1f2937;
+}
+
+.schedule-table {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.schedule-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 2fr;
+    background: #f3f4f6;
+    font-weight: 600;
+    color: #374151;
+}
+
+.header-cell {
+    padding: 1rem;
+    border-right: 1px solid #e5e7eb;
+}
+
+.header-cell:last-child {
+    border-right: none;
+}
+
+.schedule-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 2fr;
+    border-top: 1px solid #e5e7eb;
+}
+
+.schedule-cell {
+    padding: 1rem;
+    border-right: 1px solid #e5e7eb;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.schedule-cell:last-child {
+    border-right: none;
+}
+
+.status-available {
+    background: #dcfce7;
+    color: #166534;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-unavailable {
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.session-item {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 4px;
+    padding: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.session-time {
+    font-weight: 600;
+    color: #0369a1;
+}
+
+.session-patient {
+    color: #1f2937;
+}
+
+.session-type {
+    color: #6b7280;
+    font-size: 0.75rem;
+}
+
+.workload-analysis {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.workload-analysis h4 {
+    margin: 0 0 1rem 0;
+    color: #1f2937;
+}
+
+.workload-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.metric-label {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.metric-value {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #1f2937;
+}

@@ -22,18 +22,21 @@
                     <div class="col-5">
                         <p-card header="Patient files">
                             @for (patient of patients; track patient) {
-                                <div class="bg-white rounded-lg shadow-md p-6 mb-4 border-l-4 border-blue-500 my-3 p-3" (click)="setSelectedPatientDetail(patient)">
-                                    <div class="flex justify-content-between align-items-start">
-                                        <div class="flex align-items-center gap-3">
-                                            <p-avatar label="{{ getInitials(patient.name) }}" shape="circle" class="bg-secondary text-white"></p-avatar>
-                                            <div>
-                                                <div class="font-medium mb-3">{{ patient.name }}</div>
-                                                <small class="font-medium h5">{{ patient.injury }}</small>
-                                            </div>
+                            <div class="bg-white rounded-lg shadow-md p-6 mb-4 border-l-4 border-blue-500 my-3 p-3"
+                                (click)="setSelectedPatientDetail(patient)">
+                                <div class="flex justify-content-between align-items-start">
+                                    <div class="flex align-items-center gap-3">
+                                        <p-avatar label="{{ getInitials(patient.name) }}" shape="circle"
+                                            class="bg-secondary text-white"></p-avatar>
+                                        <div>
+                                            <div class="font-medium mb-3">{{ patient.name }}</div>
+                                            <small class="font-medium h5">{{ patient.injury }}</small>
                                         </div>
-                                        <p-tag [value]="patient.severity" [severity]="getSeveritySeverity(patient.severity)"></p-tag>
                                     </div>
+                                    <p-tag [value]="patient.severity"
+                                        [severity]="getSeveritySeverity(patient.severity)"></p-tag>
                                 </div>
+                            </div>
                             }
                         </p-card>
                     </div>
@@ -41,119 +44,156 @@
                     <!-- here is the details for the selected patient-->
                     <div class="col-7 p-4">
                         @if (currentPatient) {
-                            <p-card>
-                                <div class="flex justify-content-between align-items-center">
-                                    <div class="flex align-items-center gap-3">
-                                        <p-avatar label="{{ getInitials(currentPatient?.name) }}" size="large" class="bg-secondary text-white"></p-avatar>
-                                        <div>
-                                            <div class="text-xl font-semibold">{{ currentPatient?.name }}</div>
-                                            <small class="text-muted text-lg">Age: {{ currentPatient?.age }} • {{ currentPatient?.injury }}</small>
+                        <p-card>
+                            <div class="flex justify-content-between align-items-center">
+                                <div class="flex align-items-center gap-3">
+                                    <p-avatar label="{{ getInitials(currentPatient?.name) }}" size="large"
+                                        class="bg-secondary text-white"></p-avatar>
+                                    <div>
+                                        <div class="text-xl font-semibold">{{ currentPatient?.name }}</div>
+                                        <small class="text-muted text-lg">Age: {{ currentPatient?.age }} • {{
+                                            currentPatient?.injury }}</small>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <p-tag [value]="currentPatient?.severity + ' Priority'"
+                                        [severity]="getSeveritySeverity(currentPatient?.severity)"></p-tag>
+                                    <p-tag value="{{ currentPatient?.status }}" severity="info"
+                                        styleClass="p-tag-outlined"></p-tag>
+                                </div>
+                            </div>
+
+                            <p-tabs value="5">
+                                <p-tablist>
+                                    <p-tab value="5"> Overview </p-tab>
+                                    <p-tab value="6"> Treatment History </p-tab>
+                                    <p-tab value="7"> Progress </p-tab>
+                                </p-tablist>
+
+                                <p-tabpanels>
+                                    <p-tabpanel value="5">
+                                        <div class="grid">
+                                            <div class="col-12 md:col-6">
+                                                <h5 class="mb-2">Injury Details</h5>
+                                                <ul class="list-none p-0">
+                                                    <li class="mb-2">
+                                                        Date of Injury: <strong>{{ currentPatient.dateOfInjury
+                                                            }}</strong>
+                                                    </li>
+                                                    <li class="mb-2">
+                                                        Treating Doctor: <strong>{{ currentPatient.doctor }}</strong>
+                                                    </li>
+                                                    <li class="mb-2">
+                                                        Current Plan: <strong>{{ currentPatient.currentPlan }}</strong>
+                                                    </li>
+                                                    <li class="mb-2">
+                                                        Next Appointment: <strong>{{ currentPatient.nextAppointment
+                                                            }}</strong>
+                                                    </li>
+                                                    <li class="mb-2">
+                                                        Injury Location: <strong>{{ currentPatient.injuryLocation ||
+                                                            'Not specified' }}</strong>
+                                                    </li>
+                                                    <li class="mb-2">
+                                                        Mechanism of Injury: <strong>{{ currentPatient.mechanismOfInjury
+                                                            || 'Not specified' }}</strong>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                            <div class="col-12 md:col-6">
+                                                <h5 class="mb-2">Current Symptoms</h5>
+                                                <ul class="list-none p-0">
+                                                    <li *ngFor="let symptom of currentPatient.symptoms" class="mb-1"><i
+                                                            class="pi pi-exclamation-triangle text-orange-500 mr-2"></i>{{
+                                                        symptom }}</li>
+                                                </ul>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="flex gap-2">
-                                        <p-tag [value]="currentPatient?.severity + ' Priority'" [severity]="getSeveritySeverity(currentPatient?.severity)"></p-tag>
-                                        <p-tag value="{{ currentPatient?.status }}" severity="info" styleClass="p-tag-outlined"></p-tag>
-                                    </div>
-                                </div>
+                                        <h5 class="mb-2">Description</h5>
+                                        <div class="p-3 bg-gray-100 border-round">{{ currentPatient.description }}</div>
 
-                                <p-tabs value="5">
-                                    <p-tablist>
-                                        <p-tab value="5"> Overview </p-tab>
-                                        <p-tab value="6"> Treatment History </p-tab>
-                                        <p-tab value="7"> Progress </p-tab>
-                                    </p-tablist>
-
-                                    <p-tabpanels>
-                                        <p-tabpanel value="5">
-                                            <div class="grid">
-                                                <div class="col-12 md:col-6">
-                                                    <h5 class="mb-2">Injury Details</h5>
-                                                    <ul class="list-none p-0">
-                                                        <li class="mb-2">
-                                                            Date of Injury: <strong>{{ currentPatient.dateOfInjury }}</strong>
-                                                        </li>
-                                                        <li class="mb-2">
-                                                            Treating Doctor: <strong>{{ currentPatient.doctor }}</strong>
-                                                        </li>
-                                                        <li class="mb-2">
-                                                            Current Plan: <strong>{{ currentPatient.currentPlan }}</strong>
-                                                        </li>
-                                                        <li class="mb-2">
-                                                            Next Appointment: <strong>{{ currentPatient.nextAppointment }}</strong>
-                                                        </li>
-                                                    </ul>
+                                        <!-- Treatment Plan Integration -->
+                                        <div class="mt-4" *ngIf="currentPatient.currentPlan">
+                                            <h5 class="mb-2">Treatment Plan Integration</h5>
+                                            <div class="p-3 bg-blue-50 border-round border-blue-200">
+                                                <div class="flex align-items-center gap-2 mb-2">
+                                                    <i class="pi pi-file-edit text-blue-600"></i>
+                                                    <strong>Current Treatment Plan: {{ currentPatient.currentPlan
+                                                        }}</strong>
                                                 </div>
-                                                <div class="col-12 md:col-6">
-                                                    <h5 class="mb-2">Current Symptoms</h5>
-                                                    <ul class="list-none p-0">
-                                                        <li *ngFor="let symptom of currentPatient.symptoms" class="mb-1"><i class="pi pi-exclamation-triangle text-orange-500 mr-2"></i>{{ symptom }}</li>
-                                                    </ul>
-                                                </div>
+                                                <p class="mb-2 text-sm">This injury requires specific treatment
+                                                    protocols. Click on "Treatment Plans" tab to view and modify the
+                                                    exercise plan.</p>
+                                                <button class="btn-primary" (click)="navigateToTreatmentPlans()">
+                                                    <i class="pi pi-arrow-right"></i> Go to Treatment Plans
+                                                </button>
                                             </div>
-                                            <h5 class="mb-2">Description</h5>
-                                            <div class="p-3 bg-gray-100 border-round">{{ currentPatient.description }}</div>
-                                        </p-tabpanel>
+                                        </div>
+                                    </p-tabpanel>
 
-                                        <p-tabpanel value="6">
-                                            <h5>Treatment history</h5>
+                                    <p-tabpanel value="6">
+                                        <h5>Treatment history</h5>
 
-                                            @for (treatment of currentPatient.treatmentHistory; track treatment) {
-                                                <div class="mb-3">
-                                                    <p-card>
-                                                        <div class="flex justify-content-between">
-                                                            <div>
-                                                                <strong>{{ treatment.treatment }}</strong
-                                                                ><br />
-                                                                <small class="text-muted">by {{ treatment.provider }}</small>
-                                                            </div>
-                                                            <small class="text-muted">{{ treatment.date }}</small>
-                                                        </div>
-                                                    </p-card>
+                                        @for (treatment of currentPatient.treatmentHistory; track treatment) {
+                                        <div class="mb-3">
+                                            <p-card>
+                                                <div class="flex justify-content-between">
+                                                    <div>
+                                                        <strong>{{ treatment.treatment }}</strong><br />
+                                                        <small class="text-muted">by {{ treatment.provider }}</small>
+                                                    </div>
+                                                    <small class="text-muted">{{ treatment.date }}</small>
                                                 </div>
-                                            }
-                                        </p-tabpanel>
+                                            </p-card>
+                                        </div>
+                                        }
+                                    </p-tabpanel>
 
-                                        <p-tabpanel value="7">
-                                            <div class="flex justify-content-between align-items-center mb-3">
-                                                <h5>Recovery Progress</h5>
-                                                <span class="text-green-600 text-2xl font-bold">{{ currentPatient.progress }}%</span>
+                                    <p-tabpanel value="7">
+                                        <div class="flex justify-content-between align-items-center mb-3">
+                                            <h5>Recovery Progress</h5>
+                                            <span class="text-green-600 text-2xl font-bold">{{ currentPatient.progress
+                                                }}%</span>
+                                        </div>
+                                        <p-progressBar [value]="currentPatient.progress"></p-progressBar>
+
+                                        <div class="d-flex justify-content-center gap-3 mt-4">
+                                            <div class="col-4">
+                                                <p-card class="text-center">
+                                                    <i class="pi pi-directions text-primary text-3xl mb-2"></i>
+                                                    <div>Mobility</div>
+                                                    <strong>75%</strong>
+                                                </p-card>
                                             </div>
-                                            <p-progressBar [value]="currentPatient.progress"></p-progressBar>
-
-                                            <div class="d-flex justify-content-center gap-3 mt-4">
-                                                <div class="col-4">
-                                                    <p-card class="text-center">
-                                                        <i class="pi pi-directions text-primary text-3xl mb-2"></i>
-                                                        <div>Mobility</div>
-                                                        <strong>75%</strong>
-                                                    </p-card>
-                                                </div>
-                                                <div class="col-4">
-                                                    <p-card class="text-center">
-                                                        <i class="pi pi-chart-line text-success text-3xl mb-2"></i>
-                                                        <div>Strength</div>
-                                                        <strong>60%</strong>
-                                                    </p-card>
-                                                </div>
-                                                <div class="col-4">
-                                                    <p-card class="text-center">
-                                                        <i class="pi pi-exclamation-triangle text-orange-500 text-3xl mb-2"></i>
-                                                        <div>Pain Level</div>
-                                                        <strong>3/10</strong>
-                                                    </p-card>
-                                                </div>
+                                            <div class="col-4">
+                                                <p-card class="text-center">
+                                                    <i class="pi pi-chart-line text-success text-3xl mb-2"></i>
+                                                    <div>Strength</div>
+                                                    <strong>60%</strong>
+                                                </p-card>
                                             </div>
-                                        </p-tabpanel>
-                                    </p-tabpanels>
-                                </p-tabs>
-                            </p-card>
+                                            <div class="col-4">
+                                                <p-card class="text-center">
+                                                    <i
+                                                        class="pi pi-exclamation-triangle text-orange-500 text-3xl mb-2"></i>
+                                                    <div>Pain Level</div>
+                                                    <strong>3/10</strong>
+                                                </p-card>
+                                            </div>
+                                        </div>
+                                    </p-tabpanel>
+                                </p-tabpanels>
+                            </p-tabs>
+                        </p-card>
                         } @else {
-                            <p-card>
-                                <div class="d-flex flex-column align-items-center text-center" style="min-width: 100px; flex-shrink: 0">
-                                    <i class="pi pi-user" style="font-size: 5rem"></i>
-                                    <p class="mb-0 mt-2 medium text-nowrap fw-bold h4">Please, Selecte a patient to see full details</p>
-                                </div>
-                            </p-card>
+                        <p-card>
+                            <div class="d-flex flex-column align-items-center text-center"
+                                style="min-width: 100px; flex-shrink: 0">
+                                <i class="pi pi-user" style="font-size: 5rem"></i>
+                                <p class="mb-0 mt-2 medium text-nowrap fw-bold h4">Please, Selecte a patient to see full
+                                    details</p>
+                            </div>
+                        </p-card>
                         }
                     </div>
                 </div>
@@ -164,10 +204,215 @@
             <app-manage-scheduels></app-manage-scheduels>
         </p-tabpanel>
         <p-tabpanel value="2">
-            <section class="bg-white rounded-lg shadow-sm p-4"></section>
+            <section class="bg-white rounded-lg shadow-sm p-4">
+                <app-coach-assignment></app-coach-assignment>
+            </section>
         </p-tabpanel>
         <p-tabpanel value="3">
-            <section class="bg-white rounded-lg shadow-sm p-4"></section>
+            <section class="bg-white rounded-lg shadow-sm p-4">
+                <div class="treatment-plans-header">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Treatment Plans Management</h2>
+                    <p class="text-gray-600 mb-6">Update or modify exercise plans in coordination with the doctor using
+                        pre-defined templates created by super admin</p>
+                </div>
+
+                <div class="treatment-plans-content">
+                    <!-- Doctor Coordination Notice -->
+                    <div class="doctor-coordination-notice mb-6">
+                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div class="flex align-items-center gap-2 mb-2">
+                                <i class="pi pi-user-md text-blue-600 text-xl"></i>
+                                <h4 class="text-blue-800 font-semibold mb-0">Doctor Coordination Required</h4>
+                            </div>
+                            <p class="text-blue-700 text-sm mb-0">
+                                All treatment plan modifications must be coordinated with the treating doctor.
+                                Templates are pre-approved by medical staff and can be customized based on patient
+                                needs.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Patient Selection -->
+                    <div class="patient-selection mb-6">
+                        <h3 class="text-lg font-semibold mb-3">Select Patient</h3>
+                        <div class="flex gap-4">
+                            <select [(ngModel)]="selectedPatientForPlan" (change)="onPatientForPlanChange()"
+                                class="form-select">
+                                <option value="">Choose a patient...</option>
+                                <option *ngFor="let patient of patients" [value]="patient.id">
+                                    {{ patient.name }} - {{ patient.injury }} ({{ patient.doctor }})
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Treatment Plan Templates -->
+                    <div class="templates-section mb-6" *ngIf="selectedPatientForPlan">
+                        <h3 class="text-lg font-semibold mb-3">Available Templates (Super Admin Approved)</h3>
+                        <p class="text-gray-600 mb-4">Select a template to customize for the patient. All templates are
+                            pre-approved by medical staff.</p>
+                        <div class="templates-grid">
+                            <div *ngFor="let template of treatmentTemplates" class="template-card"
+                                [class.selected]="selectedTemplate?.id === template.id"
+                                (click)="selectTemplate(template)">
+                                <div class="template-header">
+                                    <h4 class="template-title">{{ template.name }}</h4>
+                                    <span class="template-category">{{ template.category }}</span>
+                                </div>
+                                <div class="template-description">
+                                    <p>{{ template.description }}</p>
+                                </div>
+                                <div class="template-details">
+                                    <span class="detail-item">
+                                        <i class="pi pi-calendar"></i>
+                                        {{ template.duration }} weeks
+                                    </span>
+                                    <span class="detail-item">
+                                        <i class="pi pi-clock"></i>
+                                        {{ template.sessionsPerWeek }} sessions/week
+                                    </span>
+                                </div>
+                                <div class="template-exercises">
+                                    <h5>Key Exercises:</h5>
+                                    <ul class="exercise-list">
+                                        <li *ngFor="let exercise of template.exercises.slice(0, 3)">{{ exercise }}</li>
+                                        <li *ngIf="template.exercises.length > 3" class="more-exercises">
+                                            +{{ template.exercises.length - 3 }} more
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="template-approval">
+                                    <span class="approval-badge">
+                                        <i class="pi pi-check-circle text-green-600"></i>
+                                        Medical Staff Approved
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Current Treatment Plan -->
+                    <div class="current-plan-section mb-6" *ngIf="selectedPatientForPlan && currentTreatmentPlan">
+                        <h3 class="text-lg font-semibold mb-3">Current Treatment Plan</h3>
+                        <div class="current-plan-card">
+                            <div class="plan-header">
+                                <h4>{{ currentTreatmentPlan.name }}</h4>
+                                <div class="plan-actions">
+                                    <button class="btn-edit" (click)="editCurrentPlan()">
+                                        <i class="pi pi-pencil"></i> Edit Plan
+                                    </button>
+                                    <button class="btn-view" (click)="viewCurrentPlan()">
+                                        <i class="pi pi-eye"></i> View Details
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="plan-progress">
+                                <div class="progress-info">
+                                    <span>Progress: {{ currentTreatmentPlan.progress }}%</span>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" [style.width.%]="currentTreatmentPlan.progress">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="plan-stats">
+                                    <div class="stat">
+                                        <span class="stat-label">Sessions Completed:</span>
+                                        <span class="stat-value">{{ currentTreatmentPlan.completedSessions }}/{{
+                                            currentTreatmentPlan.totalSessions }}</span>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-label">Next Session:</span>
+                                        <span class="stat-value">{{ currentTreatmentPlan.nextSession }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Plan Editor -->
+                    <div class="plan-editor" *ngIf="isEditingPlan && selectedTemplate && editingPlan">
+                        <h3 class="text-lg font-semibold mb-3">Edit Treatment Plan (Doctor Coordination Required)</h3>
+                        <div class="editor-container">
+                            <div class="editor-section">
+                                <h4>Plan Configuration</h4>
+                                <div class="form-group">
+                                    <label>Plan Name:</label>
+                                    <input type="text" [(ngModel)]="editingPlan!.name" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label>Duration (weeks):</label>
+                                    <input type="number" [(ngModel)]="editingPlan!.duration" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label>Sessions per Week:</label>
+                                    <input type="number" [(ngModel)]="editingPlan!.sessionsPerWeek" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label>Session Duration (minutes):</label>
+                                    <input type="number" [(ngModel)]="editingPlan!.sessionDuration" class="form-input">
+                                </div>
+                            </div>
+
+                            <div class="editor-section">
+                                <h4>Exercises (Based on Template)</h4>
+                                <div class="exercises-list">
+                                    <div *ngFor="let exercise of editingPlan!.exercises; let i = index"
+                                        class="exercise-item">
+                                        <div class="exercise-header">
+                                            <input type="text" [(ngModel)]="exercise.name" class="exercise-name">
+                                            <button class="btn-remove" (click)="removeExercise(i)">
+                                                <i class="pi pi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <div class="exercise-details">
+                                            <div class="detail-row">
+                                                <label>Sets:</label>
+                                                <input type="number" [(ngModel)]="exercise.sets" class="detail-input">
+                                            </div>
+                                            <div class="detail-row">
+                                                <label>Reps:</label>
+                                                <input type="number" [(ngModel)]="exercise.reps" class="detail-input">
+                                            </div>
+                                            <div class="detail-row">
+                                                <label>Duration:</label>
+                                                <input type="number" [(ngModel)]="exercise.duration"
+                                                    class="detail-input">
+                                                <span>seconds</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button class="btn-add-exercise" (click)="addExercise()">
+                                        <i class="pi pi-plus"></i> Add Exercise
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="editor-section">
+                                <h4>Goals & Notes (Doctor Consultation)</h4>
+                                <div class="form-group">
+                                    <label>Goals:</label>
+                                    <textarea [(ngModel)]="editingPlan!.goals" class="form-textarea" rows="3"
+                                        placeholder="Enter treatment goals in consultation with the doctor"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label>Notes:</label>
+                                    <textarea [(ngModel)]="editingPlan!.notes" class="form-textarea" rows="3"
+                                        placeholder="Add notes from doctor consultation"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="editor-actions">
+                                <button class="btn-cancel" (click)="cancelEdit()">
+                                    Cancel
+                                </button>
+                                <button class="btn-save" (click)="savePlan()">
+                                    <i class="pi pi-check"></i> Save Plan (Doctor Approved)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </p-tabpanel>
     </p-tabpanels>
 </p-tabs>

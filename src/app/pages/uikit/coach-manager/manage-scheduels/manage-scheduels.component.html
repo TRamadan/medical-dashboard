@@ -3,7 +3,8 @@
         <div class="filters-section">
             <div class="filter-group">
                 <label for="branchFilter">Filter by Branch:</label>
-                <select id="branchFilter" [(ngModel)]="selectedBranchId" (change)="filterByBranch()" class="filter-select">
+                <select id="branchFilter" [(ngModel)]="selectedBranchId" (change)="filterByBranch()"
+                    class="filter-select">
                     <option value="">All Branches</option>
                     <option *ngFor="let branch of branches" [value]="branch.id">{{ branch.name }}</option>
                 </select>
@@ -17,8 +18,11 @@
                     <div class="coach-info">
                         <h3>{{ coach.name }}</h3>
                         <p class="coach-branch">{{ coach.branch }} Branch</p>
-                        <p class="coach-specializations"><strong>Specializations:</strong> {{ coach.specializations.join(', ') }}</p>
+                        <p class="coach-specializations"><strong>Specializations:</strong> {{
+                            coach.specializations.join(', ') }}</p>
                         <p class="coach-specializations"><strong>Experience:</strong> {{ coach.experience }} years</p>
+                        <p class="coach-workload"><strong>Workload:</strong> {{ coach.currentPatients }}/{{
+                            coach.maxPatients }} patients</p>
                     </div>
 
                     <div class="coach-actions">
@@ -41,6 +45,132 @@
     </main>
 </div>
 
-<!-- here is the dialog needed to edit the slots for the selected coach -->
+<!-- Edit Schedule Dialog -->
+<p-dialog [(visible)]="editScheduleDialog" [header]="'Edit Schedule - ' + (editingCoach?.name || '')" [modal]="true"
+    [style]="{ width: '60rem' }" [draggable]="false" [resizable]="false">
 
-<!-- here is the dialog needed to show the full slots for the selected coach-->
+    <div *ngIf="editingCoach" class="edit-schedule-form">
+        <div class="schedule-grid-edit">
+            <div *ngFor="let slot of editingCoach.availability; let i = index" class="time-slot-edit">
+                <div class="slot-header">
+                    <h4>{{ slot.day }}</h4>
+                    <p-checkbox [(ngModel)]="slot.isAvailable" [binary]="true" inputId="available_{{ i }}"
+                        label="Available">
+                    </p-checkbox>
+                </div>
+
+                <div class="time-inputs" *ngIf="slot.isAvailable">
+                    <div class="time-group">
+                        <label>Start Time:</label>
+                        <input type="time" [(ngModel)]="slot.startTime" class="time-input">
+                    </div>
+                    <div class="time-group">
+                        <label>End Time:</label>
+                        <input type="time" [(ngModel)]="slot.endTime" class="time-input">
+                    </div>
+                </div>
+
+                <div class="slot-status-display" *ngIf="!slot.isAvailable">
+                    <span class="unavailable-label">Day Off</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="workload-info">
+            <h4>Workload Management</h4>
+            <div class="workload-controls">
+                <div class="workload-item">
+                    <label>Current Patients:</label>
+                    <p-inputnumber [(ngModel)]="editingCoach.currentPatients" [min]="0"
+                        [max]="editingCoach.maxPatients">
+                    </p-inputnumber>
+                </div>
+                <div class="workload-item">
+                    <label>Max Patients:</label>
+                    <p-inputnumber [(ngModel)]="editingCoach.maxPatients" [min]="1" [max]="20">
+                    </p-inputnumber>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #footer>
+        <p-button label="Cancel" [text]="true" severity="secondary" (click)="cancelEditSchedule()">
+        </p-button>
+        <p-button label="Save Changes" [raised]="true" severity="success" (click)="saveScheduleChanges()">
+        </p-button>
+    </ng-template>
+</p-dialog>
+
+<!-- Detailed Schedule Dialog -->
+<p-dialog [(visible)]="detailedScheduleDialog" [header]="'Detailed Schedule - ' + (selectedCoach?.name || '')"
+    [modal]="true" [style]="{ width: '80rem' }" [draggable]="false" [resizable]="false">
+
+    <div *ngIf="selectedCoach" class="detailed-schedule">
+        <div class="coach-info-detailed">
+            <div class="coach-profile">
+                <h3>{{ selectedCoach.name }}</h3>
+                <p><strong>Branch:</strong> {{ selectedCoach.branch }}</p>
+                <p><strong>Specializations:</strong> {{ selectedCoach.specializations.join(', ') }}</p>
+                <p><strong>Experience:</strong> {{ selectedCoach.experience }} years</p>
+                <p><strong>Workload:</strong> {{ selectedCoach.currentPatients }}/{{ selectedCoach.maxPatients }}
+                    patients</p>
+            </div>
+        </div>
+
+        <div class="weekly-schedule">
+            <h4>Weekly Schedule</h4>
+            <div class="schedule-table">
+                <div class="schedule-header">
+                    <div class="header-cell">Day</div>
+                    <div class="header-cell">Time</div>
+                    <div class="header-cell">Status</div>
+                    <div class="header-cell">Sessions</div>
+                </div>
+
+                <div *ngFor="let slot of selectedCoach.availability" class="schedule-row">
+                    <div class="schedule-cell">{{ slot.day }}</div>
+                    <div class="schedule-cell">
+                        {{ slot.isAvailable ? (slot.startTime + ' - ' + slot.endTime) : 'Day Off' }}
+                    </div>
+                    <div class="schedule-cell">
+                        <span [class]="slot.isAvailable ? 'status-available' : 'status-unavailable'">
+                            {{ slot.isAvailable ? 'Available' : 'Unavailable' }}
+                        </span>
+                    </div>
+                    <div class="schedule-cell">
+                        <div *ngFor="let session of getSessionsForDay(selectedCoach.id, slot.day)" class="session-item">
+                            <span class="session-time">{{ session.time }}</span>
+                            <span class="session-patient">{{ session.patientName }}</span>
+                            <span class="session-type">{{ session.type }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="workload-analysis">
+            <h4>Workload Analysis</h4>
+            <div class="workload-metrics">
+                <div class="metric">
+                    <span class="metric-label">Utilization Rate:</span>
+                    <span class="metric-value">{{ getUtilizationRate(selectedCoach) }}%</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Available Slots:</span>
+                    <span class="metric-value">{{ getAvailableSlots(selectedCoach) }}</span>
+                </div>
+                <div class="metric">
+                    <span class="metric-label">Capacity:</span>
+                    <span class="metric-value">{{ selectedCoach.currentPatients }}/{{ selectedCoach.maxPatients
+                        }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #footer>
+        <p-button label="Close" [text]="true" severity="secondary" (click)="closeDetailedSchedule()">
+        </p-button>
+    </ng-template>
+</p-dialog>

@@ -1,0 +1,185 @@
+<div class="coach-assignment-container">
+    <div class="assignment-header">
+        <h2>Coach Assignment</h2>
+        <p>Assign suitable coaches to sessions based on their specializations and availability</p>
+    </div>
+
+    <div class="assignment-filters">
+        <div class="filter-group">
+            <label for="patientFilter">Select Patient:</label>
+            <select id="patientFilter" [(ngModel)]="selectedPatientId" (change)="onPatientChange()"
+                class="filter-select">
+                <option value="">Choose a patient...</option>
+                <option *ngFor="let patient of patients" [value]="patient.id">
+                    {{ patient.name }} - {{ patient.injury }}
+                </option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="sessionTypeFilter">Session Type:</label>
+            <select id="sessionTypeFilter" [(ngModel)]="selectedSessionType" (change)="onSessionTypeChange()"
+                class="filter-select">
+                <option value="">All session types</option>
+                <option value="Assessment">Assessment</option>
+                <option value="Rehabilitation">Rehabilitation</option>
+                <option value="Follow-up">Follow-up</option>
+                <option value="Strength Training">Strength Training</option>
+                <option value="Mobility Training">Mobility Training</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="branchFilter">Branch:</label>
+            <select id="branchFilter" [(ngModel)]="selectedBranchId" (change)="onBranchChange()" class="filter-select">
+                <option value="">All branches</option>
+                <option *ngFor="let branch of branches" [value]="branch.id">{{ branch.name }}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="assignment-content" *ngIf="selectedPatientId">
+        <div class="patient-info-section">
+            <h3>Patient Information</h3>
+            <div class="patient-card" *ngIf="selectedPatient">
+                <div class="patient-details">
+                    <h4>{{ selectedPatient.name }}</h4>
+                    <p><strong>Injury:</strong> {{ selectedPatient.injury }}</p>
+                    <p><strong>Severity:</strong>
+                        <span [class]="'severity-' + selectedPatient.severity.toLowerCase()">
+                            {{ selectedPatient.severity }}
+                        </span>
+                    </p>
+                    <p><strong>Current Plan:</strong> {{ selectedPatient.currentPlan }}</p>
+                    <p><strong>Next Appointment:</strong> {{ selectedPatient.nextAppointment }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="coaches-section">
+            <h3>Available Coaches</h3>
+            <div class="coaches-grid">
+                <div *ngFor="let coach of filteredCoaches" class="coach-card"
+                    [class.recommended]="isRecommendedCoach(coach)" [class.available]="isCoachAvailable(coach)"
+                    [class.unavailable]="!isCoachAvailable(coach)">
+
+                    <div class="coach-header">
+                        <div class="coach-avatar">
+                            <span>{{ getInitials(coach.name) }}</span>
+                        </div>
+                        <div class="coach-info">
+                            <h4>{{ coach.name }}</h4>
+                            <p class="coach-branch">{{ coach.branch }} Branch</p>
+                            <p class="coach-experience">{{ coach.experience }} years experience</p>
+                        </div>
+                        <div class="coach-status">
+                            <span [class]="isCoachAvailable(coach) ? 'status-available' : 'status-unavailable'">
+                                {{ isCoachAvailable(coach) ? 'Available' : 'Unavailable' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="coach-specializations">
+                        <h5>Specializations:</h5>
+                        <div class="specialization-tags">
+                            <span *ngFor="let spec of coach.specializations" class="spec-tag">
+                                {{ spec }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="coach-workload">
+                        <div class="workload-info">
+                            <span>Workload: {{ coach.currentPatients }}/{{ coach.maxPatients }}</span>
+                            <div class="workload-bar">
+                                <div class="workload-fill" [style.width.%]="getWorkloadPercentage(coach)"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="coach-availability">
+                        <h5>This Week's Availability:</h5>
+                        <div class="availability-grid">
+                            <div *ngFor="let slot of coach.availability" class="availability-slot"
+                                [class.available]="slot.isAvailable" [class.unavailable]="!slot.isAvailable">
+                                <span class="day">{{ slot.day.substring(0, 3) }}</span>
+                                <span class="time" *ngIf="slot.isAvailable">{{ slot.startTime }}-{{ slot.endTime
+                                    }}</span>
+                                <span class="time" *ngIf="!slot.isAvailable">Off</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="coach-actions">
+                        <button class="assign-btn" [disabled]="!isCoachAvailable(coach)" (click)="assignCoach(coach)">
+                            Assign Coach
+                        </button>
+                        <button class="view-schedule-btn" (click)="viewCoachSchedule(coach)">
+                            View Schedule
+                        </button>
+                    </div>
+
+                    <div class="recommendation-badge" *ngIf="isRecommendedCoach(coach)">
+                        <span>⭐ Recommended</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="current-assignments" *ngIf="currentAssignments.length > 0">
+            <h3>Current Assignments</h3>
+            <div class="assignments-list">
+                <div *ngFor="let assignment of currentAssignments" class="assignment-item">
+                    <div class="assignment-info">
+                        <h4>{{ assignment.coachName }}</h4>
+                        <p>{{ assignment.sessionType }} - {{ assignment.date }}</p>
+                        <p>{{ assignment.time }}</p>
+                    </div>
+                    <div class="assignment-actions">
+                        <button class="reschedule-btn" (click)="rescheduleAssignment(assignment)">
+                            Reschedule
+                        </button>
+                        <button class="remove-btn" (click)="removeAssignment(assignment)">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="no-patient-selected" *ngIf="!selectedPatientId">
+        <div class="empty-state">
+            <i class="pi pi-user" style="font-size: 3rem; color: #ccc;"></i>
+            <h3>Select a Patient</h3>
+            <p>Choose a patient from the dropdown above to start assigning coaches</p>
+        </div>
+    </div>
+</div>
+
+<!-- Assignment Confirmation Dialog -->
+<p-dialog [(visible)]="assignmentDialog" [header]="'Confirm Assignment'" [modal]="true" [style]="{ width: '40rem' }">
+
+    <div class="assignment-confirmation" *ngIf="selectedCoachForAssignment">
+        <p>Are you sure you want to assign <strong>{{ selectedCoachForAssignment.name }}</strong> to <strong>{{
+                selectedPatient?.name }}</strong>?</p>
+
+        <div class="assignment-details">
+            <h4>Assignment Details:</h4>
+            <ul>
+                <li><strong>Patient:</strong> {{ selectedPatient?.name }}</li>
+                <li><strong>Injury:</strong> {{ selectedPatient?.injury }}</li>
+                <li><strong>Coach:</strong> {{ selectedCoachForAssignment.name }}</li>
+                <li><strong>Specializations:</strong> {{ selectedCoachForAssignment.specializations.join(', ') }}</li>
+                <li><strong>Session Type:</strong> {{ selectedSessionType || 'Not specified' }}</li>
+            </ul>
+        </div>
+    </div>
+
+    <ng-template #footer>
+        <p-button label="Cancel" [text]="true" severity="secondary" (click)="cancelAssignment()">
+        </p-button>
+        <p-button label="Confirm Assignment" [raised]="true" severity="success" (click)="confirmAssignment()">
+        </p-button>
+    </ng-template>
+</p-dialog>
