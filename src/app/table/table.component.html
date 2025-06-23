@@ -1,0 +1,41 @@
+<p-table [value]="data" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+        <tr>
+            @for(col of headers; track col){
+            <th class="text-center">{{ col.label }}</th>
+            }
+            @if(showActions){
+            <th class="text-center">Actions</th>
+            }
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-row>
+        <tr>
+            @for(col of headers; track col){
+            <td class="text-center">
+                @if(col.type === 'image') {
+
+                @if(row[col.field]){
+                <img [src]="row[col.field]" alt="img" class="w-12 h-12 object-cover rounded-full inline-block" />
+                }
+                }
+
+                @else {
+                {{ row[col.field] }}
+                }
+            </td>
+            }
+
+            @if(showActions){
+            <td class="text-center">
+                <div class="flex justify-center gap-2">
+                    <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-warning p-button-sm"
+                        (click)="onEdit(row)"></button>
+                    <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm"
+                        (click)="onDelete(row)"></button>
+                </div>
+            </td>
+            }
+        </tr>
+    </ng-template>
+</p-table>

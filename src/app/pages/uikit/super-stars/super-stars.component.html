@@ -1,3 +1,74 @@
-<p>
-  super-stars works!
-</p>
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openServiceDialog()" />
+  </ng-template>
+
+  <ng-template #end>
+    <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+  </ng-template>
+</p-toolbar>
+
+
+<!-- Use the shared dynamic table component -->
+<app-table [headers]="tableHeaders" [showActions]="true" [data]="superStars" (edit)="editSuperStar($event)"
+  (delete)="deleteSuperStar($event)"></app-table>
+
+<!-- here is the dialog needed to add or update a new super star-->
+<p-dialog [header]="isEdit ? 'Update selected super star' : 'Add New Super Star'" [(visible)]="showAddDialog"
+  [modal]="true" [style]="{width: '550px'}">
+  @if(!isDelete){
+  <form [formGroup]="addSuperStarForm">
+    <div class="grid grid-cols-1 gap-4">
+      <div class="flex flex-col gap-2">
+        <label for="nameEn">Athlete Name (English)</label>
+        <input pInputText id="nameEn" formControlName="nameEn" required />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="nameAr">Athlete Name (Arabic)</label>
+        <input pInputText id="nameAr" formControlName="nameAr" required />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="sportEn">Athlete Sport (English)</label>
+        <input pInputText id="sportEn" formControlName="sportEn" required />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="sportAr">Athlete Sport (Arabic)</label>
+        <input pInputText id="sportAr" formControlName="sportAr" required />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="achievementEn">Achievement (English)</label>
+        <input pInputText id="achievementEn" formControlName="achievementEn" required />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="achievementAr">Achievement (Arabic)</label>
+        <input pInputText id="achievementAr" formControlName="achievementAr" required />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="shortWordEn">Short Word (English)</label>
+        <input pInputText id="shortWordEn" formControlName="shortWordEn" required />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="shortWordAr">Short Word (Arabic)</label>
+        <input pInputText id="shortWordAr" formControlName="shortWordAr" required />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label for="image">Athlete Image</label>
+
+      </div>
+    </div>
+  </form>
+  }
+
+  @else {
+  <p class="font-bold text-center">Are you sure to deactivate the selected super star ?</p>
+  }
+
+
+  <div class=" flex justify-end gap-2 mt-4">
+    <p-button severity="danger" label="Cancel" icon="pi pi-times" (click)="showAddDialog = false" class="p-button-text"
+      type="button" />
+    <p-button severity="success" label="Save" icon="pi pi-check" type="submit" [disabled]="!addSuperStarForm.valid"
+      (onClick)="!isDelete ? isEdit ? updateSelectedSuperStar() :addNewSuperStar() : deleteSelectedSuperStar()" />
+  </div>
+
+</p-dialog>
