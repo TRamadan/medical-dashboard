@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { DynamicReportComponent, ReportConfig } from "../../../../app/pages/uikit/dynamic-report.component";
+import { DynamicReportComponent } from "../dynamic-report.component";
 @Component({
   standalone: true,
   imports: [DynamicReportComponent],
@@ -13,19 +13,5 @@ export class OurServicesComponent implements OnInit {
 
   ngOnInit() {
   }
-
-  reportConfig: ReportConfig = {
-    title: 'API Report',
-    sections: [
-      {
-        type: 'table',
-        tableColumns: [
-          { label: 'ID', field: 'id' },
-          { label: 'Name', field: 'name' }
-        ],
-        apiUrl: 'https://jsonplaceholder.typicode.com/users'
-      }
-    ]
-  };
 
 }

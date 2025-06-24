@@ -1,137 +1,116 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { TableModule } from 'primeng/table';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { FormBuilder, FormGroup, FormArray, FormControl, Validators, ReactiveFormsModule } from '@angular/forms';
-import { FloatLabelModule } from 'primeng/floatlabel';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-
-export interface ReportSection {
-    type: 'text' | 'table';
-    content?: string; // for text
-    tableData?: any; // for table (static)
-    tableColumns?: { label: string; field: string }[]; // for table
-    apiUrl?: string; // for dynamic data
-}
-
-export interface ReportConfig {
-    title?: string;
-    sections: ReportSection[];
-}
+import { CheckboxModule } from 'primeng/checkbox';
+import { InputSwitchModule } from 'primeng/inputswitch';
+import { InputTextModule } from 'primeng/inputtext';
+import { FieldsetModule } from 'primeng/fieldset';
 
 @Component({
     selector: 'app-dynamic-report',
     standalone: true,
-    imports: [CommonModule, TableModule, ReactiveFormsModule, FloatLabelModule, ButtonModule],
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        TableModule,
+        ButtonModule,
+        CheckboxModule,
+        InputSwitchModule,
+        InputTextModule,
+        FieldsetModule
+    ],
     templateUrl: './dynamic-report.component.html',
 })
 export class DynamicReportComponent implements OnInit {
-    @Input() config!: ReportConfig;
-    fetchedTableData: { [sectionIndex: number]: any[] } = {};
-
     reportForm!: FormGroup;
-    showConfigForm = false;
 
-    constructor(private http: HttpClient, private fb: FormBuilder) { }
+    muscularOptions = ['tb', 'tbt', 'tb3', 'tb4'];
+    lengthOptions = ['l1', 'l2', 'l3', 'l4'];
+    motionOptions = ['m1', 'm2', 'm3', 'm4'];
+
+    tableColumns: { field: string; header: string }[] = [];
+    tableData: any[] = [];
+
+    reportGenerated = false;
+    saveSuccess = false;
+
+    constructor(private fb: FormBuilder, private http: HttpClient) { }
 
     ngOnInit() {
-        this.initForm();
-        if (this.config) {
-            this.patchFormFromConfig(this.config);
-            this.fetchAllApiData();
-        }
-    }
-
-    initForm() {
         this.reportForm = this.fb.group({
-            title: [''],
-            sections: this.fb.array([])
-        });
-    }
-
-    get sections(): FormArray {
-        return this.reportForm.get('sections') as FormArray;
-    }
-
-    addSection() {
-        this.sections.push(this.createSectionGroup());
-    }
-
-    removeSection(idx: number) {
-        this.sections.removeAt(idx);
-    }
-
-    createSectionGroup(): FormGroup {
-        return this.fb.group({
-            type: ['text', Validators.required],
-            content: [''],
-            tableColumns: this.fb.array([]),
+            reportName: [''],
+            muscular: this.buildCheckboxGroup(this.muscularOptions),
+            length: this.buildCheckboxGroup(this.lengthOptions),
+            motion: this.buildCheckboxGroup(this.motionOptions),
+            useExternalApi: [false],
             apiUrl: ['']
         });
-    }
 
-    addTableColumn(sectionIdx: number) {
-        const columns = this.sections.at(sectionIdx).get('tableColumns') as FormArray;
-        columns.push(this.fb.group({ label: ['', Validators.required], field: ['', Validators.required] }));
-    }
-
-    removeTableColumn(sectionIdx: number, colIdx: number) {
-        const columns = this.sections.at(sectionIdx).get('tableColumns') as FormArray;
-        columns.removeAt(colIdx);
-    }
-
-    patchFormFromConfig(config: ReportConfig) {
-        this.reportForm.patchValue({ title: config.title || '' });
-        this.sections.clear();
-        config.sections.forEach(section => {
-            const group = this.createSectionGroup();
-            group.patchValue({
-                type: section.type,
-                content: section.content || '',
-                apiUrl: section.apiUrl || ''
-            });
-            const columns = group.get('tableColumns') as FormArray;
-            (section.tableColumns || []).forEach(col => {
-                columns.push(this.fb.group({ label: [col.label, Validators.required], field: [col.field, Validators.required] }));
-            });
-            this.sections.push(group);
-        });
-    }
-
-    saveConfig() {
-        const formValue = this.reportForm.value;
-        this.config = {
-            title: formValue.title,
-            sections: formValue.sections.map((section: any) => ({
-                type: section.type,
-                content: section.content,
-                tableColumns: section.tableColumns,
-                apiUrl: section.apiUrl
-            }))
-        };
-        this.fetchAllApiData();
-        this.showConfigForm = false;
-    }
-
-    fetchAllApiData() {
-        this.fetchedTableData = {};
-        this.config.sections.forEach((section, idx) => {
-            if (section.type === 'table' && section.apiUrl) {
-                this.http.get<any[]>(section.apiUrl).subscribe(data => {
-                    this.fetchedTableData[idx] = data;
-                });
+        this.reportForm.get('useExternalApi')?.valueChanges.subscribe(useApi => {
+            const apiUrlControl = this.reportForm.get('apiUrl');
+            if (useApi) {
+                apiUrlControl?.enable();
+            } else {
+                apiUrlControl?.disable();
             }
         });
+        this.reportForm.get('apiUrl')?.disable();
     }
 
-    getTableData(section: ReportSection, idx: number): any[] {
-        if (section.apiUrl) {
-            return this.fetchedTableData[idx] || [];
+    buildCheckboxGroup(options: string[]): FormGroup {
+        const group = this.fb.group({});
+        options.forEach(option => {
+            group.addControl(option, this.fb.control(false));
+        });
+        return group;
+    }
+
+    generateReport() {
+        const formValue = this.reportForm.getRawValue();
+
+        const muscularCols = Object.keys(formValue.muscular).filter(key => formValue.muscular[key]);
+        const lengthCols = Object.keys(formValue.length).filter(key => formValue.length[key]);
+        const motionCols = Object.keys(formValue.motion).filter(key => formValue.motion[key]);
+
+        this.tableColumns = [...muscularCols, ...lengthCols, ...motionCols].map(col => ({ field: col, header: col.toUpperCase() }));
+
+        if (formValue.useExternalApi && formValue.apiUrl) {
+            this.http.get<any[]>(formValue.apiUrl).subscribe(data => {
+                this.tableData = data;
+                this.reportGenerated = true;
+            });
+        } else {
+            this.tableData = [];
+            this.reportGenerated = true;
         }
-        return section.tableData || [];
     }
 
-    getTableColumns(section: any): FormArray {
-        return (section.get('tableColumns') as FormArray) || this.fb.array([]);
+    prepareReportPayload() {
+        const formValue = this.reportForm.getRawValue();
+        return {
+            reportName: formValue.reportName,
+            muscular: Object.keys(formValue.muscular).filter(key => formValue.muscular[key]),
+            length: Object.keys(formValue.length).filter(key => formValue.length[key]),
+            motion: Object.keys(formValue.motion).filter(key => formValue.motion[key]),
+            useExternalApi: formValue.useExternalApi,
+            apiUrl: formValue.apiUrl
+        };
+    }
+
+    saveReport() {
+        debugger
+        const payload = this.prepareReportPayload();
+        // Replace 'YOUR_API_ENDPOINT' with your actual endpoint
+        this.http.post('YOUR_API_ENDPOINT', payload).subscribe({
+            next: () => {
+                this.saveSuccess = true;
+            },
+            error: () => {
+                this.saveSuccess = false;
+            }
+        });
     }
 } 

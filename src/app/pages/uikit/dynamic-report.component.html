@@ -1,94 +1,97 @@
-<button pButton type="button" (click)="showConfigForm = !showConfigForm"
-    label="{{ showConfigForm ? 'Hide Config Form' : 'Show Config Form' }}" class="mb-4"></button>
+<form [formGroup]="reportForm" (ngSubmit)="generateReport()">
+    <div class="card">
+        <h5>Report Configuration</h5>
 
-<div *ngIf="showConfigForm">
-    <form [formGroup]="reportForm" (ngSubmit)="saveConfig()" class="space-y-6">
-        <div class="mb-4">
-            <p-floatLabel>
-                <input pInputText formControlName="title" id="title" class="w-full" />
-                <label for="title">Report Title</label>
-            </p-floatLabel>
-        </div>
-        <div formArrayName="sections">
-            <div *ngFor="let section of sections.controls; let idx = index" [formGroupName]="idx"
-                class="border p-4 mb-4 rounded bg-gray-50">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="font-semibold">Section {{ idx + 1 }}</span>
-                    <button pButton type="button" icon="pi pi-trash" class="p-button-danger p-button-sm"
-                        (click)="removeSection(idx)"></button>
-                </div>
-                <div class="mb-2">
-                    <label class="block mb-1">Section Type</label>
-                    <select formControlName="type" class="w-full p-2 border rounded">
-                        <option value="text">Text</option>
-                        <option value="table">Table</option>
-                    </select>
-                </div>
-                <div *ngIf="section.get('type')?.value === 'text'" class="mb-2">
-                    <p-floatLabel>
-                        <textarea pInputText formControlName="content" id="content-{{idx}}" rows="3"
-                            class="w-full"></textarea>
-                        <label for="content-{{idx}}">Text Content</label>
-                    </p-floatLabel>
-                </div>
-                <div *ngIf="section.get('type')?.value === 'table'">
-                    <div class="mb-2">
-                        <p-floatLabel>
-                            <input pInputText formControlName="apiUrl" id="apiUrl-{{idx}}" class="w-full" />
-                            <label for="apiUrl-{{idx}}">API URL (optional)</label>
-                        </p-floatLabel>
-                    </div>
-                    <div formArrayName="tableColumns">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="font-semibold">Table Columns</span>
-                            <button pButton type="button" icon="pi pi-plus" class="p-button-success p-button-sm"
-                                (click)="addTableColumn(idx)"></button>
-                        </div>
-                        <div *ngFor="let col of getTableColumns(section).controls; let colIdx = index"
-                            [formGroupName]="colIdx" class="flex gap-2 items-center mb-2">
-                            <p-floatLabel class="flex-1">
-                                <input pInputText formControlName="label" id="label-{{idx}}-{{colIdx}}"
-                                    class="w-full" />
-                                <label for="label-{{idx}}-{{colIdx}}">Label</label>
-                            </p-floatLabel>
-                            <p-floatLabel class="flex-1">
-                                <input pInputText formControlName="field" id="field-{{idx}}-{{colIdx}}"
-                                    class="w-full" />
-                                <label for="field-{{idx}}-{{colIdx}}">Field</label>
-                            </p-floatLabel>
-                            <button pButton type="button" icon="pi pi-trash" class="p-button-danger p-button-sm"
-                                (click)="removeTableColumn(idx, colIdx)"></button>
-                        </div>
-                    </div>
-                </div>
+        <div class="p-fluid formgrid grid">
+            <div class="field col-12">
+                <label for="reportName">Report Name</label>
+                <input pInputText id="reportName" type="text" formControlName="reportName">
             </div>
-            <button pButton type="button" icon="pi pi-plus" label="Add Section" class="p-button-success mt-2"
-                (click)="addSection()"></button>
         </div>
-        <button pButton type="submit" label="Save Report Config" class="mt-4 w-full"></button>
-    </form>
-</div>
 
-<!-- Report Preview -->
-<div *ngIf="config?.title" class="text-2xl font-bold mb-4 mt-8">{{ config.title }}</div>
-<div *ngFor="let section of config.sections; let idx = index" class="mb-6">
-    <ng-container [ngSwitch]="section.type">
-        <div *ngSwitchCase="'text'" class="mb-2">
-            <div [innerHTML]="section.content"></div>
+        <p-fieldset legend="Muscular" [toggleable]="true" formGroupName="muscular" class="mb-4">
+            <div class="flex flex-wrap gap-3">
+                @for (option of muscularOptions; track option) {
+                <div class="flex align-items-center">
+                    <p-checkbox [formControlName]="option" [inputId]="'muscular_' + option"></p-checkbox>
+                    <label [for]="'muscular_' + option" class="ml-2">{{ option.toUpperCase() }}</label>
+                </div>
+                }
+            </div>
+        </p-fieldset>
+
+        <p-fieldset legend="Length" [toggleable]="true" formGroupName="length" class="mb-4">
+            <div class="flex flex-wrap gap-3">
+                @for (option of lengthOptions; track option) {
+                <div class="flex align-items-center">
+                    <p-checkbox [formControlName]="option" [inputId]="'length_' + option"></p-checkbox>
+                    <label [for]="'length_' + option" class="ml-2">{{ option.toUpperCase() }}</label>
+                </div>
+                }
+            </div>
+        </p-fieldset>
+
+        <p-fieldset legend="Motion" [toggleable]="true" formGroupName="motion" class="mb-4">
+            <div class="flex flex-wrap gap-3">
+                @for (option of motionOptions; track option) {
+                <div class="flex align-items-center">
+                    <p-checkbox [formControlName]="option" [inputId]="'motion_' + option"></p-checkbox>
+                    <label [for]="'motion_' + option" class="ml-2">{{ option.toUpperCase() }}</label>
+                </div>
+                }
+            </div>
+        </p-fieldset>
+
+        <div class="field-checkbox my-4">
+            <p-inputSwitch formControlName="useExternalApi" inputId="useExternalApi"></p-inputSwitch>
+            <label for="useExternalApi" class="ml-2">Load data from external API</label>
         </div>
-        <div *ngSwitchCase="'table'">
-            <p-table [value]="getTableData(section, idx)">
-                <ng-template pTemplate="header">
-                    <tr>
-                        <th *ngFor="let col of section.tableColumns">{{ col.label }}</th>
-                    </tr>
-                </ng-template>
-                <ng-template pTemplate="body" let-row>
-                    <tr>
-                        <td *ngFor="let col of section.tableColumns">{{ row[col.field] }}</td>
-                    </tr>
-                </ng-template>
-            </p-table>
+
+        @if (reportForm.get('useExternalApi')?.value) {
+        <div class="formgrid grid">
+            <div class="field col-12">
+                <label for="apiUrl">API URL</label>
+                <input pInputText id="apiUrl" type="text" formControlName="apiUrl" class="w-full">
+            </div>
         </div>
-    </ng-container>
+        }
+
+        <button pButton type="submit" label="Generate Report"></button>
+    </div>
+</form>
+
+@if (reportGenerated) {
+<div class="card mt-4">
+    <h5>{{ reportForm.get('reportName')?.value }}</h5>
+    <p-table [value]="tableData" [columns]="tableColumns">
+        <ng-template pTemplate="header" let-columns>
+            <tr>
+                @for (col of columns; track col.field) {
+                <th>{{ col.header }}</th>
+                }
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rowData let-columns="columns">
+            <tr>
+                @for (col of columns; track col.field) {
+                <td>{{ rowData[col.field] }}</td>
+                }
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="emptymessage" let-columns>
+            <tr>
+                <td [attr.colspan]="columns.length">
+                    No data found.
+                    @if (!reportForm.get('useExternalApi')?.value) {
+                    <span>Enable and provide an API URL to fetch data.</span>
+                    }
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+    <button pButton type="button" label="Save Report" class="mt-4" (click)="saveReport()"></button>
+    @if (saveSuccess) {
+    <div class="p-mt-2 p-text-success">Report saved successfully!</div>
+    }
 </div>
+}
