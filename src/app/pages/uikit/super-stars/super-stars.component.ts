@@ -8,10 +8,9 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { CommonModule } from '@angular/common';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
-import { TableComponent } from '../../../table/table.component';
+import { TableComponent, TableColumn } from '../../../table/table.component';
+import { FileUploadModule } from "primeng/fileupload";
 import { Superstars } from './models/superstars';
-// import { FileUploadModule } from 'primeng/fileupload';
-// import { ToastModule } from 'primeng/toast';
 
 @Component({
   selector: 'app-super-stars',
@@ -26,6 +25,7 @@ import { Superstars } from './models/superstars';
     ReactiveFormsModule,
     ButtonModule,
     DialogModule,
+    FileUploadModule,
     TableModule,
     InputTextModule,
     TableComponent
@@ -38,10 +38,9 @@ export class SuperStarsComponent implements OnInit {
   superStars: any[] = [];
   isEdit: boolean = false;
   isDelete: boolean = false;
-  tableHeaders = [
+  tableHeaders: TableColumn[] = [
     { label: 'Image', field: 'imageUrl', type: 'image' },
-    { label: 'Name (EN)', field: 'nameEn' },
-    { label: 'Name (AR)', field: 'nameAr' },
+    { label: 'Name', field: 'nameEn' },
     { label: 'Sport (EN)', field: 'sportEn' },
     { label: 'Sport (AR)', field: 'sportAr' },
     { label: 'Achievement (EN)', field: 'achievementEn' },
@@ -53,8 +52,7 @@ export class SuperStarsComponent implements OnInit {
 
   constructor(private fb: FormBuilder) {
     this.addSuperStarForm = this.fb.group({
-      nameEn: ['', Validators.required],
-      nameAr: ['', Validators.required],
+      name: ['', Validators.required],
       sportEn: ['', Validators.required],
       sportAr: ['', Validators.required],
       achievementEn: ['', Validators.required],
@@ -159,5 +157,24 @@ export class SuperStarsComponent implements OnInit {
   deleteSuperStar(ev: any): void {
     this.isDelete = true;
     this.showAddDialog = true;
+  }
+
+  /**
+ * Developer : Eng/Tarek Ahmed Ramadan
+ * Created Date : 10/6/2025
+ * Purpose : Handle image upload and preview
+ * @param event The file upload event
+ */
+  onImageUpload(event: any): void {
+    const file = event.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.addSuperStarForm.patchValue({
+          imageUrl: e.target.result
+        });
+      };
+      reader.readAsDataURL(file);
+    }
   }
 }

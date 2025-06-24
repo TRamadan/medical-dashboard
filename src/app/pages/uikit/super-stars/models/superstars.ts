@@ -1,8 +1,7 @@
 export interface Superstars {
     id?: number;
     img?: string;
-    nameAr?: string;
-    nameEn?: string;
+    name?: string;
     sportAr?: string;
     sportEn?: string;
     achievementAr?: string;

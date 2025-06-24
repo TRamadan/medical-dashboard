@@ -19,12 +19,9 @@
   @if(!isDelete){
   <form [formGroup]="addSuperStarForm">
     <div class="grid grid-cols-1 gap-4">
+
       <div class="flex flex-col gap-2">
-        <label for="nameEn">Athlete Name (English)</label>
-        <input pInputText id="nameEn" formControlName="nameEn" required />
-      </div>
-      <div class="flex flex-col gap-2">
-        <label for="nameAr">Athlete Name (Arabic)</label>
+        <label for="nameAr">Athlete Name</label>
         <input pInputText id="nameAr" formControlName="nameAr" required />
       </div>
       <div class="flex flex-col gap-2">
@@ -53,7 +50,12 @@
       </div>
       <div class="flex flex-col gap-2">
         <label for="image">Athlete Image</label>
-
+        <p-fileUpload mode="basic" chooseLabel="Choose Image" [auto]="true" accept="image/*" [maxFileSize]="1000000"
+          (onSelect)="onImageUpload($event)"></p-fileUpload>
+        @if(addSuperStarForm.get('imageUrl')?.value) {
+        <img [src]="addSuperStarForm.get('imageUrl')?.value" alt="Preview"
+          class="mt-2 w-32 h-32 object-cover rounded-md">
+        }
       </div>
     </div>
   </form>

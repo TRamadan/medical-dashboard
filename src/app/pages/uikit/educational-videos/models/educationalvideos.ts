@@ -1,12 +1,11 @@
 export interface Educationalvideos {
     id?: number;
     videoUrl?: string;
-    title?: string;
-    videoCategory: string; //excercise, recovery, nutrition
+    descriptionAr?: string;
+    descriptionEn?: string;
+    videoCategoryAr: string; //excercise, recovery, nutrition
+    videoCategoryEn: string;
+    status?: boolean;
 }
 
-export interface VideoCategory {
-    id?: number;
-    nameAr: string;
-    nameEn: string;
-}
+

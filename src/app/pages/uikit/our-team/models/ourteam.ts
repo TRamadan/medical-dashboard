@@ -4,5 +4,5 @@ export interface Ourteam {
     name?: string;
     specialityAr?: string;
     specialityEn?: string;
-    certificates?: string; //this will be an array
+    certificates?: string[];
 }

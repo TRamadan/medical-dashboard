@@ -1,41 +1,81 @@
-<p-table [value]="data" responsiveLayout="scroll">
-    <ng-template pTemplate="header">
-        <tr>
-            @for(col of headers; track col){
-            <th class="text-center">{{ col.label }}</th>
-            }
-            @if(showActions){
-            <th class="text-center">Actions</th>
-            }
-        </tr>
-    </ng-template>
-    <ng-template pTemplate="body" let-row>
-        <tr>
-            @for(col of headers; track col){
-            <td class="text-center">
-                @if(col.type === 'image') {
+<!-- Main Table -->
+<p-card>
+    <p-table #dt [value]="data" [columns]="headers" [loading]="loading" [rows]="rows" [scrollable]="scrollable"
+        [scrollHeight]="scrollHeight" [responsive]="responsive">
 
-                @if(row[col.field]){
-                <img [src]="row[col.field]" alt="img" class="w-12 h-12 object-cover rounded-full inline-block" />
+        <!-- Table Header -->
+        <ng-template pTemplate="header">
+            <tr>
+                @for(col of headers; track col){
+                <!-- Data Columns -->
+                <th [style.width]="col.width" [pSortableColumn]="col.sortable ? col.field : undefined"
+                    class="text-center">
+                    {{col.label}}
+                </th>
                 }
-                }
+                <!-- Actions Column -->
+                <th class="text-center" *ngIf="showActions || actions.length > 0">Actions</th>
+            </tr>
+        </ng-template>
 
-                @else {
-                {{ row[col.field] }}
-                }
-            </td>
-            }
+        <!-- Table Body -->
+        <ng-template pTemplate="body" let-row>
+            <tr>
+                <!-- Data Columns -->
+                <td *ngFor="let col of headers" class="text-center">
+                    <ng-container [ngSwitch]="col.type">
+                        <ng-container *ngSwitchCase="'image'">
+                            <img *ngIf="row[col.field]" [src]="row[col.field]" alt="img"
+                                class="w-12 h-12 object-cover rounded-full inline-block" />
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'boolean'">
+                            <i [class]="row[col.field] ? 'pi pi-check text-green-500' : 'pi pi-times text-red-500'"></i>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'date'">
+                            {{ row[col.field] | date:'medium' }}
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'custom'">
+                            <ng-container *ngTemplateOutlet="col.customTemplate; context: { $implicit: row }">
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngSwitchDefault>
+                            {{ row[col.field] }}
+                        </ng-container>
+                    </ng-container>
+                </td>
 
-            @if(showActions){
-            <td class="text-center">
-                <div class="flex justify-center gap-2">
-                    <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-warning p-button-sm"
-                        (click)="onEdit(row)"></button>
-                    <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm"
-                        (click)="onDelete(row)"></button>
-                </div>
-            </td>
-            }
-        </tr>
-    </ng-template>
-</p-table>
+                <!-- Actions Column -->
+                <td class="text-center" *ngIf="showActions || actions.length > 0">
+                    <div class="flex justify-center gap-2">
+                        <ng-container *ngIf="showActions">
+                            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-warning p-button-sm"
+                                (click)="onEdit(row)"></button>
+                            <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm"
+                                (click)="onDelete(row)"></button>
+                        </ng-container>
+
+
+                    </div>
+                </td>
+            </tr>
+        </ng-template>
+
+        <!-- Loading Template -->
+        <ng-template pTemplate="loadingbody">
+            <tr>
+                <td colspan="100%" class="text-center">
+                    Loading... Please wait.
+                </td>
+            </tr>
+        </ng-template>
+
+        <!-- Empty Template -->
+        <ng-template pTemplate="emptymessage">
+            <tr>
+                <td colspan="100%" class="text-center">
+                    {{ emptyMessage }}
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
