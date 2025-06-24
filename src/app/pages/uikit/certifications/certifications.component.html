@@ -1,3 +1,54 @@
-<p>
-  certifications works!
-</p>
+<!-- Toolbar -->
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openCertificationsDialog()" />
+  </ng-template>
+
+  <ng-template #end>
+    <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+  </ng-template>
+</p-toolbar>
+
+
+<!-- Table -->
+<app-table [headers]="tableHeaders" [data]="allCertificates" [showActions]="true" [paginator]="true" [rows]="10"
+  [showGlobalFilter]="true" [globalFilterPlaceholder]="'Search About Us entries...'"
+  [globalFilterFields]="['textEn', 'textAr', 'descriptionEn', 'descriptionAr', 'type']"
+  (edit)="editSelectedCertificate($event)" (delete)="deleteCertificate($event)">
+</app-table>
+
+<!-- Dialog -->
+<p-dialog [(visible)]="showAddDialog" [modal]="true" [style]="{width: '450px'}"
+  [header]="isDelete ? 'Confirm Delete' : (isEdit ? 'Edit About Us' : 'Add About Us')">
+
+  @if(!isDelete){
+  <form [formGroup]="addCertificateForm" class="flex flex-column gap-4">
+    <div class="flex flex-col gap-2">
+      <label for="descriptionEn">Name (English)</label>
+      <input pInputText id="descriptionEn" formControlName="nameEn" class="w-full" />
+    </div>
+    <div class="flex flex-col gap-2">
+      <label for="descriptionAr">Name (Arabic)</label>
+      <input pInputText id="descriptionAr" formControlName="nameEn" class="w-full" />
+    </div>
+  </form>
+  } @else {
+  <div class="confirmation-content">
+    <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+    <span>Are you sure you want to delete this certificate entry?</span>
+  </div>
+  }
+
+  <ng-template pTemplate="footer">
+    @if(!isDelete){
+    <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="showAddDialog = false"></button>
+    <button pButton label="Save" icon="pi pi-check" class="p-button-text"
+      (click)="isEdit ? updateSelectedCertificate() : addNewCertificate()">
+    </button>
+    } @else {
+    <button pButton label="No" icon="pi pi-times" class="p-button-text" (click)="showAddDialog = false"></button>
+    <button pButton label="Yes" icon="pi pi-check" class="p-button-text p-button-danger"
+      (click)="deleteSelectedCertificate()"></button>
+    }
+  </ng-template>
+</p-dialog>

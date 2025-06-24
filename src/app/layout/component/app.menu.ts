@@ -112,20 +112,29 @@ export class AppMenu {
                         routerLink: ['/uikit/aboutus']
                     },
                     {
-                        label: 'educational videos',
+                        label: 'our team',
                         icon: '',
-                        routerLink: ['/uikit/educationalvideos']
+                        routerLink: ['/uikit/ourteam']
                     },
+                    {
+                        label: 'certificates',
+                        icon: '',
+                        routerLink: ['/uikit/certificates']
+
+                    },
+
                     {
                         label: 'our services',
                         icon: '',
                         routerLink: ['/uikit/ourservices']
                     },
+
                     {
-                        label: 'our team',
+                        label: 'educational videos',
                         icon: '',
-                        routerLink: ['/uikit/ourteam']
+                        routerLink: ['/uikit/educationalvideos']
                     },
+
                     {
                         label: 'join us',
                         icon: '',
@@ -135,6 +144,16 @@ export class AppMenu {
                         label: 'contact us',
                         icon: '',
                         routerLink: ['/uikit/contactus']
+                    }
+                ]
+            },
+            {
+                label: 'Report configuration',
+                items: [
+                    {
+                        label: 'reports',
+                        icon: '',
+                        routerLink: ['/uikit/reportconfig']
                     }
                 ]
             }
