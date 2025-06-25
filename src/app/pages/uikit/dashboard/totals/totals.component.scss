@@ -1,3 +1,64 @@
-.card {
-    box-shadow: 1px 1px 1px 1px #80808063;
+.totals-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: flex-start;
+    background: #f4f6fa;
+    padding: 1rem 0.5rem;
+}
+
+.totals-card {
+    display: flex;
+    min-width: 220px;
+    max-width: 270px;
+    flex: 1 1 220px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 2px 8px 0 #0001;
+    border: 2px solid #2196f3;
+    overflow: hidden;
+    margin-bottom: 1rem;
+}
+
+.totals-card-left {
+    background: #2196f3;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 1.2rem 1rem;
+    min-width: 120px;
+    border-top-left-radius: 16px;
+    border-bottom-left-radius: 16px;
+    flex: 1 1 120px;
+}
+
+.totals-label {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.2;
+}
+
+.totals-icon {
+    font-size: 2rem;
+    margin-top: 0.5rem;
+}
+
+.totals-card-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 80px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2196f3;
+    background: #fff;
+}
+
+.totals-value {
+    display: block;
+    width: 100%;
+    text-align: center;
 }

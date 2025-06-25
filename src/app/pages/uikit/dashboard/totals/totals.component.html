@@ -1,182 +1,83 @@
-<p-card>
-    <p-toolbar styleClass="mb-6">
-        <ng-template #start>
-            <h4 class="font-bold mb-0">Totals</h4>
-        </ng-template>
-    </p-toolbar>
-
-
-    <div class="row">
-        <div class="col-md-3">
-            <div class="card p-3  ">
-                <div class="d-flex justify-between mb-4">
-                    <span class="font-bold text-muted-color"># Registered Patients</span>
-                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
-                        style="width: 2.5rem; height: 2.5rem">
-                        <i class="bi bi-people text-blue-500 !text-xl"></i>
-                    </div>
-                </div>
-
-                <div class="text-surface-900 dark:text-surface-0 font-medium  text-center">
-                    <h4 class="mb-0">
-                        120
-                    </h4>
-                </div>
-
-            </div>
+<div class="totals-grid">
+    <div class="totals-card">
+        <div class="totals-card-left">
+            <span class="totals-label">Registered<br>Patients</span>
+            <i class="bi bi-people totals-icon"></i>
         </div>
-
-        <div class="col-md-3">
-            <div class="card p-3  ">
-                <div class="d-flex justify-between mb-4">
-                    <span class="font-bold text-muted-color"># Appointments</span>
-                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
-                        style="width: 2.5rem; height: 2.5rem">
-                        <i class="bi bi-calendar4-event text-blue-500 !text-xl"></i>
-                    </div>
-                </div>
-
-                <div class="text-surface-900 dark:text-surface-0 font-medium  text-center">
-                    <h4 class="mb-0">
-                        20
-                    </h4>
-                </div>
-
-            </div>
+        <div class="totals-card-right">
+            <span class="totals-value">120</span>
         </div>
-
-        <div class="col-md-3">
-            <div class="card p-3  ">
-                <div class="d-flex justify-between mb-4">
-                    <span class="font-bold text-muted-color"># Treatment plans</span>
-                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
-                        style="width: 2.5rem; height: 2.5rem">
-                        <i class="bi bi-heart-pulse text-blue-500 !text-xl"></i>
-                    </div>
-                </div>
-
-                <div class="text-surface-900 dark:text-surface-0 font-medium  text-center">
-                    <h4 class="mb-0">
-                        20
-                    </h4>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-            <div class="card p-3  ">
-                <div class="d-flex justify-between mb-4">
-                    <span class="font-bold text-muted-color"># Sessions</span>
-                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
-                        style="width: 2.5rem; height: 2.5rem">
-                        <i class="bi bi-clock-history text-blue-500 !text-xl"></i>
-                    </div>
-                </div>
-
-                <div class="text-surface-900 dark:text-surface-0 font-medium  text-center">
-                    <h4 class="mb-0">
-                        50
-                    </h4>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card p-3  ">
-                <div class="d-flex justify-between mb-4">
-                    <span class="font-bold text-muted-color"># Approved appointments</span>
-                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
-                        style="width: 2.5rem; height: 2.5rem">
-                        <i class="bi bi-check-circle text-blue-500 !text-xl"></i>
-                    </div>
-                </div>
-
-                <div class="text-surface-900 dark:text-surface-0 font-medium  text-center">
-                    <h4 class="mb-0">
-                        50
-                    </h4>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card p-3  ">
-                <div class="d-flex justify-between mb-4">
-                    <span class="font-bold text-muted-color"># Pending appointments</span>
-                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
-                        style="width: 2.5rem; height: 2.5rem">
-                        <i class="bi bi-hourglass-split text-blue-500 !text-xl"></i>
-                    </div>
-                </div>
-
-                <div class="text-surface-900 dark:text-surface-0 font-medium  text-center">
-                    <h4 class="mb-0">
-                        20
-                    </h4>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card p-3  ">
-                <div class="d-flex justify-between mb-4">
-                    <span class="font-bold text-muted-color"># Canceled appointments</span>
-                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
-                        style="width: 2.5rem; height: 2.5rem">
-                        <i class="bi bi-x-circle text-blue-500 !text-xl"></i>
-                    </div>
-                </div>
-
-                <div class="text-surface-900 dark:text-surface-0 font-medium  text-center">
-                    <h4 class="mb-0">
-                        20
-                    </h4>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="col-md-3 mb-3">
-            <div class="card p-3  ">
-                <div class="d-flex justify-between mb-4">
-                    <span class="font-bold text-muted-color"># Services</span>
-                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
-                        style="width: 2.5rem; height: 2.5rem">
-                        <i class="bi bi-gear text-blue-500 !text-xl"></i>
-                    </div>
-                </div>
-
-                <div class="text-surface-900 dark:text-surface-0 font-medium  text-center">
-                    <h4 class="mb-0">
-                        20
-                    </h4>
-                </div>
-
-            </div>
-        </div>
-
-        <div class="col-md-3 ">
-            <div class="card p-3  ">
-                <div class="d-flex justify-between mb-4">
-                    <span class="font-bold text-muted-color"># Locations</span>
-                    <div class="flex items-center justify-center bg-blue-100 dark:bg-blue-400/10 rounded-border"
-                        style="width: 2.5rem; height: 2.5rem">
-                        <i class="bi bi-pin-map text-blue-500 !text-xl"></i>
-                    </div>
-                </div>
-
-                <div class="text-surface-900 dark:text-surface-0 font-medium  text-center">
-                    <h4 class="mb-0">
-                        20
-                    </h4>
-                </div>
-
-            </div>
-        </div>
-
     </div>
-</p-card>
+    <div class="totals-card">
+        <div class="totals-card-left">
+            <span class="totals-label">Appointments</span>
+            <i class="bi bi-calendar4-event totals-icon"></i>
+        </div>
+        <div class="totals-card-right">
+            <span class="totals-value">20</span>
+        </div>
+    </div>
+    <div class="totals-card">
+        <div class="totals-card-left">
+            <span class="totals-label">Treatment<br>Plans</span>
+            <i class="bi bi-heart-pulse totals-icon"></i>
+        </div>
+        <div class="totals-card-right">
+            <span class="totals-value">20</span>
+        </div>
+    </div>
+    <div class="totals-card">
+        <div class="totals-card-left">
+            <span class="totals-label">Sessions</span>
+            <i class="bi bi-clock-history totals-icon"></i>
+        </div>
+        <div class="totals-card-right">
+            <span class="totals-value">50</span>
+        </div>
+    </div>
+    <div class="totals-card">
+        <div class="totals-card-left">
+            <span class="totals-label">Approved<br>Appointments</span>
+            <i class="bi bi-check-circle totals-icon"></i>
+        </div>
+        <div class="totals-card-right">
+            <span class="totals-value">50</span>
+        </div>
+    </div>
+    <div class="totals-card">
+        <div class="totals-card-left">
+            <span class="totals-label">Pending<br>Appointments</span>
+            <i class="bi bi-hourglass-split totals-icon"></i>
+        </div>
+        <div class="totals-card-right">
+            <span class="totals-value">20</span>
+        </div>
+    </div>
+    <div class="totals-card">
+        <div class="totals-card-left">
+            <span class="totals-label">Canceled<br>Appointments</span>
+            <i class="bi bi-x-circle totals-icon"></i>
+        </div>
+        <div class="totals-card-right">
+            <span class="totals-value">20</span>
+        </div>
+    </div>
+    <div class="totals-card">
+        <div class="totals-card-left">
+            <span class="totals-label">Services</span>
+            <i class="bi bi-gear totals-icon"></i>
+        </div>
+        <div class="totals-card-right">
+            <span class="totals-value">20</span>
+        </div>
+    </div>
+    <div class="totals-card">
+        <div class="totals-card-left">
+            <span class="totals-label">Locations</span>
+            <i class="bi bi-pin-map totals-icon"></i>
+        </div>
+        <div class="totals-card-right">
+            <span class="totals-value">20</span>
+        </div>
+    </div>
+</div>
