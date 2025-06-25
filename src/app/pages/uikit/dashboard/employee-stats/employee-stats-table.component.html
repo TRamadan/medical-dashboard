@@ -1,0 +1,74 @@
+<p-tabs value="0">
+    <p-tablist>
+        <p-tab value="0">Employees</p-tab>
+        <p-tab value="1">Services</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+        <p-tabpanel value="0">
+            <p-table [value]="pagedEmployees" [paginator]="false" [rows]="rows" class="p-datatable-sm">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Employee</th>
+                        <th># of appointments</th>
+                        <th>Sum of payments</th>
+                        <th># of Hours in appointment</th>
+                        <th>% of load</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-emp>
+                    <tr>
+                        <td>
+                            {{ emp.name }}
+                        </td>
+                        <td>{{ emp.appointments }}</td>
+                        <td>{{ emp.payments }}</td>
+                        <td>{{ emp.hours }}</td>
+                        <td>
+                            <span>{{ emp.load }}%</span>
+                            <p-progressBar [value]="emp.load" styleClass="ml-2" [showValue]="false"
+                                [style]="{height:'8px', width:'100px', background:'#f4f6fa'}"
+                                [color]="'#f36'"></p-progressBar>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+            <p-paginator [rows]="rows" [totalRecords]="employees.length" (onPageChange)="onPageChange($event)"
+                [first]="page*rows"></p-paginator>
+
+        </p-tabpanel>
+
+        <p-tabpanel value="1">
+            <p-table [value]="pagedServices" [paginator]="false" [rows]="rows" class="p-datatable-sm">
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th>Service</th>
+                        <th># of appointments</th>
+                        <th>Sum of payments</th>
+                        <th># of Hours in appointment</th>
+                        <th>% of load</th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-srv>
+                    <tr>
+                        <td>
+                            {{ srv.name }}
+                        </td>
+                        <td>{{ srv.appointments }}</td>
+                        <td>{{ srv.payments }}</td>
+                        <td>{{ srv.hours }}</td>
+                        <td>
+                            <span>{{ srv.load }}%</span>
+                            <p-progressBar [value]="srv.load" styleClass="ml-2" [showValue]="false"
+                                [style]="{height:'8px', width:'100px', background:'#f4f6fa'}"
+                                [color]="'#f36'"></p-progressBar>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+            <p-paginator [rows]="rows" [totalRecords]="services.length" (onPageChange)="onServicePageChange($event)"
+                [first]="servicePage*rows"></p-paginator>
+
+        </p-tabpanel>
+    </p-tabpanels>
+</p-tabs>

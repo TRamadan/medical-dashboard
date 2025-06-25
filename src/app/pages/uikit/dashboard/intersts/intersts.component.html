@@ -1,0 +1,57 @@
+<p-card>
+    <div class="my-3 w-100">
+        <p-datepicker [(ngModel)]="rangeDates" selectionMode="range" placeholder="please select date range"
+            [readonlyInput]="true" />
+    </div>
+
+    <p-tabs value="0">
+        <p-tablist>
+            <p-tab value="0">Employees</p-tab>
+            <p-tab value="1">Services</p-tab>
+            <p-tab value="2">Locations</p-tab>
+        </p-tablist>
+        <p-tabpanels>
+            <p-tabpanel value="0">
+                <p-floatlabel class="w-full md:w-80" variant="on">
+                    <p-multiselect id="employee_label" [options]="employees" [(ngModel)]="selectedEmployee"
+                        optionLabel="name" styleClass="w-full md:w-80"
+                        (onChange)="setEmployeeChartDataBasedOnSelectedEmployee($event)" />
+                    <label for="employee_label">Select an employee</label>
+                </p-floatlabel>
+
+                <p-chart type="bar" [data]="employeeChartData" [options]="chartOptions"
+                    style="width: 100%; min-height: 400px;">
+                </p-chart>
+            </p-tabpanel>
+
+            <p-tabpanel value="1">
+                <p-floatlabel class="w-full md:w-80" variant="on">
+                    <p-multiselect id="service_label" [options]="services" [(ngModel)]="selectedService"
+                        optionLabel="name" styleClass="w-full md:w-80"
+                        (onChange)="setServiceChartDataBasedOnSelectedService($event)" />
+                    <label for="service_label">Select a service</label>
+                </p-floatlabel>
+
+                <p-chart type="bar" [data]="serviceChartData" [options]="chartOptions"
+                    style="width: 100%; min-height: 400px;">
+                </p-chart>
+            </p-tabpanel>
+
+            <p-tabpanel value="2">
+                <p-floatlabel class="w-full md:w-80" variant="on">
+                    <p-multiselect id="on_label" [options]="locations" [(ngModel)]="selectedLocation" optionLabel="name"
+                        styleClass="w-full md:w-80" (onChange)="setChartDataBasedOnSelectedLocation($event)" />
+                    <label for="on_label">Select a location</label>
+                </p-floatlabel>
+
+                <p-chart type="bar" [data]="chartData" [options]="chartOptions" style="width: 100%; min-height: 400px;">
+                </p-chart>
+
+                <p-card>
+
+                </p-card>
+            </p-tabpanel>
+
+        </p-tabpanels>
+    </p-tabs>
+</p-card>

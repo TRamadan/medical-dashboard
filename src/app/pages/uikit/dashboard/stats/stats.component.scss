@@ -1,0 +1,9 @@
+:host-context(.my-custom-class) {
+    margin: 2rem;
+}
+
+::ng-deep .p-datepicker {
+    position: relative;
+    display: inline-flex;
+    width: 25% !important;
+}

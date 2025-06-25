@@ -1,0 +1,38 @@
+<p-card>
+    <div class="my-3 w-100">
+        <p-datepicker [(ngModel)]="rangeDates" selectionMode="range" placeholder="please select date range"
+            [readonlyInput]="true" />
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h4 class="font-bold mb-0 text-center">Approved appointments</h4>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-5xl font-bold">{{ approvedTotal }}</span>
+
+            </div>
+            <p-chart type="bar" [data]="chartData" [options]="chartOptions" style="max-width: 400px; height: 200px;">
+            </p-chart>
+        </div>
+
+        <div class="col-md-4">
+            <h4 class="font-bold mb-0 text-center">Percentage of load</h4>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-5xl font-bold">{{totalPercent}} %</span>
+
+            </div> <p-chart type="line" [data]="percentageOfLoadChartData" [options]="percentageOfLoadChartOptions"
+                style="max-width: 500px; height: 220px;">
+            </p-chart>
+        </div>
+
+        <div class="col-md-4">
+            <h4 class="font-bold mb-0 text-center">Revenu</h4>
+            <div class="flex items-center gap-2 mb-2">
+                <span class="text-5xl font-bold">{{totalRevenu}} EGP</span>
+
+            </div> <p-chart type="line" [data]="revenuChartData" [options]="percentageOfLoadChartOptions"
+                style="max-width: 500px; height: 220px;">
+            </p-chart>
+        </div>
+    </div>
+</p-card>
