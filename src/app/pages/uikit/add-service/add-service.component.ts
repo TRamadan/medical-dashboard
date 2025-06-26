@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+import { TableComponent, TableColumn } from '../../../table/table.component';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -27,7 +27,7 @@ import { CascadeSelectModule } from 'primeng/cascadeselect';
         TabsModule,
         FloatLabelModule,
         CommonModule,
-        TableModule,
+        TableComponent,
         FormsModule,
         ButtonModule,
         ToastModule,
@@ -53,10 +53,22 @@ export class AddServiceComponent implements OnInit {
     addServiceForm!: FormGroup;
     serviceCategoryForm!: FormGroup;
 
-    constructor(private fb: FormBuilder) {}
+    headers: TableColumn[] = [
+        { label: 'Category Name', field: 'name', type: 'text', sortable: true },
+        { label: 'No.of services', field: 'numberOfsubCatrgories', type: 'text', sortable: false },
+    ];
+    data: Services[] = [
+        // Example data, replace with real data
+        { id: 1, name: 'Physiotherapy', numberOfsubCatrgories: 3 },
+        { id: 2, name: 'Dentistry', numberOfsubCatrgories: 2 },
+    ];
+
+    constructor(private fb: FormBuilder) { }
 
     ngOnInit() {
         this.initialiseServiceForm();
+        this.getAllAddedServices();
+
     }
 
     /**
@@ -111,11 +123,14 @@ export class AddServiceComponent implements OnInit {
      * Created Date : 2/6/2025
      * Porpuse : this function is created to call an api that responsible for adding a new service
      */
-    addNewService(): void {
+    addNewCategory(): void {
         //logic goes here
         const body = {
             name: this.addServiceForm.controls['name'].value
         };
+        this.data.push(body)
+        this.hideDialog()
+
     }
 
     /**
@@ -123,21 +138,22 @@ export class AddServiceComponent implements OnInit {
      * Created Date : 2/6/2025
      * Porpuse : this function is responsible for fetch all added services by it's added categories
      */
-    getAllAddedServices(): void {}
+    getAllAddedServices(): void {
+    }
 
     /**
      * Developer: Eng/Tarek Ahmed Ramadan
      * Created Date : 2/6/2025
      * Porpuse : this function is responsible for update the selected service
      */
-    updateSelectedService(): void {}
+    updateSelectedService(): void { }
 
     /**
      * Developer: Eng/Tarek Ahmed Ramadan
      * Created Date : 2/6/2025
      * Porpuse : this function is responsible for delete the selected service
      */
-    deleteSeletedService(): void {}
+    deleteSeletedService(): void { }
 
     /**
      * Developer : Eng/Tarek Ahmed Ramadan
@@ -150,13 +166,36 @@ export class AddServiceComponent implements OnInit {
     }
 
     /**
+    * Developer : Eng/Tarek Ahmed Ramadan
+    * Created Date : 1/6/2025
+    * Porpuse : this function is responsible for close the dialog  
+    */
+    hideDialog(): void {
+        this.isEditService = false;
+        this.isNewServiceSubCategory = false;
+        this.isServiceDialog = false
+    }
+
+
+    /**
+     * Developer : Eng/Tarek Ahmed Ramadan
+     * Created Date : 1/6/2025
+     * porpuse : this function is responsible for fetch an api that show the added service per each chosed category
+     * @param ev this is the selected category needed to show the added services for it
+     */
+    showServicesForSelectedCategory(ev: any): void {
+        //api implementation goes here
+    }
+
+
+    /**
      * Developer : Eng/Tarek Ahmed Ramadan
      * Created Date : 1/6/2025
      * Porpuse : fetch accurate data by search in an input in the desired table
      * @param table
      * @param event
      */
-    onGlobalFilter(table: Table, event: Event) {
-        table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
-    }
+    // onGlobalFilter(table: TableComponent, event: Event) {
+    //     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+    // }
 }

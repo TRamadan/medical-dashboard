@@ -52,6 +52,10 @@
                                 (click)="onEdit(row)"></button>
                             <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm"
                                 (click)="onDelete(row)"></button>
+                            @if(isAddDetails){
+                            <button pButton icon="pi pi-plus" class="p-button-rounded p-button-info p-button-sm"
+                                (click)="onAddDetails(row)"></button>
+                            }
                         </ng-container>
 
 

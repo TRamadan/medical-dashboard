@@ -19,6 +19,7 @@ import { OurTeamComponent } from './our-team/our-team.component';
 import { JoinOurTeamComponent } from './join-our-team/join-our-team.component';
 import { ReportsConfigComponent } from './reports-config/reports-config.component';
 import { CertificationsComponent } from './certifications/certifications.component';
+import { SpecialitiesComponent } from './specialities/specialities.component';
 export default [
     {
         path: 'adduser',
@@ -124,5 +125,11 @@ export default [
         path: 'certificates',
         data: { breadcrumb: 'Certificates' },
         component: CertificationsComponent
+    },
+    {
+        path: 'specialities',
+        data: { breadcrumb: 'Specialities' },
+        component: SpecialitiesComponent
+
     }
 ] as Routes;

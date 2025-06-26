@@ -59,10 +59,13 @@ export class TableComponent {
   @Input() scrollHeight: string = '';
   @Input() showGlobalFilter: boolean = true;
   @Input() globalFilterPlaceholder: string = 'Search...';
+  @Input() isAddDetails: boolean = false;
 
   @Output() edit = new EventEmitter<any>();
   @Output() delete = new EventEmitter<any>();
   @Output() details = new EventEmitter<any>();
+  @Output() addDetails = new EventEmitter<any>();
+
 
   selectedItems: any[] = [];
   filters: { [key: string]: any } = {};
@@ -82,6 +85,10 @@ export class TableComponent {
 
   onViewDetails(row: any) {
     this.details.emit(row);
+  }
+
+  onAddDetails(row: any) {
+    this.addDetails.emit(row)
   }
 
 }

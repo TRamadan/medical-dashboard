@@ -1,0 +1,53 @@
+<p>specialities works!</p>
+
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button icon="pi pi-plus" raised label="Add Speciality" class="mr-2" (onClick)="openDialog('add')" />
+    </ng-template>
+</p-toolbar>
+
+<p-card>
+    <div class="flex items-center justify-between mb-2">
+        <h5 class="m-0">Specialities</h5>
+    </div>
+    <app-table [headers]="headers" [data]="data" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true" [globalFilterPlaceholder]="'Search...'"
+        [showActions]="true" [isAddDetails]="false" (edit)="editSelectedSpeciality($event)"
+        (delete)="deleteSelectedSpeciality($event)"></app-table>
+</p-card>
+
+<p-dialog [(visible)]="isDialogOpen"
+    [header]="isDelete ? 'Delete Speciality' : (isEdit ? 'Edit Speciality' : 'Add Speciality')" [modal]="true"
+    [closable]="true" [dismissableMask]="true" [style]="{width : '400px'}">
+    @if(!isDelete){
+    <form [formGroup]="specialityForm" class="my-4">
+        <div class="mb-4">
+            <p-floatlabel>
+                <input pInputText id="nameAr" formControlName="nameAr" [disabled]="isDelete" class="w-full" />
+                <label for="nameAr">Speciality Name (Arabic)</label>
+            </p-floatlabel>
+        </div>
+        <div class="mb-4">
+            <p-floatlabel>
+                <input pInputText id="nameEn" formControlName="nameEn" [disabled]="isDelete" class="w-full" />
+                <label for="nameEn">Speciality Name (English)</label>
+            </p-floatlabel>
+        </div>
+    </form>
+    }
+
+    @else {
+    <div>
+        <p>Are you sure you want to delete the speciality <b>{{selectedSpeciality?.nameAr}}</b>?</p>
+    </div>
+    }
+    <ng-template #footer>
+        <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog()" />
+        <p-button *ngIf="!isEdit && !isDelete" label="Save" [disabled]="specialityForm.invalid" [outlined]="true"
+            severity="success" (onClick)="addNewSpeciality()" />
+        <p-button *ngIf="isEdit && !isDelete" label="Update" [disabled]="specialityForm.invalid" [outlined]="true"
+            severity="success" (onClick)="updateSelectedSpeciality()" />
+        <p-button *ngIf="isDelete" label="Delete" [outlined]="true" severity="danger"
+            (onClick)="confirmSelectedSpeciality()" />
+    </ng-template>
+</p-dialog>

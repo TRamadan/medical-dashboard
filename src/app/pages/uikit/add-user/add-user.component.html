@@ -1,1 +1,32 @@
-<p>jekjkj</p>
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openAddUserDialog()" />
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+    </ng-template>
+</p-toolbar>
+
+<p-card>
+    <div class="flex items-center justify-between mb-2">
+        <h5 class="m-0">Manage users</h5>
+    </div>
+    <app-table [headers]="headers" [data]="allUsers" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true" [globalFilterPlaceholder]="'Search...'"
+        [showActions]="true" (edit)="editSelectedUser($event)" (delete)="deleteSelectedUser($event)"></app-table>
+</p-card>
+
+<!-- here is the dialog needed to add a new user or customer-->
+<p-dialog [(visible)]="userDialog" [header]="'Add new user'" [modal]="true" [closable]="true" [dismissableMask]="true"
+    [style]="{ width: '690px', height: '615px' }">
+    <p-card>
+
+    </p-card>
+
+    <ng-template #footer>
+        <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog();" />
+        <p-button label="Save" [disabled]="addNewUserForm.invalid" [outlined]="true" severity="success"
+            (onClick)="isEdit ?  updateSelectedUser():addNewUser()" />
+    </ng-template>
+</p-dialog>

@@ -70,6 +70,11 @@ export class AppMenu {
                         label: 'Calendar',
                         icon: '',
                         routerLink: ['/uikit/calendar']
+                    },
+                    {
+                        label: 'specialities',
+                        icon: '',
+                        routerLink: ['/uikit/specialities']
                     }
                 ]
             },
