@@ -21,7 +21,154 @@
 <p-dialog [(visible)]="userDialog" [header]="'Add new user'" [modal]="true" [closable]="true" [dismissableMask]="true"
     [style]="{ width: '690px', height: '615px' }">
     <p-card>
+        @if(!isDelete){
+        <form [formGroup]="addNewUserForm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                <div>
+                    <p-floatlabel>
+                        <input pInputText id="username" formControlName="username" class="w-full" />
+                        <label for="username">Username</label>
+                    </p-floatlabel>
+                </div>
+                <div>
+                    <p-floatlabel>
+                        <input pInputText id="email" formControlName="email" class="w-full" />
+                        <label for="email">Email</label>
+                    </p-floatlabel>
+                </div>
+                <div>
+                    <p-floatlabel>
+                        <input pInputText id="firstName" formControlName="firstName" class="w-full" />
+                        <label for="firstName">First Name</label>
+                    </p-floatlabel>
+                </div>
+                <div>
+                    <p-floatlabel>
+                        <input pInputText id="lastName" formControlName="lastName" class="w-full" />
+                        <label for="lastName">Last Name</label>
+                    </p-floatlabel>
+                </div>
+                <div>
+                    <p-floatlabel>
+                        <span class="p-input-icon-right w-full">
+                            <input [type]="showPassword ? 'text' : 'password'" pInputText id="password"
+                                formControlName="password" class="w-full"
+                                [ngClass]="{'p-invalid': addNewUserForm.hasError('passwordMismatch') && addNewUserForm.get('password')?.touched}" />
+                        </span>
+                        <label for="password"
+                            [ngClass]="{'text-danger': addNewUserForm.hasError('passwordMismatch') && addNewUserForm.get('password')?.touched}">Password</label>
+                    </p-floatlabel>
+                    @if(addNewUserForm.hasError('passwordMismatch') && addNewUserForm.get('password')?.touched){
+                    <div class="text-danger text-xs mt-1">
+                        Passwords do not match
+                    </div>
+                    }
+                </div>
+                <div>
+                    <p-floatlabel>
+                        <span class="p-input-icon-right w-full">
+                            <input [type]="showConfirmPassword ? 'text' : 'password'" pInputText id="confirmPassword"
+                                formControlName="confirmPassword" class="w-full"
+                                [ngClass]="{'p-invalid': addNewUserForm.hasError('passwordMismatch') && addNewUserForm.get('confirmPassword')?.touched}" />
+                        </span>
+                        <label for="confirmPassword"
+                            [ngClass]="{'text-danger': addNewUserForm.hasError('passwordMismatch') && addNewUserForm.get('confirmPassword')?.touched}">Confirm
+                            Password</label>
+                    </p-floatlabel>
+                </div>
+                <div>
+                    <label for="isCoach" class="font-medium">Is Coach?</label>
+                    <p-toggleswitch id="isCoach" formControlName="isCoach" />
+                </div>
+            </div>
+            <!-- here is the section needed to add a new coach-->
+            @if(addNewUserForm.get('isCoach')?.value) {
+            <ng-template #coachInfoTab>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3" formGroupName="coachInfo">
+                    <div>
+                        <p-floatLabel>
+                            <input pInputText id="coachFirstName" formControlName="firstName" class="w-full" />
+                            <label for="coachFirstName">First Name</label>
+                        </p-floatLabel>
+                    </div>
 
+                    <div>
+                        <p-floatLabel>
+                            <input pInputText id="coachFirstName" formControlName="lastName" class="w-full" />
+                            <label for="coachFirstName">Last Name</label>
+                        </p-floatLabel>
+                    </div>
+
+                    <div>
+                        <p-floatLabel>
+                            <input pInputText id="coachFirstName" formControlName="email" class="w-full" />
+                            <label for="coachFirstName">Email</label>
+                        </p-floatLabel>
+                    </div>
+
+                    <div>
+                        <p-floatLabel>
+                            <input pInputText id="coachFirstName" formControlName="password" class="w-full" />
+                            <label for="coachFirstName">Password</label>
+                        </p-floatLabel>
+                    </div>
+
+                    <div>
+                        <p-floatLabel>
+                            <input pInputText id="coachFirstName" formControlName="confirmPassword" class="w-full" />
+                            <label for="coachFirstName">Confirm password</label>
+                        </p-floatLabel>
+                    </div>
+
+                    <div>
+                        <p-floatlabel>
+                            <p-dropdown id="coachLocation" formControlName="location" [options]="allLocations"
+                                optionLabel="label" class="w-full"></p-dropdown>
+                            <label for="coachLocation">Location</label>
+                        </p-floatlabel>
+                    </div>
+
+                    <div>
+                        <p-floatlabel>
+                            <p-multiselect appendTo="body" id="coachSpeciality" formControlName="speciality"
+                                [options]="allSpecialities" optionLabel="label" class="w-full"></p-multiselect>
+                            <label for="coachSpeciality">Speciality</label>
+                        </p-floatlabel>
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template #assignedServiceTab>
+                @for(category of categoryService; track category) {
+                <div class="mb-4">
+                    <h6 class="font-semibold mb-2">{{ category.categoryName }}</h6>
+                    <app-table [showSpotsColumn]="true" [spotsPerRow]="2"
+                        [headers]="[{ label: 'Service Name', field: 'name', type: 'text' }, {label : 'Price', field :'price', type : 'number'}]"
+                        [data]="category.services" [showCheckbox]="true" [paginator]="false" [showActions]="false">
+                    </app-table>
+                </div>
+                }
+            </ng-template>
+
+            <ng-template #workingHoursTab>
+                <div class="overflow-x-auto">
+                    <app-working-hours></app-working-hours>
+                </div>
+            </ng-template>
+
+            <app-tabs [tabs]="[
+                    { label: 'Coach Information', template: coachInfoTab },
+                    { label: 'Assigned Service', template: assignedServiceTab },
+                    { label: 'Working Hours', template: workingHoursTab }
+                ]"></app-tabs>
+            }
+        </form>
+        }
+
+
+        @else {
+        <p class="text-center">Are you sure to deactivate the selected user</p>
+        }
     </p-card>
 
     <ng-template #footer>

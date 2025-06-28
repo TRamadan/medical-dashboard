@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TableComponent } from '../../../table/table.component';
+import { TableComponent } from '../../../shared/table/table.component';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';

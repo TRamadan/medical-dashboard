@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
-import { TableComponent, TableColumn } from '../../../table/table.component';
+import { TableComponent, TableColumn } from '../../../shared/table/table.component';
 import { DialogModule } from 'primeng/dialog';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';

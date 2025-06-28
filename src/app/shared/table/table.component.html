@@ -1,11 +1,15 @@
 <!-- Main Table -->
 <p-card>
     <p-table #dt [value]="data" [columns]="headers" [loading]="loading" [rows]="rows" [scrollable]="scrollable"
-        [scrollHeight]="scrollHeight" [responsive]="responsive">
+        [scrollHeight]="scrollHeight" [responsive]="responsive" [selectionMode]="showCheckbox ? 'multiple' : null"
+        [(selection)]="selectedItems" (onSelectionChange)="onSelectionChange($event)">
 
         <!-- Table Header -->
         <ng-template pTemplate="header">
             <tr>
+                <th *ngIf="showCheckbox" style="width: 3rem">
+                    <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                </th>
                 @for(col of headers; track col){
                 <!-- Data Columns -->
                 <th [style.width]="col.width" [pSortableColumn]="col.sortable ? col.field : undefined"
@@ -13,14 +17,18 @@
                     {{col.label}}
                 </th>
                 }
+                <th *ngIf="showSpotsColumn" class="text-center">Spots</th>
                 <!-- Actions Column -->
                 <th class="text-center" *ngIf="showActions || actions.length > 0">Actions</th>
             </tr>
         </ng-template>
 
         <!-- Table Body -->
-        <ng-template pTemplate="body" let-row>
+        <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
             <tr>
+                <td *ngIf="showCheckbox">
+                    <p-tableCheckbox [value]="row"></p-tableCheckbox>
+                </td>
                 <!-- Data Columns -->
                 <td *ngFor="let col of headers" class="text-center">
                     <ng-container [ngSwitch]="col.type">
@@ -43,7 +51,15 @@
                         </ng-container>
                     </ng-container>
                 </td>
-
+                <td *ngIf="showSpotsColumn" class="text-center">
+                    <div class="flex gap-2 justify-center">
+                        <p-inputNumber *ngFor="let spot of createSpotsArray(spotsPerRow); let i = index"
+                            [disabled]="!selectedItems.includes(row)" [ngModel]="row.spots ? row.spots[i] : 1"
+                            (ngModelChange)="onSpotChange(row, i, $event)"
+                            [inputStyle]="{ width: '48px', textAlign: 'center' }" mode="decimal" min="0">
+                        </p-inputNumber>
+                    </div>
+                </td>
                 <!-- Actions Column -->
                 <td class="text-center" *ngIf="showActions || actions.length > 0">
                     <div class="flex justify-center gap-2">
@@ -57,8 +73,6 @@
                                 (click)="onAddDetails(row)"></button>
                             }
                         </ng-container>
-
-
                     </div>
                 </td>
             </tr>

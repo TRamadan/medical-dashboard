@@ -7,7 +7,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ToolbarModule } from 'primeng/toolbar';
 import { CommonModule } from '@angular/common';
 import { FileUploadModule } from 'primeng/fileupload';
-import { TableComponent, TableColumn } from '../../../table/table.component';
+import { TableComponent, TableColumn } from '../../../shared/table/table.component';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { Ourteam } from './models/ourteam';

@@ -1,0 +1,19 @@
+<p-tabs [value]="activeIndex">
+    <p-tablist>
+        @for (tab of tabs; track tab.label) {
+        <p-tab [value]="tabs.indexOf(tab)">{{ tab.label }}</p-tab>
+        }
+    </p-tablist>
+    <p-tabpanels>
+        @for (tab of tabs; track tab.label) {
+        <p-tabpanel [value]="tabs.indexOf(tab)">
+            <ng-container *ngIf="tab.template; else stringContent">
+                <ng-container *ngTemplateOutlet="tab.template"></ng-container>
+            </ng-container>
+            <ng-template #stringContent>
+                <span>{{ tab.content }}</span>
+            </ng-template>
+        </p-tabpanel>
+        }
+    </p-tabpanels>
+</p-tabs>

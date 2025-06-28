@@ -8,7 +8,7 @@ import { ToolbarModule } from 'primeng/toolbar';
 import { CommonModule } from '@angular/common';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
-import { TableComponent, TableColumn } from '../../../table/table.component';
+import { TableComponent, TableColumn } from '../../../shared/table/table.component';
 import { FileUploadModule } from "primeng/fileupload";
 import { Superstars } from './models/superstars';
 

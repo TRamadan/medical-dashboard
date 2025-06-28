@@ -6,7 +6,7 @@ import { TableModule } from 'primeng/table';
 import { InputTextModule } from 'primeng/inputtext';
 import { ToolbarModule } from 'primeng/toolbar';
 import { CommonModule } from '@angular/common';
-import { TableComponent } from '../../../table/table.component';
+import { TableComponent } from '../../../shared/table/table.component';
 import { FloatLabelModule } from 'primeng/floatlabel';
 
 interface AboutUs {
