@@ -1,0 +1,9 @@
+::ng-deep p-select {
+    width: 100%;
+}
+
+.full-width-dropdown-panel {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+}

@@ -19,7 +19,7 @@
 
 <!-- here is the dialog needed to add a new user or customer-->
 <p-dialog [(visible)]="userDialog" [header]="'Add new user'" [modal]="true" [closable]="true" [dismissableMask]="true"
-    [style]="{ width: '690px', height: '615px' }">
+    [style]="{ width: '770px', height: '615px' }">
     <p-card>
         @if(!isDelete){
         <form [formGroup]="addNewUserForm">
@@ -139,15 +139,7 @@
             </ng-template>
 
             <ng-template #assignedServiceTab>
-                @for(category of categoryService; track category) {
-                <div class="mb-4">
-                    <h6 class="font-semibold mb-2">{{ category.categoryName }}</h6>
-                    <app-table [showSpotsColumn]="true" [spotsPerRow]="2"
-                        [headers]="[{ label: 'Service Name', field: 'name', type: 'text' }, {label : 'Price', field :'price', type : 'number'}]"
-                        [data]="category.services" [showCheckbox]="true" [paginator]="false" [showActions]="false">
-                    </app-table>
-                </div>
-                }
+                <app-assigned-services></app-assigned-services>
             </ng-template>
 
             <ng-template #workingHoursTab>
@@ -156,10 +148,19 @@
                 </div>
             </ng-template>
 
+            <ng-template #daysOffTab>
+                <div class="overflow-x-auto">
+                    <p>Some code goes here</p>
+                </div>
+            </ng-template>
+
             <app-tabs [tabs]="[
                     { label: 'Coach Information', template: coachInfoTab },
                     { label: 'Assigned Service', template: assignedServiceTab },
-                    { label: 'Working Hours', template: workingHoursTab }
+                    { label: 'Working Hours', template: workingHoursTab }, 
+                    { label : 'Days Off' , template : daysOffTab},
+                    {label : 'Special Days', template :specialDaysTab}
+                    
                 ]"></app-tabs>
             }
         </form>

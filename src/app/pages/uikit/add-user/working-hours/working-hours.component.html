@@ -1,7 +1,36 @@
-<p-accordion>
-    @for(day of daysOfWeek; track day){
-    <p-accordionTab [header]="day">
-        <div class="py-2 px-4 text-gray-500">Working hours content for {{day}}</div>
-    </p-accordionTab>
+<p-accordion value="0">
+    @for (day of daysOfWeek; track day; let i = $index) {
+    <p-accordion-panel [value]="i.toString()">
+        <p-accordion-header>{{ day }}</p-accordion-header>
+        <p-accordion-content>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                <div>
+                    <label for="coachFirstName">Start time</label>
+                    <p-select appendTo="body" [inputId]="'start-' + i" [(ngModel)]="getWorkingHour(i).startTime"
+                        [options]="timeOptions" optionLabel="label" optionValue="value" placeholder="Select start time">
+                    </p-select>
+                </div>
+
+                <div>
+                    <label for="coachFirstName">End time</label>
+                    <p-select appendTo="body" [inputId]="'end-' + i" [(ngModel)]="getWorkingHour(i).endTime"
+                        [options]="timeOptions" optionLabel="label" optionValue="value" placeholder="Select end time">
+                    </p-select>
+                </div>
+
+                <div>
+                    <label for="coachLocation - {{i}}">Location</label>
+                    <p-select appendTo="body" [options]="allLocations" optionLabel="name" optionValue="id"
+                        [(ngModel)]="getWorkingHour(i).locationId" class="w-full"></p-select>
+                </div>
+
+                <div>
+                    <label for="coachSpeciality - {{i}}">Services</label>
+                    <p-select appendTo="body" id="coachSpeciality" optionValue="id" [options]="allServices"
+                        [(ngModel)]="getWorkingHour(i).serviceId" optionLabel="name" class="w-full"></p-select>
+                </div>
+            </div>
+        </p-accordion-content>
+    </p-accordion-panel>
     }
 </p-accordion>

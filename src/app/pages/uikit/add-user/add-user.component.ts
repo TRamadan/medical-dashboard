@@ -13,22 +13,13 @@ import { TabsComponent } from '../../../shared/tabs/tabs.component';
 import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { WorkingHoursComponent } from "./working-hours/working-hours.component";
+import { AssignedServicesComponent } from "./assigned-services/assigned-services.component";
 
-interface CategoryService {
-  id: number;
-  categoryName: string;
-  services: Service[];
-}
 
-interface Service {
-  id: number;
-  name: string;
-  price: number
-}
 
 @Component({
   selector: 'app-add-user',
-  imports: [WorkingHoursComponent, InputTextModule, FormsModule, ReactiveFormsModule, FloatLabelModule, DialogModule, TableComponent, ToolbarModule, ButtonModule, CardModule, NgClass, ToggleSwitchModule, TabsComponent, DropdownModule, MultiSelectModule],
+  imports: [AssignedServicesComponent, WorkingHoursComponent, InputTextModule, FormsModule, ReactiveFormsModule, FloatLabelModule, DialogModule, TableComponent, ToolbarModule, ButtonModule, CardModule, NgClass, ToggleSwitchModule, TabsComponent, DropdownModule, MultiSelectModule],
   standalone: true,
   templateUrl: './add-user.component.html',
   styleUrls: ['./add-user.component.css']
@@ -49,6 +40,7 @@ export class AddUserComponent implements OnInit, AfterViewInit {
   @ViewChild('assignedServiceTab') assignedServiceTab!: TemplateRef<any>;
   @ViewChild('workingHoursTab') workingHoursTab!: TemplateRef<any>;
   @ViewChild('daysOffTab') daysOffTab!: TemplateRef<any>;
+  @ViewChild('specialDaysTab') specialDaysTab!: TemplateRef<any>;
 
 
   constructor(private fb: FormBuilder) { }
@@ -58,13 +50,12 @@ export class AddUserComponent implements OnInit, AfterViewInit {
     { label: 'No.of services', field: 'numberOfsubCatrgories', type: 'text', sortable: false },
   ];
 
-  categoryService: CategoryService[] = [];
+
 
   ngOnInit() {
     this.getAllUsers();
     this.getAllAddedLocations();
     this.getAllAddedSpecialities();
-    this.getAllCategoriesAndServices();
     this.initialiseUserForm();
   }
 
@@ -73,7 +64,8 @@ export class AddUserComponent implements OnInit, AfterViewInit {
       { label: 'Coach Information', template: this.coachInfoTab },
       { label: 'Assigned Service', template: this.assignedServiceTab },
       { label: 'Working Hours', template: this.workingHoursTab },
-      { label: 'Days Off', template: this.daysOffTab }
+      { label: 'Days Off', template: this.daysOffTab },
+      { label: 'Special Days', template: this.specialDaysTab }
     ];
   }
 
@@ -149,10 +141,7 @@ export class AddUserComponent implements OnInit, AfterViewInit {
     ];
   }
 
-  //here is the function needed to fetch all categories and services based on each category 
-  getAllCategoriesAndServices(): void {
-    this.categoryService = [{ id: 1, categoryName: 'Sports Rehab', services: [{ id: 1, name: 'Consultation', price: 500 }, { id: 2, name: 'Rehab Session', price: 900 }] }, { id: 2, categoryName: 'Sports Recovery', services: [{ id: 3, name: 'Full Body', price: 900 }, { id: 3, name: 'Half Body', price: 600 }] }]
-  }
+
 
 
   //here is the function needed to close the modal and rese all flags 

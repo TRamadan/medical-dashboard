@@ -1,0 +1,9 @@
+@for(category of categoryService; track category) {
+<div class="mb-4">
+    <h6 class="font-semibold mb-2">{{ category.categoryName }}</h6>
+    <app-table [showSpotsColumn]="true" [spotsPerRow]="2"
+        [headers]="[{ label: 'Service Name', field: 'name', type: 'text' }, {label : 'Price', field :'price', type : 'number'}]"
+        [data]="category.services" [showCheckbox]="true" [paginator]="false" [showActions]="false">
+    </app-table>
+</div>
+}
