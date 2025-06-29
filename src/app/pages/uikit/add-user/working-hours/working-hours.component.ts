@@ -1,8 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, effect } from '@angular/core';
 import { AccordionModule } from 'primeng/accordion';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { ButtonModule } from 'primeng/button';
+import { AssignedServicesStateService } from '../services/assigned-services-state.service';
 
 interface WorkingHour {
   day: string;
@@ -10,7 +12,7 @@ interface WorkingHour {
   endTime: string;
   isAvailable: boolean;
   locationId: number | null;
-  serviceId: number | null;
+  serviceIds: number[];
 }
 
 interface TimeOption {
@@ -30,12 +32,14 @@ interface ServiceOption {
 
 @Component({
   selector: 'app-working-hours',
-  imports: [SelectModule, MultiSelectModule, AccordionModule, FormsModule],
+  imports: [SelectModule, MultiSelectModule, AccordionModule, FormsModule, ReactiveFormsModule, ButtonModule],
   standalone: true,
   templateUrl: './working-hours.component.html',
   styleUrl: './working-hours.component.css'
 })
 export class WorkingHoursComponent implements OnInit {
+  workingHoursForm!: FormGroup;
+
   allLocations: LocationOption[] = [
     { id: 1, name: 'Main Branch' },
     { id: 2, name: 'Downtown Clinic' },
@@ -43,11 +47,9 @@ export class WorkingHoursComponent implements OnInit {
   ];
   selectedLocation: number | null = null;
 
-  allServices: ServiceOption[] = [
-    { id: 1, name: 'Physiotherapy' },
-    { id: 2, name: 'Nutrition' },
-    { id: 3, name: 'Personal Training' }
-  ];
+
+  // allServices is now a signal for reactivity
+  allServices = signal<ServiceOption[]>([]);
   selectedService: number | null = null;
 
   daysOfWeek = [
@@ -82,8 +84,60 @@ export class WorkingHoursComponent implements OnInit {
     { label: '00:00', value: '00:00' }
   ];
 
+  constructor(
+    private assignedServicesState: AssignedServicesStateService,
+    private fb: FormBuilder
+  ) {
+
+
+    effect(() => {
+      const services = this.assignedServicesState.selectedServices();
+      this.allServices.set(services.map(s => ({ id: s.id, name: s.name })));
+    });
+  }
+
   ngOnInit(): void {
     this.getAllAddedLocations();
+  }
+
+  //here is the function needed to initialise the form 
+  InitialiseFormArray(): void {
+    this.workingHoursForm = this.fb.group({
+      workingHours: this.fb.array([])
+    });
+  }
+
+  get workingHoursArray(): FormArray {
+    return this.workingHoursForm.get('workingHours') as FormArray;
+  }
+
+  createWorkingHourFormGroup(): FormGroup {
+    return this.fb.group({
+      startTime: ['', Validators.required],
+      endTime: ['', Validators.required],
+      locationId: ['', Validators.required],
+      serviceIds: ['', Validators.required]
+    });
+  }
+
+  addWorkingHour() {
+    this.workingHoursArray.push(this.createWorkingHourFormGroup());
+  }
+
+
+
+
+
+
+  markFormGroupTouched(): void {
+    Object.keys(this.workingHoursForm.controls).forEach(key => {
+      const control = this.workingHoursForm.get(key);
+      if (control instanceof FormGroup) {
+        this.markFormGroupTouched();
+      } else {
+        control?.markAsTouched();
+      }
+    });
   }
 
   workingHours = signal<WorkingHour[]>(
@@ -93,7 +147,7 @@ export class WorkingHoursComponent implements OnInit {
       endTime: '00:00',
       isAvailable: true,
       locationId: null,
-      serviceId: null
+      serviceIds: []
     }))
   );
 

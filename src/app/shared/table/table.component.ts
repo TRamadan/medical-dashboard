@@ -67,14 +67,15 @@ export class TableComponent {
   @Input() showCheckbox: boolean = false;
   @Input() showSpotsColumn: boolean = false;
   @Input() spotsPerRow: number = 2;
+  @Input() selectedItems: any[] = [];
 
   @Output() edit = new EventEmitter<any>();
   @Output() delete = new EventEmitter<any>();
   @Output() details = new EventEmitter<any>();
   @Output() addDetails = new EventEmitter<any>();
   @Output() selectionChange = new EventEmitter<any[]>();
+  @Output() selectedItemsChange = new EventEmitter<any[]>();
 
-  selectedItems: any[] = [];
   filters: { [key: string]: any } = {};
   globalFilterValue: string = '';
 
@@ -99,6 +100,9 @@ export class TableComponent {
   }
 
   onSelectionChange(event: any) {
+    debugger
+    this.selectedItems = event
+    this.selectedItemsChange.emit(this.selectedItems);
     this.selectionChange.emit(this.selectedItems);
   }
 

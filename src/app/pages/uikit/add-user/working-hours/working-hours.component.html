@@ -19,15 +19,17 @@
                 </div>
 
                 <div>
-                    <label for="coachLocation - {{i}}">Location</label>
+                    <label for="coachLocation-{{i}}">Location</label>
                     <p-select appendTo="body" [options]="allLocations" optionLabel="name" optionValue="id"
                         [(ngModel)]="getWorkingHour(i).locationId" class="w-full"></p-select>
                 </div>
 
                 <div>
-                    <label for="coachSpeciality - {{i}}">Services</label>
-                    <p-select appendTo="body" id="coachSpeciality" optionValue="id" [options]="allServices"
-                        [(ngModel)]="getWorkingHour(i).serviceId" optionLabel="name" class="w-full"></p-select>
+                    <label for="coachSpeciality-{{i}}">Services</label>
+                    <p-select appendTo="body" [options]="allServices()" optionLabel="name" optionValue="id"
+                        [(ngModel)]="getWorkingHour(i).serviceIds" class="w-full" display="chip"
+                        placeholder="Select services">
+                    </p-select>
                 </div>
             </div>
         </p-accordion-content>

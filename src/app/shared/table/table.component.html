@@ -2,7 +2,7 @@
 <p-card>
     <p-table #dt [value]="data" [columns]="headers" [loading]="loading" [rows]="rows" [scrollable]="scrollable"
         [scrollHeight]="scrollHeight" [responsive]="responsive" [selectionMode]="showCheckbox ? 'multiple' : null"
-        [(selection)]="selectedItems" (onSelectionChange)="onSelectionChange($event)">
+        [(selection)]="selectedItems" (selectionChange)="onSelectionChange($event)">
 
         <!-- Table Header -->
         <ng-template pTemplate="header">
