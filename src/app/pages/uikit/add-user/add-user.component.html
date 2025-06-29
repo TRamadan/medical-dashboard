@@ -12,9 +12,30 @@
     <div class="flex items-center justify-between mb-2">
         <h5 class="m-0">Manage users and coachs</h5>
     </div>
-    <app-table [headers]="headers" [data]="allUsers" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+
+    <ng-template #customersTab>
+        <app-table [headers]="customersHeader" [data]="allUsers" [paginator]="true" [rows]="10"
+            [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true"
+            [globalFilterPlaceholder]="'Search...'" [showActions]="true" (edit)="editSelectedUser($event)"
+            (delete)="deleteSelectedUser($event)"></app-table>
+    </ng-template>
+
+    <ng-template #employeesTab>
+        <app-table [headers]="coachsHeader" [data]="allUsers" [paginator]="true" [rows]="10"
+            [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true"
+            [globalFilterPlaceholder]="'Search...'" [showActions]="true" (edit)="editSelectedUser($event)"
+            (delete)="deleteSelectedUser($event)"></app-table>
+    </ng-template>
+
+    <app-tabs [tabs]="[
+    { label: 'Customers', template: customersTab },
+    { label: 'Employees (Coachs)', template: employeesTab },
+    
+]"></app-tabs>
+
+    <!-- <app-table [headers]="headers" [data]="allUsers" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true" [globalFilterPlaceholder]="'Search...'"
-        [showActions]="true" (edit)="editSelectedUser($event)" (delete)="deleteSelectedUser($event)"></app-table>
+        [showActions]="true" (edit)="editSelectedUser($event)" (delete)="deleteSelectedUser($event)"></app-table> -->
 </p-card>
 
 <!-- here is the dialog neede0d to add a new user or customer-->

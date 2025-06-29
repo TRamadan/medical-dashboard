@@ -49,10 +49,36 @@ export class AddUserComponent implements OnInit, AfterViewInit {
 
   constructor(private fb: FormBuilder) { }
 
-  headers: TableColumn[] = [
-    { label: 'Category Name', field: 'name', type: 'text', sortable: true },
-    { label: 'No.of services', field: 'numberOfsubCatrgories', type: 'text', sortable: false },
+  coachsHeader: TableColumn[] = [
+    { label: 'Username', field: 'username', type: 'text', sortable: true },
+    { label: 'First Name', field: 'firstName', type: 'text', sortable: true },
+    { label: 'Last Name', field: 'lastName', type: 'text', sortable: true },
+    { label: 'Email', field: 'email', type: 'text', sortable: true },
+    { label: 'Days Off', field: 'numberOfDaysOff', type: 'number', sortable: true },
+    { label: 'Assigned Services', field: 'numberOfAssignedServices', type: 'number', sortable: true },
+    { label: 'Location', field: 'location', type: 'text', sortable: true }
   ];
+
+  customersHeader: TableColumn[] = [
+    {
+      label: 'First Name', field: 'firstName', type: 'text', sortable: true
+    },
+    {
+      label: 'Last Name', field: 'lastName', type: 'text', sortable: true
+    },
+    {
+      label: 'Email', field: 'email', type: 'text', sortable: true
+    },
+    {
+      label: 'Completed Appointments', field: 'completedAppointments', type: 'number', sortable: true
+    },
+    {
+      label: 'Pending Appointments', field: 'pendingAppointments', type: 'number', sortable: true
+    },
+    {
+      label: 'Canceled Appointments', field: 'canceledAppointments', type: 'number', sortable: true
+    }
+  ]
 
 
 
