@@ -1,3 +1,4 @@
+// Updated TypeScript Component
 import { Component, OnInit, signal, effect } from '@angular/core';
 import { AccordionModule } from 'primeng/accordion';
 import { FormsModule, ReactiveFormsModule, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
@@ -47,7 +48,6 @@ export class WorkingHoursComponent implements OnInit {
   ];
   selectedLocation: number | null = null;
 
-
   // allServices is now a signal for reactivity
   allServices = signal<ServiceOption[]>([]);
   selectedService: number | null = null;
@@ -88,8 +88,6 @@ export class WorkingHoursComponent implements OnInit {
     private assignedServicesState: AssignedServicesStateService,
     private fb: FormBuilder
   ) {
-
-
     effect(() => {
       const services = this.assignedServicesState.selectedServices();
       this.allServices.set(services.map(s => ({ id: s.id, name: s.name })));
@@ -98,17 +96,32 @@ export class WorkingHoursComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllAddedLocations();
+    this.InitialiseFormArray();
   }
 
-  //here is the function needed to initialise the form 
+  // Updated form initialization with days structure
   InitialiseFormArray(): void {
     this.workingHoursForm = this.fb.group({
-      workingHours: this.fb.array([])
+      days: this.fb.array(this.createDaysFormArray())
     });
   }
 
-  get workingHoursArray(): FormArray {
-    return this.workingHoursForm.get('workingHours') as FormArray;
+  createDaysFormArray(): FormGroup[] {
+    return this.daysOfWeek.map(() => this.fb.group({
+      workingHours: this.fb.array([])
+    }));
+  }
+
+  get daysArray(): FormArray {
+    return this.workingHoursForm.get('days') as FormArray;
+  }
+
+  getDayFormGroup(dayIndex: number): FormGroup {
+    return this.daysArray.at(dayIndex) as FormGroup;
+  }
+
+  getDayWorkingHoursArray(dayIndex: number): FormArray {
+    return this.getDayFormGroup(dayIndex).get('workingHours') as FormArray;
   }
 
   createWorkingHourFormGroup(): FormGroup {
@@ -116,18 +129,25 @@ export class WorkingHoursComponent implements OnInit {
       startTime: ['', Validators.required],
       endTime: ['', Validators.required],
       locationId: ['', Validators.required],
-      serviceIds: ['', Validators.required]
+      serviceId: ['', Validators.required]
     });
   }
 
-  addWorkingHour() {
-    this.workingHoursArray.push(this.createWorkingHourFormGroup());
+  // Updated to add working hour for specific day
+  addWorkingHour(dayIndex: number) {
+    const dayWorkingHoursArray = this.getDayWorkingHoursArray(dayIndex);
+    dayWorkingHoursArray.push(this.createWorkingHourFormGroup());
   }
 
+  removeWorkingHour(dayIndex: number, workingHourIndex: number) {
+    const dayWorkingHoursArray = this.getDayWorkingHoursArray(dayIndex);
+    dayWorkingHoursArray.removeAt(workingHourIndex);
+  }
 
-
-
-
+  getWorkingHourFormGroup(dayIndex: number, workingHourIndex: number): FormGroup {
+    const dayWorkingHoursArray = this.getDayWorkingHoursArray(dayIndex);
+    return dayWorkingHoursArray.at(workingHourIndex) as FormGroup;
+  }
 
   markFormGroupTouched(): void {
     Object.keys(this.workingHoursForm.controls).forEach(key => {
@@ -163,13 +183,20 @@ export class WorkingHoursComponent implements OnInit {
     this.workingHours.set(updatedHours);
   }
 
-  //here is the function needed to fetch all added locations
   getAllAddedLocations(): void {
     // Implementation needed
   }
 
-  //here is the function needed to show the choosed service based onn the previous step (Assigned services)
   getAllServicesBasedOnServicesChoice(): void {
     // Implementation needed
+  }
+
+  onSubmit() {
+    if (this.workingHoursForm.valid) {
+      console.log('Form Value:', this.workingHoursForm.value);
+    } else {
+      console.log('Form is invalid');
+      this.workingHoursForm.markAllAsTouched();
+    }
   }
 }

@@ -1,38 +1,97 @@
-<p-accordion value="0">
-    @for (day of daysOfWeek; track day; let i = $index) {
-    <p-accordion-panel [value]="i.toString()">
-        <p-accordion-header>{{ day }}</p-accordion-header>
-        <p-accordion-content>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
-                <div>
-                    <label for="coachFirstName">Start time</label>
-                    <p-select appendTo="body" [inputId]="'start-' + i" [(ngModel)]="getWorkingHour(i).startTime"
-                        [options]="timeOptions" optionLabel="label" optionValue="value" placeholder="Select start time">
-                    </p-select>
-                </div>
+<form [formGroup]="workingHoursForm" (ngSubmit)="onSubmit()">
+    <p-accordion value="0">
+        <div formArrayName="days">
+            @for (day of daysOfWeek; track day; let dayIndex = $index) {
+            <p-accordion-panel [value]="dayIndex.toString()" [formGroupName]="dayIndex">
+                <p-accordion-header>{{ day }}</p-accordion-header>
+                <p-accordion-content>
+                    <div formArrayName="workingHours">
+                        @for(workingHour of getDayWorkingHoursArray(dayIndex).controls; track workingHour; let
+                        workingHourIndex = $index){
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 p-4 border rounded mb-4"
+                            [formGroupName]="workingHourIndex">
+                            <div>
+                                <label for="start-{{dayIndex}}-{{workingHourIndex}}">Start time</label>
+                                <p-select appendTo="body" formControlName="startTime"
+                                    [inputId]="'start-' + dayIndex + '-' + workingHourIndex" [options]="timeOptions"
+                                    optionLabel="label" optionValue="value" placeholder="Select start time">
+                                </p-select>
+                                @if(getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.invalid &&
+                                getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.touched){
+                                <div class="text-red-500 text-sm mt-1">
 
-                <div>
-                    <label for="coachFirstName">End time</label>
-                    <p-select appendTo="body" [inputId]="'end-' + i" [(ngModel)]="getWorkingHour(i).endTime"
-                        [options]="timeOptions" optionLabel="label" optionValue="value" placeholder="Select end time">
-                    </p-select>
-                </div>
+                                    Start time is required
+                                </div>
+                                }
+                            </div>
 
-                <div>
-                    <label for="coachLocation-{{i}}">Location</label>
-                    <p-select appendTo="body" [options]="allLocations" optionLabel="name" optionValue="id"
-                        [(ngModel)]="getWorkingHour(i).locationId" class="w-full"></p-select>
-                </div>
+                            <div>
+                                <label for="end-{{dayIndex}}-{{workingHourIndex}}">End time</label>
+                                <p-select appendTo="body" formControlName="endTime"
+                                    [inputId]="'end-' + dayIndex + '-' + workingHourIndex" [options]="timeOptions"
+                                    optionLabel="label" optionValue="value" placeholder="Select end time">
+                                </p-select>
+                                @if(getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.invalid &&
+                                getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.touched){
+                                <div class="text-red-500 text-sm mt-1">
+                                    End time is required
+                                </div>
+                                }
+                            </div>
 
-                <div>
-                    <label for="coachSpeciality-{{i}}">Services</label>
-                    <p-select appendTo="body" [options]="allServices()" optionLabel="name" optionValue="id"
-                        [(ngModel)]="getWorkingHour(i).serviceIds" class="w-full" display="chip"
-                        placeholder="Select services">
-                    </p-select>
-                </div>
-            </div>
-        </p-accordion-content>
-    </p-accordion-panel>
-    }
-</p-accordion>
+                            <div>
+                                <label for="location-{{dayIndex}}-{{workingHourIndex}}">Location</label>
+                                <p-select appendTo="body" formControlName="locationId" [options]="allLocations"
+                                    optionLabel="name" optionValue="id" class="w-full">
+                                </p-select>
+                                @if(getWorkingHourFormGroup(dayIndex, workingHourIndex).get('locationId')?.invalid &&
+                                getWorkingHourFormGroup(dayIndex, workingHourIndex).get('locationId')?.touched){
+                                <div class="text-red-500 text-sm mt-1">
+                                    Location is required
+                                </div>
+                                }
+                            </div>
+
+                            <div>
+                                <label for="service-{{dayIndex}}-{{workingHourIndex}}">Services</label>
+                                <p-select appendTo="body" [options]="allServices()" formControlName="serviceId"
+                                    optionLabel="name" optionValue="id" class="w-full" placeholder="Select service">
+                                </p-select>
+                                @if(getWorkingHourFormGroup(dayIndex, workingHourIndex).get('serviceId')?.invalid &&
+                                getWorkingHourFormGroup(dayIndex, workingHourIndex).get('serviceId')?.touched){
+                                <div class="text-red-500 text-sm mt-1">
+                                    Service is required
+                                </div>
+                                }
+                            </div>
+
+                            <!-- Remove button for each working hour -->
+                            @if(getDayWorkingHoursArray(dayIndex).length > 0){
+                            <div class="col-span-full">
+                                <button type="button" (click)="removeWorkingHour(dayIndex, workingHourIndex)"
+                                    class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                                    Remove Working Hour
+                                </button>
+                            </div>
+                            }
+                        </div>
+                        }
+
+                        <!-- Show message when no working hours exist for this day -->
+                        @if (getDayWorkingHoursArray(dayIndex).length === 0) {
+                        <div class="text-gray-500 italic mb-4">
+                            No working hours added for {{ day }}
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Add new working hour button for specific day -->
+                    <button type="button" (click)="addWorkingHour(dayIndex)"
+                        class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Add Working Hour for {{ day }}
+                    </button>
+                </p-accordion-content>
+            </p-accordion-panel>
+            }
+        </div>
+    </p-accordion>
