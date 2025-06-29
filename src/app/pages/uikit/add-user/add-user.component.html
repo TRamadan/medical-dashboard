@@ -10,14 +10,14 @@
 
 <p-card>
     <div class="flex items-center justify-between mb-2">
-        <h5 class="m-0">Manage users</h5>
+        <h5 class="m-0">Manage users and coachs</h5>
     </div>
     <app-table [headers]="headers" [data]="allUsers" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true" [globalFilterPlaceholder]="'Search...'"
         [showActions]="true" (edit)="editSelectedUser($event)" (delete)="deleteSelectedUser($event)"></app-table>
 </p-card>
 
-<!-- here is the dialog needed to add a new user or customer-->
+<!-- here is the dialog neede0d to add a new user or customer-->
 <p-dialog [(visible)]="userDialog" [header]="'Add new user'" [modal]="true" [closable]="true" [dismissableMask]="true"
     [style]="{ width: '770px', height: '615px' }">
     <p-card>
@@ -149,9 +149,7 @@
             </ng-template>
 
             <ng-template #daysOffTab>
-                <div class="overflow-x-auto">
-                    <p>Some code goes here</p>
-                </div>
+                <app-days-off></app-days-off>
             </ng-template>
 
             <app-tabs [tabs]="[
@@ -159,7 +157,6 @@
                     { label: 'Assigned Service', template: assignedServiceTab },
                     { label: 'Working Hours', template: workingHoursTab }, 
                     { label : 'Days Off' , template : daysOffTab},
-                    {label : 'Special Days', template :specialDaysTab}
                     
                 ]"></app-tabs>
             }

@@ -14,12 +14,12 @@ import { DropdownModule } from 'primeng/dropdown';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { WorkingHoursComponent } from "./working-hours/working-hours.component";
 import { AssignedServicesComponent } from "./assigned-services/assigned-services.component";
-
+import { DaysOffComponent } from "./days-off/days-off.component";
 
 
 @Component({
   selector: 'app-add-user',
-  imports: [AssignedServicesComponent, WorkingHoursComponent, InputTextModule, FormsModule, ReactiveFormsModule, FloatLabelModule, DialogModule, TableComponent, ToolbarModule, ButtonModule, CardModule, NgClass, ToggleSwitchModule, TabsComponent, DropdownModule, MultiSelectModule],
+  imports: [DaysOffComponent, AssignedServicesComponent, WorkingHoursComponent, InputTextModule, FormsModule, ReactiveFormsModule, FloatLabelModule, DialogModule, TableComponent, ToolbarModule, ButtonModule, CardModule, NgClass, ToggleSwitchModule, TabsComponent, DropdownModule, MultiSelectModule],
   standalone: true,
   templateUrl: './add-user.component.html',
   styleUrls: ['./add-user.component.css']
@@ -36,11 +36,15 @@ export class AddUserComponent implements OnInit, AfterViewInit {
   allLocations: any[] = [];
   allSpecialities: any[] = []
   coachTabs: any[] = [];
+  usersTabs: any[] = [];
   @ViewChild('coachInfoTab') coachInfoTab!: TemplateRef<any>;
   @ViewChild('assignedServiceTab') assignedServiceTab!: TemplateRef<any>;
   @ViewChild('workingHoursTab') workingHoursTab!: TemplateRef<any>;
   @ViewChild('daysOffTab') daysOffTab!: TemplateRef<any>;
-  @ViewChild('specialDaysTab') specialDaysTab!: TemplateRef<any>;
+
+
+  @ViewChild('Customers') customersTab!: TemplateRef<any>;
+  @ViewChild('Employees') employeesTab!: TemplateRef<any>;
 
 
   constructor(private fb: FormBuilder) { }
@@ -65,7 +69,6 @@ export class AddUserComponent implements OnInit, AfterViewInit {
       { label: 'Assigned Service', template: this.assignedServiceTab },
       { label: 'Working Hours', template: this.workingHoursTab },
       { label: 'Days Off', template: this.daysOffTab },
-      { label: 'Special Days', template: this.specialDaysTab }
     ];
   }
 
