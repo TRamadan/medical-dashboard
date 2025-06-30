@@ -1,3 +1,55 @@
-<p>
-  add-permission works!
-</p>
+<p-toast></p-toast>
+<p-toolbar styleClass="mb-6">
+  <ng-template #start>
+    <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openNew()" />
+  </ng-template>
+
+  <ng-template #end>
+    <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+  </ng-template>
+</p-toolbar>
+
+<p-card>
+  <div class="flex items-center justify-between mb-2">
+    <h5 class="m-0">Manage permissions</h5>
+  </div>
+  <app-table [data]="allPermissions" [headers]="tableColumns" [actions]="tableActions" [showActions]="true"
+    [loading]="false" (edit)="editPermission($event)" (delete)="onDeletePermission($event)">
+  </app-table>
+</p-card>
+
+<p-dialog [(visible)]="displayDialog" [style]="{width: '450px'}"
+  [header]="isEdit ? 'Edit Permission' : 'Add Permission'" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <form [formGroup]="addPermissionForm" class="flex flex-column gap-4">
+      <div class="flex flex-column gap-2">
+        <label for="name" class="font-medium">Permission Name</label>
+        <input type="text" pInputText id="name" formControlName="name" required autofocus class="w-full" />
+        @if (addPermissionForm.controls['name'].invalid && addPermissionForm.controls['name'].touched) {
+        <small class="text-danger fw-bold">Name is required.</small>
+        }
+      </div>
+      <div class="flex flex-column gap-2">
+        <label for="url" class="font-medium">URL</label>
+        <input type="text" pInputText id="url" formControlName="url" required class="w-full"
+          placeholder="/api/resource" />
+        @if (addPermissionForm.controls['url'].invalid && addPermissionForm.controls['url'].touched) {
+        <small class="text-danger fw-bold">
+          @if (addPermissionForm.controls['url'].errors?.['required']) {
+          URL is required.
+          } @else if (addPermissionForm.controls['url'].errors?.['pattern']) {
+          URL must start with /.
+          }
+        </small>
+        }
+      </div>
+    </form>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
+      (click)="displayDialog=false"></button>
+    <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="savePermission()"
+      [disabled]="addPermissionForm.invalid"></button>
+  </ng-template>
+</p-dialog>
