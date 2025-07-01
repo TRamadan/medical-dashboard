@@ -21,20 +21,24 @@
 </p-card>
 
 <p-dialog [(visible)]="displayDialog" [style]="{width: '90vw', maxWidth: '450px'}"
-  [header]="isEdit ? 'Edit Permission' : 'Add Permission'" [modal]="true" styleClass="p-fluid">
+  [header]="isEdit ? 'Edit role and permission' : 'Add role and permission'" [modal]="true" styleClass="p-fluid">
   <ng-template pTemplate="content">
     <form [formGroup]="addPermissionForm" class="flex flex-column gap-4">
       <div class="flex flex-column gap-2">
-        <label for="name" class="font-medium">Permission Name</label>
-        <input type="text" pInputText id="name" formControlName="name" required autofocus class="w-full" />
+        <p-floatlabel>
+          <input type="text" pInputText id="name" formControlName="name" required autofocus class="w-full" />
+          <label for="name">Permission Name</label>
+        </p-floatlabel>
         @if (addPermissionForm.controls['name'].invalid && addPermissionForm.controls['name'].touched) {
         <small class="text-danger fw-bold">Name is required.</small>
         }
       </div>
       <div class="flex flex-column gap-2">
-        <label for="url" class="font-medium">URL</label>
-        <input type="text" pInputText id="url" formControlName="url" required class="w-full"
-          placeholder="/api/resource" />
+        <p-floatlabel>
+          <input type="text" pInputText id="url" formControlName="url" required class="w-full"
+            placeholder="/api/resource" />
+          <label for="url">URL</label>
+        </p-floatlabel>
         @if (addPermissionForm.controls['url'].invalid && addPermissionForm.controls['url'].touched) {
         <small class="text-danger fw-bold">
           @if (addPermissionForm.controls['url'].errors?.['required']) {

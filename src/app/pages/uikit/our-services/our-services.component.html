@@ -1,1 +1,112 @@
-<app-dynamic-report></app-dynamic-report>
+<!-- <app-dynamic-report></app-dynamic-report> -->
+
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <div class="flex flex-wrap gap-2">
+            <p-button icon="pi pi-plus" raised label="New Service" (onClick)="openAddEditDialog()" />
+        </div>
+    </ng-template>
+    <ng-template #end>
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+    </ng-template>
+</p-toolbar>
+
+<p-card>
+    <p-table #dt [value]="services" [rows]="10" [paginator]="true" [tableStyle]="{ 'min-width': '75rem' }"
+        [rowHover]="true" dataKey="id" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} services"
+        [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]">
+        <ng-template pTemplate="caption">
+            <div class="flex items-center justify-between">
+                <h5 class="m-0">Manage Services</h5>
+                <p-iconfield>
+                    <p-inputicon styleClass="pi pi-search" />
+                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
+                </p-iconfield>
+            </div>
+        </ng-template>
+        <ng-template pTemplate="header">
+            <tr>
+                <th style="min-width: 16rem">Title (AR)</th>
+                <th style="min-width: 16rem">Title (EN)</th>
+                <th style="min-width: 20rem">Description (AR)</th>
+                <th style="min-width: 20rem">Description (EN)</th>
+                <th style="min-width: 12rem">Options</th>
+            </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-service>
+            <tr>
+                <td>{{service.titleAr}}</td>
+                <td>{{service.titleEn}}</td>
+                <td>{{service.descriptionAr}}</td>
+                <td>{{service.descriptionEn}}</td>
+                <td>
+                    <p-button icon="pi pi-pencil" severity="info" class="mr-2" (onClick)="onEditService(service)" />
+                    <p-button icon="pi pi-trash" severity="danger" (onClick)="onDeleteService(service)" />
+                </td>
+            </tr>
+        </ng-template>
+    </p-table>
+</p-card>
+
+<!-- Add/Edit Service Dialog -->
+<p-dialog [(visible)]="isServiceDialog" [header]="isEdit ? 'Edit Service' : 'Add Service'" [modal]="true"
+    [closable]="true" [dismissableMask]="true" [style]="{ width: '95vw', maxWidth: '600px' }"
+    contentStyleClass="responsive-dialog-content">
+    <form [formGroup]="serviceForm" class="mt-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-2 md:p-4">
+            <div>
+                <p-floatlabel>
+                    <input pInputText formControlName="titleAr" required class="w-full" />
+                    <label>Title (AR)</label>
+                </p-floatlabel>
+                @if (serviceForm.controls['titleAr'].invalid && serviceForm.controls['titleAr'].touched) {
+                <small class="text-danger fw-bold">Title (AR) is required.</small>
+                }
+            </div>
+            <div>
+                <p-floatlabel>
+                    <input pInputText formControlName="titleEn" required class="w-full" />
+                    <label>Title (EN)</label>
+                </p-floatlabel>
+                @if (serviceForm.controls['titleEn'].invalid && serviceForm.controls['titleEn'].touched) {
+                <small class="text-danger fw-bold">Title (EN) is required.</small>
+                }
+            </div>
+            <div>
+                <p-floatlabel>
+                    <textarea pTextarea formControlName="descriptionAr" required class="w-full" rows="3"></textarea>
+                    <label>Description (AR)</label>
+                </p-floatlabel>
+
+            </div>
+            <div>
+                <p-floatlabel>
+                    <textarea pTextarea formControlName="descriptionEn" required class="w-full" rows="3"></textarea>
+                    <label>Description (EN)</label>
+                </p-floatlabel>
+
+            </div>
+        </div>
+    </form>
+    <ng-template #footer>
+        <div class="flex flex-row gap-2 w-full px-2 py-2 justify-end items-end">
+            <p-button label="Cancel" [text]="true" severity="danger" (click)="closeDialog()" />
+            <p-button label="Save" [disabled]="serviceForm.invalid" [outlined]="true" severity="success"
+                (onClick)="onSaveService()" />
+        </div>
+    </ng-template>
+</p-dialog>
+
+<!-- Delete Confirmation Dialog -->
+<p-dialog [(visible)]="isDeleteDialog" [header]="'Delete Service'" [modal]="true" [closable]="true"
+    [dismissableMask]="true" [style]="{ width: '90vw', maxWidth: '400px' }">
+    <div class="p-4 text-center">
+        <p>Are you sure you want to delete the selected service?</p>
+    </div>
+    <ng-template #footer>
+        <div class="flex flex-row gap-2 w-full px-2 py-2 justify-end items-end">
+            <p-button label="Cancel" [text]="true" severity="secondary" (click)="closeDeleteDialog()" />
+            <p-button label="Delete" severity="danger" (click)="onConfirmDelete()" />
+        </div>
+    </ng-template>
+</p-dialog>

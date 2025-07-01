@@ -9,7 +9,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
-
+import { FloatLabelModule } from 'primeng/floatlabel';
 import { TableComponent, TableColumn, TableAction } from '../../../shared/table/table.component';
 import { Permission } from './models/permission';
 import { ApiService } from '../../service/api.service';
@@ -20,6 +20,7 @@ import { ToastModule } from 'primeng/toast';
   selector: 'app-add-permission',
   standalone: true,
   imports: [
+    FloatLabelModule,
     CommonModule,
     ReactiveFormsModule,
     TableComponent,

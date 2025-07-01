@@ -35,17 +35,21 @@
   <ng-template pTemplate="content">
     <form [formGroup]="addGroupForm" class="flex flex-column gap-4">
       <div class="flex flex-column gap-2">
-        <label for="name" class="font-medium">Group Name</label>
-        <input type="text" pInputText id="name" formControlName="name" required autofocus class="w-full" />
+        <p-floatlabel>
+          <input type="text" pInputText id="name" formControlName="name" required autofocus class="w-full" />
+          <label for="name">Group Name</label>
+        </p-floatlabel>
         @if (addGroupForm.controls['name'].invalid && addGroupForm.controls['name'].touched) {
         <small class="text-danger fw-bold">Name is required.</small>
         }
       </div>
       <div class="flex flex-column gap-2">
-        <label for="roles" class="font-medium">Roles</label>
-        <p-multiSelect appendTo="body" id="roles" [options]="allRoles" formControlName="roles" optionLabel="name"
-          placeholder="Select Roles" class="w-full">
-        </p-multiSelect>
+        <p-floatlabel>
+          <p-multiSelect appendTo="body" id="roles" [options]="allRoles" formControlName="roles" optionLabel="name"
+            placeholder="Select Roles" class="w-full">
+          </p-multiSelect>
+          <label for="roles">Roles</label>
+        </p-floatlabel>
         @if (addGroupForm.controls['roles'].invalid && addGroupForm.controls['roles'].touched) {
         <small class="text-danger fw-bold">At least one role is required.</small>
         }

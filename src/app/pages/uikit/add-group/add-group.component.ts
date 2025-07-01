@@ -9,7 +9,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ConfirmationService, MessageService } from 'primeng/api';
-
+import { FloatLabelModule } from 'primeng/floatlabel';
 import { TableComponent, TableColumn, TableAction } from '../../../shared/table/table.component';
 import { Group, Role } from './models/group';
 import { ApiService } from '../../service/api.service';
@@ -20,6 +20,7 @@ import { ToastModule } from 'primeng/toast';
   selector: 'app-add-group',
   standalone: true,
   imports: [
+    FloatLabelModule,
     CardModule,
     CommonModule,
     ReactiveFormsModule,

@@ -44,7 +44,7 @@ export class AppMenu {
                         routerLink: ['/uikit/addgroup']
                     },
                     {
-                        label: 'Add permission',
+                        label: 'Add roles and permissions',
                         icon: '',
                         routerLink: ['/uikit/addpermission']
                     }
