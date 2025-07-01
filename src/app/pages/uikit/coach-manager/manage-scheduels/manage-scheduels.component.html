@@ -3,11 +3,9 @@
         <div class="filters-section">
             <div class="filter-group">
                 <label for="branchFilter">Filter by Branch:</label>
-                <select id="branchFilter" [(ngModel)]="selectedBranchId" (change)="filterByBranch()"
-                    class="filter-select">
-                    <option value="">All Branches</option>
-                    <option *ngFor="let branch of branches" [value]="branch.id">{{ branch.name }}</option>
-                </select>
+                <p-dropdown [options]="branches" [(ngModel)]="selectedBranchId" (onChange)="filterByBranch()"
+                    optionLabel="name" optionValue="id" placeholder="Select Branch" />
+
             </div>
         </div>
 

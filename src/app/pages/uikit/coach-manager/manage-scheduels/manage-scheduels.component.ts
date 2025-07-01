@@ -8,11 +8,11 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { CommonModule } from '@angular/common';
 import { Branch, Coach, Session } from '../models/coach';
 import { ScheduelService } from '../services/scheduel.service';
-
+import { DropdownModule } from 'primeng/dropdown';
 @Component({
     selector: 'app-manage-scheduels',
     standalone: true,
-    imports: [CommonModule, CheckboxModule, DatePickerModule, DialogModule, ButtonModule, FormsModule, InputNumberModule],
+    imports: [DropdownModule, CommonModule, CheckboxModule, DatePickerModule, DialogModule, ButtonModule, FormsModule, InputNumberModule],
     templateUrl: './manage-scheduels.component.html',
     styleUrls: ['./manage-scheduels.component.css']
 })
@@ -27,7 +27,7 @@ export class ManageScheduelsComponent implements OnInit {
     detailedScheduleDialog: boolean = false;
     sessions: Session[] = [];
 
-    constructor(private dataService: ScheduelService) {}
+    constructor(private dataService: ScheduelService) { }
 
     ngOnInit() {
         this.dataService.getCoaches().subscribe((coaches: any) => {
@@ -45,13 +45,13 @@ export class ManageScheduelsComponent implements OnInit {
     }
 
     //here is the function needed to get all coaches
-    getAllCoaches(): void {}
+    getAllCoaches(): void { }
 
     //here is the function needed to get all added branches
-    getAllBranches(): void {}
+    getAllBranches(): void { }
 
     //here is the function needed that accept coach id to fetch all coach time slots for all days
-    getAllDaysTimeSlots(): void {}
+    getAllDaysTimeSlots(): void { }
 
     //here is the function needed to fetch coachs based on the selected branch
     filterByBranch() {
@@ -103,8 +103,8 @@ export class ManageScheduelsComponent implements OnInit {
 
     // Get sessions for a specific day and coach
     getSessionsForDay(coachId: string, day: string): any[] {
-        return this.sessions.filter(session => 
-            session.coachId === coachId && 
+        return this.sessions.filter(session =>
+            session.coachId === coachId &&
             this.getDayFromDate(session.date) === day
         ).map(session => ({
             time: session.time,

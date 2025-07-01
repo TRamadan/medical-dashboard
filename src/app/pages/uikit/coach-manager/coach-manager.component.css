@@ -102,6 +102,20 @@
             .btn {
                 justify-content: center;
             }
+
+            .templates-grid {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+
+            .template-card {
+                width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+                word-break: break-word !important;
+            }
         }
 
         @media (max-width: 480px) {
@@ -117,6 +131,49 @@
             td {
                 padding: 10px 12px;
                 font-size: 0.85rem;
+            }
+
+            .editor-section,
+            .template-card,
+            .current-plan-card,
+            .plan-editor {
+                margin-bottom: 1rem !important;
+                padding: 1rem !important;
+            }
+
+            .btn-edit,
+            .btn-view,
+            .btn-save,
+            .btn-cancel,
+            .btn-add-exercise {
+                width: 100% !important;
+                min-height: 44px !important;
+                font-size: 1rem !important;
+            }
+
+            .form-input,
+            .form-textarea {
+                font-size: 1rem !important;
+                min-height: 44px !important;
+            }
+
+            .plan-header h4,
+            .template-title {
+                font-size: 1.1rem !important;
+            }
+
+            .templates-grid {
+                grid-template-columns: 1fr !important;
+                gap: 0.75rem !important;
+                width: 100% !important;
+                min-width: 0 !important;
+            }
+
+            .template-card {
+                width: 100% !important;
+                min-width: 0 !important;
+                box-sizing: border-box !important;
+                word-break: break-word !important;
             }
         }
 

@@ -11,7 +11,7 @@ export class ScheduelService {
     private sessionsSubject = new BehaviorSubject<Session[]>(this.getMockSessions());
     private branchesSubject = new BehaviorSubject<Branch[]>(this.getMockBranches());
 
-    constructor() {}
+    constructor() { }
 
     getCoaches(): Observable<Coach[]> {
         return this.coachesSubject.asObservable();
@@ -28,7 +28,7 @@ export class ScheduelService {
                 name: 'Dr. Emily Rodriguez',
                 email: 'emily.rodriguez@clinic.com',
                 specializations: ['Knee Rehabilitation', 'Sports Medicine', 'ACL Recovery'],
-                branch: 'Downtown',
+                branch: 'Tawfikia tennis club',
                 availability: [
                     { day: 'Monday', startTime: '09:00', endTime: '17:00', isAvailable: true },
                     { day: 'Tuesday', startTime: '09:00', endTime: '17:00', isAvailable: true },
@@ -45,7 +45,7 @@ export class ScheduelService {
                 name: 'James Thompson',
                 email: 'james.thompson@clinic.com',
                 specializations: ['Shoulder Rehabilitation', 'Upper Body Therapy'],
-                branch: 'Downtown',
+                branch: 'Tawfikia tennis club',
                 availability: [
                     { day: 'Monday', startTime: '10:00', endTime: '18:00', isAvailable: true },
                     { day: 'Tuesday', startTime: '10:00', endTime: '18:00', isAvailable: true },
@@ -62,7 +62,7 @@ export class ScheduelService {
                 name: 'Lisa Chen',
                 email: 'lisa.chen@clinic.com',
                 specializations: ['Spine Therapy', 'Core Strengthening', 'Posture Correction'],
-                branch: 'Northside',
+                branch: 'The club 5th settelment',
                 availability: [
                     { day: 'Monday', startTime: '08:00', endTime: '16:00', isAvailable: true },
                     { day: 'Tuesday', startTime: '08:00', endTime: '16:00', isAvailable: true },
@@ -140,15 +140,15 @@ export class ScheduelService {
         return [
             {
                 id: '1',
-                name: 'Downtown Branch',
+                name: 'Tawfikia tennis club',
                 location: '123 Main St, Downtown',
-                coaches: this.getMockCoaches().filter((c) => c.branch === 'Downtown')
+                coaches: this.getMockCoaches().filter((c) => c.branch === 'Tawfikia tennis club')
             },
             {
                 id: '2',
-                name: 'Northside Branch',
+                name: 'The club 5th settelment',
                 location: '456 Oak Ave, Northside',
-                coaches: this.getMockCoaches().filter((c) => c.branch === 'Northside')
+                coaches: this.getMockCoaches().filter((c) => c.branch === 'The club 5th settelment')
             }
         ];
     }

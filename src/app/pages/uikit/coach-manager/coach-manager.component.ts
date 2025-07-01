@@ -13,7 +13,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ManageScheduelsComponent } from './manage-scheduels/manage-scheduels.component';
 import { CoachAssignmentComponent } from './coach-assignment/coach-assignment.component';
-
+import { DropdownModule } from 'primeng/dropdown';
 interface TreatmentTemplate {
     id: string;
     name: string;
@@ -49,7 +49,7 @@ interface Exercise {
 @Component({
     selector: 'app-coach-manager',
     standalone: true,
-    imports: [CoachAssignmentComponent,ManageScheduelsComponent, ProgressBarModule, AvatarModule, TagModule, ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
+    imports: [DropdownModule, CoachAssignmentComponent, ManageScheduelsComponent, ProgressBarModule, AvatarModule, TagModule, ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
 
     templateUrl: './coach-manager.component.html',
     styleUrls: ['./coach-manager.component.css']
@@ -70,7 +70,7 @@ export class CoachManagerComponent implements OnInit {
 
     imgPath: string = '../../../../../public/Capture.PNG';
 
-    constructor() {}
+    constructor() { }
 
     ngOnInit() {
         this.getAllPatients();
