@@ -1,9 +1,13 @@
 <p-tabs [value]="activeIndex">
-    <p-tablist>
-        @for (tab of tabs; track tab.label) {
-        <p-tab [value]="tabs.indexOf(tab)">{{ tab.label }}</p-tab>
-        }
-    </p-tablist>
+    <div
+        class="tab-header flex flex-nowrap overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+        <p-tablist class="flex flex-nowrap min-w-max">
+            @for (tab of tabs; track tab.label) {
+            <p-tab [value]="tabs.indexOf(tab)" class="flex-shrink-0 px-2 py-1 text-sm md:text-base whitespace-nowrap">{{
+                tab.label }}</p-tab>
+            }
+        </p-tablist>
+    </div>
     <p-tabpanels>
         @for (tab of tabs; track tab.label) {
         <p-tabpanel [value]="tabs.indexOf(tab)">

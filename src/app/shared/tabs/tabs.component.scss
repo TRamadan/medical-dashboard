@@ -1,0 +1,10 @@
+.tab-header::-webkit-scrollbar {
+    display: none;
+}
+
+.tab-header {
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+}

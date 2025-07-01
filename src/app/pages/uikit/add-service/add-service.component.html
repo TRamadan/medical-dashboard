@@ -1,6 +1,8 @@
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
-        <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openServiceDialog()" />
+        <div class="flex flex-wrap gap-2">
+            <p-button icon="pi pi-plus" raised label="New" (onClick)="openServiceDialog()" />
+        </div>
     </ng-template>
 
     <ng-template #end>
@@ -14,26 +16,25 @@
     </div>
     <app-table [headers]="headers" [data]="data" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true" [globalFilterPlaceholder]="'Search...'"
-        [showActions]="true" (addDetails)="addServiceCategory($event)" (edit)="editSelectedService($event)"
-        (details)="showServicesForSelectedCategory($event)"></app-table>
+        [showActions]="true" [isAddDetails]="true" (addDetails)="addServiceCategory($event)"
+        (edit)="editSelectedService($event)" (details)="showServicesForSelectedCategory($event)"></app-table>
 </p-card>
 
 <!-- here is the dialog needed to add a new service-->
-<p-dialog [(visible)]="isServiceDialog" [header]="!isNewServiceSubCategory? 'Add new category':'Add new service'"
-    [modal]="true" [closable]="true" [dismissableMask]="true"
-    [style]="!isNewServiceSubCategory ? {width : '690px', height:'210px'}:{ width: '690px', height: '615px' }">
+<p-dialog [(visible)]="isServiceDialog" [header]="!isNewServiceSubCategory ? 'Add new category' : 'Add new service'"
+    [modal]="true" [closable]="true" [dismissableMask]="true" [style]="{ width: '90vw', maxWidth: '800px' }">
     <p-card>
         @if (!isNewServiceSubCategory) {
-        <div class="row">
-            <form [formGroup]="addServiceForm">
-                <div class="col-3">
+        <form [formGroup]="addServiceForm">
+            <div class="grid p-fluid">
+                <div class="col-12">
                     <p-floatlabel variant="on">
                         <input pInputText formControlName="name" />
                         <label for="value3">Category name</label>
                     </p-floatlabel>
                 </div>
-            </form>
-        </div>
+            </div>
+        </form>
         }
         @else {
         <p-tabs value="0">
@@ -45,7 +46,7 @@
             <p-tabpanels>
                 <form [formGroup]="serviceCategoryForm">
                     <p-tabpanel value="0">
-                        <div formGroupName="detailsForm">
+                        <div formGroupName="detailsForm" class="p-fluid">
                             <p-floatlabel variant="on">
                                 <input pInputText formControlName="subCategoryName" />
                                 <label for="value3">Service name</label>
@@ -54,96 +55,79 @@
                     </p-tabpanel>
 
                     <p-tabpanel value="1">
-                        <div formGroupName="configurationForm">
-                            <div class="row">
-                                <div class="col-6">
-                                    <label>Show on Website</label>
-                                    <p-toggleswitch formControlName="isShowWebsite" />
-                                </div>
-
-                                <div class="col-6">
-                                    <label>Recurring Appointment</label>
-                                    <p-toggleswitch formControlName="isAppointmentRecurring" />
-                                </div>
+                        <div formGroupName="configurationForm" class="grid p-fluid">
+                            <div class="col-12 md:col-6 flex items-center">
+                                <label class="mr-2">Show on Website</label>
+                                <p-toggleswitch formControlName="isShowWebsite" />
                             </div>
 
-                            <div class="row my-3">
-                                <div class="col-6">
-                                    <p-floatlabel class="w-full md:w-56" variant="on">
-                                        <p-cascadeselect inputId="on_label" optionLabel="cname"
-                                            formControlName="duration" optionGroupLabel="name"
-                                            [optionGroupChildren]="['states', 'cities']" styleClass="w-full" />
-                                        <label for="on_label">Duration</label>
-                                    </p-floatlabel>
-                                </div>
-                                <div class="col-6">
-                                    <p-floatlabel variant="on">
-                                        <input pInputText formControlName="price" />
-                                        <label for="value3">Price</label>
-                                    </p-floatlabel>
-                                </div>
+                            <div class="col-12 md:col-6 flex items-center">
+                                <label class="mr-2">Recurring Appointment</label>
+                                <p-toggleswitch formControlName="isAppointmentRecurring" />
                             </div>
 
-                            <div class="row my-3">
-                                <div class="col-6">
-                                    <p-floatlabel class="w-full md:w-56" variant="on">
-                                        <p-cascadeselect inputId="on_label" formControlName="bufferTimeBefore"
-                                            styleClass="w-full" />
-                                        <label for="on_label">Buffer time before</label>
-                                    </p-floatlabel>
-                                </div>
-
-                                <div class="col-6">
-                                    <p-floatlabel class="w-full md:w-56" variant="on">
-                                        <p-cascadeselect inputId="on_label" formControlName="bufferTimeAfter"
-                                            styleClass="w-full" />
-                                        <label for="on_label">Buffer time after</label>
-                                    </p-floatlabel>
-                                </div>
+                            <div class="col-12 md:col-6 mt-4">
+                                <p-floatlabel variant="on">
+                                    <p-cascadeselect inputId="on_label" optionLabel="cname" formControlName="duration"
+                                        optionGroupLabel="name" [optionGroupChildren]="['states', 'cities']"
+                                        styleClass="w-full" />
+                                    <label for="on_label">Duration</label>
+                                </p-floatlabel>
+                            </div>
+                            <div class="col-12 md:col-6 mt-4">
+                                <p-floatlabel variant="on">
+                                    <input pInputText formControlName="price" />
+                                    <label for="value3">Price</label>
+                                </p-floatlabel>
                             </div>
 
-                            <div class="row my-3">
-                                <div class="col-6">
-                                    <p-floatlabel variant="on">
-                                        <input pInputText formControlName="minCapacity" />
-                                        <label for="value3">Min Capacity</label>
-                                    </p-floatlabel>
-                                </div>
-
-                                <div class="col-6">
-                                    <p-floatlabel variant="on">
-                                        <input pInputText formControlName="maxCapacity" />
-                                        <label for="value3">Max Capacity</label>
-                                    </p-floatlabel>
-                                </div>
+                            <div class="col-12 md:col-6 mt-4">
+                                <p-floatlabel variant="on">
+                                    <p-cascadeselect inputId="on_label" formControlName="bufferTimeBefore"
+                                        styleClass="w-full" />
+                                    <label for="on_label">Buffer time before</label>
+                                </p-floatlabel>
                             </div>
 
-                            <div class="row my-3">
-                                <div class="col-12">
-                                    <p-floatlabel variant="on">
-                                        <input pInputText class="w-75"
-                                            formControlName="minimumTimeRequiredBeforeBooking" />
-                                        <label for="value3">Minimum time before booking</label>
-                                    </p-floatlabel>
-                                </div>
+                            <div class="col-12 md:col-6 mt-4">
+                                <p-floatlabel variant="on">
+                                    <p-cascadeselect inputId="on_label" formControlName="bufferTimeAfter"
+                                        styleClass="w-full" />
+                                    <label for="on_label">Buffer time after</label>
+                                </p-floatlabel>
                             </div>
-                            <div class="row">
-                                <div class="col-12">
-                                    <p-floatlabel variant="on">
-                                        <input pInputText class="w-75"
-                                            formControlName="minimumTimeRequiredBeforeCancelation" />
-                                        <label for="value3">Minimum time before cancelation</label>
-                                    </p-floatlabel>
-                                </div>
+
+                            <div class="col-12 md:col-6 mt-4">
+                                <p-floatlabel variant="on">
+                                    <input pInputText formControlName="minCapacity" />
+                                    <label for="value3">Min Capacity</label>
+                                </p-floatlabel>
                             </div>
-                            <div class="row my-3">
-                                <div class="col-12">
-                                    <p-floatlabel variant="on">
-                                        <input pInputText class="w-75"
-                                            formControlName="minimumTimeRequiredBeforeReschedueling" />
-                                        <label for="value3">Minimum time before reschecdueling</label>
-                                    </p-floatlabel>
-                                </div>
+
+                            <div class="col-12 md:col-6 mt-4">
+                                <p-floatlabel variant="on">
+                                    <input pInputText formControlName="maxCapacity" />
+                                    <label for="value3">Max Capacity</label>
+                                </p-floatlabel>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <p-floatlabel variant="on">
+                                    <input pInputText formControlName="minimumTimeRequiredBeforeBooking" />
+                                    <label for="value3">Minimum time before booking</label>
+                                </p-floatlabel>
+                            </div>
+                            <div class="col-12 mt-4">
+                                <p-floatlabel variant="on">
+                                    <input pInputText formControlName="minimumTimeRequiredBeforeCancelation" />
+                                    <label for="value3">Minimum time before cancelation</label>
+                                </p-floatlabel>
+                            </div>
+                            <div class="col-12 mt-4">
+                                <p-floatlabel variant="on">
+                                    <input pInputText formControlName="minimumTimeRequiredBeforeReschedueling" />
+                                    <label for="value3">Minimum time before reschecdueling</label>
+                                </p-floatlabel>
                             </div>
                         </div>
                     </p-tabpanel>

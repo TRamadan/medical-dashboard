@@ -483,50 +483,57 @@ export class TreatmentPlanComponent implements OnInit {
 
     // Open dialog to add a treatment plan
     addTreatmentPlanDialog(): void {
-        try {
-            // Reset form and clear arrays
-            this.addTreatmentPlanForm.reset();
-            this.progressPhases.clear();
-            this.assignedCoaches.clear();
-            this.selectedPatient = null;
+        // Open dialog immediately after form initialization
+        this.treatmentPlanDialog = true;
+        this.isNew = true;
+        // try {
+        //     debugger
+        //     // Reset form and clear arrays
+        //     this.addTreatmentPlanForm.reset();
 
-            // Set default values
-            this.addTreatmentPlanForm.patchValue({
-                priority: 'medium'
-            });
+        //     // Clear and reinitialize form arrays
+        //     while (this.progressPhases.length !== 0) {
+        //         this.progressPhases.removeAt(0);
+        //     }
+        //     while (this.assignedCoaches.length !== 0) {
+        //         this.assignedCoaches.removeAt(0);
+        //     }
 
-            // Add initial phase and coach assignment
-            this.addProgressPhase();
-            this.addAssignedCoach();
+        //     this.selectedPatient = null;
 
-            // Ensure the form arrays are properly initialized
-            // Add at least one session to the first phase
-            if (this.progressPhases.length > 0) {
-                this.addSession(0);
-            }
+        //     // Set default values
+        //     this.addTreatmentPlanForm.patchValue({
+        //         priority: 'medium'
+        //     });
 
-            // Small delay to ensure form is fully initialized
-            setTimeout(() => {
-                // Open dialog
-                this.treatmentPlanDialog = true;
-                this.isNew = true;
-                this.isEdit = false;
+        //     // Add initial phase and coach assignment
+        //     this.addProgressPhase();
+        //     this.addAssignedCoach();
 
-                console.log('Dialog opened successfully');
-                console.log('Form arrays:', {
-                    progressPhases: this.progressPhases.length,
-                    assignedCoaches: this.assignedCoaches.length
-                });
-            }, 100);
+        //     // Ensure the form arrays are properly initialized
+        //     // Add at least one session to the first phase
+        //     if (this.progressPhases.length > 0) {
+        //         this.addSession(0);
+        //     }
 
-        } catch (error) {
-            console.error('Error opening dialog:', error);
-            this.messageService.add({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to open treatment plan dialog'
-            });
-        }
+
+        //     this.isEdit = false;
+
+        //     console.log('Dialog opened successfully');
+        //     console.log('Form arrays:', {
+        //         progressPhases: this.progressPhases.length,
+        //         assignedCoaches: this.assignedCoaches.length
+        //     });
+
+        // } 
+        // catch (error) {
+        //     console.error('Error opening dialog:', error);
+        //     this.messageService.add({
+        //         severity: 'error',
+        //         summary: 'Error',
+        //         detail: 'Failed to open treatment plan dialog'
+        //     });
+        // }
     }
 
     // Edit treatment plan

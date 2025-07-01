@@ -6,11 +6,12 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Educationalvideos } from "./models/educationalvideos";
 import { DialogModule } from "primeng/dialog";
 import { InputTextModule } from 'primeng/inputtext';
+import { FloatLabelModule } from 'primeng/floatlabel';
 
 @Component({
   selector: 'app-educational-videos',
   standalone: true,
-  imports: [InputTextModule, DialogModule, ReactiveFormsModule, TableComponent, ToolbarModule, ButtonModule],
+  imports: [InputTextModule, DialogModule, ReactiveFormsModule, TableComponent, ToolbarModule, ButtonModule, FloatLabelModule],
   templateUrl: './educational-videos.component.html',
   styleUrls: ['./educational-videos.component.css']
 })
@@ -36,7 +37,7 @@ export class EducationalVideosComponent implements OnInit {
       videoCategoryAr: ['', Validators.required],
       descriptionEn: ['', Validators.required],
       descriptionAr: ['', Validators.required],
-      videoUrl: ['', Validators.required]
+      videoUrl: ['', [Validators.required, Validators.pattern('^(https?://)?([\\da-z.-]+)\\.([a-z.]{2,6})[/\\w .-]*/?$')]]
     });
   }
 

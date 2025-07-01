@@ -242,9 +242,10 @@
                         </div>
 
                         <p-accordion>
-                            @for (phase of progressPhases.controls; track phase; let phaseIndex = $index) {
+                            @for (phase of progressPhases?.controls || []; track phase; let phaseIndex = $index) {
                             <p-accordionTab [header]="'Phase ' + (phaseIndex + 1)">
-                                <div [formGroupName]="phaseIndex" *ngIf="progressPhases.at(phaseIndex)">
+                                <div [formGroupName]="phaseIndex"
+                                    *ngIf="progressPhases && progressPhases.at(phaseIndex)">
                                     <div class="flex justify-content-between align-items-center mb-3">
                                         <h5>Phase {{ phaseIndex + 1 }} Configuration</h5>
                                         <p-button icon="pi pi-trash" severity="danger" size="small" [text]="true"
@@ -291,7 +292,8 @@
                                                 (onClick)="addSession(phaseIndex)" />
                                         </div>
 
-                                        @for (session of getSessionsArray(phaseIndex).controls; track session; let
+                                        @for (session of getSessionsArray(phaseIndex)?.controls || []; track session;
+                                        let
                                         sessionIndex = $index) {
                                         <p-card styleClass="mb-3">
                                             <div [formGroupName]="sessionIndex"
@@ -366,7 +368,8 @@
                                                     </div>
 
                                                     @for (exercise of getExercisesArray(phaseIndex,
-                                                    sessionIndex).controls; track exercise; let exerciseIndex = $index)
+                                                    sessionIndex)?.controls || []; track exercise; let exerciseIndex =
+                                                    $index)
                                                     {
                                                     <p-card styleClass="mb-2">
                                                         <div [formGroupName]="exerciseIndex"
@@ -469,10 +472,11 @@
                                 (onClick)="addAssignedCoach()" />
                         </div>
 
-                        @for (coachAssignment of assignedCoaches.controls; track coachAssignment; let coachIndex =
+                        @for (coachAssignment of assignedCoaches.controls || []; track coachAssignment; let coachIndex
+                        =
                         $index) {
                         <p-card styleClass="mb-3">
-                            <div [formGroupName]="coachIndex" *ngIf="assignedCoaches.at(coachIndex)">
+                            <div [formGroupName]="coachIndex" *ngIf="assignedCoaches && assignedCoaches.at(coachIndex)">
                                 <div class="flex justify-content-between align-items-center mb-3">
                                     <h5>Coach Assignment {{ coachIndex + 1 }}</h5>
                                     <p-button icon="pi pi-trash" severity="danger" size="small" [text]="true"

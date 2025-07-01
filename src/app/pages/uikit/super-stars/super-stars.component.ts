@@ -11,6 +11,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { TableComponent, TableColumn } from '../../../shared/table/table.component';
 import { FileUploadModule } from "primeng/fileupload";
 import { Superstars } from './models/superstars';
+import { FloatLabelModule } from 'primeng/floatlabel';
 
 @Component({
   selector: 'app-super-stars',
@@ -28,7 +29,8 @@ import { Superstars } from './models/superstars';
     FileUploadModule,
     TableModule,
     InputTextModule,
-    TableComponent
+    TableComponent,
+    FloatLabelModule
   ]
 })
 export class SuperStarsComponent implements OnInit {
@@ -52,7 +54,7 @@ export class SuperStarsComponent implements OnInit {
 
   constructor(private fb: FormBuilder) {
     this.addSuperStarForm = this.fb.group({
-      name: ['', Validators.required],
+      nameAr: ['', Validators.required],
       sportEn: ['', Validators.required],
       sportAr: ['', Validators.required],
       achievementEn: ['', Validators.required],

@@ -39,11 +39,27 @@
 </p-card>
 
 <!-- here is the dialog neede0d to add a new user or customer-->
-<p-dialog [(visible)]="userDialog" [header]="'Add new user'" [modal]="true" [closable]="true" [dismissableMask]="true"
-    [style]="{ width: '770px', height: '615px' }">
+<p-dialog [(visible)]="userDialog" [header]="''" [modal]="true" [closable]="true" [dismissableMask]="true"
+    contentStyleClass="responsive-dialog-content"
+    [style]="{ width: '100vw', maxWidth: '100vw', minWidth: '0', height: '100vh', maxHeight: '100vh', margin: '0', padding: '0' }">
+    <ng-template pTemplate="header">
+        <div class="flex items-center justify-between px-2 py-2 md:px-4 md:py-3 w-full">
+            <span class="text-base md:text-lg font-semibold truncate">Add new user</span>
+            <button type="button" pButton icon="pi pi-times" (click)="hideDialog()"
+                class="p-button-text p-0 ml-2"></button>
+        </div>
+    </ng-template>
     <p-card>
         @if(!isDelete){
         <form [formGroup]="addNewUserForm">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label for="isCoach" class="font-medium">Is Coach?</label>
+                    <p-toggleswitch id="isCoach" formControlName="isCoach" />
+                </div>
+            </div>
+
+            @if(!addNewUserForm.get('isCoach')?.value) {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
                 <div>
                     <p-floatlabel>
@@ -97,11 +113,8 @@
                             Password</label>
                     </p-floatlabel>
                 </div>
-                <div>
-                    <label for="isCoach" class="font-medium">Is Coach?</label>
-                    <p-toggleswitch id="isCoach" formControlName="isCoach" />
-                </div>
             </div>
+            }
             <!-- here is the section needed to add a new coach-->
             @if(addNewUserForm.get('isCoach')?.value) {
             <ng-template #coachInfoTab>
@@ -173,13 +186,16 @@
                 <app-days-off></app-days-off>
             </ng-template>
 
-            <app-tabs [tabs]="[
-                    { label: 'Coach Information', template: coachInfoTab },
-                    { label: 'Assigned Service', template: assignedServiceTab },
-                    { label: 'Working Hours', template: workingHoursTab }, 
-                    { label : 'Days Off' , template : daysOffTab},
-                    
-                ]"></app-tabs>
+            <div class="w-full max-w-full px-2 md:px-4 lg:px-8">
+                <div class="overflow-x-auto">
+                    <app-tabs [tabs]="[
+                        { label: 'Coach Information', template: coachInfoTab },
+                        { label: 'Assigned Service', template: assignedServiceTab },
+                        { label: 'Working Hours', template: workingHoursTab }, 
+                        { label : 'Days Off' , template : daysOffTab},
+                    ]" class="min-w-[320px] md:min-w-0"></app-tabs>
+                </div>
+            </div>
             }
         </form>
         }
@@ -190,9 +206,11 @@
         }
     </p-card>
 
-    <ng-template #footer>
-        <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog();" />
-        <p-button label="Save" [disabled]="addNewUserForm.invalid" [outlined]="true" severity="success"
-            (onClick)="isEdit ?  updateSelectedUser():addNewUser()" />
+    <ng-template pTemplate="footer">
+        <div class="flex flex-col gap-2 md:flex-row md:justify-end md:gap-4 w-full px-2 py-2">
+            <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog();" class="w-full md:w-auto" />
+            <p-button label="Save" [disabled]="addNewUserForm.invalid" [outlined]="true" severity="success"
+                (onClick)="isEdit ?  updateSelectedUser():addNewUser()" class="w-full md:w-auto" />
+        </div>
     </ng-template>
 </p-dialog>

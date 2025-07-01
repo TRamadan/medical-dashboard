@@ -1,7 +1,9 @@
 <p-toast></p-toast>
 <p-toolbar styleClass="mb-6">
   <ng-template #start>
-    <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openNew()" />
+    <div class="flex flex-wrap gap-2">
+      <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openNew()" />
+    </div>
   </ng-template>
 
   <ng-template #end>
@@ -28,8 +30,8 @@
 </p-card>
 
 
-<p-dialog [(visible)]="displayDialog" [style]="{width: '450px'}" [header]="isEdit ? 'Edit Group' : 'Add Group'"
-  [modal]="true" styleClass="p-fluid">
+<p-dialog [(visible)]="displayDialog" [style]="{width: '90vw', maxWidth: '450px'}"
+  [header]="isEdit ? 'Edit Group' : 'Add Group'" [modal]="true" styleClass="p-fluid">
   <ng-template pTemplate="content">
     <form [formGroup]="addGroupForm" class="flex flex-column gap-4">
       <div class="flex flex-column gap-2">

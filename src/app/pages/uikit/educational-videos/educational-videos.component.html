@@ -1,7 +1,9 @@
 <!-- Toolbar -->
 <p-toolbar styleClass="mb-6">
   <ng-template #start>
-    <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openEducationalVideosDialog()" />
+    <div class="flex flex-wrap gap-2">
+      <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openEducationalVideosDialog()" />
+    </div>
   </ng-template>
 
   <ng-template #end>
@@ -18,30 +20,62 @@
 </app-table>
 
 <!-- Dialog -->
-<p-dialog [(visible)]="showAddDialog" [modal]="true" [style]="{width: '450px'}"
-  [header]="isDelete ? 'Confirm Delete' : (isEdit ? 'Edit About Us' : 'Add About Us')">
+<p-dialog [(visible)]="showAddDialog" [modal]="true" [style]="{width: '90vw', maxWidth: '700px'}"
+  [header]="isDelete ? 'Confirm Delete' : (isEdit ? 'Edit Educational Video' : 'Add Educational Video')">
 
   @if(!isDelete){
-  <form [formGroup]="addEducationalVideo" class="flex flex-column gap-4">
-    <div class="flex flex-col gap-2">
-      <label for="descriptionEn">Description (English)</label>
-      <input pInputText id="descriptionEn" formControlName="descriptionEn" class="w-full" />
+  <form [formGroup]="addEducationalVideo" class="p-fluid grid">
+    <div class="col-12 md:col-6">
+      <p-floatLabel variant="on" class="w-full mt-4">
+        <input pInputText id="descriptionEn" formControlName="descriptionEn" class="w-full" />
+        <label for="descriptionEn">Description (English)</label>
+      </p-floatLabel>
+      @if(addEducationalVideo.get('descriptionEn')?.invalid && addEducationalVideo.get('descriptionEn')?.touched) {
+      <small class="text-danger fw-bold">Description (English) is required.</small>
+      }
     </div>
-    <div class="flex flex-col gap-2">
-      <label for="descriptionAr">Description (Arabic)</label>
-      <input pInputText id="descriptionAr" formControlName="descriptionAr" class="w-full" />
+    <div class="col-12 md:col-6">
+      <p-floatLabel variant="on" class="w-full mt-4">
+        <input pInputText id="descriptionAr" formControlName="descriptionAr" class="w-full" />
+        <label for="descriptionAr">Description (Arabic)</label>
+      </p-floatLabel>
+      @if(addEducationalVideo.get('descriptionAr')?.invalid && addEducationalVideo.get('descriptionAr')?.touched) {
+      <small class="text-danger fw-bold">Description (Arabic) is required.</small>
+      }
     </div>
-    <div class="flex flex-col gap-2">
-      <label for="descriptionEn">Video Category (English)</label>
-      <input pInputText id="descriptionEn" formControlName="videoCategoryEn" class="w-full" />
+    <div class="col-12 md:col-6">
+      <p-floatLabel variant="on" class="w-full mt-4">
+        <input pInputText id="videoCategoryEn" formControlName="videoCategoryEn" class="w-full" />
+        <label for="videoCategoryEn">Video Category (English)</label>
+      </p-floatLabel>
+      @if(addEducationalVideo.get('videoCategoryEn')?.invalid && addEducationalVideo.get('videoCategoryEn')?.touched) {
+      <small class="text-danger fw-bold">Video Category (English) is required.</small>
+      }
     </div>
-    <div class="flex flex-col gap-2">
-      <label for="descriptionAr">Video Category (Arabic)</label>
-      <input pInputText id="descriptionAr" formControlName="videoCategoryAr" class="w-full" />
+    <div class="col-12 md:col-6">
+      <p-floatLabel variant="on" class="w-full mt-4">
+        <input pInputText id="videoCategoryAr" formControlName="videoCategoryAr" class="w-full" />
+        <label for="videoCategoryAr">Video Category (Arabic)</label>
+      </p-floatLabel>
+      @if(addEducationalVideo.get('videoCategoryAr')?.invalid && addEducationalVideo.get('videoCategoryAr')?.touched) {
+      <small class="text-danger fw-bold">Video Category (Arabic) is required.</small>
+      }
     </div>
-    <div class="flex flex-col gap-2">
-      <label for="type">Video Url</label>
-      <input pInputText id="type" formControlName="videoUrl" class="w-full" />
+    <div class="col-12">
+      <p-floatLabel variant="on" class="w-full mt-4">
+        <input pInputText id="videoUrl" formControlName="videoUrl" class="w-full" />
+        <label for="videoUrl">Video Url</label>
+      </p-floatLabel>
+      @if(addEducationalVideo.get('videoUrl')?.invalid && addEducationalVideo.get('videoUrl')?.touched) {
+      <small class="text-danger fw-bold">
+        @if(addEducationalVideo.get('videoUrl')?.errors?.['required']) {
+        Video URL is required.
+        }
+        @if(addEducationalVideo.get('videoUrl')?.errors?.['pattern']) {
+        Please enter a valid URL.
+        }
+      </small>
+      }
     </div>
   </form>
   } @else {

@@ -17,8 +17,10 @@ import { TabsModule } from 'primeng/tabs';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { CascadeSelectModule } from 'primeng/cascadeselect';
 import { IconFieldModule } from 'primeng/iconfield';
+import { Location } from './models/location';
 @Component({
     selector: 'app-add-location',
+    standalone: true,
     imports: [
         IconFieldModule,
         CascadeSelectModule,
@@ -48,11 +50,12 @@ export class AddLocationComponent implements OnInit {
     isEditServiceSubCategory: boolean = false;
     isLocationDialog: boolean = false;
     selectedLocation: any = {};
+    locations: Location[] = [];
 
     addLocationForm!: FormGroup;
     serviceCategoryForm!: FormGroup;
 
-    constructor(private fb: FormBuilder) {}
+    constructor(private fb: FormBuilder) { }
 
     ngOnInit() {
         this.initialiseServiceForm();
@@ -95,21 +98,21 @@ export class AddLocationComponent implements OnInit {
      * Created Date : 2/6/2025
      * Porpuse : this function is responsible for fetch all added locations
      */
-    getAllAddedLocation(): void {}
+    getAllAddedLocation(): void { }
 
     /**
      * Developer: Eng/Tarek Ahmed Ramadan
      * Created Date : 2/6/2025
      * Porpuse : this function is responsible for update the selected location
      */
-    updateSelectedLocation(): void {}
+    updateSelectedLocation(): void { }
 
     /**
      * Developer: Eng/Tarek Ahmed Ramadan
      * Created Date : 2/6/2025
      * Porpuse : this function is responsible for delete the selected location
      */
-    deleteSeletedLocation(): void {}
+    deleteLocation(location: Location): void { }
 
     /**
      * Developer : Eng/Tarek Ahmed Ramadan
@@ -117,8 +120,10 @@ export class AddLocationComponent implements OnInit {
      * Porpuse : this function is responsible for set the data for the chosed location
      * @param chosedLocation
      */
-    editSelectedLocation(chosedLocation: Location): void {
+    editLocation(location: Location): void {
         this.isEditService = true;
+        this.isLocationDialog = true;
+        this.addLocationForm.patchValue(location);
     }
 
     /**

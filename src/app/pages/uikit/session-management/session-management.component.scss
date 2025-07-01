@@ -1,0 +1,25 @@
+.responsive-dialog-content {
+    padding: 0.5rem 0.5rem;
+}
+
+@media (min-width: 640px) {
+    .responsive-dialog-content {
+        padding: 1.5rem 2rem;
+    }
+}
+
+:host ::ng-deep .p-dialog {
+    border-radius: 0.5rem;
+}
+
+@media (max-width: 640px) {
+    :host ::ng-deep .p-dialog {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        min-width: 0 !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+    }
+}

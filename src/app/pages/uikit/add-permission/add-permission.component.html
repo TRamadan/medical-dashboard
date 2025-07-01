@@ -1,7 +1,9 @@
 <p-toast></p-toast>
 <p-toolbar styleClass="mb-6">
   <ng-template #start>
-    <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openNew()" />
+    <div class="flex flex-wrap gap-2">
+      <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openNew()" />
+    </div>
   </ng-template>
 
   <ng-template #end>
@@ -11,14 +13,14 @@
 
 <p-card>
   <div class="flex items-center justify-between mb-2">
-    <h5 class="m-0">Manage permissions</h5>
+    <h5 class="m-0">Manage roles and permissions</h5>
   </div>
   <app-table [data]="allPermissions" [headers]="tableColumns" [actions]="tableActions" [showActions]="true"
     [loading]="false" (edit)="editPermission($event)" (delete)="onDeletePermission($event)">
   </app-table>
 </p-card>
 
-<p-dialog [(visible)]="displayDialog" [style]="{width: '450px'}"
+<p-dialog [(visible)]="displayDialog" [style]="{width: '90vw', maxWidth: '450px'}"
   [header]="isEdit ? 'Edit Permission' : 'Add Permission'" [modal]="true" styleClass="p-fluid">
   <ng-template pTemplate="content">
     <form [formGroup]="addPermissionForm" class="flex flex-column gap-4">

@@ -27,49 +27,49 @@
                         @for (session of assignedSessions; track session) {
                         <div class="bg-white rounded-lg shadow-md p-6 mb-4 border-l-4 border-blue-500 my-3 p-3">
                             <div class="relative">
-                                <div class="absolute top-0 right-0">
-                                    <p-tag [severity]="getSeverity(session.status)"
-                                        [value]="session.status | titlecase"></p-tag>
+                                <div class="flex flex-col-reverse md:flex-row md:items-center md:justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <span class="min-w-[110px] w-1/2 md:w-40 font-bold">Name :</span>
+                                        <span class="font-bold">{{ session.patientName }}</span>
+                                    </div>
+                                    <p-tag [severity]="getSeverity(session.status)" [value]="session.status | titlecase"
+                                        class="mb-1 md:mb-0 w-fit"></p-tag>
                                 </div>
-                                <div class="grid grid-cols-2 gap-x-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
                                     <!-- Left Column -->
                                     <div>
                                         <div class="flex mb-3">
-                                            <span class="w-40 font-bold">Name :</span>
-                                            <span class="font-bold">{{ session.patientName }}</span>
-                                        </div>
-                                        <div class="flex mb-3">
-                                            <span class="w-40">Session Date :</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Session Date :</span>
                                             <span>{{ session.scheduledDate }}</span>
                                         </div>
                                         <div class="flex mb-3">
-                                            <span class="w-40">Time Duration :</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Time Duration :</span>
                                             <span>{{ session.duration }}</span>
                                         </div>
                                         <div class="flex">
-                                            <span class="w-40">Session Number :</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Session Number :</span>
                                             <span>{{ session.sessionNumber }}/{{ session.totalSessions }}</span>
                                         </div>
                                     </div>
                                     <!-- Right Column -->
                                     <div>
                                         <div class="flex mb-3">
-                                            <span class="w-40">Patient ID :</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Patient ID :</span>
                                             <span>{{ session.patientId }}</span>
                                         </div>
                                         <div class="flex mb-3">
-                                            <span class="w-40">Session Time :</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Session Time :</span>
                                             <span>{{ session.scheduledTime }}</span>
                                         </div>
                                         <div class="flex mb-3">
-                                            <span class="w-40">Injury :</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Injury :</span>
                                             <span class="text-blue-600 font-semibold">
                                                 {{session.injury}}
                                             </span>
                                             <!-- <a href="#" class="text-blue-600 font-semibold">{{ session.injury }}</a> -->
                                         </div>
                                         <div class="flex">
-                                            <span class="w-40">Service :</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Service :</span>
                                             <span>{{ session.sessionType }}</span>
                                         </div>
                                     </div>
@@ -83,29 +83,29 @@
                                 <span>{{ session.otherCoaches.join(', ') }}</span>
                             </div>
                             }
-                            <div class="flex gap-2 my-3">
+                            <div class="flex flex-col md:flex-row gap-2 my-3 w-full">
                                 @if (session.status == 'scheduled') {
                                 <ng-container>
                                     <p-button label="Start Session" icon="pi pi-power-off" [raised]="true"
                                         severity="info"
-                                        [styleClass]="'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm'"
+                                        [styleClass]="'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm w-full md:w-auto'"
                                         (click)="updateSessionStatus(session, 'in progress')" />
                                 </ng-container>
                                 }
                                 <p-button label="View Session" icon="pi pi-eye" [raised]="true" severity="warn"
                                     (click)="openSession(session)"
-                                    [styleClass]="'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm'" />
+                                    [styleClass]="'flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm w-full md:w-auto'" />
 
                                 <ng-container
                                     *ngIf="session.status === 'scheduled' || session.status === 'in progress'">
                                     <p-button severity="success" label="Complete Session" icon="pi pi-check-circle"
                                         [raised]="true"
-                                        [styleClass]="'flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm'"
+                                        [styleClass]="'flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm w-full md:w-auto'"
                                         (click)="updateSessionStatus(session, 'completed')" />
 
                                     <p-button severity="danger" label="Cancel Session" icon="pi pi-times-circle"
                                         [raised]="true"
-                                        [styleClass]="'flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm'"
+                                        [styleClass]="'flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm w-full md:w-auto'"
                                         (click)="updateSessionStatus(session, 'not-completed')" />
                                 </ng-container>
                             </div>
@@ -129,47 +129,48 @@
                         @for (s of day.sessions; track s) {
                         <div class="bg-white rounded-lg shadow-md p-6 mb-4 border-l-4 border-blue-500 my-3 p-3">
                             <div class="relative">
-                                <div class="absolute top-0 right-0">
-                                    <p-tag [severity]="getSeverity(s.status)" [value]="s.status | titlecase"></p-tag>
+                                <div class="flex flex-col-reverse md:flex-row md:items-center md:justify-between mb-2">
+                                    <div class="flex items-center">
+                                        <span class="min-w-[110px] w-1/2 md:w-40 font-bold">Name:</span>
+                                        <span class="font-bold">{{ s.patientName }}</span>
+                                    </div>
+                                    <p-tag [severity]="getSeverity(s.status)" [value]="s.status | titlecase"
+                                        class="mb-1 md:mb-0 w-fit"></p-tag>
                                 </div>
-                                <div class="grid grid-cols-2 gap-x-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
                                     <!-- Left Column -->
                                     <div>
                                         <div class="flex mb-3">
-                                            <span class="w-40 font-bold">Name:</span>
-                                            <span class="font-bold">{{ s.patientName }}</span>
-                                        </div>
-                                        <div class="flex mb-3">
-                                            <span class="w-40">Session Date:</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Session Date:</span>
                                             <span>{{ s.scheduledDate }}</span>
                                         </div>
                                         <div class="flex mb-3">
-                                            <span class="w-40">Time Duration:</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Time Duration:</span>
                                             <span>{{ s.duration }}</span>
                                         </div>
                                         <div class="flex">
-                                            <span class="w-40">Session Number:</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Session Number:</span>
                                             <span>{{ s.sessionNumber }}/{{ s.totalSessions }}</span>
                                         </div>
                                     </div>
                                     <!-- Right Column -->
                                     <div>
                                         <div class="flex mb-3">
-                                            <span class="w-40">Patient ID:</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Patient ID:</span>
                                             <span>{{ s.patientId }}</span>
                                         </div>
                                         <div class="flex mb-3">
-                                            <span class="w-40">Session Time:</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Session Time:</span>
                                             <span>{{ s.scheduledTime }}</span>
                                         </div>
                                         <div class="flex mb-3">
-                                            <span class="w-40">Injury:</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Injury:</span>
                                             <span class="text-blue-600 font-semibold">
                                                 {{s.injury}}
                                             </span>
                                         </div>
                                         <div class="flex">
-                                            <span class="w-40">Service:</span>
+                                            <span class="min-w-[110px] w-1/2 md:w-40">Service:</span>
                                             <span>{{ s.sessionType }}</span>
                                         </div>
                                     </div>
@@ -199,7 +200,8 @@
 </section>
 
 <p-dialog closable="false" [header]="'Session details'" [modal]="true" [visible]="isSessionDetails"
-    [style]="{ width: '650px', height: '550px' }" [dismissableMask]="false">
+    [style]="{ width: '100vw', maxWidth: '100vw', minWidth: '0', height: '100vh', maxHeight: '100vh', margin: '0', padding: '0' }"
+    contentStyleClass="responsive-dialog-content" [dismissableMask]="false">
     @if (selectedSession) {
     <div class="p-6">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -228,7 +230,7 @@
                 <p class="mb-2"><strong>Phase {{ selectedSession.treatmentPlan.phase }} </strong> </p>
                 <p class="mb-2"><strong>Goals:</strong> {{ selectedSession.treatmentPlan.goals }}</p>
                 <strong>Exercises:</strong>
-                <ul class="flex flex-row gap-x-8 list-disc items-center mx-3 my-2">
+                <ul class="flex flex-col md:flex-row gap-x-8 list-disc items-start md:items-center mx-3 my-2">
                     @for(ex of selectedSession.treatmentPlan.exercises; track ex){
                     <li class="font-bold">
                         {{ex}}
@@ -258,13 +260,14 @@
             <div class="space-y-4">
                 <div class="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4"
                     *ngFor="let m of selectedSession.treatmentPlan.measurements">
-                    <label class="w-40 text-sm font-medium">{{ m }}:</label>
+                    <label class="min-w-[110px] w-1/2 md:w-40 text-sm font-medium">{{ m }}:</label>
                     <input
                         class="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Enter measurement" />
                 </div>
             </div>
-            <button class="mt-4 flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+            <button
+                class="mt-4 flex items-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 w-full md:w-auto"
                 (click)="saveProgress(selectedSession.id)">Save Progress</button>
         </div>
         <div *ngIf="selectedSession.otherCoaches.length">
@@ -280,6 +283,9 @@
     </div>
     }
     <ng-template #footer>
-        <p-button label="Cancel" [text]="true" severity="danger" (click)="isSessionDetails = false" />
+        <div class="flex flex-col md:flex-row gap-2 w-full">
+            <p-button label="Cancel" [text]="true" severity="danger" (click)="isSessionDetails = false"
+                class="w-full md:w-auto" />
+        </div>
     </ng-template>
 </p-dialog>
