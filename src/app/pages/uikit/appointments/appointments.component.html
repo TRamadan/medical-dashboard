@@ -1,19 +1,21 @@
 <div class="grid grid-cols-12 gap-8 mb-4">
     <div class="col-span-12 md:col-span-6 xl:col-span-3">
-        <div class="card !p-0 overflow-hidden flex flex-col">
+        <div class="card !p-0 overflow-hidden flex flex-col border-0">
             <div class="flex items-center p-6">
                 <i class="pi pi-check !text-5xl text-green-500"></i>
-                <div class="ml-6"><span class="text-green-500 block whitespace-nowrap">Approved appointments</span><span class="text-green-500 block text-4xl font-bold">20</span></div>
+                <div class="ml-6"><span class="text-green-500 block whitespace-nowrap">Approved appointments</span><span
+                        class="text-green-500 block text-4xl font-bold">20</span></div>
             </div>
             <img alt="conversion" class="w-full" src="../../../../assets/users.svg" />
         </div>
     </div>
 
     <div class="col-span-12 md:col-span-6 xl:col-span-3">
-        <div class="card !p-0 overflow-hidden flex flex-col">
+        <div class="card !p-0 overflow-hidden flex flex-col border-0">
             <div class="flex items-center p-6">
                 <i class="pi pi-clock !text-5xl text-orange-500"></i>
-                <div class="ml-6"><span class="text-orange-500 block whitespace-nowrap">Pending appointments</span><span class="text-orange-500 block text-4xl font-bold">10</span></div>
+                <div class="ml-6"><span class="text-orange-500 block whitespace-nowrap">Pending appointments</span><span
+                        class="text-orange-500 block text-4xl font-bold">10</span></div>
             </div>
             <img alt="conversion" class="w-full" src="assets/users.svg" />
         </div>
@@ -30,18 +32,9 @@
     </ng-template>
 </p-toolbar>
 
-<p-table
-    #dt
-    [value]="allAppointments()"
-    [rows]="10"
-    [paginator]="true"
-    [tableStyle]="{ 'min-width': '75rem' }"
-    [rowHover]="true"
-    dataKey="id"
-    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
-    [showCurrentPageReport]="true"
-    [rowsPerPageOptions]="[10, 20, 30]"
->
+<p-table #dt [value]="allAppointments()" [rows]="10" [paginator]="true" [tableStyle]="{ 'min-width': '75rem' }"
+    [rowHover]="true" dataKey="id" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+    [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]">
     <ng-template #caption>
         <div class="flex items-center justify-between">
             <h5 class="m-0">Manage Appointments</h5>

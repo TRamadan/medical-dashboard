@@ -1,1 +1,14 @@
-<p>reports-config works!</p>
+<p-card>
+    <app-tabs [tabs]="[
+{ label: 'Reports configuration', template: reportsConfigTab },
+{ label: 'Reservation form configuration', template: formConfigTab },
+
+]"></app-tabs>
+    <ng-template #reportsConfigTab>
+        <app-reports-configuration></app-reports-configuration>
+    </ng-template>
+
+    <ng-template #formConfigTab>
+        reservation form config goes here
+    </ng-template>
+</p-card>

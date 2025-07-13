@@ -1,0 +1,828 @@
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    overflow-x: hidden;
+    width: 100%;
+}
+
+/* Global Styles */
+section {
+    min-height: 100vh;
+    padding: 0.5rem;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+.container {
+    width: 100%;
+    max-width: 1400px;
+    margin: 0 auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    background: linear-gradient(135deg, #3A96FF, #235A99);
+    color: white;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    width: 100%;
+}
+
+.header h1 {
+    font-size: clamp(1.2rem, 3.5vw, 2.5rem);
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+}
+
+/* PrimeNG Tab Overrides */
+.p-tabview {
+    width: 100%;
+    overflow: hidden;
+}
+
+.p-tabview-nav {
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.p-tabview-nav li {
+    flex: 1;
+    min-width: fit-content;
+}
+
+.p-tabpanel {
+    padding: 1rem !important;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+/* Session Cards */
+.session-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-left: 4px solid #2196F3;
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.session-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Session Card Grid - Responsive */
+.session-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+.session-column {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.session-field {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.session-field-label {
+    min-width: 7rem;
+    font-weight: 600;
+    color: #374151;
+    flex-shrink: 0;
+    font-size: clamp(0.75rem, 2vw, 0.9rem);
+}
+
+.session-field-value {
+    color: #1f2937;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    flex: 1;
+    font-size: clamp(0.75rem, 2vw, 0.9rem);
+}
+
+/* Status Tag Positioning */
+.session-status {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    z-index: 10;
+}
+
+/* Collaborating Coaches Badge */
+.coaches-badge {
+    margin: 1rem 0;
+    padding: 0.75rem;
+    background: #2196F3;
+    color: white;
+    border-radius: 6px;
+    font-size: clamp(0.75rem, 2vw, 0.9rem);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    word-break: break-word;
+}
+
+.coaches-badge-label {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.coaches-list {
+    flex: 1;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    width: 100%;
+}
+
+/* PrimeNG Button Overrides */
+.action-buttons .p-button {
+    flex: 0 1 auto;
+    min-width: fit-content;
+    font-size: clamp(0.7rem, 2vw, 0.875rem) !important;
+    padding: 0.5rem 0.75rem !important;
+    white-space: nowrap;
+}
+
+.action-buttons .p-button .p-button-label {
+    font-size: inherit !important;
+}
+
+/* Dialog Responsive */
+.p-dialog {
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    margin: 1rem !important;
+}
+
+.p-dialog .p-dialog-content {
+    padding: 1rem !important;
+    overflow-y: auto;
+    max-height: 70vh;
+}
+
+.dialog-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    width: 100%;
+}
+
+.dialog-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.dialog-section h3 {
+    font-size: clamp(1rem, 2.5vw, 1.125rem);
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: #1f2937;
+}
+
+.dialog-section p {
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+    word-break: break-word;
+}
+
+/* Treatment Plan Section */
+.treatment-plan {
+    background: #f9fafb;
+    padding: 1rem;
+    border-radius: 6px;
+    margin: 1rem 0;
+    width: 100%;
+    overflow: hidden;
+}
+
+.treatment-plan ul {
+    margin-top: 0.5rem;
+    padding-left: 1.25rem;
+}
+
+.treatment-plan li {
+    margin-bottom: 0.25rem;
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+    word-break: break-word;
+}
+
+/* Progress Measurements */
+.measurements-section {
+    margin: 1rem 0;
+    width: 100%;
+}
+
+.measurement-field {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    width: 100%;
+}
+
+.measurement-label {
+    min-width: 8rem;
+    font-weight: 500;
+    color: #374151;
+    flex-shrink: 0;
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+}
+
+.measurement-input {
+    flex: 1;
+    padding: 0.6rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: clamp(0.8rem, 2vw, 0.875rem);
+    transition: border-color 0.2s ease;
+    width: 100%;
+    min-width: 0;
+}
+
+.measurement-input:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+/* Collaboration Section */
+.collaboration-section {
+    background: #eff6ff;
+    padding: 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+    width: 100%;
+    overflow: hidden;
+}
+
+.collaboration-section h3 {
+    color: #1e40af;
+    margin-bottom: 0.75rem;
+    font-size: clamp(1rem, 2.5vw, 1.125rem);
+}
+
+.collaboration-section ul {
+    margin: 0.5rem 0 0.75rem 1.25rem;
+}
+
+.collaboration-section li {
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+    word-break: break-word;
+}
+
+.collaboration-note {
+    font-size: clamp(0.7rem, 1.8vw, 0.75rem);
+    color: #1d4ed8;
+    font-style: italic;
+}
+
+/* Empty State */
+.empty-state {
+    background: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 6px;
+    text-align: center;
+    color: #6b7280;
+    margin: 1rem 0;
+    font-size: clamp(0.9rem, 2.2vw, 1rem);
+}
+
+/* Save Progress Button */
+.save-progress-btn {
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    width: 100%;
+    max-width: 200px;
+}
+
+.save-progress-btn:hover {
+    background: #059669;
+}
+
+/* Ultra Small Devices (280px - 374px) - Older small phones */
+@media (max-width: 374px) {
+    section {
+        padding: 0.25rem;
+    }
+
+    .container {
+        border-radius: 6px;
+        margin: 0;
+    }
+
+    .header {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .header h1 {
+        font-size: 1.1rem;
+        line-height: 1.1;
+    }
+
+    .p-tabpanel {
+        padding: 0.5rem !important;
+    }
+
+    .session-card {
+        padding: 0.75rem;
+        border-radius: 6px;
+        margin-bottom: 0.75rem;
+    }
+
+    .session-grid {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .session-field {
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: flex-start;
+    }
+
+    .session-field-label {
+        min-width: auto;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .session-field-value {
+        font-size: 0.75rem;
+        padding-left: 0;
+    }
+
+    .session-status {
+        position: static;
+        margin-bottom: 0.75rem;
+        align-self: flex-start;
+    }
+
+    .coaches-badge {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+        padding: 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .action-buttons .p-button {
+        width: 100% !important;
+        justify-content: center !important;
+        font-size: 0.75rem !important;
+        padding: 0.6rem !important;
+        min-height: 2.5rem;
+    }
+
+    .p-dialog {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    .dialog-row {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .measurement-field {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .measurement-label {
+        min-width: auto;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    .measurement-input {
+        width: 100%;
+        font-size: 0.75rem;
+        padding: 0.5rem;
+    }
+
+    .save-progress-btn {
+        font-size: 0.75rem;
+        padding: 0.6rem;
+        max-width: none;
+    }
+}
+
+/* Small Devices (375px - 479px) - Modern small phones */
+@media (min-width: 375px) and (max-width: 479px) {
+    section {
+        padding: 0.5rem;
+    }
+
+    .session-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .session-field {
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: flex-start;
+    }
+
+    .session-field-label {
+        min-width: auto;
+        font-size: 0.8rem;
+    }
+
+    .session-field-value {
+        font-size: 0.8rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .action-buttons .p-button {
+        width: 100% !important;
+        justify-content: center !important;
+        font-size: 0.8rem !important;
+        padding: 0.65rem !important;
+    }
+
+    .dialog-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .measurement-field {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+
+    .measurement-label {
+        min-width: auto;
+        font-size: 0.8rem;
+    }
+}
+
+/* Medium Small Devices (480px - 575px) - Large phones */
+@media (min-width: 480px) and (max-width: 575px) {
+    .session-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .session-field {
+        flex-direction: row;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+
+    .session-field-label {
+        min-width: 6rem;
+        font-size: 0.8rem;
+    }
+
+    .action-buttons .p-button {
+        flex: 1;
+        min-width: 0;
+        font-size: 0.8rem !important;
+    }
+
+    .dialog-row {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .measurement-field {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+}
+
+/* Small Tablets (576px - 767px) */
+@media (min-width: 576px) and (max-width: 767px) {
+    .session-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .session-field {
+        flex-direction: row;
+        gap: 0.5rem;
+    }
+
+    .session-field-label {
+        min-width: 7rem;
+    }
+
+    .action-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .action-buttons .p-button {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .dialog-row {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+    }
+
+    .measurement-field {
+        flex-direction: row;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .measurement-label {
+        min-width: 8rem;
+    }
+}
+
+/* Tablets (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .session-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .session-field-label {
+        min-width: 6rem;
+    }
+
+    .action-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+
+    .action-buttons .p-button {
+        flex: 0 1 auto;
+        min-width: 100px;
+    }
+
+    .p-dialog {
+        width: 90vw !important;
+        max-width: 700px !important;
+    }
+
+    .dialog-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+}
+
+/* Large Tablets/Small Desktops (992px - 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .container {
+        max-width: 95%;
+    }
+
+    .session-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    .session-card {
+        padding: 1.25rem;
+    }
+
+    .p-dialog {
+        width: 80vw !important;
+        max-width: 800px !important;
+    }
+}
+
+/* Desktop (1200px - 1399px) */
+@media (min-width: 1200px) and (max-width: 1399px) {
+    .container {
+        max-width: 90%;
+    }
+
+    .session-grid {
+        gap: 2rem;
+    }
+
+    .session-card {
+        padding: 1.5rem;
+    }
+
+    .p-dialog {
+        width: 70vw !important;
+        max-width: 900px !important;
+    }
+}
+
+/* Large Desktop (1400px+) */
+@media (min-width: 1400px) {
+    .session-grid {
+        gap: 2.5rem;
+    }
+
+    .session-card {
+        padding: 2rem;
+    }
+
+    .session-field-label {
+        min-width: 9rem;
+    }
+
+    .p-dialog {
+        width: 60vw !important;
+        max-width: 1000px !important;
+    }
+}
+
+/* Portrait Orientation Specific */
+@media (orientation: portrait) and (max-width: 767px) {
+    .p-tabview-nav {
+        flex-direction: column;
+    }
+
+    .p-tabview-nav li {
+        width: 100%;
+        margin-bottom: 0.25rem;
+    }
+
+    .session-status {
+        position: static;
+        margin-bottom: 0.75rem;
+        align-self: flex-start;
+    }
+}
+
+/* Landscape Orientation for Mobile */
+@media (orientation: landscape) and (max-height: 500px) {
+    .header {
+        padding: 0.75rem 1rem;
+    }
+
+    .header h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .p-dialog {
+        height: 95vh !important;
+        max-height: 95vh !important;
+    }
+
+    .p-dialog .p-dialog-content {
+        max-height: 60vh;
+    }
+}
+
+/* Print Styles */
+@media print {
+
+    .action-buttons,
+    .p-button,
+    .header,
+    .p-tabview-nav {
+        display: none !important;
+    }
+
+    .session-card {
+        break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+        margin-bottom: 1rem;
+    }
+
+    .container {
+        box-shadow: none;
+        background: white;
+        max-width: none;
+        width: 100%;
+    }
+
+    .session-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    body {
+        font-size: 12pt;
+        line-height: 1.4;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .session-card {
+        border: 2px solid #000;
+        background: #fff;
+    }
+
+    .coaches-badge {
+        border: 2px solid #fff;
+        background: #000;
+        color: #fff;
+    }
+
+    .treatment-plan,
+    .collaboration-section {
+        border: 2px solid #666;
+        background: #f0f0f0;
+    }
+
+    .p-button {
+        border: 2px solid #000 !important;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+
+    .session-card,
+    .measurement-input,
+    .save-progress-btn {
+        transition: none;
+    }
+
+    .session-card:hover {
+        transform: none;
+    }
+}
+
+/* Force Hardware Acceleration for Smooth Scrolling */
+.p-dialog .p-dialog-content,
+.p-tabpanel {
+    transform: translateZ(0);
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Ensure text remains readable at all zoom levels */
+@media (min-resolution: 192dpi) {
+
+    .session-field-label,
+    .session-field-value,
+    .p-button-label {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+.bg-gray {
+    background-color: #F0EFEF !important;
+}

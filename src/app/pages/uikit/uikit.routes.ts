@@ -20,6 +20,7 @@ import { JoinOurTeamComponent } from './join-our-team/join-our-team.component';
 import { ReportsConfigComponent } from './reports-config/reports-config.component';
 import { CertificationsComponent } from './certifications/certifications.component';
 import { SpecialitiesComponent } from './specialities/specialities.component';
+import { ContactUsComponent } from './contact-us/contact-us.component';
 export default [
     {
         path: 'adduser',
@@ -114,7 +115,7 @@ export default [
     {
         path: 'contactus',
         data: { breadcrumb: 'Join us' },
-        component: JoinOurTeamComponent
+        component: ContactUsComponent
     },
     {
         path: 'reportconfig',

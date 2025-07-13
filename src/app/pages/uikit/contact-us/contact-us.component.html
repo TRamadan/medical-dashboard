@@ -1,3 +1,320 @@
-<p>
-  contact-us works!
-</p>
+<!-- Feature Toggle -->
+<div class="feature-toggle">
+  <button type="button" class="toggle-btn" [class.active]="activeFeature === 'polygon'"
+    (click)="setActiveFeature('polygon')">
+    <i class="pi pi-image"></i>
+    Muscle Polygon Tool
+  </button>
+  <button type="button" class="toggle-btn" [class.active]="activeFeature === 'website'"
+    (click)="setActiveFeature('website')">
+    <i class="pi pi-globe"></i>
+    Website Generator
+  </button>
+</div>
+
+<!-- Muscle Polygon Feature -->
+<div class="feature-section" *ngIf="activeFeature === 'polygon'">
+  <button type="button" class="region-select-btn" (click)="startPolygonSelection()">Select Muscle Polygon</button>
+  <br /><button type="button" class="region-select-btn" (click)="finishPolygon()"
+    [disabled]="!polygonSelectionActive">Finish
+    Polygon</button>
+  <br />
+  <button type="button" class="region-select-btn" (click)="downloadPolygons()">Download Polygons JSON</button>
+
+  <div class="container">
+    <h2>Hover over the image to see the coordinates</h2>
+
+    <div class="coords-display">
+      Coordinates: (X: {{ mouseX }}, Y: {{ mouseY }})
+    </div>
+    <div class="hovered-part">
+      Hovered Part: {{ hoveredPart }}
+    </div>
+
+    <div class="image-map-container" (mousemove)="onMouseMove($event)">
+      <img src="../../../../assets/Capture.PNG" alt="Anatomical illustration of the human muscular system"
+        (click)="onImageClick($event)" (load)="onImageLoad($event)" />
+
+      <!-- SVG overlay for all saved polygons -->
+      <svg [attr.width]="imageWidth" [attr.height]="imageHeight" class="polygon-overlay">
+        @for(part of bodyParts; track part){
+        @if(part.polygon && part.polygon.length > 1){
+        <polygon [attr.points]="getPolygonPointsString(part.polygon)"
+          [attr.fill]="hoveredPart === part.name ? 'rgba(255,0,0,0.5)' : 'rgba(0,123,255,0.3)'"
+          [attr.stroke]="hoveredPart === part.name ? 'red' : '#007bff'" stroke-width="2" />
+        @for(pt of part.polygon; track pt){
+        <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="4" fill="#007bff" />
+        }
+        @if(hoveredPart === part.name){
+        <!-- Show name label at first point of polygon -->
+        <text [attr.x]="part.polygon[0].x + 10" [attr.y]="part.polygon[0].y - 10" fill="red" font-size="16"
+          font-weight="bold">
+          {{ part.name }}
+        </text>
+        }
+        }
+        }
+      </svg>
+
+      <!-- SVG overlay for polygon selection (in-progress) -->
+      @if(polygonSelectionActive && currentPolygon.length > 1){
+      <svg [attr.width]="imageWidth" [attr.height]="imageHeight" class="polygon-overlay">
+        <polygon [attr.points]="polygonPointsString" fill="rgba(0,123,255,0.3)" stroke="#007bff" stroke-width="2" />
+        @for(pt of currentPolygon; track pt){
+        <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="4" fill="#007bff" />
+        }
+      </svg>
+      }
+
+      @for(part of bodyParts; track part){
+      @if(part.x_min !== undefined && part.x_max !== undefined && part.y_min !== undefined && part.y_max !== undefined)
+      {
+      <div class="body-part-overlay" [class.hovered]="hoveredPart === part.name" [style.left.px]="part.x_min"
+        [style.top.px]="part.y_min" [style.width.px]="part.x_max - part.x_min"
+        [style.height.px]="part.y_max - part.y_min"></div>
+      }
+
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Website Generator Feature -->
+<div class="feature-section" *ngIf="activeFeature === 'website'">
+  <div class="website-generator-container">
+    <div class="generator-header">
+      <h2>Drag & Drop Website Generator</h2>
+      <p>Create a professional website by dragging and dropping components</p>
+    </div>
+
+    <div class="generator-layout">
+      <!-- Component Library Sidebar -->
+      <div class="component-library">
+        <h3>Components</h3>
+        <div class="component-categories">
+          <div class="category">
+            <h4>Layout</h4>
+            <div class="component-item" draggable="true" (dragstart)="onDragStart($event, 'header')"
+              (click)="addComponent('header')">
+              <i class="pi pi-window-maximize"></i>
+              <span>Header</span>
+            </div>
+            <div class="component-item" draggable="true" (dragstart)="onDragStart($event, 'footer')"
+              (click)="addComponent('footer')">
+              <i class="pi pi-window-minimize"></i>
+              <span>Footer</span>
+            </div>
+            <div class="component-item" draggable="true" (dragstart)="onDragStart($event, 'sidebar')"
+              (click)="addComponent('sidebar')">
+              <i class="pi pi-bars"></i>
+              <span>Sidebar</span>
+            </div>
+          </div>
+
+          <div class="category">
+            <h4>Content</h4>
+            <div class="component-item" draggable="true" (dragstart)="onDragStart($event, 'text')"
+              (click)="addComponent('text')">
+              <i class="pi pi-file-text"></i>
+              <span>Text Block</span>
+            </div>
+            <div class="component-item" draggable="true" (dragstart)="onDragStart($event, 'image')"
+              (click)="addComponent('image')">
+              <i class="pi pi-image"></i>
+              <span>Image</span>
+            </div>
+            <div class="component-item" draggable="true" (dragstart)="onDragStart($event, 'video')"
+              (click)="addComponent('video')">
+              <i class="pi pi-video"></i>
+              <span>Video</span>
+            </div>
+          </div>
+
+          <div class="category">
+            <h4>Interactive</h4>
+            <div class="component-item" draggable="true" (dragstart)="onDragStart($event, 'button')"
+              (click)="addComponent('button')">
+              <i class="pi pi-link"></i>
+              <span>Button</span>
+            </div>
+            <div class="component-item" draggable="true" (dragstart)="onDragStart($event, 'form')"
+              (click)="addComponent('form')">
+              <i class="pi pi-list"></i>
+              <span>Contact Form</span>
+            </div>
+            <div class="component-item" draggable="true" (dragstart)="onDragStart($event, 'gallery')"
+              (click)="addComponent('gallery')">
+              <i class="pi pi-images"></i>
+              <span>Gallery</span>
+            </div>
+          </div>
+
+          <div class="category">
+            <h4>Navigation</h4>
+            <div class="component-item" draggable="true" (dragstart)="onDragStart($event, 'navbar')"
+              (click)="addComponent('navbar')">
+              <i class="pi pi-bars"></i>
+              <span>Navigation</span>
+            </div>
+            <div class="component-item" draggable="true" (dragstart)="onDragStart($event, 'breadcrumb')"
+              (click)="addComponent('breadcrumb')">
+              <i class="pi pi-chevron-right"></i>
+              <span>Breadcrumb</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Website Canvas -->
+      <div class="website-canvas" (dragover)="onDragOver($event)" (drop)="onDrop($event)" (click)="deselectAll()">
+        <div class="canvas-header">
+          <h3>Website Preview</h3>
+          <div class="canvas-controls">
+            <button class="control-btn" (click)="previewWebsite()">
+              <i class="pi pi-eye"></i> Preview
+            </button>
+            <button class="control-btn" (click)="exportWebsite()">
+              <i class="pi pi-download"></i> Export
+            </button>
+            <button class="control-btn" (click)="clearCanvas()">
+              <i class="pi pi-trash"></i> Clear
+            </button>
+          </div>
+        </div>
+
+        <div class="canvas-content" #canvasContent>
+          @for(component of websiteComponents; track component.id; let i = $index){
+          <div class="website-component" [class.selected]="selectedComponent?.id === component.id"
+            [class.dragging]="draggedComponent?.id === component.id" (click)="selectComponent(component, $event)"
+            (mousedown)="startDrag($event, component)">
+
+            <!-- Component Header -->
+            <div class="component-header">
+              <span class="component-type">{{ component.type | titlecase }}</span>
+              <div class="component-actions">
+                <button class="action-btn" (click)="editComponent(component, $event)">
+                  <i class="pi pi-pencil"></i>
+                </button>
+                <button class="action-btn" (click)="duplicateComponent(component, $event)">
+                  <i class="pi pi-copy"></i>
+                </button>
+                <button class="action-btn" (click)="deleteComponent(component, $event)">
+                  <i class="pi pi-trash"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Component Content -->
+            <div class="component-content" [ngSwitch]="component.type">
+              <!-- Header Component -->
+              <div *ngSwitchCase="'header'" class="header-component">
+                <div class="header-content">
+                  <h1>{{ component.data.title || 'Your Website Title' }}</h1>
+                  <p>{{ component.data.subtitle || 'Your tagline here' }}</p>
+                </div>
+              </div>
+
+              <!-- Text Component -->
+              <div *ngSwitchCase="'text'" class="text-component">
+                <p>{{ component.data.content || 'Add your text content here...' }}</p>
+              </div>
+
+              <!-- Image Component -->
+              <div *ngSwitchCase="'image'" class="image-component">
+                <img [src]="component.data.src || 'assets/placeholder-image.jpg'"
+                  [alt]="component.data.alt || 'Image'" />
+              </div>
+
+              <!-- Button Component -->
+              <div *ngSwitchCase="'button'" class="button-component">
+                <button class="generated-btn">{{ component.data.text || 'Click Me' }}</button>
+              </div>
+
+              <!-- Form Component -->
+              <div *ngSwitchCase="'form'" class="form-component">
+                <form class="contact-form">
+                  <input type="text" placeholder="Name" />
+                  <input type="email" placeholder="Email" />
+                  <textarea placeholder="Message"></textarea>
+                  <button type="submit">Send Message</button>
+                </form>
+              </div>
+
+              <!-- Gallery Component -->
+              <div *ngSwitchCase="'gallery'" class="gallery-component">
+                <div class="gallery-grid">
+                  @for(item of component.data.items || [1,2,3,4]; track item){
+                  <div class="gallery-item">
+                    <img src="assets/placeholder-image.jpg" alt="Gallery Image" />
+                  </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Navigation Component -->
+              <div *ngSwitchCase="'navbar'" class="navbar-component">
+                <nav class="generated-nav">
+                  <a href="#" class="nav-link">Home</a>
+                  <a href="#" class="nav-link">About</a>
+                  <a href="#" class="nav-link">Services</a>
+                  <a href="#" class="nav-link">Contact</a>
+                </nav>
+              </div>
+
+              <!-- Footer Component -->
+              <div *ngSwitchCase="'footer'" class="footer-component">
+                <div class="footer-content">
+                  <p>&copy; 2024 Your Company. All rights reserved.</p>
+                </div>
+              </div>
+
+              <!-- Default Component -->
+              <div *ngSwitchDefault class="default-component">
+                <p>{{ component.type | titlecase }} Component</p>
+              </div>
+            </div>
+          </div>
+          }
+
+          <!-- Empty State -->
+          @if(websiteComponents.length === 0){
+          <div class="empty-canvas">
+            <i class="pi pi-plus-circle"></i>
+            <p>Drag components here to start building your website</p>
+          </div>
+          }
+        </div>
+      </div>
+
+      <!-- Properties Panel -->
+      <div class="properties-panel" *ngIf="selectedComponent">
+        <h3>Properties</h3>
+        <div class="property-group">
+          <label>Component Type</label>
+          <input type="text" [value]="selectedComponent.type" readonly />
+        </div>
+
+        <div class="property-group" *ngIf="selectedComponent?.data">
+          @for(prop of getComponentProperties(selectedComponent!); track prop.key){
+          <label>{{ prop.label }}</label>
+          <input *ngIf="prop.type === 'text'" type="text" [value]="selectedComponent!.data[prop.key]"
+            (input)="updateComponentProperty(prop.key, $event)" />
+          <textarea *ngIf="prop.type === 'textarea'" [value]="selectedComponent!.data[prop.key]"
+            (input)="updateComponentProperty(prop.key, $event)"></textarea>
+          <input *ngIf="prop.type === 'color'" type="color" [value]="selectedComponent!.data[prop.key]"
+            (input)="updateComponentProperty(prop.key, $event)" />
+          }
+        </div>
+
+        <div class="property-group">
+          <label>Styling</label>
+          <div class="style-controls">
+            <input type="text" placeholder="Background Color"
+              (input)="updateComponentStyle('backgroundColor', $event)" />
+            <input type="text" placeholder="Text Color" (input)="updateComponentStyle('color', $event)" />
+            <input type="text" placeholder="Padding (px)" (input)="updateComponentStyle('padding', $event)" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -1,0 +1,599 @@
+.container {
+    /* Basic styling for your main container if needed */
+    padding: 20px;
+    text-align: center;
+}
+
+.coords-display,
+.hovered-part {
+    margin-top: 10px;
+    font-family: monospace;
+    color: #333;
+}
+
+.image-map-container {
+    position: relative;
+    /* Essential for positioning the overlays */
+    display: inline-block;
+    /* Makes the container wrap its content (the image) */
+    /* Ensure the container has the same dimensions as your image or adjust as needed */
+    /* For example, if Capture.PNG is 800px wide: */
+    /* width: 800px; */
+    /* height: 600px; */
+    /* Adjust height based on your image */
+}
+
+.image-map-container img {
+    display: block;
+    /* Removes any extra space below the image */
+    max-width: 100%;
+    /* Ensures the image is responsive */
+    height: auto;
+}
+
+.body-part-overlay {
+    position: absolute;
+    background-color: rgba(0, 123, 255, 0.2);
+    /* A semi-transparent blue by default */
+    border: 1px solid transparent;
+    /* Optional: a subtle border */
+    cursor: pointer;
+    /* Indicates it's clickable/interactive */
+    pointer-events: none;
+    /* VERY IMPORTANT: Allows mouse events to pass through to the image-map-container */
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    /* Smooth transition for hover effect */
+}
+
+.polygon-overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Feature Toggle Styles */
+.feature-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+    padding: 20px;
+}
+
+.toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    transition: all 0.2s ease;
+}
+
+.toggle-btn:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.toggle-btn.active {
+    background: #007bff;
+    border-color: #007bff;
+    color: white;
+}
+
+.toggle-btn i {
+    font-size: 16px;
+}
+
+.feature-section {
+    margin-bottom: 30px;
+}
+
+/* Website Generator Styles */
+.website-generator-container {
+    margin-top: 40px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.generator-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.generator-header h2 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.generator-header p {
+    color: #666;
+    font-size: 16px;
+}
+
+.generator-layout {
+    display: grid;
+    grid-template-columns: 250px 1fr 300px;
+    gap: 20px;
+    min-height: 600px;
+}
+
+/* Component Library */
+.component-library {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+}
+
+.component-library h3 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 18px;
+}
+
+.component-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.category h4 {
+    margin-bottom: 10px;
+    color: #555;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.component-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    background: #f8f9fa;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.component-item:hover {
+    background: #e9ecef;
+    border-color: #007bff;
+    transform: translateY(-1px);
+}
+
+.component-item:active {
+    transform: translateY(0);
+}
+
+.component-item i {
+    font-size: 16px;
+    color: #007bff;
+}
+
+.component-item span {
+    font-size: 14px;
+    color: #333;
+}
+
+/* Website Canvas */
+.website-canvas {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    min-height: 600px;
+}
+
+.canvas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.canvas-header h3 {
+    margin: 0;
+    color: #333;
+}
+
+.canvas-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.control-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s ease;
+}
+
+.control-btn:hover {
+    background: #0056b3;
+}
+
+.control-btn i {
+    font-size: 14px;
+}
+
+.canvas-content {
+    flex: 1;
+    padding: 20px;
+    min-height: 500px;
+    position: relative;
+    background: #fafafa;
+}
+
+.empty-canvas {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #999;
+    text-align: center;
+}
+
+.empty-canvas i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    color: #ccc;
+}
+
+.empty-canvas p {
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Website Components */
+.website-component {
+    background: white;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.website-component:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.website-component.selected {
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.website-component.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+.component-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+    border-radius: 6px 6px 0 0;
+}
+
+.component-type {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.component-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.action-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: transparent;
+    color: #666;
+    cursor: pointer;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background: #e9ecef;
+    color: #333;
+}
+
+.action-btn i {
+    font-size: 12px;
+}
+
+.component-content {
+    padding: 15px;
+}
+
+/* Component Specific Styles */
+.header-component {
+    text-align: center;
+    padding: 20px;
+}
+
+.header-component h1 {
+    margin: 0 0 10px 0;
+    font-size: 24px;
+    color: #333;
+}
+
+.header-component p {
+    margin: 0;
+    color: #666;
+    font-size: 16px;
+}
+
+.text-component p {
+    margin: 0;
+    line-height: 1.6;
+    color: #333;
+}
+
+.image-component img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+
+.button-component {
+    text-align: center;
+}
+
+.generated-btn {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s ease;
+}
+
+.generated-btn:hover {
+    background: #0056b3;
+}
+
+.form-component {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.contact-form input,
+.contact-form textarea {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.contact-form textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.contact-form button {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.gallery-component {
+    padding: 10px;
+}
+
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.navbar-component {
+    padding: 10px 0;
+}
+
+.generated-nav {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.nav-link {
+    text-decoration: none;
+    color: #333;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+    color: #007bff;
+}
+
+.footer-component {
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+}
+
+.footer-content p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Properties Panel */
+.properties-panel {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    height: fit-content;
+}
+
+.properties-panel h3 {
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 18px;
+}
+
+.property-group {
+    margin-bottom: 20px;
+}
+
+.property-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #555;
+}
+
+.property-group input,
+.property-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.property-group textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+.style-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.style-controls input {
+    font-size: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .generator-layout {
+        grid-template-columns: 200px 1fr 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .generator-layout {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .component-library,
+    .properties-panel {
+        order: 2;
+    }
+
+    .website-canvas {
+        order: 1;
+    }
+
+    .canvas-header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+
+    .canvas-controls {
+        justify-content: center;
+    }
+
+    .component-item {
+        padding: 10px;
+    }
+
+    .component-item span {
+        font-size: 13px;
+    }
+}
+
+/* Drag and Drop Visual Feedback */
+.website-canvas.drag-over {
+    background: #e3f2fd;
+    border: 2px dashed #007bff;
+}
+
+.component-item.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+}
+
+/* Animation for component addition */
+@keyframes componentAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.website-component {
+    animation: componentAppear 0.3s ease-out;
+}

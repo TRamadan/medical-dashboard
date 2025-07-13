@@ -153,7 +153,7 @@ export class AppMenu {
                 ]
             },
             {
-                label: 'Report configuration',
+                label: 'Reports and forms configuration',
                 items: [
                     {
                         label: 'reports',

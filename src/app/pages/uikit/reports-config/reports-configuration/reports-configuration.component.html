@@ -1,0 +1,89 @@
+<p-toolbar styleClass="mb-6">
+    <ng-template #start>
+        <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openAddReportDialog()" />
+    </ng-template>
+
+    <ng-template #end>
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+    </ng-template>
+</p-toolbar>
+
+<p-card>
+    <h3>Users tables</h3>
+    <app-patients-report></app-patients-report>
+</p-card>
+
+<!-- here is the dialog needed to add a new report-->
+<p-dialog [(visible)]="reportDialog" [header]="''" [modal]="true" contentStyleClass="responsive-dialog-content"
+    [style]="{width : '60rem', height : '40rem'}">
+    <ng-template pTemplate="header">
+        <div class="flex items-center justify-between px-2 py-2 md:px-4 md:py-3 w-full">
+            <span class="text-base md:text-lg font-semibold truncate">Create new report</span>
+        </div>
+    </ng-template>
+    <p-card>
+        @if(!isDelete){
+        <form [formGroup]="reportConfigForm">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                <div>
+                    <p-floatlabel variant="on">
+                        <input id="reportName" pInputText formControlName="reportName" />
+                        <label for="reportName">Report name</label>
+                    </p-floatlabel>
+                </div>
+
+                <div>
+                    <p-floatlabel class="w-full md:w-56" variant="on">
+                        <p-select inputId="on_label" [options]="reportTemplates" formControlName="reportTemplate"
+                            optionLabel="name" optionValue="id" class="w-full" (onChange)="onTemplateChange()" />
+                        <label for="on_label">Report template</label>
+                    </p-floatlabel>
+                </div>
+
+                <div class="flex flex-row items-center gap-2">
+                    <label for="on_label">Save template for later</label>
+                    <p-toggleswitch formControlName="isSavedForLater" (onChange)="onToggleChange()" />
+                </div>
+
+                @if (reportConfigForm.get('isSavedForLater')?.value) {
+                <div class="mt-3">
+                    <p-floatlabel variant="on">
+                        <input id="templateName" pInputText formControlName="templateName" />
+                        <label for="templateName">Template name</label>
+                    </p-floatlabel>
+                </div>
+                }
+            </div>
+
+            <!-- Template Details Chips -->
+            @if (selectedTemplateDetails.length > 0) {
+            <div class="mt-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Template Details:</label>
+                <div class="flex flex-wrap gap-2">
+                    @for (detail of selectedTemplateDetails; track detail.id) {
+                    <span
+                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                        {{ detail.name }}
+                    </span>
+                    }
+                </div>
+            </div>
+            }
+        </form>
+        }
+
+        @else {
+        <p class="text-center">
+            Are you sure to disable the selected report config ?
+        </p>
+        }
+    </p-card>
+
+    <!-- <ng-template pTemplate="footer">
+        <div class="flex flex-col gap-2 md:flex-row md:justify-end md:gap-4 w-full px-2 py-2">
+            <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog();" class="w-full md:w-auto" />
+            <p-button label="Save" [disabled]="addNewUserForm.invalid" [outlined]="true" severity="success"
+                (onClick)="isEdit ?  updateSelectedUser():addNewUser()" class="w-full md:w-auto" />
+        </div>
+    </ng-template> -->
+</p-dialog>
