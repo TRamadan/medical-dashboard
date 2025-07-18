@@ -92,7 +92,7 @@ export class TableComponent {
   }
 
   onViewDetails(row: any) {
-    this.details.emit(row);
+    row.showDetails = !row.showDetails;
   }
 
   onAddDetails(row: any) {

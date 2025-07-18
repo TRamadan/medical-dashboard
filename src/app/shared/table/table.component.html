@@ -68,11 +68,21 @@
                                 (click)="onEdit(row)"></button>
                             <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm"
                                 (click)="onDelete(row)"></button>
+
                             @if(isAddDetails){
                             <button pButton icon="pi pi-plus" class="p-button-rounded p-button-info p-button-sm"
                                 (click)="onAddDetails(row)"></button>
                             }
                         </ng-container>
+                    </div>
+                </td>
+            </tr>
+            <!-- Details Row -->
+            <tr *ngIf="row.showDetails">
+                <td [attr.colspan]="headers.length + (showCheckbox ? 1 : 0) + (showSpotsColumn ? 1 : 0) + 1">
+                    <div class="p-3 bg-gray-50 border border-gray-200 rounded">
+                        <strong>Details:</strong>
+                        <pre>{{ row | json }}</pre>
                     </div>
                 </td>
             </tr>
