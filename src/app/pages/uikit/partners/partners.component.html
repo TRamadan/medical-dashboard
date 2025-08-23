@@ -23,8 +23,8 @@
       <label for="image">Partner Image</label>
       <p-fileUpload mode="basic" chooseLabel="Choose Image" [auto]="true" accept="image/*" [maxFileSize]="1000000"
         (onSelect)="onImageUpload($event)"></p-fileUpload>
-      @if(addPartnerForm.get('imageUrl')?.value) {
-      <img [src]="addPartnerForm.get('imageUrl')?.value" alt="Preview" class="mt-2 w-32 h-32 object-cover rounded-md">
+      @if(uploadResponse) {
+      <img [src]="uploadResponse" alt="Preview" class="mt-2 w-32 h-32 object-cover rounded-md">
       }
     </div>
   </form>

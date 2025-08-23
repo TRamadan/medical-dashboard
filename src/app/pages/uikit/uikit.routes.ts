@@ -21,6 +21,12 @@ import { ReportsConfigComponent } from './reports-config/reports-config.componen
 import { CertificationsComponent } from './certifications/certifications.component';
 import { SpecialitiesComponent } from './specialities/specialities.component';
 import { ContactUsComponent } from './contact-us/contact-us.component';
+import { CuttingEdgeTechnologyComponent } from './cutting-edge-technology/cutting-edge-technology.component';
+import { MethodologyComponent } from './methodology/methodology.component';
+import { HeroSectionConfigComponent } from './hero-section-config/hero-section-config.component';
+import { BenefitsComponent } from './benefits/benefits.component';
+import { SuccessStoreisComponent } from './success-storeis/success-storeis.component';
+import { HowItWorksComponent } from './how-it-works/how-it-works.component';
 export default [
     {
         path: 'adduser',
@@ -67,70 +73,62 @@ export default [
         data: { breadcrumb: 'Caledar' },
         component: SessionManagementComponent
     },
+
     {
         path: 'coachmanagement',
         data: { breachcrumb: 'Coach management' },
         component: CoachManagerComponent
     },
+
     {
         path: 'treatmentplan',
         data: { breadcrumb: 'Treatment plan' },
         component: TreatmentPlanComponent
     },
+
+    {
+        path: 'herosectionconfig',
+        component: HeroSectionConfigComponent
+    },
     {
         path: 'superstars',
-        data: { breadcrumb: 'super stars' },
         component: SuperStarsComponent
     },
     {
+        path: 'Methodology',
+        component: MethodologyComponent
+    },
+    {
+        path: 'benefits',
+        component: BenefitsComponent
+    },
+    {
         path: 'partners',
-        data: { breadcrumb: 'Partners' },
         component: PartnersComponent
     },
+
+    // {
+    //     path: 'inovationHub',
+    //     component: CuttingEdgeTechnologyComponent
+    // },
     {
-        path: 'aboutus',
-        data: { breadcrumb: 'About us' },
-        component: AboutUsComponent
+        path: 'successstories',
+        component: SuccessStoreisComponent
     },
     {
-        path: 'educationalvideos',
-        data: { breadcrumb: 'Educational videos' },
-        component: EducationalVideosComponent
-    },
-    {
-        path: 'ourservices',
-        data: { breadcrumb: 'Our services' },
-        component: OurServicesComponent
-    },
-    {
-        path: 'ourteam',
-        data: { breadcrumb: 'Our team' },
-        component: OurTeamComponent
-    },
-    {
-        path: 'joinus',
-        data: { breadcrumb: 'Join us' },
-        component: JoinOurTeamComponent
+        path: 'howitworks',
+        component: HowItWorksComponent
     },
     {
         path: 'contactus',
-        data: { breadcrumb: 'Join us' },
         component: ContactUsComponent
     },
     {
+        path: 'aboutus',
+        component: AboutUsComponent
+    },
+    {
         path: 'reportconfig',
-        data: { breadcrumb: 'Report Config' },
         component: ReportsConfigComponent
-    },
-    {
-        path: 'certificates',
-        data: { breadcrumb: 'Certificates' },
-        component: CertificationsComponent
-    },
-    {
-        path: 'specialities',
-        data: { breadcrumb: 'Specialities' },
-        component: SpecialitiesComponent
-
     }
 ] as Routes;

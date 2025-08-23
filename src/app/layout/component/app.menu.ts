@@ -102,53 +102,54 @@ export class AppMenu {
                 label: 'Website control',
                 items: [
                     {
+                        label: 'Hero Section Config',
+                        icon: '',
+                        routerLink: ['/uikit/herosectionconfig']
+                    },
+                    {
                         label: 'our super stars',
                         icon: '',
                         routerLink: ['/uikit/superstars']
                     },
                     {
-                        label: 'our partners',
+                        label: 'Our methodology section config',
+                        icon: '',
+                        routerLink: ['/uikit/Methodology']
+                    },
+                    {
+                        label: 'Our benefits section config',
+                        icon: '',
+                        routerLink: ['/uikit/benefits']
+                    },
+                    {
+                        label: 'Our partners section config',
                         icon: '',
                         routerLink: ['/uikit/partners']
                     },
+                    // {
+                    //     label: 'Inovation hub section config',
+                    //     icon: '',
+                    //     routerLink: ['/uikit/inovationHub']
+                    // },
                     {
-                        label: 'about us',
+                        label: 'Success Stories section config',
                         icon: '',
-                        routerLink: ['/uikit/aboutus']
+                        routerLink: ['/uikit/successstories']
                     },
                     {
-                        label: 'our team',
+                        label: 'How it works section config',
                         icon: '',
-                        routerLink: ['/uikit/ourteam']
+                        routerLink: ['/uikit/howitworks']
                     },
                     {
-                        label: 'certificates',
-                        icon: '',
-                        routerLink: ['/uikit/certificates']
-
-                    },
-
-                    {
-                        label: 'our services',
-                        icon: '',
-                        routerLink: ['/uikit/ourservices']
-                    },
-
-                    {
-                        label: 'educational videos',
-                        icon: '',
-                        routerLink: ['/uikit/educationalvideos']
-                    },
-
-                    {
-                        label: 'join us',
-                        icon: '',
-                        routerLink: ['/uikit/joinus']
-                    },
-                    {
-                        label: 'contact us',
+                        label: 'Contact us section config',
                         icon: '',
                         routerLink: ['/uikit/contactus']
+                    },
+                    {
+                        label: 'About us config',
+                        icon: '',
+                        routerLink: ['/uikit/aboutus']
                     }
                 ]
             },
