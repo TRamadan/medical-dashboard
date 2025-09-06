@@ -9,4 +9,5 @@ export interface SuccessStory {
     name?: string;
     personDescriptionAr?: string;
     personDescriptionEn?: string;
+    videoUrl?: string;
 }

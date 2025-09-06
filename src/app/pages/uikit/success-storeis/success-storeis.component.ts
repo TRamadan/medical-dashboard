@@ -13,12 +13,14 @@ import { SuccessStoryService } from './services/successStory.service';
 import { MessageService } from 'primeng/api';
 import { SharedService } from '../../../shared/services/shared.service';
 import { firstValueFrom } from 'rxjs';
+import { FileUploadInputComponent } from '../../../shared/file-upload-input/file-upload-input.component';
+import { ToastModule } from 'primeng/toast';
 
 @Component({
     selector: 'app-success-storeis',
     standalone: true,
     providers: [MessageService],
-    imports: [CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent],
+    imports: [ToastModule, FileUploadInputComponent, CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent],
     templateUrl: './success-storeis.component.html',
     styleUrls: ['./success-storeis.component.css']
 })
@@ -52,17 +54,59 @@ export class SuccessStoreisComponent implements OnInit {
 
     ngOnInit() {
         this.addSuccessStoryForm = this.fb.group({
-            titleAr: ['', Validators.required],
-            titleEn: ['', Validators.required],
-            descriptionAr: ['', Validators.required],
-            descriptionEn: ['', Validators.required],
+            id: [null],
+            titleAr: [
+                '',
+                [
+                    Validators.required,
+                    Validators.pattern(/^[\u0600-\u06FF\s]+$/) // Arabic letters + spaces only
+                ]
+            ],
+            titleEn: [
+                '',
+                [
+                    Validators.required,
+                    Validators.pattern(/^[A-Za-z\s]+$/) // English letters + spaces only
+                ]
+            ],
+            descriptionAr: [
+                '',
+                [
+                    Validators.required,
+                    Validators.pattern(/^[\u0600-\u06FF\s.,!?-]+$/) // Arabic with punctuation
+                ]
+            ],
+            descriptionEn: [
+                '',
+                [
+                    Validators.required,
+                    Validators.pattern(/^[A-Za-z0-9\s.,!?-]+$/) // English with punctuation
+                ]
+            ],
             isSuccessStoryVideo: [false],
-            videoUrl: [''], // Will be required if isSuccessStoryVideo is true
-            image: [''], // Will be required if isSuccessStoryVideo is false
-            name: ['', Validators.required],
-            personDescriptionAr: ['', Validators.required],
-            personDescriptionEn: ['', Validators.required]
+            videoUrl: [
+                '',
+                [
+                    // Required dynamically if isSuccessStoryVideo = true
+                    Validators.pattern(/^(https?:\/\/)?([\w\-]+\.)+[\w]{2,}(\/\S*)?$/)
+                ]
+            ],
+            image: [
+                '',
+                [
+                    // Required dynamically if isSuccessStoryVideo = false
+                ]
+            ],
+            name: [
+                '',
+                [
+                    Validators.pattern(/^[A-Za-z\u0600-\u06FF\s]+$/) // Arabic or English letters
+                ]
+            ],
+            personDescriptionAr: [''],
+            personDescriptionEn: ['']
         });
+
         this.getAllSuccessStories();
     }
 
@@ -119,10 +163,12 @@ export class SuccessStoreisComponent implements OnInit {
      * Purpose : Update the selected success story's information
      */
     updateSelectedSuccessStory(): void {
-        const body = {};
-        this._successStories.updateSuccessStory(body).subscribe({
+        const payLoad = this.addSuccessStoryForm.getRawValue();
+        this._successStories.updateSuccessStory(payLoad).subscribe({
             next: () => {
                 this._messageService.add({ severity: 'success', detail: 'Success story updated successfully' });
+                this.isEdit = false;
+                this.showAddDialog = false;
                 this.getAllSuccessStories();
             },
             error: (err) => {
@@ -140,6 +186,8 @@ export class SuccessStoreisComponent implements OnInit {
         this._successStories.deleteSuccessStory(this.selectedSuccessStory.id).subscribe({
             next: (res) => {
                 this._messageService.add({ severity: 'success', detail: 'Success story deleted successfully' });
+                this.isDelete = false;
+                this.showAddDialog = false;
                 this.getAllSuccessStories();
             },
             error: (err) => {
@@ -171,22 +219,5 @@ export class SuccessStoreisComponent implements OnInit {
         this.selectedSuccessStory = successStory;
         this.isDelete = true;
         this.showAddDialog = true;
-    }
-
-    /**
-     * Developer : Eng/Tarek Ahmed Ramadan
-     * Created Date : 10/6/2025
-     * Purpose : Handle image upload and preview
-     * @param event The file upload event
-     */
-    async onImageUpload(event: any): Promise<any> {
-        const file = event.files?.[0];
-        if (!file) return;
-        try {
-            this.uploadResponse = await firstValueFrom(this._uploadFileService.uploadFileService(file, 'Success stories'));
-            return this.uploadResponse;
-        } catch (error: any) {
-            this._messageService.add({ severity: 'error', detail: 'Upload failed' });
-        }
     }
 }

@@ -10,6 +10,9 @@
     </ng-template>
 </p-toolbar>
 
+<p-toast></p-toast>
+
+
 <!-- Use the shared dynamic table component -->
 <app-table [headers]="tableHeaders" [data]="allSuccessStories" [showActions]="true" (edit)="editSuccessStory($event)"
     (delete)="deleteSuccessStory($event)"></app-table>
@@ -18,69 +21,143 @@
 <p-dialog [header]="isEdit ? 'Update Partner' : 'Add New Partner'" [(visible)]="showAddDialog" [modal]="true"
     [style]="{width: '90vw', maxWidth: '550px'}">
     @if(!isDelete) {
-    <form [formGroup]="addSuccessStoryForm" class="flex flex-col gap-4">
+    <form [formGroup]="addSuccessStoryForm" class="container mt-3">
 
-        <div class="p-field">
-            <label for="titleAr">Title (Arabic)</label>
-            <input id="titleAr" pInputText formControlName="titleAr" />
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="titleAr" class="form-label">Title (Arabic)</label>
+                <input id="titleAr" type="text" class="form-control"
+                    [ngClass]="{ 'is-invalid': addSuccessStoryForm.get('titleAr')?.invalid && addSuccessStoryForm.get('titleAr')?.touched }"
+                    formControlName="titleAr">
+                <div *ngIf="addSuccessStoryForm.get('titleAr')?.errors && addSuccessStoryForm.get('titleAr')?.touched"
+                    class="invalid-feedback">
+                    <div *ngIf="addSuccessStoryForm.get('titleAr')?.errors?.['required']">Title (Arabic) is required.
+                    </div>
+                    <div *ngIf="addSuccessStoryForm.get('titleAr')?.errors?.['pattern']">Only Arabic letters are
+                        allowed.</div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label for="titleEn" class="form-label">Title (English)</label>
+                <input id="titleEn" type="text" class="form-control"
+                    [ngClass]="{ 'is-invalid': addSuccessStoryForm.get('titleEn')?.invalid && addSuccessStoryForm.get('titleEn')?.touched }"
+                    formControlName="titleEn">
+                <div *ngIf="addSuccessStoryForm.get('titleEn')?.errors && addSuccessStoryForm.get('titleEn')?.touched"
+                    class="invalid-feedback">
+                    <div *ngIf="addSuccessStoryForm.get('titleEn')?.errors?.['required']">Title (English) is required.
+                    </div>
+                    <div *ngIf="addSuccessStoryForm.get('titleEn')?.errors?.['pattern']">Only English letters are
+                        allowed.</div>
+                </div>
+            </div>
         </div>
 
-        <div class="p-field">
-            <label for="titleEn">Title (English)</label>
-            <input id="titleEn" pInputText formControlName="titleEn" />
+        <!-- Description Fields -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="descriptionAr" class="form-label">Description (Arabic)</label>
+                <textarea id="descriptionAr" class="form-control"
+                    [ngClass]="{ 'is-invalid': addSuccessStoryForm.get('descriptionAr')?.invalid && addSuccessStoryForm.get('descriptionAr')?.touched }"
+                    rows="3" formControlName="descriptionAr"></textarea>
+                <div *ngIf="addSuccessStoryForm.get('descriptionAr')?.errors && addSuccessStoryForm.get('descriptionAr')?.touched"
+                    class="invalid-feedback">
+                    <div *ngIf="addSuccessStoryForm.get('descriptionAr')?.errors?.['required']">Description (Arabic) is
+                        required.</div>
+                    <div *ngIf="addSuccessStoryForm.get('descriptionAr')?.errors?.['pattern']">Only Arabic text is
+                        allowed.</div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label for="descriptionEn" class="form-label">Description (English)</label>
+                <textarea id="descriptionEn" class="form-control"
+                    [ngClass]="{ 'is-invalid': addSuccessStoryForm.get('descriptionEn')?.invalid && addSuccessStoryForm.get('descriptionEn')?.touched }"
+                    rows="3" formControlName="descriptionEn"></textarea>
+                <div *ngIf="addSuccessStoryForm.get('descriptionEn')?.errors && addSuccessStoryForm.get('descriptionEn')?.touched"
+                    class="invalid-feedback">
+                    <div *ngIf="addSuccessStoryForm.get('descriptionEn')?.errors?.['required']">Description (English) is
+                        required.</div>
+                    <div *ngIf="addSuccessStoryForm.get('descriptionEn')?.errors?.['pattern']">Only English text is
+                        allowed.</div>
+                </div>
+            </div>
         </div>
 
-        <div class="p-field">
-            <label for="descriptionAr">Description (Arabic)</label>
-            <textarea id="descriptionAr" pInputTextarea formControlName="descriptionAr"></textarea>
+        <!-- Checkbox -->
+        <div class="form-check mb-3">
+            <input type="checkbox" class="form-check-input" id="isSuccessStoryVideo"
+                formControlName="isSuccessStoryVideo">
+            <label for="isSuccessStoryVideo" class="form-check-label">Is Success Story Video?</label>
         </div>
 
-        <div class="p-field">
-            <label for="descriptionEn">Description (English)</label>
-            <textarea id="descriptionEn" pInputTextarea formControlName="descriptionEn"></textarea>
-        </div>
-
-        <div class="p-field-checkbox">
-            <p-checkbox formControlName="isSuccessStoryVideo" binary="true" inputId="isSuccessStoryVideo">
-            </p-checkbox>
-            <label for="isSuccessStoryVideo">Is Success Story Video?</label>
-        </div>
-
-
-        @if(addSuccessStoryForm.get('isSuccessStoryVideo')?.value){
-        <div class="p-field">
-            <label for="videoUrl"></label>
-            <input id="videoUrl" pInputText formControlName="videoUrl" />
+        <!-- If true -> show videoUrl -->
+        @if(addSuccessStoryForm.get('isSuccessStoryVideo')?.value) {
+        <div class="mb-3">
+            <label for="videoUrl" class="form-label">Video URL</label>
+            <input id="videoUrl" type="text" class="form-control"
+                [ngClass]="{ 'is-invalid': addSuccessStoryForm.get('videoUrl')?.invalid && addSuccessStoryForm.get('videoUrl')?.touched }"
+                formControlName="videoUrl">
+            <div *ngIf="addSuccessStoryForm.get('videoUrl')?.errors && addSuccessStoryForm.get('videoUrl')?.touched"
+                class="invalid-feedback">
+                <div *ngIf="addSuccessStoryForm.get('videoUrl')?.errors?.['required']">Video URL is required.</div>
+                <div *ngIf="addSuccessStoryForm.get('videoUrl')?.errors?.['pattern']">Please enter a valid URL.</div>
+            </div>
         </div>
         }
 
-        @if(!addSuccessStoryForm.get('isSuccessStoryVideo')?.value){
-        <div class="flex flex-col gap-2">
-            <label for="image">Success story Image</label>
-            <p-fileUpload mode="basic" chooseLabel="Choose Image" [auto]="true" accept="image/*" [maxFileSize]="1000000"
-                (onSelect)="onImageUpload($event)"></p-fileUpload>
-            @if(uploadResponse) {
-            <img [src]="uploadResponse" alt="Preview" class="mt-2 w-32 h-32 object-cover rounded-md">
-            }
+        <!-- If false -> show image + name + descriptions -->
+        @if(!addSuccessStoryForm.get('isSuccessStoryVideo')?.value) {
+        <div class="mb-3">
+            <app-file-upload-input formControlName="image" label="Success Story Image"></app-file-upload-input>
+            <div *ngIf="addSuccessStoryForm.get('image')?.errors && addSuccessStoryForm.get('image')?.touched"
+                class="text-danger small">
+                <div *ngIf="addSuccessStoryForm.get('image')?.errors?.['required']">Image is required.</div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="name" class="form-label">Name</label>
+            <input id="name" type="text" class="form-control"
+                [ngClass]="{ 'is-invalid': addSuccessStoryForm.get('name')?.invalid && addSuccessStoryForm.get('name')?.touched }"
+                formControlName="name">
+            <div *ngIf="addSuccessStoryForm.get('name')?.errors && addSuccessStoryForm.get('name')?.touched"
+                class="invalid-feedback">
+                <div *ngIf="addSuccessStoryForm.get('name')?.errors?.['required']">Name is required.</div>
+                <div *ngIf="addSuccessStoryForm.get('name')?.errors?.['pattern']">Only Arabic or English letters are
+                    allowed.</div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="personDescriptionAr" class="form-label">Person Description (Arabic)</label>
+                <textarea id="personDescriptionAr" class="form-control"
+                    [ngClass]="{ 'is-invalid': addSuccessStoryForm.get('personDescriptionAr')?.invalid && addSuccessStoryForm.get('personDescriptionAr')?.touched }"
+                    rows="3" formControlName="personDescriptionAr"></textarea>
+                <div *ngIf="addSuccessStoryForm.get('personDescriptionAr')?.errors && addSuccessStoryForm.get('personDescriptionAr')?.touched"
+                    class="invalid-feedback">
+                    <div *ngIf="addSuccessStoryForm.get('personDescriptionAr')?.errors?.['required']">Person Description
+                        (Arabic) is required.</div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <label for="personDescriptionEn" class="form-label">Person Description (English)</label>
+                <textarea id="personDescriptionEn" class="form-control"
+                    [ngClass]="{ 'is-invalid': addSuccessStoryForm.get('personDescriptionEn')?.invalid && addSuccessStoryForm.get('personDescriptionEn')?.touched }"
+                    rows="3" formControlName="personDescriptionEn"></textarea>
+                <div *ngIf="addSuccessStoryForm.get('personDescriptionEn')?.errors && addSuccessStoryForm.get('personDescriptionEn')?.touched"
+                    class="invalid-feedback">
+                    <div *ngIf="addSuccessStoryForm.get('personDescriptionEn')?.errors?.['required']">Person Description
+                        (English) is required.</div>
+                </div>
+            </div>
         </div>
         }
 
-
-        <div class="p-field">
-            <label for="name">Name</label>
-            <input id="name" pInputText formControlName="name" />
-        </div>
-
-        <div class="p-field">
-            <label for="personDescriptionAr">Person Description (Arabic)</label>
-            <textarea id="personDescriptionAr" pInputTextarea formControlName="personDescriptionAr"></textarea>
-        </div>
-
-        <div class="p-field">
-            <label for="personDescriptionEn">Person Description (English)</label>
-            <textarea id="personDescriptionEn" pInputTextarea formControlName="personDescriptionEn"></textarea>
-        </div>
     </form>
+
     }
     @else {
     <p class="font-bold text-center">Are you sure you want to delete this Success story?</p>
