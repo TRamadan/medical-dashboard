@@ -33,18 +33,19 @@
                 <td *ngFor="let col of headers" class="text-center">
                     <ng-container [ngSwitch]="col.type">
                         <ng-container *ngSwitchCase="'image'">
-                            <img *ngIf="row[col.field]" [src]="row[col.field]" alt="img"
+                            <img *ngIf="row[col.field]" [src]="imgUrl + row[col.field]" alt="img"
                                 class="w-12 h-12 object-cover rounded-full inline-block" />
                         </ng-container>
-                        <ng-container *ngSwitchCase="'boolean'">
-                            <i [class]="row[col.field] ? 'pi pi-check text-green-500' : 'pi pi-times text-red-500'"></i>
-                        </ng-container>
+
                         <ng-container *ngSwitchCase="'date'">
                             {{ row[col.field] | date:'medium' }}
                         </ng-container>
                         <ng-container *ngSwitchCase="'custom'">
                             <ng-container *ngTemplateOutlet="col.customTemplate; context: { $implicit: row }">
                             </ng-container>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'boolean'">
+                            {{ row[col.field] == true ? 'Yes' : 'No'}}
                         </ng-container>
                         <ng-container *ngSwitchDefault>
                             {{ row[col.field] }}

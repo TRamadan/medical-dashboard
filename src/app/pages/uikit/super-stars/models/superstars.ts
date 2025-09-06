@@ -1,13 +1,12 @@
 export interface Superstars {
     id?: number;
-    img?: string;
     name?: string;
-    sportAr?: string;
+    image?: string;
+    description?: string;
+    descriptionEn?: string;
+    sport?: string;
     sportEn?: string;
-    achievementAr?: string;
+    achievement?: string;
     achievementEn?: string;
-    shortWordAr?: string;
-    shortWordEn?: string;
-    isActive?: boolean;
-
+    isElite?: boolean;
 }

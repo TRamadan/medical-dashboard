@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <p-toolbar styleClass="mb-6">
   <ng-template #start>
     <div class="flex flex-wrap gap-2">
@@ -19,82 +20,115 @@
 <p-dialog [header]="isEdit ? 'Update selected super star' : 'Add New Super Star'" [(visible)]="showAddDialog"
   [modal]="true" [style]="{width: '90vw', maxWidth: '700px'}">
   @if(!isDelete){
-  <form [formGroup]="addSuperStarForm">
-    <div class="grid p-fluid mt-4">
-      <div class="col-12 md:col-6">
-        <p-floatLabel>
-          <input pInputText id="nameAr" formControlName="nameAr" required />
-          <label for="nameAr">Athlete Name</label>
-        </p-floatLabel>
-        @if(addSuperStarForm.get('nameAr')?.invalid && addSuperStarForm.get('nameAr')?.touched) {
-        <small class="p-error">Athlete name is required.</small>
+  <form [formGroup]="addSuperStarForm" class="mt-4">
+    <div class="row g-3">
+
+      <!-- Name -->
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <input type="text" class="form-control" id="name" formControlName="name" placeholder="Athlete Name" required>
+          <label for="name">Athlete Name</label>
+        </div>
+        @if(addSuperStarForm.get('name')?.invalid && addSuperStarForm.get('name')?.touched) {
+        <small class="text-danger">Athlete name is required.</small>
         }
       </div>
-      <div class="col-12 md:col-6">
-        <p-floatLabel>
-          <input pInputText id="sportEn" formControlName="sportEn" required />
+
+      <!-- Sport (Arabic) -->
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <input type="text" class="form-control" id="sport" formControlName="sport"
+            placeholder="Athlete Sport (Arabic)" required>
+          <label for="sport">Athlete Sport (Arabic)</label>
+        </div>
+        @if(addSuperStarForm.get('sport')?.invalid && addSuperStarForm.get('sport')?.touched) {
+        <small class="text-danger">Athlete Sport (Arabic) is required.</small>
+        }
+      </div>
+
+      <!-- Sport (English) -->
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <input type="text" class="form-control" id="sportEn" formControlName="sportEn"
+            placeholder="Athlete Sport (English)" required>
           <label for="sportEn">Athlete Sport (English)</label>
-        </p-floatLabel>
+        </div>
         @if(addSuperStarForm.get('sportEn')?.invalid && addSuperStarForm.get('sportEn')?.touched) {
-        <small class="p-error">Athlete Sport (English) is required.</small>
+        <small class="text-danger">Athlete Sport (English) is required.</small>
         }
       </div>
-      <div class="col-12 md:col-6">
-        <p-floatLabel>
-          <input pInputText id="sportAr" formControlName="sportAr" required />
-          <label for="sportAr">Athlete Sport (Arabic)</label>
-        </p-floatLabel>
-        @if(addSuperStarForm.get('sportAr')?.invalid && addSuperStarForm.get('sportAr')?.touched) {
-        <small class="p-error">Athlete Sport (Arabic) is required.</small>
+
+      <!-- Achievement (Arabic) -->
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <input type="text" class="form-control" id="achievement" formControlName="achievement"
+            placeholder="Achievement (Arabic)" required>
+          <label for="achievement">Achievement (Arabic)</label>
+        </div>
+        @if(addSuperStarForm.get('achievement')?.invalid && addSuperStarForm.get('achievement')?.touched) {
+        <small class="text-danger">Achievement (Arabic) is required.</small>
         }
       </div>
-      <div class="col-12 md:col-6">
-        <p-floatLabel>
-          <input pInputText id="achievementEn" formControlName="achievementEn" required />
+
+      <!-- Achievement (English) -->
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <input type="text" class="form-control" id="achievementEn" formControlName="achievementEn"
+            placeholder="Achievement (English)" required>
           <label for="achievementEn">Achievement (English)</label>
-        </p-floatLabel>
+        </div>
         @if(addSuperStarForm.get('achievementEn')?.invalid && addSuperStarForm.get('achievementEn')?.touched) {
-        <small class="p-error">Achievement (English) is required.</small>
+        <small class="text-danger">Achievement (English) is required.</small>
         }
       </div>
-      <div class="col-12 md:col-6">
-        <p-floatLabel>
-          <input pInputText id="achievementAr" formControlName="achievementAr" required />
-          <label for="achievementAr">Achievement (Arabic)</label>
-        </p-floatLabel>
-        @if(addSuperStarForm.get('achievementAr')?.invalid && addSuperStarForm.get('achievementAr')?.touched) {
-        <small class="p-error">Achievement (Arabic) is required.</small>
+
+      <!-- Description (Arabic) -->
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <textarea class="form-control" id="description" formControlName="description"
+            placeholder="Description (Arabic)" rows="3" required></textarea>
+          <label for="description">Description (Arabic)</label>
+        </div>
+        @if(addSuperStarForm.get('description')?.invalid && addSuperStarForm.get('description')?.touched) {
+        <small class="text-danger">Description (Arabic) is required.</small>
         }
       </div>
-      <div class="col-12 md:col-6">
-        <p-floatLabel>
-          <input pInputText id="shortWordEn" formControlName="shortWordEn" required />
-          <label for="shortWordEn">Short Word (English)</label>
-        </p-floatLabel>
-        @if(addSuperStarForm.get('shortWordEn')?.invalid && addSuperStarForm.get('shortWordEn')?.touched) {
-        <small class="p-error">Short Word (English) is required.</small>
+
+      <!-- Description (English) -->
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <textarea class="form-control" id="descriptionEn" formControlName="descriptionEn"
+            placeholder="Description (English)" rows="3" required></textarea>
+          <label for="descriptionEn">Description (English)</label>
+        </div>
+        @if(addSuperStarForm.get('descriptionEn')?.invalid && addSuperStarForm.get('descriptionEn')?.touched) {
+        <small class="text-danger">Description (English) is required.</small>
         }
       </div>
-      <div class="col-12 md:col-6">
-        <p-floatLabel>
-          <input pInputText id="shortWordAr" formControlName="shortWordAr" required />
-          <label for="shortWordAr">Short Word (Arabic)</label>
-        </p-floatLabel>
-        @if(addSuperStarForm.get('shortWordAr')?.invalid && addSuperStarForm.get('shortWordAr')?.touched) {
-        <small class="p-error">Short Word (Arabic) is required.</small>
-        }
+
+      <!-- Is Elite -->
+      <div class="col-12 col-md-4 d-flex align-items-center mt-2">
+
+
+        <input class="form-check-input me-2" type="checkbox" formControlName="isElite" id="isElite">
+        <label class="form-check-label" for="isElite">Is Elite Athlete?</label>
       </div>
-      <div class="col-12 flex flex-col gap-2">
+
+      <!-- Image Upload (full row) -->
+      <div class="col-12 mt-3">
         <label for="image">Athlete Image</label>
-        <p-fileUpload mode="basic" chooseLabel="Choose Image" [auto]="true" accept="image/*" [maxFileSize]="1000000"
-          (onSelect)="onImageUpload($event)"></p-fileUpload>
-        @if(addSuperStarForm.get('imageUrl')?.value) {
-        <img [src]="addSuperStarForm.get('imageUrl')?.value" alt="Preview"
-          class="mt-2 w-32 h-32 object-cover rounded-md">
+        <input type="file" class="form-control" accept="image/*" (change)="onImageUpload($event)">
+        @if(addSuperStarForm.get('image')?.value) {
+        <img [src]="imgUrl + addSuperStarForm.get('image')?.value" alt="Preview" class="mt-2 img-thumbnail"
+          style="width: 120px; height: 120px; object-fit: cover;">
         }
       </div>
+
     </div>
   </form>
+
+
+
   }
 
   @else {
@@ -102,11 +136,23 @@
   }
 
 
+  @if(!isDelete){
+  <div class=" flex justify-end gap-2 mt-4">
+    <p-button severity="success" label="Save" icon="pi pi-check" type="submit" [disabled]="!addSuperStarForm.valid"
+      (onClick)="!isDelete ? isEdit ? updateSelectedSuperStar() :addNewSuperStar() : deleteSelectedSuperStar()" />
+
+    <p-button severity="danger" label="Cancel" icon="pi pi-times" (click)="showAddDialog = false" class="p-button-text"
+      type="button" />
+  </div>
+  }
+
+  @if(isDelete){
+  <p-button severity="success" label="Save" icon="pi pi-check" type="submit" (onClick)="deleteSelectedSuperStar() " />
+
   <div class=" flex justify-end gap-2 mt-4">
     <p-button severity="danger" label="Cancel" icon="pi pi-times" (click)="showAddDialog = false" class="p-button-text"
       type="button" />
-    <p-button severity="success" label="Save" icon="pi pi-check" type="submit" [disabled]="!addSuperStarForm.valid"
-      (onClick)="!isDelete ? isEdit ? updateSelectedSuperStar() :addNewSuperStar() : deleteSelectedSuperStar()" />
   </div>
+  }
 
 </p-dialog>
