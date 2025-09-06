@@ -7,15 +7,13 @@ import { Observable } from 'rxjs';
     providedIn: 'root'
 })
 export class SharedService {
-    config = environment.apiUrl;
+    private uploadUrl = environment.apiUrl + 'UploadFiles';
     constructor(private http: HttpClient) {}
 
-    uploadFileService(file: File, folderName: string): any {
-        if (!file) {
-            return;
-        }
+    uploadFileService(file: File, folderName: string): Observable<any> {
         const formData = new FormData();
-        formData.append('file', file, file.name);
-        return this.http.post(this.config + `UploadFiles?folderName=${folderName}`, formData);
+        formData.append('file', file);
+
+        return this.http.post(`${this.uploadUrl}?folderName=${folderName}`, formData);
     }
 }

@@ -26,6 +26,6 @@ export class MethodologyService {
 
     //here is the function needed to delete the selected Methodology
     deleteMethodology(id: any) {
-        return this.http.delete(this.configUrl + 'Methodology' + id);
+        return this.http.delete(this.configUrl + 'Methodology/' + id);
     }
 }

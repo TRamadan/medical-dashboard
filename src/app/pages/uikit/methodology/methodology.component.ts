@@ -16,6 +16,9 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { ToastModule } from 'primeng/toast';
+
+import { environment } from '../../../../environments/environment';
 
 @Component({
     selector: 'app-methodology',
@@ -23,10 +26,11 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
     styleUrls: ['./methodology.component.css'],
     standalone: true,
     providers: [MessageService],
-    imports: [ToggleSwitchModule, SelectModule, TextareaModule, FloatLabelModule, CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent]
+    imports: [ToastModule, ToggleSwitchModule, SelectModule, TextareaModule, FloatLabelModule, CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent]
 })
 export class MethodologyComponent implements OnInit {
     showAddDialog: boolean = false;
+    public readonly imgUrl = environment.imgUrl;
     addMethodologiesConfig!: FormGroup;
     selectedMethodologiesConfig: Methodology = {};
     allMethodologies: Methodology[] = [];
@@ -54,8 +58,14 @@ export class MethodologyComponent implements OnInit {
             field: 'descriptionEn'
         },
         {
-            label: 'icon',
-            field: 'icon'
+            label: 'image',
+            field: 'icon',
+            type: 'image'
+        },
+        {
+            label: 'Is ctting edge technology',
+            field: 'isCuttingEdgeTechnology',
+            type: 'boolean'
         }
     ];
 
@@ -67,8 +77,9 @@ export class MethodologyComponent implements OnInit {
             descriptionEn: [null, Validators.required],
             description: [null, Validators.required],
             isCuttingEdgeTechnology: [false, Validators.required],
-            icon: [null]
+            icon: ['']
         });
+        this.getAllMethodologies();
     }
 
     openNewMethodologySection(): void {
@@ -116,12 +127,16 @@ export class MethodologyComponent implements OnInit {
      * Purpose : Update the selected methodology's information
      */
     updatedMethodology(): void {
-        const body = this.addMethodologiesConfig.getRawValue();
-
-        this._methodologyService.updateMethodology(body).subscribe({
+        const payload: Methodology = {
+            ...this.selectedMethodologiesConfig,
+            ...this.addMethodologiesConfig.value
+        };
+        this._methodologyService.updateMethodology(payload).subscribe({
             next: () => {
                 this._messageService.add({ severity: 'success', detail: 'Methodology updated successfully' });
                 this.getAllMethodologies();
+                this.showAddDialog = false;
+                this.isEdit = false;
             },
             error: (err: any) => {
                 this._messageService.add({ severity: 'error', detail: 'Failed to update methodology' });
@@ -139,6 +154,8 @@ export class MethodologyComponent implements OnInit {
             next: (res) => {
                 this._messageService.add({ severity: 'success', detail: 'Methodology deleted successfully' });
                 this.getAllMethodologies();
+                this.showAddDialog = false;
+                this.isDelete = false;
             },
             error: (err) => {
                 this._messageService.add({ severity: 'error', detail: 'Failed to delete methodology' });
@@ -166,8 +183,51 @@ export class MethodologyComponent implements OnInit {
      * @param methodology The methodology object to delete
      */
     deleteMethodology(methodology: Methodology): void {
+        this.addMethodologiesConfig.controls['id'].setValue(methodology.id);
         this.selectedMethodologiesConfig = methodology;
         this.isDelete = true;
         this.showAddDialog = true;
+    }
+
+    /**
+     * Developer : Eng/Tarek Ahmed Ramadan
+     * Created Date : 10/6/2025
+     * Purpose : Handle image upload and preview
+     * @param event The file upload event
+     */
+    onImageUpload(event: any): void {
+        const file = event.target.files[0];
+        let folderName = this.addMethodologiesConfig.controls['isCuttingEdgeTechnology'].value == true ? 'CuttingEdgeTechnology' : 'Methodology';
+        if (file) {
+            this._uploadFileService.uploadFileService(file, folderName).subscribe({
+                next: (res: any) => {
+                    this.addMethodologiesConfig.patchValue({
+                        icon: res.filePath
+                    });
+
+                    // Show preview (optional)
+                    const reader = new FileReader();
+                    reader.onload = (e: any) => {
+                        this.addMethodologiesConfig.patchValue({
+                            imageUrl: e.target.result
+                        });
+                    };
+                    reader.readAsDataURL(file);
+
+                    this._messageService.add({
+                        severity: 'success',
+                        summary: 'Success',
+                        detail: 'Image uploaded successfully.'
+                    });
+                },
+                error: (err: any) => {
+                    this._messageService.add({
+                        severity: 'error',
+                        summary: 'Upload Failed',
+                        detail: 'Could not upload image. Please try again.'
+                    });
+                }
+            });
+        }
     }
 }

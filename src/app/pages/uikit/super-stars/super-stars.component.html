@@ -18,7 +18,7 @@
 
 <!-- here is the dialog needed to add or update a new super star-->
 <p-dialog [header]="isEdit ? 'Update selected super star' : 'Add New Super Star'" [(visible)]="showAddDialog"
-  [modal]="true" [style]="{width: '90vw', maxWidth: '700px'}">
+  [modal]="true" [style]="{width: '100vw', maxWidth: '700px'}">
   @if(!isDelete){
   <form [formGroup]="addSuperStarForm" class="mt-4">
     <div class="row g-3">
@@ -126,9 +126,6 @@
 
     </div>
   </form>
-
-
-
   }
 
   @else {

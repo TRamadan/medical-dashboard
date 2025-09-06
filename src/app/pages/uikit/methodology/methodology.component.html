@@ -6,6 +6,8 @@
     <p-button label="Export" icon="pi pi-upload" severity="secondary" />
   </ng-template>
 </p-toolbar>
+<p-toast></p-toast>
+
 
 <!-- Use the shared dynamic table component -->
 <app-table [headers]="tableHeaders" [data]="allMethodologies" [showActions]="true" (edit)="editMethodology($event)"
@@ -15,46 +17,72 @@
 <p-dialog [header]="isEdit ?'Update selected methodology item' : 'Add new methodology item'" [(visible)]="showAddDialog"
   [modal]="true" [style]="{width: '90vw', maxWidth: '550px'}">
   @if(!isDelete) {
-  <form [formGroup]="addMethodologiesConfig" class="flex flex-column gap-4">
-    <div class="flex flex-column gap-2 my-4">
-      <p-floatlabel>
-        <input type="text" pInputText id="name" formControlName="name" required autofocus class="w-full" />
-        <label for="name">Title</label>
-      </p-floatlabel>
-    </div>
+  <form [formGroup]="addMethodologiesConfig" class="mt-4">
+    <div class="row g-3">
 
-    <div class="flex flex-column gap-2">
-      <p-floatlabel>
-        <input type="text" pInputText id="name" formControlName="titleEn" required autofocus class="w-full" />
-        <label for="name">Title (EN)</label>
-      </p-floatlabel>
-    </div>
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <input type="text" class="form-control" id="name" formControlName="title" required>
+          <label for="name">Title</label>
+        </div>
+        @if(addMethodologiesConfig.get('title')?.invalid && addMethodologiesConfig.get('title')?.touched) {
+        <small class="text-danger">Title is required.</small>
+        }
+      </div>
 
-    <div class="flex flex-column gap-2">
-      <p-floatlabel>
-        <textarea rows="5" cols="30" pTextarea formControlName="description" class="w-full" rows="3"></textarea>
-        <label>Description</label>
-      </p-floatlabel>
-    </div>
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <input type="text" class="form-control" id="sport" formControlName="titleEn" required>
+          <label for="sport">Title (English)</label>
+        </div>
+        @if(addMethodologiesConfig.get('titleEn')?.invalid && addMethodologiesConfig.get('titleEn')?.touched) {
+        <small class="text-danger">Title (English) is required.</small>
+        }
+      </div>
 
-    <div class="flex flex-column gap-2">
-      <p-floatlabel>
-        <textarea rows="5" cols="30" pTextarea formControlName="descriptionEn" class="w-full" rows="3"></textarea>
-        <label>Description (En)</label>
-      </p-floatlabel>
-    </div>
+      <!-- Description (Arabic) -->
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <textarea class="form-control" id="description" formControlName="description"
+            placeholder="Description (Arabic)" rows="3" required></textarea>
+          <label for="description">Description (Arabic)</label>
+        </div>
+        @if(addMethodologiesConfig.get('description')?.invalid && addMethodologiesConfig.get('description')?.touched) {
+        <small class="text-danger">Description (Arabic) is required.</small>
+        }
+      </div>
+
+      <!-- Description (English) -->
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <textarea class="form-control" id="descriptionEn" formControlName="descriptionEn"
+            placeholder="Description (English)" rows="3" required></textarea>
+          <label for="descriptionEn">Description (English)</label>
+        </div>
+        @if(addMethodologiesConfig.get('descriptionEn')?.invalid &&
+        addMethodologiesConfig.get('descriptionEn')?.touched) {
+        <small class="text-danger">Description (English) is required.</small>
+        }
+      </div>
+
+      <!-- Is Elite -->
+      <div class="col-12 col-md-4 d-flex align-items-center mt-2">
 
 
-    <div class="flex flex-column gap-2">
-      <p-floatlabel class="w-full" variant="on">
-        <p-select inputId="on_label" [options]="icons" optionLabel="name" styleClass="w-full" />
-        <label for="on_label">Icon</label>
-      </p-floatlabel>
-    </div>
+        <input class="form-check-input me-2" type="checkbox" formControlName="isCuttingEdgeTechnology" id="isElite">
+        <label class="form-check-label" for="isElite">Is Cutting edge technology ?</label>
+      </div>
 
-    <div class="flex flex-column gap-2">
-      <label>Is cutting edge technology ?</label>
-      <p-toggleswitch formControlName="isCuttingEdgeTechnology" />
+      <!-- Image Upload (full row) -->
+      <div class="col-12 mt-3">
+        <label for="image"> Image</label>
+        <input type="file" class="form-control" accept="image/*" (change)="onImageUpload($event)">
+        @if(addMethodologiesConfig.get('icon')?.value) {
+        <img [src]="imgUrl + addMethodologiesConfig.get('icon')?.value" alt="Preview" class="mt-2 img-thumbnail"
+          style="width: 120px; height: 120px; object-fit: cover;">
+        }
+      </div>
+
     </div>
   </form>
   }
