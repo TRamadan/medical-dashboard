@@ -1,0 +1,18 @@
+<div class="col-12 mt-3">
+  <label>{{ label }}</label>
+  <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)" [disabled]="disabled" />
+
+  @if(previewUrl){
+  <ng-container>
+    <img [src]="previewUrl" alt="Preview" class="mt-2 img-thumbnail"
+      style="width: 120px; height: 120px; object-fit: cover;" />
+  </ng-container>
+  }
+
+
+  @else {
+  <ng-template>
+    <p class="text-muted mt-2">لا يوجد صورة</p>
+  </ng-template>
+  }
+</div>

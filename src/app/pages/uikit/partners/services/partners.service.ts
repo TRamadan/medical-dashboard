@@ -26,6 +26,6 @@ export class PartnersService {
 
     //here is the function needed to delete the selected partner
     deletePartner(id: any) {
-        return this.http.delete(this.configUrl + 'Partner' + id);
+        return this.http.delete(this.configUrl + 'Partner/' + id);
     }
 }

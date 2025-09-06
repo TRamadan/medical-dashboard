@@ -9,6 +9,8 @@
     <p-button label="Export" icon="pi pi-upload" severity="secondary" />
   </ng-template>
 </p-toolbar>
+<p-toast></p-toast>
+
 
 <!-- Use the shared dynamic table component -->
 <app-table [headers]="tableHeaders" [data]="partners" [showActions]="true" (edit)="editPartner($event)"
@@ -19,14 +21,8 @@
   [style]="{width: '90vw', maxWidth: '550px'}">
   @if(!isDelete) {
   <form [formGroup]="addPartnerForm" class="flex flex-col gap-4">
-    <div class="flex flex-col gap-2">
-      <label for="image">Partner Image</label>
-      <p-fileUpload mode="basic" chooseLabel="Choose Image" [auto]="true" accept="image/*" [maxFileSize]="1000000"
-        (onSelect)="onImageUpload($event)"></p-fileUpload>
-      @if(uploadResponse) {
-      <img [src]="uploadResponse" alt="Preview" class="mt-2 w-32 h-32 object-cover rounded-md">
-      }
-    </div>
+    <app-file-upload-input formControlName="logo" [folderName]="'partners'" label="Upload Icon"></app-file-upload-input>
+
   </form>
   }
   @else {

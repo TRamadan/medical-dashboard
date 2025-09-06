@@ -13,13 +13,15 @@ import { PartnersService } from './services/partners.service';
 import { MessageService } from 'primeng/api';
 import { SharedService } from '../../../shared/services/shared.service';
 import { firstValueFrom } from 'rxjs';
+import { ToastModule } from 'primeng/toast';
+import { FileUploadInputComponent } from '../../../shared/file-upload-input/file-upload-input.component';
 @Component({
     selector: 'app-partners',
     templateUrl: './partners.component.html',
     styleUrls: ['./partners.component.css'],
     standalone: true,
     providers: [MessageService],
-    imports: [CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent]
+    imports: [ToastModule, FileUploadInputComponent, CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent]
 })
 export class PartnersComponent implements OnInit {
     showAddDialog: boolean = false;
@@ -30,7 +32,7 @@ export class PartnersComponent implements OnInit {
     isDelete: boolean = false;
     uploadResponse: any;
 
-    tableHeaders: TableColumn[] = [{ label: 'Partner Image', field: 'imageUrl', type: 'image' }];
+    tableHeaders: TableColumn[] = [{ label: 'Partner Image', field: 'logo', type: 'image' }];
 
     constructor(
         private fb: FormBuilder,
@@ -83,7 +85,7 @@ export class PartnersComponent implements OnInit {
      */
     addNewPartner(): void {
         let body = {
-            logo: this.uploadResponse.filePath
+            logo: this.addPartnerForm.get('logo')?.value
         };
         this._partnerService.saveNewPartner(body).subscribe({
             next: () => {
@@ -105,13 +107,15 @@ export class PartnersComponent implements OnInit {
     updateSelectedPartner(): void {
         const body = {
             id: this.selectedPartner.id,
-            logo: this.uploadResponse ? this.uploadResponse.filePath : this.selectedPartner.logo
+            logo: this.addPartnerForm.get('logo')?.value
         };
 
         this._partnerService.updatePartner(body).subscribe({
             next: () => {
                 this._messageService.add({ severity: 'success', detail: 'Partner updated successfully' });
                 this.getAllPartners();
+                this.isEdit = false;
+                this.showAddDialog = false;
             },
             error: (err) => {
                 this._messageService.add({ severity: 'error', detail: 'Failed to update partner' });
@@ -129,6 +133,8 @@ export class PartnersComponent implements OnInit {
             next: (res) => {
                 this._messageService.add({ severity: 'success', detail: 'Partner deleted successfully' });
                 this.getAllPartners();
+                this.isDelete = false;
+                this.showAddDialog = false;
             },
             error: (err) => {
                 this._messageService.add({ severity: 'error', detail: 'Failed to delete partner' });
@@ -159,22 +165,5 @@ export class PartnersComponent implements OnInit {
         this.selectedPartner = partner;
         this.isDelete = true;
         this.showAddDialog = true;
-    }
-
-    /**
-     * Developer : Eng/Tarek Ahmed Ramadan
-     * Created Date : 10/6/2025
-     * Purpose : Handle image upload and preview
-     * @param event The file upload event
-     */
-    async onImageUpload(event: any): Promise<any> {
-        const file = event.files?.[0];
-        if (!file) return;
-        try {
-            this.uploadResponse = await firstValueFrom(this._uploadFileService.uploadFileService(file, 'Partners'));
-            return this.uploadResponse;
-        } catch (error: any) {
-            this._messageService.add({ severity: 'error', detail: 'Upload failed' });
-        }
     }
 }
