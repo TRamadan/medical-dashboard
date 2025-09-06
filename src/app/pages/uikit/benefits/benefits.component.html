@@ -1,3 +1,5 @@
+<p-toast></p-toast>
+
 <p-toolbar styleClass="mb-6">
   <ng-template pTemplate="start">
     <div class="flex flex-wrap gap-2">
@@ -18,26 +20,64 @@
 <p-dialog [header]="isEdit ? 'Update Benefit' : 'Add New Benefit'" [(visible)]="showAddDialog" [modal]="true"
   [style]="{width: '90vw', maxWidth: '550px'}">
   @if(!isDelete) {
-  <form [formGroup]="addBenefitForm" class="flex flex-col gap-4">
-    <div class="flex flex-column gap-2">
-      <p-floatlabel>
-        <textarea rows="5" cols="30" pTextarea formControlName="description" class="w-full" rows="3"></textarea>
-        <label>Description</label>
-      </p-floatlabel>
-    </div>
+  <form [formGroup]="addBenefitForm">
+    <div class="row g-3">
 
-    <div class="flex flex-column gap-2">
-      <p-floatlabel>
-        <textarea rows="5" cols="30" pTextarea formControlName="descriptionEn" class="w-full" rows="3"></textarea>
-        <label>Description (En)</label>
-      </p-floatlabel>
-    </div>
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <input type="text" class="form-control" id="name" formControlName="title" required>
+          <label for="name">Title</label>
+        </div>
+        @if(addBenefitForm.get('title')?.invalid && addBenefitForm.get('title')?.touched) {
+        <small class="text-danger">Title is required.</small>
+        }
+      </div>
 
-    <div class="flex flex-column gap-2">
-      <p-floatlabel class="w-full" variant="on">
-        <p-select inputId="on_label" [options]="icons" optionLabel="name" styleClass="w-full" />
-        <label for="on_label">Icon</label>
-      </p-floatlabel>
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <input type="text" class="form-control" id="sport" formControlName="titleEn" required>
+          <label for="sport">Title (English)</label>
+        </div>
+        @if(addBenefitForm.get('titleEn')?.invalid && addBenefitForm.get('titleEn')?.touched) {
+        <small class="text-danger">Title (English) is required.</small>
+        }
+      </div>
+
+      <!-- Description (Arabic) -->
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <textarea class="form-control" id="description" formControlName="description"
+            placeholder="Description (Arabic)" rows="3" required></textarea>
+          <label for="description">Description (Arabic)</label>
+        </div>
+        @if(addBenefitForm.get('description')?.invalid && addBenefitForm.get('description')?.touched) {
+        <small class="text-danger">Description (Arabic) is required.</small>
+        }
+      </div>
+
+      <!-- Description (English) -->
+      <div class="col-12 col-md-4">
+        <div class="form-floating">
+          <textarea class="form-control" id="descriptionEn" formControlName="descriptionEn"
+            placeholder="Description (English)" rows="3" required></textarea>
+          <label for="descriptionEn">Description (English)</label>
+        </div>
+        @if(addBenefitForm.get('descriptionEn')?.invalid &&
+        addBenefitForm.get('descriptionEn')?.touched) {
+        <small class="text-danger">Description (English) is required.</small>
+        }
+      </div>
+
+      <!-- Image Upload (full row) -->
+      <div class="col-12 mt-3">
+        <label for="image"> Image</label>
+        <input type="file" class="form-control" accept="image/*" (change)="onImageUpload($event)">
+        @if(addBenefitForm.get('icon')?.value) {
+        <img [src]="imgUrl + addBenefitForm.get('icon')?.value" alt="Preview" class="mt-2 img-thumbnail"
+          style="width: 120px; height: 120px; object-fit: cover;">
+        }
+      </div>
+
     </div>
   </form>
   }

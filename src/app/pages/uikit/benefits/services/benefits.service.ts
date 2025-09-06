@@ -25,7 +25,7 @@ export class BenefitsService {
     }
 
     //here is the function needed to add a delete selected benefit
-    deleteBenefit(body: any) {
-        return this.http.delete(this.configUrl + 'Benefit', body);
+    deleteBenefit(id: any) {
+        return this.http.delete(this.configUrl + 'Benefit/' + id);
     }
 }
