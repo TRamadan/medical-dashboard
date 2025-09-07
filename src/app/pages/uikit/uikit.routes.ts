@@ -130,5 +130,9 @@ export default [
     {
         path: 'reportconfig',
         component: ReportsConfigComponent
+    },
+    {
+        path: 'our-team',
+        component: OurTeamComponent
     }
 ] as Routes;

@@ -1,23 +1,27 @@
+<!-- Use p-tab elements but also attach a click handler for reliability -->
 <p-tabs [value]="activeIndex">
-    <div
-        class="tab-header flex flex-nowrap overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-        <p-tablist class="flex flex-nowrap min-w-max">
-            @for (tab of tabs; track tab.label) {
-            <p-tab [value]="tabs.indexOf(tab)" class="flex-shrink-0 px-2 py-1 text-sm md:text-base whitespace-nowrap">{{
-                tab.label }}</p-tab>
-            }
+    <div class="tab-header">
+        <p-tablist>
+            <ng-container *ngFor="let tab of tabs; let i = index">
+                <!-- click is more reliable than relying on PrimeNG internal events across versions -->
+                <p-tab [value]="i" (click)="selectTab(i)" [class.active]="activeIndex === i">
+                    {{ tab.label }}
+                </p-tab>
+            </ng-container>
         </p-tablist>
     </div>
+
     <p-tabpanels>
-        @for (tab of tabs; track tab.label) {
-        <p-tabpanel [value]="tabs.indexOf(tab)">
-            <ng-container *ngIf="tab.template; else stringContent">
-                <ng-container *ngTemplateOutlet="tab.template"></ng-container>
-            </ng-container>
-            <ng-template #stringContent>
-                <span>{{ tab.content }}</span>
-            </ng-template>
-        </p-tabpanel>
-        }
+        <ng-container *ngFor="let tab of tabs; let i = index">
+            <p-tabpanel [value]="i">
+                <ng-container *ngIf="tab.template; else stringContent">
+                    <!-- Render template (it should maintain its original context) -->
+                    <ng-container *ngTemplateOutlet="tab.template"></ng-container>
+                </ng-container>
+                <ng-template #stringContent>
+                    <span>{{ tab.content }}</span>
+                </ng-template>
+            </p-tabpanel>
+        </ng-container>
     </p-tabpanels>
 </p-tabs>

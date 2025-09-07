@@ -127,26 +127,17 @@ export class AppMenu {
                         routerLink: ['/uikit/partners']
                     },
 
-                    // {
-                    //     label: 'Inovation hub section config',
-                    //     icon: '',
-                    //     routerLink: ['/uikit/inovationHub']
-                    // },
                     {
                         label: 'Success Stories section config',
                         icon: '',
                         routerLink: ['/uikit/successstories']
                     },
+
                     // {
-                    //     label: 'How it works section config',
+                    //     label: 'Contact us section config',
                     //     icon: '',
-                    //     routerLink: ['/uikit/howitworks']
+                    //     routerLink: ['/uikit/contactus']
                     // },
-                    {
-                        label: 'Contact us section config',
-                        icon: '',
-                        routerLink: ['/uikit/contactus']
-                    },
                     {
                         label: 'About us config',
                         icon: '',
@@ -155,7 +146,7 @@ export class AppMenu {
                     {
                         label: 'Our team',
                         icon: '',
-                        routerLink: ['']
+                        routerLink: ['/uikit/our-team']
                     }
                 ]
             },

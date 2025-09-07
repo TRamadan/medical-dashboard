@@ -1,8 +1,21 @@
-export interface Ourteam {
+export interface Advisors {
     id?: number;
-    img?: string;
     name?: string;
-    specialityAr?: string;
-    specialityEn?: string;
-    certificates?: string[];
+    jobDescriptionAr?: string;
+    jobDescriptionEn?: string;
+    jobAr?: string;
+    jobEn?: string;
+    shortParagraphAr?: string;
+    shortParagraphEn?: string;
+    image?: string;
+}
+
+export interface OurTeam {
+    id?: number;
+    name?: string;
+    roleAr?: string;
+    roleEn?: string;
+    specializationAr?: string;
+    specializationEn?: string;
+    image?: string;
 }
