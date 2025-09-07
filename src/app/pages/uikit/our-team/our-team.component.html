@@ -35,7 +35,7 @@
     { label: 'Our Advisors', template: advisorsTab },
     { label: 'Our Team members', template: teamMemberTab },
     
-]"></app-tabs>
+]" [activeIndex]="activeTabIndex" (tabChange)="onTabChange($event)"></app-tabs>
 </p-card>
 
 <!-- here is the dialog needed to handle the add, update and delete-->
@@ -157,14 +157,88 @@
     </form>
   </ng-template>
 
-  <ng-template #teamMemberFormTab>
-    <p>
-      Team member form goes here
-    </p>
+  <ng-template #addTeamFormTab>
+    <form [formGroup]="addTeamForm" class="container mt-3">
+
+      <!-- Name -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <label for="name" class="form-label">Name</label>
+          <input id="name" type="text" class="form-control" formControlName="name"
+            [ngClass]="{ 'is-invalid': addTeamForm.get('name')?.invalid && addTeamForm.get('name')?.touched }">
+          <div *ngIf="addTeamForm.get('name')?.errors && addTeamForm.get('name')?.touched" class="invalid-feedback">
+            <div *ngIf="addTeamForm.get('name')?.errors?.['required']">Name is required.</div>
+            <div *ngIf="addTeamForm.get('name')?.errors?.['pattern']">Only English letters (3–50 chars).</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Role (Arabic & English) -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="roleAr" class="form-label">Role (Arabic)</label>
+          <input id="roleAr" type="text" class="form-control" formControlName="roleAr"
+            [ngClass]="{ 'is-invalid': addTeamForm.get('roleAr')?.invalid && addTeamForm.get('roleAr')?.touched }">
+          <div *ngIf="addTeamForm.get('roleAr')?.errors && addTeamForm.get('roleAr')?.touched" class="invalid-feedback">
+            <div *ngIf="addTeamForm.get('roleAr')?.errors?.['required']">Role (Arabic) is required.</div>
+            <div *ngIf="addTeamForm.get('roleAr')?.errors?.['pattern']">Only Arabic letters (2–50 chars).</div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="roleEn" class="form-label">Role (English)</label>
+          <input id="roleEn" type="text" class="form-control" formControlName="roleEn"
+            [ngClass]="{ 'is-invalid': addTeamForm.get('roleEn')?.invalid && addTeamForm.get('roleEn')?.touched }">
+          <div *ngIf="addTeamForm.get('roleEn')?.errors && addTeamForm.get('roleEn')?.touched" class="invalid-feedback">
+            <div *ngIf="addTeamForm.get('roleEn')?.errors?.['required']">Role (English) is required.</div>
+            <div *ngIf="addTeamForm.get('roleEn')?.errors?.['pattern']">Only English letters (2–50 chars).</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Specialization (Arabic & English) -->
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="specializationAr" class="form-label">Specialization (Arabic)</label>
+          <input id="specializationAr" type="text" class="form-control" formControlName="specializationAr"
+            [ngClass]="{ 'is-invalid': addTeamForm.get('specializationAr')?.invalid && addTeamForm.get('specializationAr')?.touched }">
+          <div *ngIf="addTeamForm.get('specializationAr')?.errors && addTeamForm.get('specializationAr')?.touched"
+            class="invalid-feedback">
+            <div *ngIf="addTeamForm.get('specializationAr')?.errors?.['required']">Specialization (Arabic) is
+              required.</div>
+            <div *ngIf="addTeamForm.get('specializationAr')?.errors?.['pattern']">Only Arabic letters (2–100 chars).
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-6">
+          <label for="specializationEn" class="form-label">Specialization (English)</label>
+          <input id="specializationEn" type="text" class="form-control" formControlName="specializationEn"
+            [ngClass]="{ 'is-invalid': addTeamForm.get('specializationEn')?.invalid && addTeamForm.get('specializationEn')?.touched }">
+          <div *ngIf="addTeamForm.get('specializationEn')?.errors && addTeamForm.get('specializationEn')?.touched"
+            class="invalid-feedback">
+            <div *ngIf="addTeamForm.get('specializationEn')?.errors?.['required']">Specialization (English) is
+              required.</div>
+            <div *ngIf="addTeamForm.get('specializationEn')?.errors?.['pattern']">Only English letters (2–100 chars).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Image Upload -->
+      <div class="row mb-3">
+        <div class="col-md-12">
+          <app-file-upload-input [folderName]="'Team member'" formControlName="image"></app-file-upload-input>
+        </div>
+      </div>
+
+
+    </form>
+
   </ng-template>
   <app-tabs [tabs]="[
     { label: 'Add new advisor', template: advisorsFormTab },
-    { label: 'Add new team member', template: teamMemberFormTab },
+    { label: 'Add new team member', template: addTeamFormTab },
     
 ]" [activeIndex]="activeTabIndex" (tabChange)="onTabChange($event)"></app-tabs>
   }

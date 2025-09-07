@@ -53,7 +53,7 @@ export class OurTeamComponent implements OnInit {
     showAddDialog: boolean = false;
     addTeamForm!: FormGroup;
     addAdvisorForm!: FormGroup;
-    selectedTeamMember: OurTeam | null = null;
+    selectedTeamMember: OurTeam = {};
     teamMembers: OurTeam[] = [];
     selectedAdvisor: Advisors = {};
     allTeamMembers: OurTeam[] = [];
@@ -88,40 +88,22 @@ export class OurTeamComponent implements OnInit {
     ) {
         this.addTeamForm = this.fb.group({
             id: [null],
-            name: ['', Validators.required],
-            img: ['']
+            name: ['', [Validators.required, Validators.pattern(/^[A-Za-z\s]{3,50}$/)]],
+            roleAr: ['', [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s]{2,50}$/)]],
+            roleEn: ['', [Validators.required, Validators.pattern(/^[A-Za-z\s]{2,50}$/)]],
+            specializationAr: ['', [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s]{2,100}$/)]],
+            specializationEn: ['', [Validators.required, Validators.pattern(/^[A-Za-z\s]{2,100}$/)]],
+            image: [null]
         });
         this.addAdvisorForm = this.fb.group({
             id: [null],
-            name: [
-                '',
-                [Validators.required, Validators.pattern(/^[A-Za-z\s]{3,50}$/)] // only letters, 3–50 chars
-            ],
-            jobAr: [
-                '',
-                [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s]{2,50}$/)] // Arabic job title
-            ],
-            jobEn: [
-                '',
-                [Validators.required, Validators.pattern(/^[A-Za-z\s]{2,50}$/)] // English job title
-            ],
-            jobDescriptionAr: [
-                '',
-                [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s]{10,200}$/)] // Arabic text
-            ],
-            jobDescriptionEn: [
-                '',
-                [Validators.required, Validators.pattern(/^[A-Za-z0-9\s.,-]{10,200}$/)] // English description
-            ],
-
-            shortParagraphAr: [
-                '',
-                [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s.,-]{10,300}$/)] // Arabic paragraph
-            ],
-            shortParagraphEn: [
-                '',
-                [Validators.required, Validators.pattern(/^[A-Za-z0-9\s.,-]{10,300}$/)] // English paragraph
-            ],
+            name: ['', [Validators.required, Validators.pattern(/^[A-Za-z\s]{3,50}$/)]],
+            jobAr: ['', [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s]{2,50}$/)]],
+            jobEn: ['', [Validators.required, Validators.pattern(/^[A-Za-z\s]{2,50}$/)]],
+            jobDescriptionAr: ['', [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s]{10,200}$/)]],
+            jobDescriptionEn: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9\s.,-]{10,200}$/)]],
+            shortParagraphAr: ['', [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s.,-]{10,300}$/)]],
+            shortParagraphEn: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9\s.,-]{10,300}$/)]],
             image: [null]
         });
     }
@@ -165,27 +147,23 @@ export class OurTeamComponent implements OnInit {
     }
 
     onSave() {
-        if (this.isDelete) {
-            this.confirmDeleteSelectedAdvisor();
-            return;
-        }
-
+        debugger;
         if (this.activeTabIndex === 0) {
-            // advisor tab
-            if (this.addAdvisorForm.invalid) {
-                this.addAdvisorForm.markAllAsTouched();
-                return;
+            if (this.isEdit) {
+                this.updateAdvisor();
+            } else if (this.isDelete) {
+                this.confirmDeleteSelectedAdvisor();
+            } else {
+                this.addNewAdvisor();
             }
-            if (this.isEdit) this.updateAdvisor();
-            else this.addNewAdvisor();
         } else {
-            // team member tab
-            if (this.addAdvisorForm.invalid) {
-                this.addAdvisorForm.markAllAsTouched();
-                return;
+            if (this.isEdit) {
+                this.updateTeamMember();
+            } else if (this.isDelete) {
+                this.confirmDeleteTeamMember();
+            } else {
+                this.addNewTeamMember();
             }
-            if (this.isEdit) this.updateTeamMember();
-            else this.addNewTeamMember();
         }
     }
 
@@ -198,7 +176,12 @@ export class OurTeamComponent implements OnInit {
     }
 
     //here is the function needed to edit the selected team member
-    editTeamMember(event: any): void {}
+    editTeamMember(event: any): void {
+        this.selectedTeamMember = { ...event };
+        this.addTeamForm.patchValue(this.selectedTeamMember);
+        this.isEdit = true;
+        this.showAddDialog = true;
+    }
 
     //here is the function needed to set the id for the selected deleted row
     deleteSelectedAdvisor(event: any): void {
@@ -209,7 +192,13 @@ export class OurTeamComponent implements OnInit {
     }
 
     //here is the function
-    deleteTeamMember(event: any): void {}
+    deleteTeamMember(event: any): void {
+        debugger;
+        this.selectedTeamMember = { ...event };
+        this.addTeamForm.controls['id'].setValue(this.selectedTeamMember.id);
+        this.isDelete = true;
+        this.showAddDialog = true;
+    }
 
     //here is the function needed to add a new advisor
     addNewAdvisor(): void {
@@ -228,7 +217,19 @@ export class OurTeamComponent implements OnInit {
     }
 
     //here is the function needed to add a new team member
-    addNewTeamMember(): void {}
+    addNewTeamMember(): void {
+        const payload = this.addTeamForm.getRawValue();
+        this._ourTeamService.create('TeamMembers', payload).subscribe({
+            next: (res: any) => {
+                this._messageService.add({ severity: 'success', detail: 'Done add new team member' });
+                this.showAddDialog = false;
+                this.getAllTeamMembers();
+            },
+            error: (error: any) => {
+                this._messageService.add({ severity: 'error', detail: 'Failed to add a new team member' });
+            }
+        });
+    }
 
     //here is the function needed to update the selected advisor
     updateAdvisor(): void {
@@ -263,5 +264,34 @@ export class OurTeamComponent implements OnInit {
     }
 
     //here is the function needed to update the selected team member
-    updateTeamMember(): void {}
+    updateTeamMember(): void {
+        const payLoad = this.addTeamForm.getRawValue();
+        this._ourTeamService.update('TeamMembers', payLoad).subscribe({
+            next: (res: any) => {
+                this._messageService.add({ severity: 'success', detail: 'Success update team member data' });
+                this.isEdit = false;
+                this.showAddDialog = false;
+                this.getAllTeamMembers();
+            },
+            error: (error: any) => {
+                this._messageService.add({ severity: 'error', detail: 'Failed to update the selected team member' });
+            }
+        });
+    }
+
+    //here is the function needed to delete the selected team member
+    confirmDeleteTeamMember(): void {
+        let id = this.addTeamForm.controls['id'].value;
+        this._ourTeamService.delete('TeamMembers', id).subscribe({
+            next: (res: any) => {
+                this._messageService.add({ severity: 'success', detail: 'Selected team member is deleted successfully' });
+                this.getAllTeamMembers();
+                this.isDelete = false;
+                this.showAddDialog = false;
+            },
+            error: (error: any) => {
+                this._messageService.add({ severity: 'error', detail: 'Failed to delete success story' });
+            }
+        });
+    }
 }
