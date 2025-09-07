@@ -13,8 +13,13 @@
 
 
 <!-- Use the shared dynamic table component -->
-<app-table [headers]="tableHeaders" [showActions]="true" [data]="superStars" (edit)="editSuperStar($event)"
-  (delete)="deleteSuperStar($event)"></app-table>
+<p-card>
+  <div class="flex items-center justify-between mb-2">
+    <h5 class="m-0">Manage All super stars</h5>
+  </div>
+  <app-table [headers]="tableHeaders" [showActions]="true" [data]="superStars" (edit)="editSuperStar($event)"
+    (delete)="deleteSuperStar($event)"></app-table>
+</p-card>
 
 <!-- here is the dialog needed to add or update a new super star-->
 <p-dialog [header]="isEdit ? 'Update selected super star' : 'Add New Super Star'" [(visible)]="showAddDialog"

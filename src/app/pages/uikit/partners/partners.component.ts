@@ -15,13 +15,14 @@ import { SharedService } from '../../../shared/services/shared.service';
 import { firstValueFrom } from 'rxjs';
 import { ToastModule } from 'primeng/toast';
 import { FileUploadInputComponent } from '../../../shared/file-upload-input/file-upload-input.component';
+import { CardModule } from 'primeng/card';
 @Component({
     selector: 'app-partners',
     templateUrl: './partners.component.html',
     styleUrls: ['./partners.component.css'],
     standalone: true,
     providers: [MessageService],
-    imports: [ToastModule, FileUploadInputComponent, CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent]
+    imports: [CardModule, ToastModule, FileUploadInputComponent, CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent]
 })
 export class PartnersComponent implements OnInit {
     showAddDialog: boolean = false;

@@ -10,8 +10,13 @@
 
 
 <!-- Use the shared dynamic table component -->
-<app-table [headers]="tableHeaders" [data]="allMethodologies" [showActions]="true" (edit)="editMethodology($event)"
-  (delete)="deleteMethodology($event)"></app-table>
+<p-card>
+  <div class="flex items-center justify-between mb-2">
+    <h5 class="m-0">Manage Methodology and cutting edge technology</h5>
+  </div>
+  <app-table [headers]="tableHeaders" [data]="allMethodologies" [showActions]="true" (edit)="editMethodology($event)"
+    (delete)="deleteMethodology($event)"></app-table>
+</p-card>
 
 <!-- Dialog for adding/editing partners -->
 <p-dialog [header]="isEdit ?'Update selected methodology item' : 'Add new methodology item'" [(visible)]="showAddDialog"

@@ -13,8 +13,14 @@
 </p-toolbar>
 
 <!-- Use the shared dynamic table component -->
-<app-table [headers]="tableHeaders" [data]="allBenefits" [showActions]="true" (edit)="editBenefit($event)"
-  (delete)="deleteBenefit($event)"></app-table>
+<p-card>
+  <div class="flex items-center justify-between mb-2">
+    <h5 class="m-0">Manage our benefits</h5>
+  </div>
+  <app-table [headers]="tableHeaders" [data]="allBenefits" [showActions]="true" (edit)="editBenefit($event)"
+    (delete)="deleteBenefit($event)"></app-table>
+</p-card>
+
 
 <!-- Dialog for adding/editing partners -->
 <p-dialog [header]="isEdit ? 'Update Benefit' : 'Add New Benefit'" [(visible)]="showAddDialog" [modal]="true"

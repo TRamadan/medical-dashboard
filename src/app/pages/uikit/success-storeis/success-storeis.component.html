@@ -12,10 +12,15 @@
 
 <p-toast></p-toast>
 
+<p-card>
+    <div class="flex items-center justify-between mb-2">
+        <h5 class="m-0">Manage Our success stories</h5>
+    </div>
+    <!-- Use the shared dynamic table component -->
+    <app-table [headers]="tableHeaders" [data]="allSuccessStories" [showActions]="true"
+        (edit)="editSuccessStory($event)" (delete)="deleteSuccessStory($event)"></app-table>
+</p-card>
 
-<!-- Use the shared dynamic table component -->
-<app-table [headers]="tableHeaders" [data]="allSuccessStories" [showActions]="true" (edit)="editSuccessStory($event)"
-    (delete)="deleteSuccessStory($event)"></app-table>
 
 <!-- Dialog for adding/editing partners -->
 <p-dialog [header]="isEdit ? 'Update Partner' : 'Add New Partner'" [(visible)]="showAddDialog" [modal]="true"

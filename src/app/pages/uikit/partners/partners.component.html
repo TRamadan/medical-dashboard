@@ -13,8 +13,13 @@
 
 
 <!-- Use the shared dynamic table component -->
-<app-table [headers]="tableHeaders" [data]="partners" [showActions]="true" (edit)="editPartner($event)"
-  (delete)="deletePartner($event)"></app-table>
+<p-card>
+  <div class="flex items-center justify-between mb-2">
+    <h5 class="m-0">Manage our partners</h5>
+  </div>
+  <app-table [headers]="tableHeaders" [data]="partners" [showActions]="true" (edit)="editPartner($event)"
+    (delete)="deletePartner($event)"></app-table>
+</p-card>
 
 <!-- Dialog for adding/editing partners -->
 <p-dialog [header]="isEdit ? 'Update Partner' : 'Add New Partner'" [(visible)]="showAddDialog" [modal]="true"

@@ -17,13 +17,14 @@ import { SelectModule } from 'primeng/select';
 import { ToastModule } from 'primeng/toast';
 import { environment } from '../../../../environments/environment';
 import { SharedService } from '../../../shared/services/shared.service';
+import { CardModule } from 'primeng/card';
 @Component({
     selector: 'app-benefits',
     templateUrl: './benefits.component.html',
     providers: [MessageService],
     styleUrls: ['./benefits.component.css'],
     standalone: true,
-    imports: [ToastModule, SelectModule, TextareaModule, FloatLabelModule, CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent]
+    imports: [CardModule, ToastModule, SelectModule, TextareaModule, FloatLabelModule, CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent]
 })
 export class BenefitsComponent implements OnInit {
     allBenefits: Benefits[] = [];

@@ -15,12 +15,12 @@ import { SharedService } from '../../../shared/services/shared.service';
 import { firstValueFrom } from 'rxjs';
 import { FileUploadInputComponent } from '../../../shared/file-upload-input/file-upload-input.component';
 import { ToastModule } from 'primeng/toast';
-
+import { CardModule } from 'primeng/card';
 @Component({
     selector: 'app-success-storeis',
     standalone: true,
     providers: [MessageService],
-    imports: [ToastModule, FileUploadInputComponent, CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent],
+    imports: [CardModule, ToastModule, FileUploadInputComponent, CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent],
     templateUrl: './success-storeis.component.html',
     styleUrls: ['./success-storeis.component.css']
 })

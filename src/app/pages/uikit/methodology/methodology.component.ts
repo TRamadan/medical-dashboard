@@ -17,7 +17,7 @@ import { TextareaModule } from 'primeng/textarea';
 import { SelectModule } from 'primeng/select';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { ToastModule } from 'primeng/toast';
-
+import { CardModule } from 'primeng/card';
 import { environment } from '../../../../environments/environment';
 
 @Component({
@@ -26,7 +26,7 @@ import { environment } from '../../../../environments/environment';
     styleUrls: ['./methodology.component.css'],
     standalone: true,
     providers: [MessageService],
-    imports: [ToastModule, ToggleSwitchModule, SelectModule, TextareaModule, FloatLabelModule, CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent]
+    imports: [CardModule, ToastModule, ToggleSwitchModule, SelectModule, TextareaModule, FloatLabelModule, CommonModule, ReactiveFormsModule, ButtonModule, DialogModule, TableModule, InputTextModule, ToolbarModule, FileUploadModule, TableComponent]
 })
 export class MethodologyComponent implements OnInit {
     showAddDialog: boolean = false;

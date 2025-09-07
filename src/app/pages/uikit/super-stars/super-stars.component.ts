@@ -17,6 +17,7 @@ import { SuperstarsService } from './service/superstars.service';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { environment } from '../../../../environments/environment';
+import { CardModule } from 'primeng/card';
 
 @Component({
     selector: 'app-super-stars',
@@ -24,7 +25,7 @@ import { environment } from '../../../../environments/environment';
     styleUrls: ['./super-stars.component.css'],
     standalone: true,
     providers: [MessageService],
-    imports: [ToastModule, CheckboxModule, InputIconModule, IconFieldModule, CommonModule, ToolbarModule, ReactiveFormsModule, ButtonModule, DialogModule, FileUploadModule, TableModule, InputTextModule, TableComponent, FloatLabelModule]
+    imports: [CardModule, ToastModule, CheckboxModule, InputIconModule, IconFieldModule, CommonModule, ToolbarModule, ReactiveFormsModule, ButtonModule, DialogModule, FileUploadModule, TableModule, InputTextModule, TableComponent, FloatLabelModule]
 })
 export class SuperStarsComponent implements OnInit {
     public readonly imgUrl = environment.imgUrl;
