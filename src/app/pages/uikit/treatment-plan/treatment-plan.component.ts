@@ -63,11 +63,7 @@ export class TreatmentPlanComponent implements OnInit {
     isEdit: boolean = false;
     isNew: boolean = false;
     selectedPatient: Patient | null = null;
-    selectedInjuryTypes: string[] = [
-        'Knee Injury', 'Shoulder Injury', 'Back Pain', 'Ankle Sprain',
-        'Hip Injury', 'Elbow Injury', 'Wrist Injury', 'Neck Pain',
-        'Sports Injury', 'Post-Surgery Rehabilitation', 'Chronic Pain'
-    ];
+    selectedInjuryTypes: string[] = ['Knee Injury', 'Shoulder Injury', 'Back Pain', 'Ankle Sprain', 'Hip Injury', 'Elbow Injury', 'Wrist Injury', 'Neck Pain', 'Sports Injury', 'Post-Surgery Rehabilitation', 'Chronic Pain'];
     priorityOptions = [
         { label: 'Low', value: 'low' },
         { label: 'Medium', value: 'medium' },
@@ -83,7 +79,7 @@ export class TreatmentPlanComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private messageService: MessageService
-    ) { }
+    ) {}
 
     ngOnInit(): void {
         try {
@@ -337,17 +333,14 @@ export class TreatmentPlanComponent implements OnInit {
     // Get available coaches by specialization
     getAvailableCoaches(specialization?: string): Coach[] {
         if (!specialization) {
-            return this.allCoaches.filter(coach => coach.currentWorkload < coach.maxWorkload);
+            return this.allCoaches.filter((coach) => coach.currentWorkload < coach.maxWorkload);
         }
-        return this.allCoaches.filter(coach =>
-            coach.specialization.toLowerCase().includes(specialization.toLowerCase()) &&
-            coach.currentWorkload < coach.maxWorkload
-        );
+        return this.allCoaches.filter((coach) => coach.specialization.toLowerCase().includes(specialization.toLowerCase()) && coach.currentWorkload < coach.maxWorkload);
     }
 
     // Calculate coach workload
     calculateCoachWorkload(coachId: number): number {
-        const coach = this.allCoaches.find(c => c.id === coachId);
+        const coach = this.allCoaches.find((c) => c.id === coachId);
         return coach ? coach.currentWorkload : 0;
     }
 
@@ -374,7 +367,7 @@ export class TreatmentPlanComponent implements OnInit {
                     detail: 'Treatment plan created successfully'
                 });
             } else {
-                const index = this.allTreatmentPlans.findIndex(tp => tp.id === treatmentPlan.id);
+                const index = this.allTreatmentPlans.findIndex((tp) => tp.id === treatmentPlan.id);
                 if (index !== -1) {
                     this.allTreatmentPlans[index] = treatmentPlan;
                     this.messageService.add({
@@ -487,7 +480,7 @@ export class TreatmentPlanComponent implements OnInit {
         this.treatmentPlanDialog = true;
         this.isNew = true;
         // try {
-        //     debugger
+        //
         //     // Reset form and clear arrays
         //     this.addTreatmentPlanForm.reset();
 
@@ -516,7 +509,6 @@ export class TreatmentPlanComponent implements OnInit {
         //         this.addSession(0);
         //     }
 
-
         //     this.isEdit = false;
 
         //     console.log('Dialog opened successfully');
@@ -525,7 +517,7 @@ export class TreatmentPlanComponent implements OnInit {
         //         assignedCoaches: this.assignedCoaches.length
         //     });
 
-        // } 
+        // }
         // catch (error) {
         //     console.error('Error opening dialog:', error);
         //     this.messageService.add({
@@ -548,7 +540,7 @@ export class TreatmentPlanComponent implements OnInit {
             priority: treatmentPlan.priority
         });
 
-        this.selectedPatient = this.allPatients.find(p => p.id === treatmentPlan.patientId) || null;
+        this.selectedPatient = this.allPatients.find((p) => p.id === treatmentPlan.patientId) || null;
         this.treatmentPlanDialog = true;
         this.isEdit = true;
         this.isNew = false;
@@ -568,22 +560,32 @@ export class TreatmentPlanComponent implements OnInit {
     // Get status severity for display
     getStatusSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
         switch (status) {
-            case 'active': return 'success';
-            case 'draft': return 'warn';
-            case 'completed': return 'info';
-            case 'paused': return 'danger';
-            default: return 'secondary';
+            case 'active':
+                return 'success';
+            case 'draft':
+                return 'warn';
+            case 'completed':
+                return 'info';
+            case 'paused':
+                return 'danger';
+            default:
+                return 'secondary';
         }
     }
 
     // Get priority severity for display
     getPrioritySeverity(priority: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' {
         switch (priority) {
-            case 'urgent': return 'danger';
-            case 'high': return 'warn';
-            case 'medium': return 'info';
-            case 'low': return 'success';
-            default: return 'secondary';
+            case 'urgent':
+                return 'danger';
+            case 'high':
+                return 'warn';
+            case 'medium':
+                return 'info';
+            case 'low':
+                return 'success';
+            default:
+                return 'secondary';
         }
     }
 

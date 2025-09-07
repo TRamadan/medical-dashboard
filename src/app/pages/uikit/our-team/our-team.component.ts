@@ -147,7 +147,6 @@ export class OurTeamComponent implements OnInit {
     }
 
     onSave() {
-        debugger;
         if (this.activeTabIndex === 0) {
             if (this.isEdit) {
                 this.updateAdvisor();
@@ -193,7 +192,6 @@ export class OurTeamComponent implements OnInit {
 
     //here is the function
     deleteTeamMember(event: any): void {
-        debugger;
         this.selectedTeamMember = { ...event };
         this.addTeamForm.controls['id'].setValue(this.selectedTeamMember.id);
         this.isDelete = true;
