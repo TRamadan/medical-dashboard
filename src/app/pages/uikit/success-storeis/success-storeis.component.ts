@@ -53,56 +53,42 @@ export class SuccessStoreisComponent implements OnInit {
     ) {}
 
     ngOnInit() {
+        this.addSuccessStoryForm?.get('isSuccessStoryVideo')?.valueChanges.subscribe((isVideo: boolean) => {
+            const videoUrlControl = this.addSuccessStoryForm?.get('videoUrl');
+            const personDescriptionAr = this.addSuccessStoryForm?.get('personDescriptionAr');
+            const personDescriptionEn = this.addSuccessStoryForm?.get('personDescriptionEn');
+
+            if (isVideo) {
+                videoUrlControl?.setValidators([Validators.required, Validators.pattern(/^(https?:\/\/)?([\w\-]+\.)+[a-zA-Z]{2,}(\/\S*)?$/)]);
+                personDescriptionAr?.clearValidators();
+                personDescriptionEn?.clearValidators();
+            } else {
+                videoUrlControl?.setValidators([Validators.pattern(/^(https?:\/\/)?([\w\-]+\.)+[a-zA-Z]{2,}(\/\S*)?$/)]);
+                personDescriptionAr?.setValidators([Validators.required, Validators.pattern(/^[\u0600-\u06FF\s.,!?-]+$/)]);
+                personDescriptionEn?.setValidators([Validators.required, Validators.pattern(/^[A-Za-z0-9\s.,!?-]+$/)]);
+            }
+
+            videoUrlControl?.updateValueAndValidity();
+            personDescriptionAr?.updateValueAndValidity();
+            personDescriptionEn?.updateValueAndValidity();
+        });
+
         this.addSuccessStoryForm = this.fb.group({
             id: [null],
-            titleAr: [
-                '',
-                [
-                    Validators.required,
-                    Validators.pattern(/^[\u0600-\u06FF\s]+$/) // Arabic letters + spaces only
-                ]
-            ],
-            titleEn: [
-                '',
-                [
-                    Validators.required,
-                    Validators.pattern(/^[A-Za-z\s]+$/) // English letters + spaces only
-                ]
-            ],
-            descriptionAr: [
-                '',
-                [
-                    Validators.required,
-                    Validators.pattern(/^[\u0600-\u06FF\s.,!?-]+$/) // Arabic with punctuation
-                ]
-            ],
-            descriptionEn: [
-                '',
-                [
-                    Validators.required,
-                    Validators.pattern(/^[A-Za-z0-9\s.,!?-]+$/) // English with punctuation
-                ]
-            ],
+
+            titleAr: ['', [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s]+$/)]],
+            titleEn: ['', [Validators.required, Validators.pattern(/^[A-Za-z\s]+$/)]],
+            descriptionAr: ['', [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s.,!?-]+$/)]],
+            descriptionEn: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9\s.,!?-]+$/)]],
+
             isSuccessStoryVideo: [false],
-            videoUrl: [
-                '',
-                [
-                    // Required dynamically if isSuccessStoryVideo = true
-                    Validators.pattern(/^(https?:\/\/)?([\w\-]+\.)+[\w]{2,}(\/\S*)?$/)
-                ]
-            ],
-            image: [
-                '',
-                [
-                    // Required dynamically if isSuccessStoryVideo = false
-                ]
-            ],
-            name: [
-                '',
-                [
-                    Validators.pattern(/^[A-Za-z\u0600-\u06FF\s]+$/) // Arabic or English letters
-                ]
-            ],
+
+            videoUrl: ['', [Validators.pattern(/^(https?:\/\/)?([\w\-]+\.)+[a-zA-Z]{2,}(\/\S*)?$/)]],
+
+            image: [''],
+
+            name: ['', [Validators.pattern(/^[A-Za-z\u0600-\u06FF\s]+$/)]],
+
             personDescriptionAr: [''],
             personDescriptionEn: ['']
         });

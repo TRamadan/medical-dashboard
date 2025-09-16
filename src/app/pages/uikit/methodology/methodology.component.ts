@@ -72,10 +72,22 @@ export class MethodologyComponent implements OnInit {
     ngOnInit() {
         this.addMethodologiesConfig = this.fb.group({
             id: [null],
-            title: [null, Validators.required],
-            titleEn: [null, Validators.required],
-            descriptionEn: [null, Validators.required],
-            description: [null, Validators.required],
+            title: [
+                null,
+                [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s]+$/)] // Arabic only
+            ],
+            titleEn: [
+                null,
+                [Validators.required, Validators.pattern(/^[A-Za-z\s]+$/)] // English only
+            ],
+            description: [
+                null,
+                [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s.,!?-]+$/)] // Arabic with punctuation
+            ],
+            descriptionEn: [
+                null,
+                [Validators.required, Validators.pattern(/^[A-Za-z0-9\s.,!?-]+$/)] // English with punctuation
+            ],
             isCuttingEdgeTechnology: [false, Validators.required],
             icon: ['']
         });

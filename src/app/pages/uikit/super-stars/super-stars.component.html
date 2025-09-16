@@ -31,106 +31,134 @@
       <!-- Name -->
       <div class="col-12 col-md-4">
         <div class="form-floating">
-          <input type="text" class="form-control" id="name" formControlName="name" placeholder="Athlete Name" required>
+          <input type="text" id="name" class="form-control" formControlName="name" placeholder="Athlete Name"
+            [ngClass]="{ 'is-invalid': addSuperStarForm.get('name')?.invalid && addSuperStarForm.get('name')?.touched }">
           <label for="name">Athlete Name</label>
+          <div *ngIf="addSuperStarForm.get('name')?.errors && addSuperStarForm.get('name')?.touched"
+            class="invalid-feedback">
+            <div *ngIf="addSuperStarForm.get('name')?.errors?.['required']">Athlete name is required.</div>
+            <div *ngIf="addSuperStarForm.get('name')?.errors?.['pattern']">Only letters are allowed.</div>
+          </div>
         </div>
-        @if(addSuperStarForm.get('name')?.invalid && addSuperStarForm.get('name')?.touched) {
-        <small class="text-danger">Athlete name is required.</small>
-        }
       </div>
 
       <!-- Sport (Arabic) -->
       <div class="col-12 col-md-4">
         <div class="form-floating">
-          <input type="text" class="form-control" id="sport" formControlName="sport"
-            placeholder="Athlete Sport (Arabic)" required>
+          <input type="text" id="sport" class="form-control" formControlName="sport"
+            placeholder="Athlete Sport (Arabic)"
+            [ngClass]="{ 'is-invalid': addSuperStarForm.get('sport')?.invalid && addSuperStarForm.get('sport')?.touched }">
           <label for="sport">Athlete Sport (Arabic)</label>
+          <div *ngIf="addSuperStarForm.get('sport')?.errors && addSuperStarForm.get('sport')?.touched"
+            class="invalid-feedback">
+            <div *ngIf="addSuperStarForm.get('sport')?.errors?.['required']">Athlete Sport (Arabic) is required.</div>
+            <div *ngIf="addSuperStarForm.get('sport')?.errors?.['pattern']">Only Arabic letters are allowed.</div>
+          </div>
         </div>
-        @if(addSuperStarForm.get('sport')?.invalid && addSuperStarForm.get('sport')?.touched) {
-        <small class="text-danger">Athlete Sport (Arabic) is required.</small>
-        }
       </div>
 
       <!-- Sport (English) -->
       <div class="col-12 col-md-4">
         <div class="form-floating">
-          <input type="text" class="form-control" id="sportEn" formControlName="sportEn"
-            placeholder="Athlete Sport (English)" required>
+          <input type="text" id="sportEn" class="form-control" formControlName="sportEn"
+            placeholder="Athlete Sport (English)"
+            [ngClass]="{ 'is-invalid': addSuperStarForm.get('sportEn')?.invalid && addSuperStarForm.get('sportEn')?.touched }">
           <label for="sportEn">Athlete Sport (English)</label>
+          <div *ngIf="addSuperStarForm.get('sportEn')?.errors && addSuperStarForm.get('sportEn')?.touched"
+            class="invalid-feedback">
+            <div *ngIf="addSuperStarForm.get('sportEn')?.errors?.['required']">Athlete Sport (English) is required.
+            </div>
+            <div *ngIf="addSuperStarForm.get('sportEn')?.errors?.['pattern']">Only English letters are allowed.</div>
+          </div>
         </div>
-        @if(addSuperStarForm.get('sportEn')?.invalid && addSuperStarForm.get('sportEn')?.touched) {
-        <small class="text-danger">Athlete Sport (English) is required.</small>
-        }
       </div>
 
       <!-- Achievement (Arabic) -->
       <div class="col-12 col-md-4">
         <div class="form-floating">
-          <input type="text" class="form-control" id="achievement" formControlName="achievement"
-            placeholder="Achievement (Arabic)" required>
+          <input type="text" id="achievement" class="form-control" formControlName="achievement"
+            placeholder="Achievement (Arabic)"
+            [ngClass]="{ 'is-invalid': addSuperStarForm.get('achievement')?.invalid && addSuperStarForm.get('achievement')?.touched }">
           <label for="achievement">Achievement (Arabic)</label>
+          <div *ngIf="addSuperStarForm.get('achievement')?.errors && addSuperStarForm.get('achievement')?.touched"
+            class="invalid-feedback">
+            <div *ngIf="addSuperStarForm.get('achievement')?.errors?.['required']">Achievement (Arabic) is required.
+            </div>
+            <div *ngIf="addSuperStarForm.get('achievement')?.errors?.['pattern']">Only Arabic letters are allowed.</div>
+          </div>
         </div>
-        @if(addSuperStarForm.get('achievement')?.invalid && addSuperStarForm.get('achievement')?.touched) {
-        <small class="text-danger">Achievement (Arabic) is required.</small>
-        }
       </div>
 
       <!-- Achievement (English) -->
       <div class="col-12 col-md-4">
         <div class="form-floating">
-          <input type="text" class="form-control" id="achievementEn" formControlName="achievementEn"
-            placeholder="Achievement (English)" required>
+          <input type="text" id="achievementEn" class="form-control" formControlName="achievementEn"
+            placeholder="Achievement (English)"
+            [ngClass]="{ 'is-invalid': addSuperStarForm.get('achievementEn')?.invalid && addSuperStarForm.get('achievementEn')?.touched }">
           <label for="achievementEn">Achievement (English)</label>
+          <div *ngIf="addSuperStarForm.get('achievementEn')?.errors && addSuperStarForm.get('achievementEn')?.touched"
+            class="invalid-feedback">
+            <div *ngIf="addSuperStarForm.get('achievementEn')?.errors?.['required']">Achievement (English) is required.
+            </div>
+            <div *ngIf="addSuperStarForm.get('achievementEn')?.errors?.['pattern']">Only English letters are allowed.
+            </div>
+          </div>
         </div>
-        @if(addSuperStarForm.get('achievementEn')?.invalid && addSuperStarForm.get('achievementEn')?.touched) {
-        <small class="text-danger">Achievement (English) is required.</small>
-        }
       </div>
 
       <!-- Description (Arabic) -->
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-6">
         <div class="form-floating">
-          <textarea class="form-control" id="description" formControlName="description"
-            placeholder="Description (Arabic)" rows="3" required></textarea>
+          <textarea id="description" class="form-control" rows="3" formControlName="description"
+            placeholder="Description (Arabic)"
+            [ngClass]="{ 'is-invalid': addSuperStarForm.get('description')?.invalid && addSuperStarForm.get('description')?.touched }"></textarea>
           <label for="description">Description (Arabic)</label>
+          <div *ngIf="addSuperStarForm.get('description')?.errors && addSuperStarForm.get('description')?.touched"
+            class="invalid-feedback">
+            <div *ngIf="addSuperStarForm.get('description')?.errors?.['required']">Description (Arabic) is required.
+            </div>
+            <div *ngIf="addSuperStarForm.get('description')?.errors?.['pattern']">Only Arabic letters, numbers and basic
+              punctuation are allowed.</div>
+          </div>
         </div>
-        @if(addSuperStarForm.get('description')?.invalid && addSuperStarForm.get('description')?.touched) {
-        <small class="text-danger">Description (Arabic) is required.</small>
-        }
       </div>
 
       <!-- Description (English) -->
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-6">
         <div class="form-floating">
-          <textarea class="form-control" id="descriptionEn" formControlName="descriptionEn"
-            placeholder="Description (English)" rows="3" required></textarea>
+          <textarea id="descriptionEn" class="form-control" rows="3" formControlName="descriptionEn"
+            placeholder="Description (English)"
+            [ngClass]="{ 'is-invalid': addSuperStarForm.get('descriptionEn')?.invalid && addSuperStarForm.get('descriptionEn')?.touched }"></textarea>
           <label for="descriptionEn">Description (English)</label>
+          <div *ngIf="addSuperStarForm.get('descriptionEn')?.errors && addSuperStarForm.get('descriptionEn')?.touched"
+            class="invalid-feedback">
+            <div *ngIf="addSuperStarForm.get('descriptionEn')?.errors?.['required']">Description (English) is required.
+            </div>
+            <div *ngIf="addSuperStarForm.get('descriptionEn')?.errors?.['pattern']">Only English letters, numbers and
+              basic punctuation are allowed.</div>
+          </div>
         </div>
-        @if(addSuperStarForm.get('descriptionEn')?.invalid && addSuperStarForm.get('descriptionEn')?.touched) {
-        <small class="text-danger">Description (English) is required.</small>
-        }
       </div>
 
       <!-- Is Elite -->
       <div class="col-12 col-md-4 d-flex align-items-center mt-2">
-
-
-        <input class="form-check-input me-2" type="checkbox" formControlName="isElite" id="isElite">
+        <input type="checkbox" class="form-check-input me-2" formControlName="isElite" id="isElite">
         <label class="form-check-label" for="isElite">Is Elite Athlete?</label>
       </div>
 
-      <!-- Image Upload (full row) -->
+      <!-- Image Upload -->
       <div class="col-12 mt-3">
         <label for="image">Athlete Image</label>
         <input type="file" class="form-control" accept="image/*" (change)="onImageUpload($event)">
-        @if(addSuperStarForm.get('image')?.value) {
-        <img [src]="imgUrl + addSuperStarForm.get('image')?.value" alt="Preview" class="mt-2 img-thumbnail"
-          style="width: 120px; height: 120px; object-fit: cover;">
-        }
+        <div *ngIf="addSuperStarForm.get('image')?.value">
+          <img [src]="imgUrl + addSuperStarForm.get('image')?.value" alt="Preview" class="mt-2 img-thumbnail"
+            style="width: 120px; height: 120px; object-fit: cover;">
+        </div>
       </div>
 
     </div>
   </form>
+
   }
 
   @else {
@@ -149,9 +177,9 @@
   }
 
   @if(isDelete){
-  <p-button severity="success" label="Save" icon="pi pi-check" type="submit" (onClick)="deleteSelectedSuperStar() " />
 
   <div class=" flex justify-end gap-2 mt-4">
+    <p-button severity="success" label="Save" icon="pi pi-check" type="submit" (onClick)="deleteSelectedSuperStar() " />
     <p-button severity="danger" label="Cancel" icon="pi pi-times" (click)="showAddDialog = false" class="p-button-text"
       type="button" />
   </div>

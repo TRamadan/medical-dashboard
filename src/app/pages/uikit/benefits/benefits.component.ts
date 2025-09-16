@@ -45,10 +45,10 @@ export class BenefitsComponent implements OnInit {
     ) {
         this.addBenefitForm = this.fb.group({
             id: [null],
-            title: [null, Validators.required],
-            titleEn: [null, Validators.required],
-            description: [null, Validators.required],
-            descriptionEn: [null, Validators.required],
+            title: [null, [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s]+$/)]],
+            titleEn: [null, [Validators.required, Validators.pattern(/^[A-Za-z\s]+$/)]],
+            description: [null, [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s.,!?-]+$/)]],
+            descriptionEn: [null, [Validators.required, Validators.pattern(/^[A-Za-z0-9\s.,!?-]+$/)]],
             icon: [null]
         });
     }

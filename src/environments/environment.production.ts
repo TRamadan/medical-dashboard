@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    apiUrl: 'http://10.4.30.8:1103/api/',
-    fileUrl: ''
+    apiUrl: 'http://hamoudasw-001-site1.mtempurl.com/api/',
+    imgUrl: 'http://hamoudasw-001-site1.mtempurl.com/'
 };

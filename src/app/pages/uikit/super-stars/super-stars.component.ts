@@ -57,13 +57,13 @@ export class SuperStarsComponent implements OnInit {
     ) {
         this.addSuperStarForm = this.fb.group({
             id: [null],
-            name: ['', Validators.required],
-            sport: ['', Validators.required],
-            sportEn: ['', Validators.required],
-            achievement: ['', Validators.required],
-            achievementEn: ['', Validators.required],
-            description: ['', Validators.required],
-            descriptionEn: ['', Validators.required],
+            name: ['', [Validators.required, Validators.pattern(/^[\p{L}\s]+$/u)]],
+            sport: ['', [Validators.required, Validators.pattern(/^[\u0621-\u064A\s]+$/)]],
+            sportEn: ['', [Validators.required, Validators.pattern(/^[A-Za-z\s]+$/)]],
+            achievement: ['', [Validators.required, Validators.pattern(/^[\u0621-\u064A\s]+$/)]],
+            achievementEn: ['', [Validators.required, Validators.pattern(/^[A-Za-z\s]+$/)]],
+            description: ['', [Validators.required, Validators.pattern(/^[\u0621-\u064A0-9\s\.\،\-]+$/)]],
+            descriptionEn: ['', [Validators.required, Validators.pattern(/^[A-Za-z0-9\s\.\,\-]+$/)]],
             image: [''],
             isElite: [false]
         });
