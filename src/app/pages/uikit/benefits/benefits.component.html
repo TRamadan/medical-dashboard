@@ -29,15 +29,16 @@
   <form [formGroup]="addBenefitForm" class="mt-4">
     <div class="row g-3">
 
-      <!-- Title -->
+      <!-- Title (Arabic) -->
       <div class="col-12 col-md-4">
         <div class="form-floating">
-          <input type="text" id="title" class="form-control" formControlName="title" placeholder="Title"
+          <input type="text" id="title" class="form-control" formControlName="title" placeholder="Title (Arabic)"
             [ngClass]="{ 'is-invalid': addBenefitForm.get('title')?.invalid && addBenefitForm.get('title')?.touched }">
-          <label for="title">Title</label>
+          <label for="title">Title (Arabic)</label>
           <div *ngIf="addBenefitForm.get('title')?.errors && addBenefitForm.get('title')?.touched"
             class="invalid-feedback">
-            <div *ngIf="addBenefitForm.get('title')?.errors?.['required']">Title is required.</div>
+            <div *ngIf="addBenefitForm.get('title')?.errors?.['required']">Title (Arabic) is required.</div>
+            <div *ngIf="addBenefitForm.get('title')?.errors?.['pattern']">Only Arabic letters are allowed.</div>
           </div>
         </div>
       </div>
@@ -51,12 +52,13 @@
           <div *ngIf="addBenefitForm.get('titleEn')?.errors && addBenefitForm.get('titleEn')?.touched"
             class="invalid-feedback">
             <div *ngIf="addBenefitForm.get('titleEn')?.errors?.['required']">Title (English) is required.</div>
+            <div *ngIf="addBenefitForm.get('titleEn')?.errors?.['pattern']">Only English letters are allowed.</div>
           </div>
         </div>
       </div>
 
       <!-- Description (Arabic) -->
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-6">
         <div class="form-floating">
           <textarea id="description" class="form-control" rows="3" formControlName="description"
             placeholder="Description (Arabic)"
@@ -65,12 +67,14 @@
           <div *ngIf="addBenefitForm.get('description')?.errors && addBenefitForm.get('description')?.touched"
             class="invalid-feedback">
             <div *ngIf="addBenefitForm.get('description')?.errors?.['required']">Description (Arabic) is required.</div>
+            <div *ngIf="addBenefitForm.get('description')?.errors?.['pattern']">Only Arabic letters, numbers and basic
+              punctuation are allowed.</div>
           </div>
         </div>
       </div>
 
       <!-- Description (English) -->
-      <div class="col-12 col-md-4">
+      <div class="col-12 col-md-6">
         <div class="form-floating">
           <textarea id="descriptionEn" class="form-control" rows="3" formControlName="descriptionEn"
             placeholder="Description (English)"
@@ -80,6 +84,8 @@
             class="invalid-feedback">
             <div *ngIf="addBenefitForm.get('descriptionEn')?.errors?.['required']">Description (English) is required.
             </div>
+            <div *ngIf="addBenefitForm.get('descriptionEn')?.errors?.['pattern']">Only English letters, numbers and
+              basic punctuation are allowed.</div>
           </div>
         </div>
       </div>
