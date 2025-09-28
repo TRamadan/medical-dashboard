@@ -1,3 +1,5 @@
+<p-toast></p-toast>
+
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
         <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openAddUserDialog()" />
@@ -10,201 +12,231 @@
 
 <p-card>
     <div class="flex items-center justify-between mb-2">
-        <h5 class="m-0">Manage users and coachs</h5>
+        <h5 class="m-0">Manage users</h5>
     </div>
 
-    <ng-template #customersTab>
-        <app-table [headers]="customersHeader" [data]="allUsers" [paginator]="true" [rows]="10"
-            [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true"
-            [globalFilterPlaceholder]="'Search...'" [showActions]="true" (edit)="editSelectedUser($event)"
-            (delete)="deleteSelectedUser($event)"></app-table>
-    </ng-template>
-
-    <ng-template #employeesTab>
-        <app-table [headers]="coachsHeader" [data]="allUsers" [paginator]="true" [rows]="10"
-            [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true"
-            [globalFilterPlaceholder]="'Search...'" [showActions]="true" (edit)="editSelectedUser($event)"
-            (delete)="deleteSelectedUser($event)"></app-table>
-    </ng-template>
-
-    <app-tabs [tabs]="[
-    { label: 'Customers', template: customersTab },
-    { label: 'Employees (Coachs)', template: employeesTab },
-    
-]"></app-tabs>
-
-    <!-- <app-table [headers]="headers" [data]="allUsers" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+    <app-table [headers]="coachsHeader" [data]="allUsers" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true" [globalFilterPlaceholder]="'Search...'"
-        [showActions]="true" (edit)="editSelectedUser($event)" (delete)="deleteSelectedUser($event)"></app-table> -->
+        [showActions]="true" (edit)="editSelectedUser($event)" (delete)="deleteSelectedUser($event)">
+        <ng-template pTemplate="actions" let-rowData>
+            <button pButton pRipple icon="pi pi-eye" class="p-button-rounded p-button-info mr-2"
+                (click)="showUserDetails(rowData)"></button>
+        </ng-template>
+    </app-table>
 </p-card>
 
 <!-- here is the dialog neede0d to add a new user or customer-->
-<p-dialog [(visible)]="userDialog" [header]="''" [modal]="true" [closable]="true" [dismissableMask]="true"
-    contentStyleClass="responsive-dialog-content"
-    [style]="{ width: '100vw', maxWidth: '100vw', minWidth: '0', height: '100vh', maxHeight: '100vh', margin: '0', padding: '0' }">
-    <ng-template pTemplate="header">
-        <div class="flex items-center justify-between px-2 py-2 md:px-4 md:py-3 w-full">
-            <span class="text-base md:text-lg font-semibold truncate">Add new user</span>
-            <button type="button" pButton icon="pi pi-times" (click)="hideDialog()"
-                class="p-button-text p-0 ml-2"></button>
-        </div>
-    </ng-template>
-    <p-card>
-        @if(!isDelete){
-        <form [formGroup]="addNewUserForm">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                    <label for="isCoach" class="font-medium">Is Coach?</label>
-                    <p-toggleswitch id="isCoach" formControlName="isCoach" />
-                </div>
-            </div>
+<p-dialog [(visible)]="userDialog" [header]="isEdit ? 'Update selected user' : 'Add new user'" [modal]="true"
+    [dismissableMask]="true" styleClass="p-fluid" [style]="{ width: '90vw', maxWidth: '60rem' }">
 
-            @if(!addNewUserForm.get('isCoach')?.value) {
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                <div>
-                    <p-floatlabel>
-                        <input pInputText id="username" formControlName="username" class="w-full" />
-                        <label for="username">Username</label>
-                    </p-floatlabel>
-                </div>
-                <div>
-                    <p-floatlabel>
-                        <input pInputText id="email" formControlName="email" class="w-full" />
-                        <label for="email">Email</label>
-                    </p-floatlabel>
-                </div>
-                <div>
-                    <p-floatlabel>
-                        <input pInputText id="firstName" formControlName="firstName" class="w-full" />
-                        <label for="firstName">First Name</label>
-                    </p-floatlabel>
-                </div>
-                <div>
-                    <p-floatlabel>
-                        <input pInputText id="lastName" formControlName="lastName" class="w-full" />
-                        <label for="lastName">Last Name</label>
-                    </p-floatlabel>
-                </div>
-                <div>
-                    <p-floatlabel>
-                        <span class="p-input-icon-right w-full">
-                            <input [type]="showPassword ? 'text' : 'password'" pInputText id="password"
-                                formControlName="password" class="w-full"
-                                [ngClass]="{'p-invalid': addNewUserForm.hasError('passwordMismatch') && addNewUserForm.get('password')?.touched}" />
-                        </span>
-                        <label for="password"
-                            [ngClass]="{'text-danger': addNewUserForm.hasError('passwordMismatch') && addNewUserForm.get('password')?.touched}">Password</label>
-                    </p-floatlabel>
-                    @if(addNewUserForm.hasError('passwordMismatch') && addNewUserForm.get('password')?.touched){
-                    <div class="text-danger text-xs mt-1">
-                        Passwords do not match
-                    </div>
-                    }
-                </div>
-                <div>
-                    <p-floatlabel>
-                        <span class="p-input-icon-right w-full">
-                            <input [type]="showConfirmPassword ? 'text' : 'password'" pInputText id="confirmPassword"
-                                formControlName="confirmPassword" class="w-full"
-                                [ngClass]="{'p-invalid': addNewUserForm.hasError('passwordMismatch') && addNewUserForm.get('confirmPassword')?.touched}" />
-                        </span>
-                        <label for="confirmPassword"
-                            [ngClass]="{'text-danger': addNewUserForm.hasError('passwordMismatch') && addNewUserForm.get('confirmPassword')?.touched}">Confirm
-                            Password</label>
-                    </p-floatlabel>
-                </div>
-            </div>
-            }
-            <!-- here is the section needed to add a new coach-->
-            @if(addNewUserForm.get('isCoach')?.value) {
-            <ng-template #coachInfoTab>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3" formGroupName="coachInfo">
-                    <div>
-                        <p-floatLabel>
-                            <input pInputText id="coachFirstName" formControlName="firstName" class="w-full" />
-                            <label for="coachFirstName">First Name</label>
-                        </p-floatLabel>
-                    </div>
+    @if(!isDelete){
+    <form [formGroup]="addNewUserForm">
+        <p-stepper [value]="1" class="basis-[50rem]">
+            <p-step-list>
+                <p-step [value]="1">Personal Information</p-step>
+                <p-step [value]="2">Employeement Information</p-step>
+            </p-step-list>
+            <p-step-panels>
+                <p-step-panel [value]="1">
+                    <ng-template #content let-activateCallback="activateCallback">
+                        <div class="container-fluid">
+                            <div formGroupName="personalData" class="row mt-3">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" id="userName" formControlName="userName" class="form-control"
+                                            placeholder="Username" />
+                                        <label for="userName">Username</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" id="nameAr" formControlName="nameAr" class="form-control"
+                                            placeholder="Name (Arabic)" />
+                                        <label for="nameAr">Name (Arabic)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" id="nameEn" formControlName="nameEn" class="form-control"
+                                            placeholder="Name (English)" />
+                                        <label for="nameEn">Name (English)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="email" id="email" formControlName="email" class="form-control"
+                                            placeholder="Email" />
+                                        <label for="email">Email</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="tel" id="phoneNumber" formControlName="phoneNumber"
+                                            class="form-control" placeholder="Phone Number" />
+                                        <label for="phoneNumber">Phone Number</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="password" id="password" formControlName="password"
+                                            class="form-control" placeholder="Password" />
+                                        <label for="password">Password</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="rolesId" class="form-label">Roles</label>
+                                    <p-multiSelect id="rolesId" formControlName="rolesId" [options]="allRoles"
+                                        optionLabel="label" optionValue="value" placeholder="Select Roles"
+                                        styleClass="w-full"></p-multiSelect>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="groupesId" class="form-label">Groups</label>
+                                    <p-multiSelect id="groupesId" formControlName="groupesId" [options]="allGroups"
+                                        optionLabel="label" optionValue="value" placeholder="Select Groups"
+                                        styleClass="w-full"></p-multiSelect>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex pt-4 justify-end">
+                            <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
+                                (onClick)="activateCallback(2)" />
+                        </div>
+                    </ng-template>
+                </p-step-panel>
 
-                    <div>
-                        <p-floatLabel>
-                            <input pInputText id="coachFirstName" formControlName="lastName" class="w-full" />
-                            <label for="coachFirstName">Last Name</label>
-                        </p-floatLabel>
-                    </div>
+                <p-step-panel [value]="2">
+                    <ng-template #content let-activateCallback="activateCallback">
+                        <div class="container-fluid">
+                            <div formGroupName="employeeData" class="row mt-3">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" id="fullNameAr" formControlName="fullNameAr"
+                                            class="form-control" placeholder="Full Name (Arabic)" />
+                                        <label for="fullNameAr">Full Name (Arabic)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" id="fullNameEn" formControlName="fullNameEn"
+                                            class="form-control" placeholder="Full Name (English)" />
+                                        <label for="fullNameEn">Full Name (English)</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="tel" id="whatsappNumber" formControlName="whatsappNumber"
+                                            class="form-control" placeholder="WhatsApp Number" />
+                                        <label for="whatsappNumber">WhatsApp Number</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="tel" id="argentNumber1" formControlName="argentNumber1"
+                                            class="form-control" placeholder="Emergency Number 1" />
+                                        <label for="argentNumber1">Emergency Number 1</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="tel" id="argentNumber2" formControlName="argentNumber2"
+                                            class="form-control" placeholder="Emergency Number 2" />
+                                        <label for="argentNumber2">Emergency Number 2</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" id="address" formControlName="address" class="form-control"
+                                            placeholder="Address" />
+                                        <label for="address">Address</label>
+                                    </div>
+                                </div>
+                                <div class="col-6  mb-3">
+                                    <label for="nationalIDImage" class="form-label">National ID Image</label>
+                                    <input type="file" formControlName="nationalIDImage" class="form-control"
+                                        accept="image/*" (change)="onImageUpload($event , 'nationalIDImage')">
+                                    @if(addNewUserForm.get('employeeData.nationalIDImage')?.value){
+                                    <div>
+                                        <img [src]="imgUrl + addNewUserForm.get('employeeData.nationalIDImage')?.value"
+                                            alt="Preview" class="mt-2 img-thumbnail"
+                                            style="width: 120px; height: 120px; object-fit: cover;">
+                                    </div>
+                                    }
+                                </div>
+                                <div class="col-6  mb-3">
+                                    <label for="birthstatementImage" class="form-label">Birth Statement Image</label>
+                                    <input type="file" formControlName="birthstatementImage" class="form-control"
+                                        accept="image/*" (change)="onImageUpload($event , 'birthstatementImage')">
+                                    @if(addNewUserForm.get('employeeData.birthstatementImage')?.value){
+                                    <div>
+                                        <img [src]="imgUrl + addNewUserForm.get('employeeData.birthstatementImage')?.value"
+                                            alt="Preview" class="mt-2 img-thumbnail"
+                                            style="width: 120px; height: 120px; object-fit: cover;">
+                                    </div>
+                                    }
 
-                    <div>
-                        <p-floatLabel>
-                            <input pInputText id="coachFirstName" formControlName="email" class="w-full" />
-                            <label for="coachFirstName">Email</label>
-                        </p-floatLabel>
-                    </div>
+                                </div>
+                                <div class="col-6  mb-3">
+                                    <label for="civilStatusStatemntImage" class="form-label">Civil Status Statement
+                                        Image</label>
+                                    <input type="file" formControlName="civilStatusStatemntImage" class="form-control"
+                                        accept="image/*" (change)="onImageUpload($event , 'civilStatusStatemntImage')">
 
-                    <div>
-                        <p-floatLabel>
-                            <input pInputText id="coachFirstName" formControlName="password" class="w-full" />
-                            <label for="coachFirstName">Password</label>
-                        </p-floatLabel>
-                    </div>
+                                    @if(addNewUserForm.get('employeeData.civilStatusStatemntImage')?.value){
+                                    <div>
+                                        <img [src]="imgUrl + addNewUserForm.get('employeeData.civilStatusStatemntImage')?.value"
+                                            alt="Preview" class="mt-2 img-thumbnail"
+                                            style="width: 120px; height: 120px; object-fit: cover;">
+                                    </div>
+                                    }
+                                </div>
+                                <div class="col-6  mb-3">
+                                    <label for="educationalqualificationImage" class="form-label">Educational
+                                        Qualification Image</label>
+                                    <input type="file" formControlName="educationalqualificationImage"
+                                        class="form-control" accept="image/*"
+                                        (change)="onImageUpload($event , 'educationalqualificationImage')">
 
-                    <div>
-                        <p-floatLabel>
-                            <input pInputText id="coachFirstName" formControlName="confirmPassword" class="w-full" />
-                            <label for="coachFirstName">Confirm password</label>
-                        </p-floatLabel>
-                    </div>
+                                    @if(addNewUserForm.get('employeeData.educationalqualificationImage')?.value){
+                                    <div>
+                                        <img [src]="imgUrl + addNewUserForm.get('employeeData.educationalqualificationImage')?.value"
+                                            alt="Preview" class="mt-2 img-thumbnail"
+                                            style="width: 120px; height: 120px; object-fit: cover;">
+                                    </div>
+                                    }
+                                </div>
+                                <div class="col-6  mb-3">
+                                    <label for="malitaryStatusImage" class="form-label">
+                                        Military Status Image</label>
+                                    <input type="file" formControlName="malitaryStatusImage" class="form-control"
+                                        accept="image/*" (change)="onImageUpload($event , 'malitaryStatusImage')">
 
-                    <div>
-                        <p-floatlabel>
-                            <p-dropdown id="coachLocation" formControlName="location" [options]="allLocations"
-                                optionLabel="label" class="w-full"></p-dropdown>
-                            <label for="coachLocation">Location</label>
-                        </p-floatlabel>
-                    </div>
-
-                    <div>
-                        <p-floatlabel>
-                            <p-multiselect appendTo="body" id="coachSpeciality" formControlName="speciality"
-                                [options]="allSpecialities" optionLabel="label" class="w-full"></p-multiselect>
-                            <label for="coachSpeciality">Speciality</label>
-                        </p-floatlabel>
-                    </div>
-                </div>
-            </ng-template>
-
-            <ng-template #assignedServiceTab>
-                <app-assigned-services></app-assigned-services>
-            </ng-template>
-
-            <ng-template #workingHoursTab>
-                <div class="overflow-x-auto">
-                    <app-working-hours></app-working-hours>
-                </div>
-            </ng-template>
-
-            <ng-template #daysOffTab>
-                <app-days-off></app-days-off>
-            </ng-template>
-
-            <div class="w-full max-w-full px-2 md:px-4 lg:px-8">
-                <div class="overflow-x-auto">
-                    <app-tabs [tabs]="[
-                        { label: 'Coach Information', template: coachInfoTab },
-                        { label: 'Assigned Service', template: assignedServiceTab },
-                        { label: 'Working Hours', template: workingHoursTab }, 
-                        { label : 'Days Off' , template : daysOffTab},
-                    ]" class="min-w-[320px] md:min-w-0"></app-tabs>
-                </div>
-            </div>
-            }
-        </form>
-        }
+                                    @if(addNewUserForm.get('employeeData.malitaryStatusImage')?.value){
+                                    <div>
+                                        <img [src]="imgUrl + addNewUserForm.get('employeeData.malitaryStatusImage')?.value"
+                                            alt="Preview" class="mt-2 img-thumbnail"
+                                            style="width: 120px; height: 120px; object-fit: cover;">
+                                    </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex pt-4 justify-between">
+                            <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
+                                (onClick)="activateCallback(1)" />
+                        </div>
+                    </ng-template>
+                </p-step-panel>
 
 
-        @else {
-        <p class="text-center">Are you sure to deactivate the selected user</p>
-        }
-    </p-card>
+            </p-step-panels>
+        </p-stepper>
+    </form>
+    }
+
+
+    @else {
+    <p class="text-center">Are you sure to deactivate the selected user</p>
+    }
 
     <ng-template pTemplate="footer">
         <div class="flex flex-col gap-2 md:flex-row md:justify-end md:gap-4 w-full px-2 py-2">
@@ -213,4 +245,17 @@
                 (onClick)="isEdit ?  updateSelectedUser():addNewUser()" class="w-full md:w-auto" />
         </div>
     </ng-template>
+</p-dialog>
+
+<p-dialog [(visible)]="detailsDialog" [header]="'User Details'" [modal]="true" [style]="{width: '50vw'}">
+    @if(selectedUser) {
+    <div>
+        <p><strong>Username:</strong> {{selectedUser.username}}</p>
+        <p><strong>Name (AR):</strong> {{selectedUser.nameAr}}</p>
+        <p><strong>Name (EN):</strong> {{selectedUser.nameEn}}</p>
+        <p><strong>Email:</strong> {{selectedUser.email}}</p>
+        <p><strong>Phone Number:</strong> {{selectedUser.phoneNumber}}</p>
+        <!-- Add other details you want to show -->
+    </div>
+    }
 </p-dialog>

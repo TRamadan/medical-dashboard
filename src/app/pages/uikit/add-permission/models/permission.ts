@@ -1,5 +1,8 @@
 export interface Permission {
-    id: string;
-    name: string;
-    url: string;
-} 
+    id?: any;
+    name?: string;
+    nameAr?: string;
+    pageUrl?: string;
+    isPage?: true;
+    parentId?: 0;
+}

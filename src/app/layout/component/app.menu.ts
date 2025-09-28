@@ -101,11 +101,11 @@ export class AppMenu {
             {
                 label: 'Website control',
                 items: [
-                    {
-                        label: 'Hero Section Config',
-                        icon: '',
-                        routerLink: ['/uikit/herosectionconfig']
-                    },
+                    // {
+                    //     label: 'Hero Section Config',
+                    //     icon: '',
+                    //     routerLink: ['/uikit/herosectionconfig']
+                    // },
                     {
                         label: 'our super stars',
                         icon: '',
@@ -138,11 +138,11 @@ export class AppMenu {
                     //     icon: '',
                     //     routerLink: ['/uikit/contactus']
                     // },
-                    {
-                        label: 'About us config',
-                        icon: '',
-                        routerLink: ['/uikit/aboutus']
-                    },
+                    // {
+                    //     label: 'About us config',
+                    //     icon: '',
+                    //     routerLink: ['/uikit/aboutus']
+                    // },
                     {
                         label: 'Our team',
                         icon: '',
