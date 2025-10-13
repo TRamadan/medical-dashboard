@@ -1,20 +1,21 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { Group } from '../models/group';
 
 @Injectable({
     providedIn: 'root'
 })
 export class GroupsService {
-    private apiUrl = 'http://hamosw-001-site1.anytempurl.com/api/';
+    private apiUrl = 'http://localhost:5000/api/';
 
     constructor(private http: HttpClient) {}
     /**
      * A function to get all added groups
      * @returns An observable with the list of groups.
      */
-    getAllGroups(): Observable<any[]> {
-        return this.http.get<any[]>(this.apiUrl + 'Groupe/GetAll');
+    getAllGroups(): Observable<Group[]> {
+        return this.http.get<Group[]>(this.apiUrl + 'Groupe/GetAll');
     }
 
     /**
@@ -41,6 +42,6 @@ export class GroupsService {
      * @returns An observable with the response.
      */
     deleteGroup(id: string): Observable<any> {
-        return this.http.delete<any>(`${this.apiUrl}${'Groupe/Delete'}${id}`);
+        return this.http.delete<any>(`${this.apiUrl}${'Groupe/Delete?id='}${id}`);
     }
 }

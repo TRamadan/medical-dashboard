@@ -8,7 +8,7 @@ import { SuccessStory } from '../models/successStory';
     providedIn: 'root'
 })
 export class SuccessStoryService {
-    baseUrl = environment.apiUrl;
+    baseUrl = environment.apiUrlWebsite;
 
     constructor(private http: HttpClient) {}
 

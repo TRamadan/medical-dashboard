@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
     providedIn: 'root'
 })
 export class SharedService {
-    private uploadUrl = environment.apiUrl + 'UploadFiles';
+    private uploadUrl = environment.apiUrlWebsite + 'UploadFiles';
     constructor(private http: HttpClient) {}
 
     uploadFileService(file: File, folderName: string): Observable<any> {

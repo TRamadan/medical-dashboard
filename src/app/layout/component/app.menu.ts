@@ -19,6 +19,21 @@ export class AppMenu {
     model: MenuItem[] = [];
 
     ngOnInit() {
+        // const sideRoutesString = localStorage.getItem('sideRoutes');
+        // if (sideRoutesString) {
+        //     const sideRouts = JSON.parse(sideRoutesString);
+
+        //     this.model = sideRouts.map((route: any) => {
+        //         return {
+        //             label: route.name, // مثلاً "website control"
+        //             items: route.children.map((child: any) => ({
+        //                 label: child.name,
+        //                 icon: '',
+        //                 routerLink: [child.pageUrl]
+        //             }))
+        //         };
+        //     });
+        // }
         this.model = [
             {
                 label: 'Home',
@@ -120,6 +135,11 @@ export class AppMenu {
                         label: 'Our benefits section config',
                         icon: '',
                         routerLink: ['/uikit/benefits']
+                    },
+                    {
+                        label: 'Knowledge hub page config',
+                        icon: '',
+                        routerLink: ['/uikit/knowledgehub']
                     },
                     {
                         label: 'Our partners section config',

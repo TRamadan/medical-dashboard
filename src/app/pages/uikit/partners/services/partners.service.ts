@@ -6,7 +6,7 @@ import { HttpClient } from '@angular/common/http';
     providedIn: 'root'
 })
 export class PartnersService {
-    configUrl = environment.apiUrl;
+    configUrl = environment.apiUrlWebsite;
     constructor(private http: HttpClient) {}
 
     //here is the function needed to add a new partner

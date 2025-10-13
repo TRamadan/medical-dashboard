@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class UserManangementService {
     // I'll use a placeholder for your API URL.
-    private apiUrl = 'http://hamosw-001-site1.anytempurl.com/api/User/';
+    private apiUrl = 'http://localhost:5000/api/User/';
 
     constructor(private http: HttpClient) {}
 
@@ -25,7 +25,7 @@ export class UserManangementService {
      * @returns An observable with the user data.
      */
     getUserById(id: string): Observable<any> {
-        return this.http.get<any>(`${this.apiUrl}${'GetById/GetById'}/${id}`);
+        return this.http.get<any>(`${this.apiUrl}${'GetById/GetById?id='}${id}`);
     }
 
     /**
@@ -53,6 +53,6 @@ export class UserManangementService {
      * @returns An observable with the response.
      */
     deleteUser(id: string): Observable<any> {
-        return this.http.delete<any>(`${this.apiUrl}${'Delete/Delete'}/${id}`);
+        return this.http.delete<any>(`${this.apiUrl}${'Delete/Delete?id='}${id}`);
     }
 }

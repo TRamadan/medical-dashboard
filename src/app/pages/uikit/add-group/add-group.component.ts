@@ -13,8 +13,9 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { TableComponent, TableColumn, TableAction } from '../../../shared/table/table.component';
 import { Group, Role } from './models/group';
 import { GroupsService } from './services/groups.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastModule } from 'primeng/toast';
+import { RolesService } from '../add-permission/services/roles.service';
+import { RoleGroupService } from './services/roleGroup.service';
 
 @Component({
     selector: 'app-add-group',
@@ -27,19 +28,25 @@ import { ToastModule } from 'primeng/toast';
 export class AddGroupComponent implements OnInit {
     private readonly formBuilder = inject(FormBuilder);
     private readonly groupsService = inject(GroupsService);
-    private readonly confirmationService = inject(ConfirmationService);
     private readonly messageService = inject(MessageService);
-    private readonly destroyRef = inject(DestroyRef);
-
-    isEdit = false;
-    displayDialog = false;
+    private readonly rolesService = inject(RolesService);
+    private readonly roleGroupService = inject(RoleGroupService);
+    isEdit: boolean = false;
+    isDelete: boolean = false;
+    displayDialog: boolean = false;
+    displayRoleGroupDialog: boolean = false;
 
     allGroups: Group[] = [];
+    groupsArr: Group[] = [];
     allRoles: Role[] = [];
     addGroupForm!: FormGroup;
+    addRoleGroupForm!: FormGroup;
 
     tableColumns: TableColumn[] = [];
     tableActions: TableAction[] = [];
+
+    tableColumnsGroups: TableColumn[] = [];
+    tableActionsGroups: TableAction[] = [];
 
     ngOnInit() {
         this.initializeForm();
@@ -63,6 +70,16 @@ export class AddGroupComponent implements OnInit {
             { label: 'Edit', icon: 'pi pi-pencil', type: 'primary', onClick: (row: Group) => this.editGroup(row) },
             { label: 'Delete', icon: 'pi pi-trash', type: 'danger', onClick: (row: Group) => this.onDeleteGroup(row) }
         ];
+
+        this.tableColumnsGroups = [
+            { field: 'name', label: 'Group Name (EN)' },
+            {
+                field: 'nameAr',
+                label: 'Groupe Name(Ar)'
+            }
+        ];
+
+        this.tableActionsGroups = [{ label: 'Delete', icon: 'pi pi-trash', type: 'danger', onClick: (row: Group) => this.deleteSelectedGroup(row) }];
     }
 
     /**
@@ -71,22 +88,38 @@ export class AddGroupComponent implements OnInit {
     private initializeForm(): void {
         this.addGroupForm = this.formBuilder.group({
             id: [''],
-            nameEn: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]*$/)]],
+            name: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]*$/)]],
             nameAr: ['', [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s]*$/)]]
         });
+
+        this.addRoleGroupForm = this.formBuilder.group({
+            id: [''],
+            groupId: [''],
+            roles: [[], Validators.required]
+        });
+    }
+
+    /**
+     * here is the function needed to close the dialog
+     */
+    hideDialog(): void {
+        this.displayDialog = false;
+        this.groupsArr = [];
+        this.isDelete = false;
+        this.isEdit = false;
+        this.addGroupForm.reset();
     }
 
     /**
      * Fetches all groups from the API.
      */
     getAllGroups() {
-        this.groupsService
-            .getAllGroups()
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: (groups: Group[]) => (this.allGroups = groups),
-                error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch groups.' })
-            });
+        this.groupsService.getAllGroups().subscribe({
+            next: (groups: any) => {
+                this.allGroups = groups.data;
+            },
+            error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch groups.' })
+        });
     }
 
     /**
@@ -112,57 +145,61 @@ export class AddGroupComponent implements OnInit {
      * Saves the group. It either adds a new group or updates an existing one.
      */
     saveGroup() {
-        if (this.addGroupForm.invalid) {
-            this.addGroupForm.markAllAsTouched();
-            return;
-        }
-
         if (this.isEdit) {
             this.updateGroup();
+        } else if (this.isDelete) {
+            this.confirmDelete();
         } else {
             this.addGroup();
         }
     }
 
     /**
-     * push more item in a table
+     * push more item in a table to send more than one group
      */
 
-    pushMultipleGroup(): void {}
+    pushMultipleGroup(): void {
+        this.groupsArr.push({
+            name: this.addGroupForm.controls['name'].value,
+            nameAr: this.addGroupForm.controls['nameAr'].value
+        });
+        this.addGroupForm.reset();
+    }
+
+    /**
+     * here is the function needed to delete the selected group before save
+     */
+
+    deleteSelectedGroup(group: Group) {
+        this.groupsArr.splice(this.groupsArr.indexOf(group), 1);
+    }
 
     /**
      * Adds a new group using an API call.
      */
-    private addGroup() {
-        this.groupsService
-            .addGroup(this.addGroupForm.value)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: () => {
-                    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Group added successfully.' });
-                    this.getAllGroups();
-                    this.displayDialog = false;
-                },
-                error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to add group.' })
-            });
+    addGroup() {
+        this.groupsService.addGroup(this.groupsArr).subscribe({
+            next: () => {
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Group added successfully.' });
+                this.getAllGroups();
+                this.hideDialog();
+            },
+            error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to add group.' })
+        });
     }
 
     /**
      * Updates the selected group using an API call.
      */
-    private updateGroup() {
-        const groupId = this.addGroupForm.value.id;
-        this.groupsService
-            .updateGroup(this.addGroupForm.value)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: () => {
-                    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Group updated successfully.' });
-                    this.getAllGroups();
-                    this.displayDialog = false;
-                },
-                error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update group.' })
-            });
+    updateGroup() {
+        this.groupsService.updateGroup(this.addGroupForm.value).subscribe({
+            next: () => {
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Group updated successfully.' });
+                this.getAllGroups();
+                this.displayDialog = false;
+            },
+            error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update group.' })
+        });
     }
 
     /**
@@ -170,29 +207,75 @@ export class AddGroupComponent implements OnInit {
      * @param group The group to delete.
      */
     onDeleteGroup(group: Group) {
-        this.confirmationService.confirm({
-            message: `Are you sure you want to delete the group "${group.name}"?`,
-            header: 'Confirm Deletion',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => this.confirmDelete(group.id),
-            reject: () => {}
-        });
+        this.isDelete = true;
+        this.displayDialog = true;
+        this.addGroupForm.controls['id'].setValue(group.id);
     }
 
     /**
      * Deletes the selected group using an API call.
-     * @param groupId The ID of the group to delete.
      */
-    private confirmDelete(groupId: string) {
-        this.groupsService
-            .deleteGroup(groupId)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: () => {
-                    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Group deleted successfully.' });
-                    this.getAllGroups();
-                },
-                error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete group.' })
-            });
+    confirmDelete() {
+        let choosedGroupId = this.addGroupForm.controls['id'].value;
+        this.groupsService.deleteGroup(choosedGroupId).subscribe({
+            next: () => {
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Group deleted successfully.' });
+                this.getAllGroups();
+                this.hideDialog();
+            },
+            error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete group.' })
+        });
+    }
+
+    //here is the function needed to fetch all added roles
+    getAllRoles(): void {
+        this.rolesService.getAllRoles().subscribe({
+            next: (res: any) => {
+                this.allRoles = res.data.map((element: any) => ({
+                    id: element.id,
+                    name: element.name,
+                    nameAr: element.nameAr
+                })) as Role[];
+            },
+            error: (error: any) => {
+                this.messageService.add({
+                    severity: 'error',
+                    detail: 'Error while fetching roles, please try again later'
+                });
+            }
+        });
+    }
+
+    /**
+     * here is the function needed to open a dialog to add a roles to the added groups
+     * @param group
+     */
+    addRoleGroup(group: Group): void {
+        this.getAllRoles();
+        this.addRoleGroupForm.controls['groupId'].setValue(group.id);
+        this.displayRoleGroupDialog = true;
+    }
+
+    /**
+     * here is the function needed to control the add role group for the selected group
+     */
+    saveRoleGroup(): void {
+        const groupeId = this.addRoleGroupForm.controls['groupId'].value;
+        const roleIds: string[] = this.addRoleGroupForm.controls['roles'].value;
+
+        const body = roleIds.map((roleId) => ({ groupeId, roleId }));
+
+        this.roleGroupService.addRoleGroup(body).subscribe({
+            next: (res: any) => {
+                this.displayRoleGroupDialog = false;
+                this.addRoleGroupForm.reset();
+            },
+            error: (error: any) => {
+                this.messageService.add({
+                    severity: 'error',
+                    detail: 'Error while adding roles to the selected group, please try again later'
+                });
+            }
+        });
     }
 }

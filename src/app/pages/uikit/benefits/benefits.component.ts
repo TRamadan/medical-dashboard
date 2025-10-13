@@ -35,7 +35,7 @@ export class BenefitsComponent implements OnInit {
     isEdit: boolean = false;
     isDelete: boolean = false;
     uploadResponse: any;
-    public readonly imgUrl = environment.imgUrl;
+    public readonly imgUrl = environment.imgUrlWebsite;
 
     constructor(
         private fb: FormBuilder,
@@ -152,6 +152,9 @@ export class BenefitsComponent implements OnInit {
             next: () => {
                 this._messageService.add({ severity: 'success', detail: 'Benefit updated successfully' });
                 this.getAllBenefits();
+                this.showAddDialog = false;
+                this.addBenefitForm.reset();
+                this.isEdit = false;
             },
             error: (err) => {
                 this._messageService.add({ severity: 'error', detail: 'Failed to update benefit' });

@@ -30,7 +30,7 @@ import { environment } from '../../../../environments/environment';
 })
 export class MethodologyComponent implements OnInit {
     showAddDialog: boolean = false;
-    public readonly imgUrl = environment.imgUrl;
+    public readonly imgUrl = environment.imgUrlWebsite;
     addMethodologiesConfig!: FormGroup;
     selectedMethodologiesConfig: Methodology = {};
     allMethodologies: Methodology[] = [];

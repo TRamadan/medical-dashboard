@@ -26,72 +26,70 @@
     <div class="row g-3">
 
       <!-- Title (Arabic) -->
-      <div class="col-12 col-md-4">
-        <div class="form-floating">
-          <input type="text" id="title" class="form-control" formControlName="title" placeholder="Title (Arabic)"
-            [ngClass]="{ 'is-invalid': addMethodologiesConfig.get('title')?.invalid && addMethodologiesConfig.get('title')?.touched }">
-          <label for="title">Title (Arabic)</label>
-          <div *ngIf="addMethodologiesConfig.get('title')?.errors && addMethodologiesConfig.get('title')?.touched"
-            class="invalid-feedback">
-            <div *ngIf="addMethodologiesConfig.get('title')?.errors?.['required']">Title (Arabic) is required.</div>
-            <div *ngIf="addMethodologiesConfig.get('title')?.errors?.['pattern']">Only Arabic letters are allowed.</div>
-          </div>
+      <div class="col-md-6">
+        <label for="title">Title (Arabic)</label>
+        <input type="text" id="title" class="form-control" formControlName="title"
+          [ngClass]="{ 'is-invalid': addMethodologiesConfig.get('title')?.invalid && addMethodologiesConfig.get('title')?.touched }">
+        @if (addMethodologiesConfig.get('title')?.errors && addMethodologiesConfig.get('title')?.touched) {
+        <div class="invalid-feedback">
+          @if (addMethodologiesConfig.get('title')?.errors?.['required']) { <div>Title (Arabic) is required.</div> }
+          @if (addMethodologiesConfig.get('title')?.errors?.['pattern']) { <div>Only Arabic letters are allowed.</div>
+          }
         </div>
+        }
       </div>
 
       <!-- Title (English) -->
-      <div class="col-12 col-md-4">
-        <div class="form-floating">
-          <input type="text" id="titleEn" class="form-control" formControlName="titleEn" placeholder="Title (English)"
-            [ngClass]="{ 'is-invalid': addMethodologiesConfig.get('titleEn')?.invalid && addMethodologiesConfig.get('titleEn')?.touched }">
-          <label for="titleEn">Title (English)</label>
-          <div *ngIf="addMethodologiesConfig.get('titleEn')?.errors && addMethodologiesConfig.get('titleEn')?.touched"
-            class="invalid-feedback">
-            <div *ngIf="addMethodologiesConfig.get('titleEn')?.errors?.['required']">Title (English) is required.</div>
-            <div *ngIf="addMethodologiesConfig.get('titleEn')?.errors?.['pattern']">Only English letters are allowed.
-            </div>
-          </div>
+      <div class="col-md-6">
+        <label for="titleEn">Title (English)</label>
+        <input type="text" id="titleEn" class="form-control" formControlName="titleEn"
+          [ngClass]="{ 'is-invalid': addMethodologiesConfig.get('titleEn')?.invalid && addMethodologiesConfig.get('titleEn')?.touched }">
+        @if (addMethodologiesConfig.get('titleEn')?.errors && addMethodologiesConfig.get('titleEn')?.touched) {
+        <div class="invalid-feedback">
+          @if (addMethodologiesConfig.get('titleEn')?.errors?.['required']) { <div>Title (English) is required.</div>
+          }
+          @if (addMethodologiesConfig.get('titleEn')?.errors?.['pattern']) { <div>Only English letters are allowed.
+          </div> }
         </div>
+        }
       </div>
 
       <!-- Description (Arabic) -->
       <div class="col-12 col-md-6">
-        <div class="form-floating">
-          <textarea id="description" class="form-control" rows="3" formControlName="description"
-            placeholder="Description (Arabic)"
-            [ngClass]="{ 'is-invalid': addMethodologiesConfig.get('description')?.invalid && addMethodologiesConfig.get('description')?.touched }"></textarea>
-          <label for="description">Description (Arabic)</label>
-          <div
-            *ngIf="addMethodologiesConfig.get('description')?.errors && addMethodologiesConfig.get('description')?.touched"
-            class="invalid-feedback">
-            <div *ngIf="addMethodologiesConfig.get('description')?.errors?.['required']">Description (Arabic) is
-              required.</div>
-            <div *ngIf="addMethodologiesConfig.get('description')?.errors?.['pattern']">Only Arabic letters, numbers and
-              basic punctuation are allowed.</div>
-          </div>
+        <label for="description">Description (Arabic)</label>
+        <textarea id="description" class="form-control" rows="3" formControlName="description"
+          placeholder="Description (Arabic)"
+          [ngClass]="{ 'is-invalid': addMethodologiesConfig.get('description')?.invalid && addMethodologiesConfig.get('description')?.touched }"></textarea>
+        @if (addMethodologiesConfig.get('description')?.errors && addMethodologiesConfig.get('description')?.touched)
+        {
+        <div class="invalid-feedback">
+          @if (addMethodologiesConfig.get('description')?.errors?.['required']) { <div>Description (Arabic) is
+            required.</div> }
+          @if (addMethodologiesConfig.get('description')?.errors?.['pattern']) { <div>Only Arabic letters, numbers and
+            basic punctuation are allowed.</div> }
         </div>
+        }
       </div>
 
       <!-- Description (English) -->
       <div class="col-12 col-md-6">
-        <div class="form-floating">
-          <textarea id="descriptionEn" class="form-control" rows="3" formControlName="descriptionEn"
-            placeholder="Description (English)"
-            [ngClass]="{ 'is-invalid': addMethodologiesConfig.get('descriptionEn')?.invalid && addMethodologiesConfig.get('descriptionEn')?.touched }"></textarea>
-          <label for="descriptionEn">Description (English)</label>
-          <div
-            *ngIf="addMethodologiesConfig.get('descriptionEn')?.errors && addMethodologiesConfig.get('descriptionEn')?.touched"
-            class="invalid-feedback">
-            <div *ngIf="addMethodologiesConfig.get('descriptionEn')?.errors?.['required']">Description (English) is
-              required.</div>
-            <div *ngIf="addMethodologiesConfig.get('descriptionEn')?.errors?.['pattern']">Only English letters, numbers
-              and basic punctuation are allowed.</div>
-          </div>
+        <label for="descriptionEn">Description (English)</label>
+        <textarea id="descriptionEn" class="form-control" rows="3" formControlName="descriptionEn"
+          placeholder="Description (English)"
+          [ngClass]="{ 'is-invalid': addMethodologiesConfig.get('descriptionEn')?.invalid && addMethodologiesConfig.get('descriptionEn')?.touched }"></textarea>
+        @if (addMethodologiesConfig.get('descriptionEn')?.errors &&
+        addMethodologiesConfig.get('descriptionEn')?.touched) {
+        <div class="invalid-feedback">
+          @if (addMethodologiesConfig.get('descriptionEn')?.errors?.['required']) { <div>Description (English) is
+            required.</div> }
+          @if (addMethodologiesConfig.get('descriptionEn')?.errors?.['pattern']) { <div>Only English letters, numbers
+            and basic punctuation are allowed.</div> }
         </div>
+        }
       </div>
 
       <!-- Checkbox -->
-      <div class="col-12 col-md-4 d-flex align-items-center mt-2">
+      <div class="col-12 col-md-4 d-flex align-items-center mt-2 w-100">
         <input type="checkbox" class="form-check-input me-2" formControlName="isCuttingEdgeTechnology"
           id="isCuttingEdgeTechnology">
         <label class="form-check-label" for="isCuttingEdgeTechnology">Is Cutting Edge Technology?</label>
@@ -101,10 +99,10 @@
       <div class="col-12 mt-3">
         <label for="icon">Image</label>
         <input type="file" class="form-control" accept="image/*" (change)="onImageUpload($event)">
-        <div *ngIf="addMethodologiesConfig.get('icon')?.value">
-          <img [src]="imgUrl + addMethodologiesConfig.get('icon')?.value" alt="Preview" class="mt-2 img-thumbnail"
-            style="width: 120px; height: 120px; object-fit: cover;">
-        </div>
+        @if (addMethodologiesConfig.get('icon')?.value) {
+        <img [src]="imgUrl + addMethodologiesConfig.get('icon')?.value" alt="Preview" class="mt-2 img-thumbnail"
+          style="width: 120px; height: 120px; object-fit: cover;">
+        }
       </div>
 
     </div>
@@ -118,7 +116,7 @@
   <div class="flex justify-end gap-2 mt-4">
     <p-button severity="danger" label="Cancel" icon="pi pi-times" (onClick)="showAddDialog = false"
       class="p-button-text" />
-    <p-button severity="success" label="Save" icon="pi pi-check" [disabled]="!isDelete && !addMethodologiesConfig.valid"
-      (onClick)="!isDelete ? (isEdit ? updatedMethodology() : addNewMethodology()) : deleteSelectedMethodology()" />
+    <p-button severity="success" label="Save" icon="pi pi-check"
+      (onClick)=" !isDelete ? (isEdit ? updatedMethodology() : addNewMethodology()) : deleteSelectedMethodology()" />
   </div>
 </p-dialog>

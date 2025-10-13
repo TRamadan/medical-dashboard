@@ -1,8 +1,8 @@
-export interface Permission {
+export interface Roles {
     id?: any;
     name?: string;
     nameAr?: string;
     pageUrl?: string;
-    isPage?: true;
+    isPage?: boolean;
     parentId?: 0;
 }

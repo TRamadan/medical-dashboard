@@ -33,8 +33,9 @@
                 <td *ngFor="let col of headers" class="text-center">
                     <ng-container [ngSwitch]="col.type">
                         <ng-container *ngSwitchCase="'image'">
-                            <img *ngIf="row[col.field]" [src]="imgUrl + row[col.field]" alt="img"
-                                class="w-12 h-12 object-cover rounded-full inline-block" />
+                            <img *ngIf="row[col.field]"
+                                [src]="imgUrl + row[col.field] ? imgUrl + row[col.field] : '../../../assets/logo-new2-transperant.png'"
+                                alt="img" class="w-12 h-12 object-cover rounded-full inline-block" />
                         </ng-container>
 
                         <ng-container *ngSwitchCase="'date'">
@@ -47,8 +48,14 @@
                         <ng-container *ngSwitchCase="'boolean'">
                             {{ row[col.field] == true ? 'Yes' : 'No'}}
                         </ng-container>
+                        <ng-container *ngSwitchCase="'link'">
+                            <a (click)="openFile(row[col.field])" [href]="row[col.field]" rel="noopener noreferrer"
+                                class="text-blue-500 hover:underline">
+                                {{ row[col.field] }}
+                            </a>
+                        </ng-container>
                         <ng-container *ngSwitchDefault>
-                            {{ row[col.field] }}
+                            {{ row[col.field] ? row[col.field] : '-' }}
                         </ng-container>
                     </ng-container>
                 </td>
@@ -65,25 +72,31 @@
                 <td class="text-center" *ngIf="showActions || actions.length > 0">
                     <div class="flex justify-center gap-2">
                         <ng-container *ngIf="showActions">
-                            <button pButton icon="pi pi-pencil" class="p-button-rounded p-button-warning p-button-sm"
-                                (click)="onEdit(row)"></button>
-                            <button pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm"
-                                (click)="onDelete(row)"></button>
+                            <button *ngIf="showEditButton" pButton icon="pi pi-pencil"
+                                class="p-button-rounded p-button-warning p-button-sm" (click)="onEdit(row)"></button>
+                            <button *ngIf="showDeleteButton" pButton icon="pi pi-trash"
+                                class="p-button-rounded p-button-danger p-button-sm" (click)="onDelete(row)"></button>
 
                             @if(isAddDetails){
                             <button pButton icon="pi pi-plus" class="p-button-rounded p-button-info p-button-sm"
                                 (click)="onAddDetails(row)"></button>
                             }
+
+                            @if(isShowDetails){
+                            <button pButton icon="pi pi-eye" class="p-button-rounded p-button-success p-button-sm"
+                                (click)="onViewDetails(row)"></button>
+                            }
+
                         </ng-container>
                     </div>
                 </td>
             </tr>
             <!-- Details Row -->
             <tr *ngIf="row.showDetails">
-                <td [attr.colspan]="headers.length + (showCheckbox ? 1 : 0) + (showSpotsColumn ? 1 : 0) + 1">
-                    <div class="p-3 bg-gray-50 border border-gray-200 rounded">
-                        <strong>Details:</strong>
-                        <pre>{{ row | json }}</pre>
+                <td
+                    [attr.colspan]="headers.length + (showCheckbox ? 1 : 0) + (showSpotsColumn ? 1 : 0) + (showActions || actions.length > 0 ? 1 : 0) + (isAddDetails || isShowDetails ? 1 : 0)">
+                    <div class="p-3">
+                        <ng-container *ngTemplateOutlet="detailsTemplate; context: { $implicit: row }"></ng-container>
                     </div>
                 </td>
             </tr>

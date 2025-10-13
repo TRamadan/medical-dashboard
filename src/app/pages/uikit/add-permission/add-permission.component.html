@@ -13,49 +13,101 @@
 
 <p-card>
   <div class="flex items-center justify-between mb-2">
-    <h5 class="m-0">Manage roles and permissions</h5>
+    <h5 class="m-0">Manage roles</h5>
   </div>
   <app-table [data]="allPermissions" [headers]="tableColumns" [actions]="tableActions" [showActions]="true"
     [loading]="false" (edit)="editPermission($event)" (delete)="onDeletePermission($event)">
   </app-table>
 </p-card>
 
-<p-dialog [(visible)]="displayDialog" [style]="{width: '90vw', maxWidth: '450px'}"
-  [header]="isEdit ? 'Edit role and permission' : 'Add role and permission'" [modal]="true" styleClass="p-fluid">
+<p-dialog [(visible)]="displayDialog" [style]="{width: '70rem', height : '25rem'}"
+  [header]="isEdit ? 'Edit role' : 'Add role'" [modal]="true" styleClass="p-fluid">
   <ng-template pTemplate="content">
+    @if(!isDelete){
     <form [formGroup]="addPermissionForm" class="flex flex-column gap-4">
-      <div class="flex flex-column gap-2">
-        <p-floatlabel>
-          <input type="text" pInputText id="name" formControlName="name" required autofocus class="w-full" />
-          <label for="name">Permission Name</label>
-        </p-floatlabel>
-        @if (addPermissionForm.controls['name'].invalid && addPermissionForm.controls['name'].touched) {
-        <small class="text-danger fw-bold">Name is required.</small>
-        }
+      <div class="row g-3">
+        <div class="col-12 col-md-4">
+          <div class="form-floating">
+            <input type="text" id="name" class="form-control" formControlName="name" placeholder="Group Name (English)"
+              [ngClass]="{ 'is-invalid': addPermissionForm.get('name')?.invalid && addPermissionForm.get('name')?.touched }">
+            <label for="name">Role Name (English)</label>
+            <div *ngIf="addPermissionForm.get('name')?.errors && addPermissionForm.get('name')?.touched"
+              class="invalid-feedback">
+              <div *ngIf="addPermissionForm.get('name')?.errors?.['required']">Name (English) is required.</div>
+              <div *ngIf="addPermissionForm.get('name')?.errors?.['pattern']">Only English letters are allowed.</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="form-floating">
+            <input type="text" id="nameAr" class="form-control" formControlName="nameAr"
+              placeholder="Role Name (Arabic)"
+              [ngClass]="{ 'is-invalid': addPermissionForm.get('nameAr')?.invalid && addPermissionForm.get('nameAr')?.touched }">
+            <label for="nameAr">Role Name (Arabic)</label>
+            <div *ngIf="addPermissionForm.get('nameAr')?.errors && addPermissionForm.get('nameAr')?.touched"
+              class="invalid-feedback">
+              <div *ngIf="addPermissionForm.get('nameAr')?.errors?.['required']">Name (Arabic) is required.</div>
+              <div *ngIf="addPermissionForm.get('nameAr')?.errors?.['pattern']">Only Arabic letters are allowed.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-4">
+          <div class="form-floating">
+            <input type="text" id="nameAr" class="form-control" formControlName="pageUrl"
+              placeholder="Role Name (Arabic)"
+              [ngClass]="{ 'is-invalid': addPermissionForm.get('pageUrl')?.invalid && addPermissionForm.get('pageUrl')?.touched }">
+            <label for="nameAr">Page url</label>
+            <div *ngIf="addPermissionForm.get('pageUrl')?.errors && addPermissionForm.get('pageUrl')?.touched"
+              class="invalid-feedback">
+              <div *ngIf="addPermissionForm.get('pageUrl')?.errors?.['required']">Page URL is required.</div>
+              <div *ngIf="addPermissionForm.get('pageUrl')?.errors?.['pattern']">Invalid URL format.</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="flex flex-column gap-2">
-        <p-floatlabel>
-          <input type="text" pInputText id="url" formControlName="url" required class="w-full"
-            placeholder="/api/resource" />
-          <label for="url">URL</label>
-        </p-floatlabel>
-        @if (addPermissionForm.controls['url'].invalid && addPermissionForm.controls['url'].touched) {
-        <small class="text-danger fw-bold">
-          @if (addPermissionForm.controls['url'].errors?.['required']) {
-          URL is required.
-          } @else if (addPermissionForm.controls['url'].errors?.['pattern']) {
-          URL must start with /.
-          }
-        </small>
-        }
+
+      <div class="row">
+        <div class="col-12 col-md-2 col-md-1 d-flex flex-col">
+          <label class="form-label" for="isPage">Is page ?</label>
+          <p-toggleswitch formControlName="isPage" />
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label for="parentId" class="form-label">Parent</label>
+          <p-select id="parentId" formControlName="parentId" appendTo="body" [options]="parentPermissions"
+            optionLabel="name" optionValue="id" placeholder="Select parent for role" styleClass="w-full"></p-select>
+        </div>
       </div>
+
+      @if(!isEdit){
+      <div class="row">
+        <div class="col-12 text-center">
+          <p-button label="Add" severity="success" (onClick)="pushMoreThanOneRole()" />
+        </div>
+      </div>
+
+      @if(rolesArr.length){
+      <app-table [data]="rolesArr" [headers]="tableColumnsRoles" [actions]="tableActionsRoles" [showActions]="true"
+        [loading]="false" [showEditButton]="false" (delete)="deleteRoleBeforeSave($event)">
+      </app-table>
+      }
+      }
     </form>
+    }
+
+    @else {
+    <p class="text-center fw-bold">
+      Are you sure you want to delete this role?
+    </p>
+    }
   </ng-template>
 
   <ng-template pTemplate="footer">
-    <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
-      (click)="displayDialog=false"></button>
-    <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text" (click)="savePermission()"
-      [disabled]="addPermissionForm.invalid"></button>
+    <div class="flex justify-end gap-2 mt-4">
+      <p-button severity="danger" label="Cancel" icon="pi pi-times" (onClick)="displayDialog = false"
+        class="p-button-text" />
+      <p-button severity="success" label="Save" icon="pi pi-check" (onClick)="savePermission()" />
+    </div>
   </ng-template>
 </p-dialog>

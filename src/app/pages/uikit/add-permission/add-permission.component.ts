@@ -11,17 +11,34 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 import { CardModule } from 'primeng/card';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { TableComponent, TableColumn, TableAction } from '../../../shared/table/table.component';
-import { Permission } from './models/permission';
+import { Roles } from './models/permission';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastModule } from 'primeng/toast';
 import { RolesService } from './services/roles.service';
 import { DropdownModule } from 'primeng/dropdown';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
-
+import { SelectModule } from 'primeng/select';
+import { TableModule } from 'primeng/table';
 @Component({
     selector: 'app-add-permission',
     standalone: true,
-    imports: [FloatLabelModule, CommonModule, ReactiveFormsModule, TableComponent, ButtonModule, DialogModule, InputTextModule, ConfirmDialogModule, ToolbarModule, ToastModule, CardModule, DropdownModule, ToggleSwitchModule],
+    imports: [
+        TableModule,
+        SelectModule,
+        FloatLabelModule,
+        CommonModule,
+        ReactiveFormsModule,
+        TableComponent,
+        ButtonModule,
+        DialogModule,
+        InputTextModule,
+        ConfirmDialogModule,
+        ToolbarModule,
+        ToastModule,
+        CardModule,
+        DropdownModule,
+        ToggleSwitchModule
+    ],
     templateUrl: './add-permission.component.html',
     styleUrls: ['./add-permission.component.css'],
     providers: [ConfirmationService, MessageService]
@@ -33,15 +50,20 @@ export class AddPermissionComponent implements OnInit {
     private readonly messageService = inject(MessageService);
     private readonly destroyRef = inject(DestroyRef);
 
-    isEdit = false;
-    displayDialog = false;
+    isEdit: boolean = false;
+    displayDialog: boolean = false;
+    isDelete: boolean = false;
 
-    allPermissions: Permission[] = [];
+    allPermissions: Roles[] = [];
+    rolesArr: Roles[] = [];
     addPermissionForm!: FormGroup;
-    parentPermissions: Permission[] = [];
+    parentPermissions: Roles[] = [];
 
     tableColumns: TableColumn[] = [];
     tableActions: TableAction[] = [];
+
+    tableColumnsRoles: TableColumn[] = [];
+    tableActionsRoles: TableAction[] = [];
 
     ngOnInit() {
         this.initializeForm();
@@ -61,9 +83,26 @@ export class AddPermissionComponent implements OnInit {
         ];
 
         this.tableActions = [
-            { label: 'Edit', icon: 'pi pi-pencil', type: 'primary', onClick: (row: Permission) => this.editPermission(row) },
-            { label: 'Delete', icon: 'pi pi-trash', type: 'danger', onClick: (row: Permission) => this.onDeletePermission(row) }
+            { label: 'Edit', icon: 'pi pi-pencil', type: 'primary', onClick: (row: Roles) => this.editPermission(row) },
+            { label: 'Delete', icon: 'pi pi-trash', type: 'danger', onClick: (row: Roles) => this.onDeletePermission(row) }
         ];
+
+        this.tableColumnsRoles = [
+            { field: 'name', label: 'Name (EN)' },
+            { field: 'nameAr', label: 'Name (AR)' },
+            { field: 'pageUrl', label: 'Page URL' },
+            { field: 'isPage', label: 'Is Page', type: 'boolean' }
+        ];
+
+        this.tableActionsRoles = [{ label: 'Delete', icon: 'pi pi-trash', type: 'danger', onClick: (row: Roles) => this.deleteRoleBeforeSave(row) }];
+    }
+
+    /**
+     * here is the function needed to delete the selected role before save
+     *
+     */
+    deleteRoleBeforeSave(role: Roles): void {
+        this.rolesArr.splice(this.rolesArr.indexOf(role), 1);
     }
 
     /**
@@ -75,28 +114,42 @@ export class AddPermissionComponent implements OnInit {
                 id: [''],
                 name: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]*$/)]],
                 nameAr: ['', [Validators.required, Validators.pattern(/^[\u0600-\u06FF\s]*$/)]],
-                pageUrl: ['', [Validators.required, Validators.pattern(/^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/)]],
+                pageUrl: [''],
                 isPage: [false],
                 parentId: [null]
             },
             { updateOn: 'change' }
         );
+
+        this.addPermissionForm.get('isPage')?.valueChanges.subscribe((isPageValue: boolean) => {
+            const pageUrlControl = this.addPermissionForm.get('pageUrl');
+
+            if (isPageValue) {
+                pageUrlControl?.setValidators([Validators.required, Validators.pattern(/^\/[a-zA-Z0-9\/_-]*$/)]);
+            } else {
+                pageUrlControl?.clearValidators();
+            }
+
+            pageUrlControl?.updateValueAndValidity();
+        });
     }
 
     /**
      * Fetches all permissions from the API.
      */
     getAllPermissions() {
-        this.rolesService
-            .getAllRoles()
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: (permissions: Permission[]) => {
-                    this.allPermissions = permissions;
-                    this.parentPermissions = permissions.filter((p) => p.isPage);
-                },
-                error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch roles.' })
-            });
+        this.rolesService.getAllRoles().subscribe({
+            next: (permissions: any) => {
+                this.allPermissions = permissions.data as Roles[];
+                this.parentPermissions = permissions.data.map((element: any) => {
+                    return {
+                        id: element.id,
+                        name: element.name
+                    };
+                });
+            },
+            error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch roles.' })
+        });
     }
 
     /**
@@ -109,10 +162,31 @@ export class AddPermissionComponent implements OnInit {
     }
 
     /**
+     * here is the function needed to close the dialog
+     */
+    hideDialog(): void {
+        this.addPermissionForm.reset();
+        this.displayDialog = false;
+        this.isEdit = false;
+        this.isDelete = false;
+    }
+
+    //here is the function needed to push more than one role in one time per request
+    pushMoreThanOneRole(): void {
+        this.rolesArr.push({
+            name: this.addPermissionForm.controls['name'].value,
+            nameAr: this.addPermissionForm.controls['nameAr'].value,
+            pageUrl: this.addPermissionForm.controls['pageUrl'].value,
+            isPage: this.addPermissionForm.controls['isPage'].value == null ? false : true,
+            parentId: this.addPermissionForm.controls['parentId'].value
+        });
+    }
+
+    /**
      * Opens the dialog in edit mode and sets the form values for the chosen row.
      * @param role The permission to edit.
      */
-    editPermission(role: Permission) {
+    editPermission(role: Roles) {
         this.isEdit = true;
         this.addPermissionForm.patchValue(role);
         this.displayDialog = true;
@@ -122,13 +196,10 @@ export class AddPermissionComponent implements OnInit {
      * Saves the permission. It either adds a new permission or updates an existing one.
      */
     savePermission() {
-        if (this.addPermissionForm.invalid) {
-            this.addPermissionForm.markAllAsTouched();
-            return;
-        }
-
         if (this.isEdit) {
             this.updatePermission();
+        } else if (this.isDelete) {
+            //delete record function will go here
         } else {
             this.addPermission();
         }
@@ -137,18 +208,15 @@ export class AddPermissionComponent implements OnInit {
     /**
      * Adds a new permission using an API call.
      */
-    private addPermission() {
-        this.rolesService
-            .addRole(this.addPermissionForm.value)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: () => {
-                    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Role added successfully.' });
-                    this.getAllPermissions();
-                    this.displayDialog = false;
-                },
-                error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to add role.' })
-            });
+    addPermission() {
+        this.rolesService.addRole(this.rolesArr).subscribe({
+            next: () => {
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Role added successfully.' });
+                this.getAllPermissions();
+                this.hideDialog();
+            },
+            error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to add role.' })
+        });
     }
 
     /**
@@ -172,30 +240,19 @@ export class AddPermissionComponent implements OnInit {
      * Shows a confirmation dialog before deleting a permission.
      * @param role The permission to delete.
      */
-    onDeletePermission(role: Permission) {
-        this.confirmationService.confirm({
-            message: `Are you sure you want to delete the role "${role.name}"?`,
-            header: 'Confirm Deletion',
-            icon: 'pi pi-exclamation-triangle',
-            accept: () => this.confirmDelete(role.id),
-            reject: () => {}
-        });
-    }
+    onDeletePermission(role: Roles) {}
 
     /**
      * Deletes the selected permission using an API call.
      * @param permissionId The ID of the permission to delete.
      */
     private confirmDelete(permissionId: string) {
-        this.rolesService
-            .deleteRole(permissionId)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-                next: () => {
-                    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Role deleted successfully.' });
-                    this.getAllPermissions();
-                },
-                error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete role.' })
-            });
+        this.rolesService.deleteRole(permissionId).subscribe({
+            next: () => {
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Role deleted successfully.' });
+                this.getAllPermissions();
+            },
+            error: (err: any) => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete role.' })
+        });
     }
 }

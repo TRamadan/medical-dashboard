@@ -1,0 +1,6 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<app-table [data]="allExercies" [headers]="cols" [showActions]="true" (edit)="editExercies($event)"
+  (delete)="deleteExercise($event)">
+</app-table>

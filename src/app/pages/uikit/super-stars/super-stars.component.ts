@@ -18,6 +18,7 @@ import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { environment } from '../../../../environments/environment';
 import { CardModule } from 'primeng/card';
+import { SharedService } from '../../../shared/services/shared.service';
 
 @Component({
     selector: 'app-super-stars',
@@ -28,7 +29,7 @@ import { CardModule } from 'primeng/card';
     imports: [CardModule, ToastModule, CheckboxModule, InputIconModule, IconFieldModule, CommonModule, ToolbarModule, ReactiveFormsModule, ButtonModule, DialogModule, FileUploadModule, TableModule, InputTextModule, TableComponent, FloatLabelModule]
 })
 export class SuperStarsComponent implements OnInit {
-    public readonly imgUrl = environment.imgUrl;
+    public readonly imgUrl = environment.imgUrlWebsite;
     showAddDialog: boolean = false;
     addSuperStarForm: FormGroup;
     selectedSuperStar: Superstars = {};
@@ -53,7 +54,8 @@ export class SuperStarsComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private _superStarsService: SuperstarsService,
-        private _messageService: MessageService
+        private _messageService: MessageService,
+        private _uploadFileService: SharedService
     ) {
         this.addSuperStarForm = this.fb.group({
             id: [null],
@@ -242,7 +244,7 @@ export class SuperStarsComponent implements OnInit {
         const file = event.target.files[0];
         let folderName = this.addSuperStarForm.controls['isElite'].value == true ? 'Ordinarysuperstars' : 'Elitesuperstars';
         if (file) {
-            this._superStarsService.uploadFile(file, folderName).subscribe({
+            this._uploadFileService.uploadFileService(file, folderName).subscribe({
                 next: (res: any) => {
                     this.addSuperStarForm.patchValue({
                         image: res.filePath

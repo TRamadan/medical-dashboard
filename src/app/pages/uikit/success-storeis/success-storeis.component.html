@@ -23,8 +23,8 @@
 
 
 <!-- Dialog for adding/editing partners -->
-<p-dialog [header]="isEdit ? 'Update Partner' : 'Add New Partner'" [(visible)]="showAddDialog" [modal]="true"
-    [style]="{width: '90vw', maxWidth: '550px'}">
+<p-dialog [header]="isEdit ? 'Update selected success story' : 'Add New success story'" [(visible)]="showAddDialog"
+    [modal]="true" [style]="{width: '90vw', maxWidth: '550px'}">
     @if(!isDelete) {
     <form [formGroup]="addSuccessStoryForm" class="container mt-3">
 

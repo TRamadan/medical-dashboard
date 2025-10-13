@@ -1,0 +1,391 @@
+<p-toast></p-toast>
+<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+
+
+<p-card header="Choose the need to make configuration" styleClass="text-center mb-3">
+    <ng-template pTemplate="content">
+        <div class="row g-4">
+            @for(item of configArr; track item){
+            <div class="col-12 col-sm-6">
+                <p-card [header]="item.name" styleClass="p-card-shadow cursor-pointer hover:bg-gray-100"
+                    (click)="selecteConfigType(item)">
+                    <p>Click to add {{ item.name }}.</p>
+                </p-card>
+            </div>
+            }
+        </div>
+    </ng-template>
+</p-card>
+
+<p-tabs value="0">
+    <p-tablist>
+        <p-tab value="0">All categories</p-tab>
+        <p-tab value="1">Researches</p-tab>
+        <p-tab value="2">Exercies</p-tab>
+    </p-tablist>
+
+    <p-tabpanels>
+        <p-tabpanel value="0">
+            <app-table [data]="categories" [headers]="cols" [showActions]="true" [isShowDetails]="true"
+                (edit)="editCategory($event)" (delete)="deleteCategory($event)">
+                <ng-template #details let-category>
+                    <div class="p-3">
+                        <h5>Content in {{ category.nameEn }}</h5>
+                        @if(category.educations && category.educations.length > 0){
+                        <div class="row">
+                            @for (item of category.educations; track item.id) {
+                            <div class="col-12 col-md-6 col-lg-3 mb-3">
+                                <p-card styleClass="h-100 d-flex flex-column">
+                                    <div class="text-center">
+                                        @if(item.img){
+                                        <img [src]="imgUrl + item.img" [alt]="item.titleEn" class="img-fluid rounded"
+                                            style="height: 150px; width: 100%; object-fit: cover;">
+                                        } @else if (!item.isArticle) {
+                                        <i class="pi pi-youtube"
+                                            style="font-size: 4rem; color: var(--primary-color);"></i>
+                                        } @else {
+                                        <i class="pi pi-file"
+                                            style="font-size: 4rem; color: var(--text-color-secondary);"></i>
+                                        }
+                                    </div>
+                                    <div class="d-flex flex-column flex-grow-1 p-3">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <h6 class="mb-1">{{ item.titleEn }}</h6>
+                                            <p-tag [value]="item.isArticle ? 'Article' : 'Video'"
+                                                [severity]="item.isArticle ? 'info' : 'warn'"></p-tag>
+                                        </div>
+                                        <p class="text-muted small flex-grow-1">{{ item.descriptionEn }}</p>
+                                        <div class="mt-auto d-flex gap-2">
+                                            @if(!item.isArticle && item.videoUrl){
+                                            <a [href]="item.videoUrl" target="_blank" pButton label="Watch"
+                                                icon="pi pi-youtube" class="p-button-sm p-button-danger"></a>
+                                            }
+                                            <button pButton icon="pi pi-pencil" (click)="editEducation(item, category)"
+                                                class="p-button-sm p-button-warning"></button>
+                                            <button pButton icon="pi pi-trash" (click)="deleteEducation(item)"
+                                                class="p-button-sm p-button-danger"></button>
+                                        </div>
+                                    </div>
+                                </p-card>
+                            </div>
+                            }
+                        </div>
+                        } @else {
+                        <p>No content found for this category.</p>
+                        }
+                    </div>
+                </ng-template>
+            </app-table>
+        </p-tabpanel>
+
+        <p-tabpanel value="1">
+            <app-researches (edit)="openEditResearchDialog($event)"></app-researches>
+        </p-tabpanel>
+
+        <p-tabpanel value="2">
+            <app-exercies (edit)="openEditExerciseDialog($event)"></app-exercies>
+        </p-tabpanel>
+
+    </p-tabpanels>
+</p-tabs>
+
+
+<!-- here is the dialog needed to add a new category-->
+<p-dialog [(visible)]="categoryDialog" [style]="{width: '450px'}"
+    [header]="isEditMode ? 'Edit Category' : 'Add Category'" [modal]="true" class="p-fluid">
+    <ng-template pTemplate="content">
+        <form [formGroup]="categoryForm">
+            <div class="row">
+                <!-- Title (Arabic) -->
+                <div class="col-md-6">
+                    <label for="nameAr">Category name (Arabic)</label>
+                    <input type="text" id="nameAr" class="form-control" formControlName="nameAr"
+                        [ngClass]="{ 'is-invalid': categoryForm.get('nameAr')?.invalid && categoryForm.get('nameAr')?.touched }">
+                    @if (categoryForm.get('nameAr')?.errors && categoryForm.get('nameAr')?.touched) {
+                    <div class="invalid-feedback">
+                        @if (categoryForm.get('nameAr')?.errors?.['required']) { <div>Title (Arabic) is
+                            required.</div> }
+                        @if (categoryForm.get('nameAr')?.errors?.['pattern']) { <div>Only Arabic letters are
+                            allowed.</div>
+                        }
+                    </div>
+                    }
+                </div>
+
+                <!-- Title (English) -->
+                <div class="col-md-6">
+                    <label for="nameEn">Category name (English)</label>
+                    <input type="text" id="nameEn" class="form-control" formControlName="nameEn"
+                        [ngClass]="{ 'is-invalid': categoryForm.get('nameEn')?.invalid && categoryForm.get('nameEn')?.touched }">
+                    @if (categoryForm.get('nameEn')?.errors &&
+                    categoryForm.get('nameEn')?.touched) {
+                    <div class="invalid-feedback">
+                        @if (categoryForm.get('nameEn')?.errors?.['required']) { <div>Title (English) is
+                            required.</div>
+                        }
+                        @if (categoryForm.get('nameEn')?.errors?.['pattern']) { <div>Only English letters are
+                            allowed.
+                        </div> }
+                    </div>
+                    }
+                </div>
+            </div>
+        </form>
+
+
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button severity="danger" label="Cancel" icon="pi pi-times" (onClick)="hideDialog()"
+                class="p-button-text" />
+            <p-button severity="success" label="Save" icon="pi pi-check" (onClick)="submitCategory()" />
+        </div>
+    </ng-template>
+
+</p-dialog>
+
+<!-- Education Content Dialog -->
+<p-dialog [(visible)]="educationDialog" [style]="{width: '750px'}"
+    [header]="isEditEducationMode ? 'Edit Content' : 'Add New Content'" [modal]="true" class="p-fluid">
+    <ng-template pTemplate="content">
+        <!-- Step 1: Select Content Type -->
+        @if (!selectedContentType) {
+        <div class="row g-4">
+            @for(item of knwolegdeHubContent; track item){
+            <div class="col-12  col-sm-6">
+                <p-card [header]="item.name" styleClass="p-card-shadow cursor-pointer hover:bg-gray-100"
+                    (click)="selectContentType(item.name)">
+                    <p>Click to add a new {{ item.name }}.</p>
+                </p-card>
+            </div>
+            }
+        </div>
+        }
+        <!-- Step 2: Show Form for Selected Content Type -->
+        @else {
+        <div>
+            @if(!isEditEducationMode){
+            <button pButton pRipple type="button" icon="pi pi-arrow-left" (click)="backToSelection()"
+                class="p-button-text mb-3"></button>
+            }
+            <form [formGroup]="educationForm">
+                <!-- Article Form -->
+                @if (selectedContentType === 'Articles') {
+                <div class="row g-3">
+                    <!-- Title (Arabic) -->
+                    <div class="col-md-4">
+                        <label for="title">Title (Arabic)</label>
+                        <input type="text" id="title" class="form-control" formControlName="title"
+                            [ngClass]="{ 'is-invalid': educationForm.get('title')?.invalid && educationForm.get('title')?.touched }">
+                        @if (educationForm.get('title')?.errors && educationForm.get('title')?.touched) {
+                        <div class="invalid-feedback">
+                            @if (educationForm.get('title')?.errors?.['required']) { <div>Title (Arabic) is
+                                required.</div> }
+                            @if (educationForm.get('title')?.errors?.['pattern']) { <div>Only Arabic letters are
+                                allowed.</div>
+                            }
+                        </div>
+                        }
+                    </div>
+                    <!-- Title (English) -->
+                    <div class="col-md-4">
+                        <label for="titleEn">Title (English)</label>
+                        <input type="text" id="titleEn" class="form-control" formControlName="titleEn"
+                            [ngClass]="{ 'is-invalid': educationForm.get('titleEn')?.invalid && educationForm.get('titleEn')?.touched }">
+
+                        @if (educationForm.get('titleEn')?.errors && educationForm.get('titleEn')?.touched) {
+                        <div class="invalid-feedback">
+                            @if (educationForm.get('titleEn')?.errors?.['required']) { <div>Title (English) is
+                                required.</div> }
+                            @if (educationForm.get('titleEn')?.errors?.['pattern']) { <div>Only English letters are
+                                allowed.</div>
+                            }
+                        </div>
+                        }
+                    </div>
+                    <!-- category -->
+                    <div class="col-md-4">
+                        <label for="titleEn">Category</label>
+                        <p-select id="categoryId" appendTo="body" formControlName="categoryId"
+                            [options]="parsedCategories" [filter]="true" optionLabel="name" optionValue="id"
+                            placeholder="Select Roles" styleClass="w-full" />
+                        @if(educationForm.get('categoryId')?.invalid && educationForm.get('categoryId')?.touched){
+                        <div class="text-danger mt-1 text-xs">
+                            <div>Choosed your the needed category.</div>
+                        </div>
+                        }
+
+                    </div>
+                    <!-- Description (Arabic) -->
+                    <div class="col-12">
+                        <label for="description">Description (Arabic)</label>
+                        <textarea id="description" class="form-control" rows="3"
+                            formControlName="description"></textarea>
+                    </div>
+                    <!-- Description (English) -->
+                    <div class="col-12">
+                        <label for="descriptionEn">Description (English)</label>
+                        <textarea id="descriptionEn" class="form-control" rows="3"
+                            formControlName="descriptionEn"></textarea>
+                    </div>
+                    <!-- Image Upload -->
+                    <div class="col-12 mt-3">
+                        <label for="icon">Image</label>
+                        <input type="file" class="form-control" accept="image/*" (change)="onImageUpload($event)">
+                        @if (educationForm.get('img')?.value) {
+                        <img [src]="imgUrl + educationForm.get('img')?.value" alt="Preview" class="mt-2 img-thumbnail"
+                            style="width: 120px; height: 120px; object-fit: cover;">
+                        }
+                    </div>
+                </div>
+                }
+                <!-- Video Form -->
+                @if (selectedContentType === 'Videos') {
+                <div class="row g-3">
+                    <!-- Title, Description fields can be reused or made specific -->
+                    <!-- Title (Arabic) -->
+                    <div class="col-md-4">
+                        <label for="title">Title (Arabic)</label>
+                        <input type="text" id="title" class="form-control" formControlName="title"
+                            [ngClass]="{ 'is-invalid': educationForm.get('title')?.invalid && educationForm.get('title')?.touched }">
+                        @if (educationForm.get('title')?.errors && educationForm.get('title')?.touched) {
+                        <div class="invalid-feedback">
+                            @if (educationForm.get('title')?.errors?.['required']) { <div>Title (English) is
+                                required.</div> }
+                            @if (educationForm.get('title')?.errors?.['pattern']) { <div>Only English letters are
+                                allowed.</div>
+                            }
+                        </div>
+                        }
+                    </div>
+                    <!-- Title (English) -->
+                    <div class="col-md-4">
+                        <label for="titleEn">Title (English)</label>
+                        <input type="text" id="titleEn" class="form-control" formControlName="titleEn"
+                            [ngClass]="{ 'is-invalid': educationForm.get('titleEn')?.invalid && educationForm.get('titleEn')?.touched }">
+
+                        @if (educationForm.get('titleEn')?.errors && educationForm.get('titleEn')?.touched) {
+                        <div class="invalid-feedback">
+                            @if (educationForm.get('titleEn')?.errors?.['required']) { <div>Title (English) is
+                                required.</div> }
+                            @if (educationForm.get('titleEn')?.errors?.['pattern']) { <div>Only English letters are
+                                allowed.</div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <!-- category -->
+                    <div class="col-md-4">
+                        <label for="titleEn">Category</label>
+                        <p-select id="categoryId" appendTo="body" [filter]="true" formControlName="categoryId"
+                            [options]="parsedCategories" optionLabel="name" optionValue="id" placeholder="Select Roles"
+                            styleClass="w-full" />
+                        @if(educationForm.get('categoryId')?.invalid && educationForm.get('categoryId')?.touched){
+                        <div class="text-danger mt-1 text-xs">
+                            <div>Choosed your the needed category.</div>
+                        </div>
+                        }
+
+                    </div>
+
+                    <!-- Description (Arabic) -->
+                    <div class="col-12">
+                        <label for="description">Description (Arabic)</label>
+                        <textarea id="description" class="form-control" rows="3"
+                            formControlName="description"></textarea>
+                    </div>
+                    <!-- Description (English) -->
+                    <div class="col-12">
+                        <label for="descriptionEn">Description (English)</label>
+                        <textarea id="descriptionEn" class="form-control" rows="3"
+                            formControlName="descriptionEn"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label for="videoUrl">Video URL</label>
+                        <input type="text" id="videoUrl" class="form-control" formControlName="videoUrl"
+                            [ngClass]="{ 'is-invalid': educationForm.get('videoUrl')?.invalid && educationForm.get('videoUrl')?.touched }">
+                    </div>
+                </div>
+                }
+                <!-- Researches Form -->
+                @if (selectedContentType === 'Researches') {
+                <div class="row g-3">
+                    <!-- Title (Arabic) -->
+                    <div class="col-md-6">
+                        <label for="title">Title (Arabic)</label>
+                        <input type="text" id="title" class="form-control" formControlName="title"
+                            [ngClass]="{ 'is-invalid': educationForm.get('title')?.invalid && educationForm.get('title')?.touched }">
+                    </div>
+                    <!-- Title (English) -->
+                    <div class="col-md-6">
+                        <label for="titleEn">Title (English)</label>
+                        <input type="text" id="titleEn" class="form-control" formControlName="titleEn"
+                            [ngClass]="{ 'is-invalid': educationForm.get('titleEn')?.invalid && educationForm.get('titleEn')?.touched }">
+                    </div>
+                    <!-- Description (Arabic) -->
+                    <div class="col-12">
+                        <label for="description">Description (Arabic)</label>
+                        <textarea id="description" class="form-control" rows="3"
+                            formControlName="description"></textarea>
+                    </div>
+                    <!-- Description (English) -->
+                    <div class="col-12">
+                        <label for="descriptionEn">Description (English)</label>
+                        <textarea id="descriptionEn" class="form-control" rows="3"
+                            formControlName="descriptionEn"></textarea>
+                    </div>
+                    <!-- Link -->
+                    <div class="col-12">
+                        <label for="link">Link</label>
+                        <input type="text" id="link" class="form-control" formControlName="link"
+                            [ngClass]="{ 'is-invalid': educationForm.get('link')?.invalid && educationForm.get('link')?.touched }">
+                    </div>
+                </div>
+                }
+                <!-- Exercises Form -->
+                @if (selectedContentType === 'Exercises') {
+                <div class="row g-3">
+                    <!-- Title (Arabic) -->
+                    <div class="col-md-6">
+                        <label for="title">Title (Arabic)</label>
+                        <input type="text" id="title" class="form-control" formControlName="title"
+                            [ngClass]="{ 'is-invalid': educationForm.get('title')?.invalid && educationForm.get('title')?.touched }">
+                    </div>
+                    <!-- Title (English) -->
+                    <div class="col-md-6">
+                        <label for="titleEn">Title (English)</label>
+                        <input type="text" id="titleEn" class="form-control" formControlName="titleEn"
+                            [ngClass]="{ 'is-invalid': educationForm.get('titleEn')?.invalid && educationForm.get('titleEn')?.touched }">
+                    </div>
+                    <!-- File Upload -->
+                    <div class="col-12 mt-3">
+                        <label for="file">File</label>
+                        <input type="file" class="form-control" (change)="onFileUpload($event)">
+                        @if (educationForm.get('file')?.value) {
+                        <div class="mt-2">
+                            <a [href]="imgUrl + educationForm.get('file')?.value" target="_blank"
+                                class="btn btn-link p-0">
+                                View Uploaded File
+                            </a>
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+            </form>
+        </div>
+        }
+    </ng-template>
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button severity="danger" label="Cancel" icon="pi pi-times" (onClick)="hideEducationDialog()"
+                class="p-button-text" />
+            @if(selectedContentType){
+            <p-button severity="success" label="Save" icon="pi pi-check" (onClick)="saveContent()"
+                [disabled]="!selectedContentType" />
+            }
+        </div>
+    </ng-template>
+</p-dialog>

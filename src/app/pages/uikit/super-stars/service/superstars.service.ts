@@ -7,8 +7,7 @@ import { environment } from '../../../../../environments/environment';
     providedIn: 'root'
 })
 export class SuperstarsService {
-    private baseUrl = environment.apiUrl + 'SuperstarAthlete';
-    private uploadUrl = environment.apiUrl + 'UploadFiles';
+    private baseUrl = environment.apiUrlWebsite + 'SuperstarAthlete';
 
     constructor(private http: HttpClient) {}
 
@@ -46,12 +45,5 @@ export class SuperstarsService {
      */
     deleteSelectedSuperStar(id: number): Observable<any> {
         return this.http.delete(`${this.baseUrl}/${id}`);
-    }
-
-    uploadFile(file: File, folderName: string): Observable<any> {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        return this.http.post(`${this.uploadUrl}?folderName=${folderName}`, formData);
     }
 }

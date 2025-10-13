@@ -4,7 +4,7 @@ export interface Role {
 }
 
 export interface Group {
-    id: string;
+    id?: any;
     name: string;
-    roles: Role[];
-} 
+    nameAr: string;
+}

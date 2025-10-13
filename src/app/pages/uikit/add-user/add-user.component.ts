@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
-import { TableComponent, TableColumn } from '../../../shared/table/table.component';
+import { TableColumn, TableComponent } from '../../../shared/table/table.component';
 import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
-import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule, AbstractControl } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -16,6 +16,10 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { environment } from '../../../../environments/environment';
 import { SharedService } from '../../../shared/services/shared.service';
+import { Group } from '../add-group/models/group';
+import { Roles } from '../add-permission/models/permission';
+import { GroupsService } from '../add-group/services/groups.service';
+import { RolesService } from '../add-permission/services/roles.service';
 
 @Component({
     selector: 'app-add-user',
@@ -35,15 +39,17 @@ export class AddUserComponent implements OnInit {
     showPassword = false;
     detailsDialog: boolean = false;
     selectedUser: any;
-    allRoles: any[] = [];
-    allGroups: any[] = [];
+    allRoles: Roles[] = [];
+    allGroups: Group[] = [];
     public readonly imgUrl = environment.imgUrl;
 
     constructor(
         private fb: FormBuilder,
         private userService: UserManangementService,
         private _messageService: MessageService,
-        private _uploadFileService: SharedService
+        private _uploadFileService: SharedService,
+        private _groupsService: GroupsService,
+        private _rolesService: RolesService
     ) {}
 
     coachsHeader: TableColumn[] = [
@@ -69,7 +75,7 @@ export class AddUserComponent implements OnInit {
                 nameAr: ['', [Validators.required, Validators.pattern('^[\u0621-\u064A\u0660-\u0669\\s]{3,}$')]],
                 nameEn: ['', [Validators.required, Validators.pattern('^[a-zA-Z\\s]{3,}$')]],
                 email: ['', [Validators.required, Validators.email]],
-                phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]],
+                phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$'), Validators.maxLength(11)]],
                 password: ['', [Validators.required, Validators.minLength(8)]],
                 rolesId: [[], Validators.required],
                 groupesId: [[], Validators.required]
@@ -86,7 +92,8 @@ export class AddUserComponent implements OnInit {
                 civilStatusStatemntImage: [null],
                 educationalqualificationImage: [null],
                 malitaryStatusImage: [null]
-            })
+            }),
+            otherAttachments: this.fb.array([])
         });
     }
 
@@ -96,6 +103,24 @@ export class AddUserComponent implements OnInit {
 
     get employeeData(): AbstractControl {
         return this.addNewUserForm.get('employeeData')!;
+    }
+
+    get otherAttachments(): FormArray {
+        return this.addNewUserForm.get('otherAttachments') as FormArray;
+    }
+
+    addAttachment(): void {
+        const attachmentForm = this.fb.group({
+            description: ['', Validators.required],
+            file: [null, Validators.required]
+        });
+        this.otherAttachments.push(attachmentForm);
+    }
+
+    removeAttachment(index: number): void {
+        if (this.otherAttachments.length > 0) {
+            this.otherAttachments.removeAt(index);
+        }
     }
 
     //here is the function needed to open a dialog for add a new user
@@ -117,13 +142,18 @@ export class AddUserComponent implements OnInit {
 
     //here is the function needed to add a new user
     addNewUser(): void {
-        if (this.addNewUserForm.invalid) {
-            return;
-        }
         // Combine form data from both steps
         const userPayload = {
-            ...this.addNewUserForm.value.personalData,
-            ...this.addNewUserForm.value.employeeData
+            registerDTO: {
+                ...this.addNewUserForm.value.personalData
+            },
+            employeeProfileDTO: {
+                ...this.addNewUserForm.value.employeeData,
+                attachments: this.addNewUserForm.value.otherAttachments.map((att: any) => ({
+                    filePath: att.file,
+                    description: att.description
+                }))
+            }
         };
 
         this.userService.addUser(userPayload).subscribe({
@@ -136,6 +166,20 @@ export class AddUserComponent implements OnInit {
                 this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to create user.' });
             }
         });
+    }
+
+    /**
+     * here is the function needed that control the add,edit and delete for the user
+     */
+
+    submitUser(): void {
+        if (this.isEdit) {
+            this.updateSelectedUser();
+        } else if (this.isDelete) {
+            this.confirmDeleteSelectedUser();
+        } else {
+            this.addNewUser();
+        }
     }
 
     //here is the function needed to update the selected user
@@ -199,20 +243,42 @@ export class AddUserComponent implements OnInit {
 
     //here is the function needed to fetch all added roles
     getAllRoles(): void {
-        this.allRoles = [
-            { label: 'Admin', value: '1' },
-            { label: 'Coach', value: '2' },
-            { label: 'User', value: '3' }
-        ];
+        this._rolesService.getAllRoles().subscribe({
+            next: (res: any) => {
+                this.allRoles = res.data.map((role: any) => {
+                    return {
+                        id: role.id,
+                        name: role.name
+                    };
+                });
+            },
+            error: (error: any) => {
+                this._messageService.add({
+                    severity: 'error',
+                    detail: 'Error while fetching added roles, please try again'
+                });
+            }
+        });
     }
 
     //here is the function needed to fetch all added groups
     getAllGroups(): void {
-        this.allGroups = [
-            { label: 'Group A', value: 'A' },
-            { label: 'Group B', value: 'B' },
-            { label: 'Group C', value: 'C' }
-        ];
+        this._groupsService.getAllGroups().subscribe({
+            next: (res: any) => {
+                this.allGroups = res.data.map((group: any) => {
+                    return {
+                        id: group.id,
+                        name: group.nameAr
+                    };
+                });
+            },
+            error: (error: any) => {
+                this._messageService.add({
+                    severity: 'An error occured',
+                    detail: 'Error on fetching added groups'
+                });
+            }
+        });
     }
 
     showUserDetails(user: any) {
@@ -235,26 +301,32 @@ export class AddUserComponent implements OnInit {
      * Purpose : Handle image upload and preview
      * @param event The file upload event
      */
-    onImageUpload(event: any, controlName: string): void {
+    onImageUpload(event: any, controlName: string, index?: number): void {
         const file = event.target.files[0];
 
         if (file) {
             this._uploadFileService.uploadFileService(file, 'Users').subscribe({
                 next: (res: any) => {
-                    const employeeGroup = this.addNewUserForm.get('employeeData');
+                    let formGroup: AbstractControl | null;
+                    if (index !== undefined) {
+                        formGroup = this.otherAttachments.at(index);
+                    } else {
+                        formGroup = this.addNewUserForm.get('employeeData');
+                    }
 
-                    if (employeeGroup) {
-                        employeeGroup.get(controlName)?.patchValue(res.filePath);
+                    if (formGroup) {
+                        formGroup.get(controlName)?.patchValue(res.filePath);
                     }
 
                     // preview اختياري
                     const reader = new FileReader();
                     reader.onload = (e: any) => {
-                        employeeGroup?.get(controlName)?.patchValue(e.target.result);
+                        // This part seems to be for local preview, which might not be what you want when you get a filePath from the service.
+                        // If you want to store the file path, the line below should be removed or adjusted.
+                        // formGroup?.get(controlName)?.patchValue(e.target.result);
                     };
                     reader.readAsDataURL(file);
-
-                    this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch users.' });
+                    this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Image uploaded successfully.' });
                 },
                 error: (err: any) => {
                     this._messageService.add({

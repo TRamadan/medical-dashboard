@@ -35,6 +35,7 @@
             <p-step-list>
                 <p-step [value]="1">Personal Information</p-step>
                 <p-step [value]="2">Employeement Information</p-step>
+                <p-step [value]="3">Other attachments</p-step>
             </p-step-list>
             <p-step-panels>
                 <p-step-panel [value]="1">
@@ -46,6 +47,18 @@
                                         <input type="text" id="userName" formControlName="userName" class="form-control"
                                             placeholder="Username" />
                                         <label for="userName">Username</label>
+                                        @if(personalData.get('userName')?.invalid &&
+                                        personalData.get('userName')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            @if(personalData.get('userName')?.errors?.['required']){
+                                            <div>Username is required.</div>
+                                            }
+                                            @if(personalData.get('userName')?.errors?.['pattern']){
+                                            <div>Username must be 3-20 characters and can only contain letters, numbers,
+                                                and underscores.</div>
+                                            }
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -53,6 +66,16 @@
                                         <input type="text" id="nameAr" formControlName="nameAr" class="form-control"
                                             placeholder="Name (Arabic)" />
                                         <label for="nameAr">Name (Arabic)</label>
+                                        @if(personalData.get('nameAr')?.invalid && personalData.get('nameAr')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            @if(personalData.get('nameAr')?.errors?.['required']){
+                                            <div>Arabic name is required.</div>
+                                            }
+                                            @if(personalData.get('nameAr')?.errors?.['pattern']){
+                                            <div>Please enter a valid Arabic name (at least 3 characters).</div>
+                                            }
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -60,6 +83,16 @@
                                         <input type="text" id="nameEn" formControlName="nameEn" class="form-control"
                                             placeholder="Name (English)" />
                                         <label for="nameEn">Name (English)</label>
+                                        @if(personalData.get('nameEn')?.invalid && personalData.get('nameEn')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            @if(personalData.get('nameEn')?.errors?.['required']){
+                                            <div>English name is required.</div>
+                                            }
+                                            @if(personalData.get('nameEn')?.errors?.['pattern']){
+                                            <div>Please enter a valid English name (at least 3 characters).</div>
+                                            }
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -67,6 +100,16 @@
                                         <input type="email" id="email" formControlName="email" class="form-control"
                                             placeholder="Email" />
                                         <label for="email">Email</label>
+                                        @if(personalData.get('email')?.invalid && personalData.get('email')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            @if(personalData.get('email')?.errors?.['required']){
+                                            <div>Email is required.</div>
+                                            }
+                                            @if(personalData.get('email')?.errors?.['email']){
+                                            <div>Please enter a valid email address.</div>
+                                            }
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -74,26 +117,63 @@
                                         <input type="tel" id="phoneNumber" formControlName="phoneNumber"
                                             class="form-control" placeholder="Phone Number" />
                                         <label for="phoneNumber">Phone Number</label>
+                                        @if(personalData.get('phoneNumber')?.invalid &&
+                                        personalData.get('phoneNumber')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            @if(personalData.get('phoneNumber')?.errors?.['required']){
+                                            <div>Phone number is required.</div>
+                                            }
+                                            @if(personalData.get('phoneNumber')?.errors?.['pattern']){
+                                            <div>Please enter a valid phone number.</div>
+                                            }
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <div class="form-floating">
-                                        <input type="password" id="password" formControlName="password"
-                                            class="form-control" placeholder="Password" />
+                                    <div class="form-floating position-relative">
+                                        <input [type]="showPassword ? 'text' : 'password'" id="password"
+                                            formControlName="password" class="form-control" placeholder="Password" />
                                         <label for="password">Password</label>
+                                        <i class="pi position-absolute cursor-pointer"
+                                            [ngClass]="showPassword ? 'pi-eye-slash' : 'pi-eye'"
+                                            (click)="showPassword = !showPassword"
+                                            style="top: 50%; right: 1rem; transform: translateY(-50%);"></i>
+                                        @if(personalData.get('password')?.invalid &&
+                                        personalData.get('password')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            @if(personalData.get('password')?.errors?.['required']){
+                                            <div>Password is required.</div>
+                                            }
+                                            @if(personalData.get('password')?.errors?.['minlength']){
+                                            <div>Password must be at least 8 characters long.</div>
+                                            }
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="rolesId" class="form-label">Roles</label>
-                                    <p-multiSelect id="rolesId" formControlName="rolesId" [options]="allRoles"
-                                        optionLabel="label" optionValue="value" placeholder="Select Roles"
-                                        styleClass="w-full"></p-multiSelect>
+                                    <p-multiSelect id="rolesId" appendTo="body" formControlName="rolesId"
+                                        [options]="allRoles" optionLabel="name" optionValue="id"
+                                        placeholder="Select Roles" styleClass="w-full" />
+                                    @if(personalData.get('rolesId')?.invalid && personalData.get('rolesId')?.touched){
+                                    <div class="text-danger mt-1 text-xs">
+                                        <div>At least one role is required.</div>
+                                    </div>
+                                    }
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="groupesId" class="form-label">Groups</label>
-                                    <p-multiSelect id="groupesId" formControlName="groupesId" [options]="allGroups"
-                                        optionLabel="label" optionValue="value" placeholder="Select Groups"
-                                        styleClass="w-full"></p-multiSelect>
+                                    <p-multiSelect id="groupesId" appendTo="body" formControlName="groupesId"
+                                        [options]="allGroups" optionLabel="name" optionValue="id"
+                                        placeholder="Select Groups" styleClass="w-full" />
+                                    @if(personalData.get('groupesId')?.invalid &&
+                                    personalData.get('groupesId')?.touched){
+                                    <div class="text-danger mt-1 text-xs">
+                                        <div>At least one group is required.</div>
+                                    </div>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -113,6 +193,17 @@
                                         <input type="text" id="fullNameAr" formControlName="fullNameAr"
                                             class="form-control" placeholder="Full Name (Arabic)" />
                                         <label for="fullNameAr">Full Name (Arabic)</label>
+                                        @if(employeeData.get('fullNameAr')?.invalid &&
+                                        employeeData.get('fullNameAr')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            @if(employeeData.get('fullNameAr')?.errors?.['required']){
+                                            <div>Arabic full name is required.</div>
+                                            }
+                                            @if(employeeData.get('fullNameAr')?.errors?.['pattern']){
+                                            <div>Please enter a valid Arabic name (at least 3 characters).</div>
+                                            }
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -120,6 +211,17 @@
                                         <input type="text" id="fullNameEn" formControlName="fullNameEn"
                                             class="form-control" placeholder="Full Name (English)" />
                                         <label for="fullNameEn">Full Name (English)</label>
+                                        @if(employeeData.get('fullNameEn')?.invalid &&
+                                        employeeData.get('fullNameEn')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            @if(employeeData.get('fullNameEn')?.errors?.['required']){
+                                            <div>English full name is required.</div>
+                                            }
+                                            @if(employeeData.get('fullNameEn')?.errors?.['pattern']){
+                                            <div>Please enter a valid English name (at least 3 characters).</div>
+                                            }
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -127,6 +229,17 @@
                                         <input type="tel" id="whatsappNumber" formControlName="whatsappNumber"
                                             class="form-control" placeholder="WhatsApp Number" />
                                         <label for="whatsappNumber">WhatsApp Number</label>
+                                        @if(employeeData.get('whatsappNumber')?.invalid &&
+                                        employeeData.get('whatsappNumber')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            @if(employeeData.get('whatsappNumber')?.errors?.['required']){
+                                            <div>WhatsApp number is required.</div>
+                                            }
+                                            @if(employeeData.get('whatsappNumber')?.errors?.['pattern']){
+                                            <div>Please enter a valid WhatsApp number.</div>
+                                            }
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -134,6 +247,14 @@
                                         <input type="tel" id="argentNumber1" formControlName="argentNumber1"
                                             class="form-control" placeholder="Emergency Number 1" />
                                         <label for="argentNumber1">Emergency Number 1</label>
+                                        @if(employeeData.get('argentNumber1')?.invalid &&
+                                        employeeData.get('argentNumber1')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            @if(employeeData.get('argentNumber1')?.errors?.['pattern']){
+                                            <div>Please enter a valid phone number.</div>
+                                            }
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -141,6 +262,14 @@
                                         <input type="tel" id="argentNumber2" formControlName="argentNumber2"
                                             class="form-control" placeholder="Emergency Number 2" />
                                         <label for="argentNumber2">Emergency Number 2</label>
+                                        @if(employeeData.get('argentNumber2')?.invalid &&
+                                        employeeData.get('argentNumber2')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            @if(employeeData.get('argentNumber2')?.errors?.['pattern']){
+                                            <div>Please enter a valid phone number.</div>
+                                            }
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
@@ -148,16 +277,24 @@
                                         <input type="text" id="address" formControlName="address" class="form-control"
                                             placeholder="Address" />
                                         <label for="address">Address</label>
+                                        @if(employeeData.get('address')?.invalid &&
+                                        employeeData.get('address')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            @if(employeeData.get('address')?.errors?.['required']){
+                                            <div>Address is required.</div>
+                                            }
+                                        </div>
+                                        }
                                     </div>
                                 </div>
                                 <div class="col-6  mb-3">
                                     <label for="nationalIDImage" class="form-label">National ID Image</label>
                                     <input type="file" formControlName="nationalIDImage" class="form-control"
                                         accept="image/*" (change)="onImageUpload($event , 'nationalIDImage')">
-                                    @if(addNewUserForm.get('employeeData.nationalIDImage')?.value){
+                                    @if(employeeData.get('nationalIDImage')?.value){
                                     <div>
-                                        <img [src]="imgUrl + addNewUserForm.get('employeeData.nationalIDImage')?.value"
-                                            alt="Preview" class="mt-2 img-thumbnail"
+                                        <img [src]="imgUrl + employeeData.get('nationalIDImage')?.value" alt="Preview"
+                                            class="mt-2 img-thumbnail"
                                             style="width: 120px; height: 120px; object-fit: cover;">
                                     </div>
                                     }
@@ -166,9 +303,9 @@
                                     <label for="birthstatementImage" class="form-label">Birth Statement Image</label>
                                     <input type="file" formControlName="birthstatementImage" class="form-control"
                                         accept="image/*" (change)="onImageUpload($event , 'birthstatementImage')">
-                                    @if(addNewUserForm.get('employeeData.birthstatementImage')?.value){
+                                    @if(employeeData.get('birthstatementImage')?.value){
                                     <div>
-                                        <img [src]="imgUrl + addNewUserForm.get('employeeData.birthstatementImage')?.value"
+                                        <img [src]="imgUrl + employeeData.get('birthstatementImage')?.value"
                                             alt="Preview" class="mt-2 img-thumbnail"
                                             style="width: 120px; height: 120px; object-fit: cover;">
                                     </div>
@@ -181,9 +318,9 @@
                                     <input type="file" formControlName="civilStatusStatemntImage" class="form-control"
                                         accept="image/*" (change)="onImageUpload($event , 'civilStatusStatemntImage')">
 
-                                    @if(addNewUserForm.get('employeeData.civilStatusStatemntImage')?.value){
+                                    @if(employeeData.get('civilStatusStatemntImage')?.value){
                                     <div>
-                                        <img [src]="imgUrl + addNewUserForm.get('employeeData.civilStatusStatemntImage')?.value"
+                                        <img [src]="imgUrl + employeeData.get('civilStatusStatemntImage')?.value"
                                             alt="Preview" class="mt-2 img-thumbnail"
                                             style="width: 120px; height: 120px; object-fit: cover;">
                                     </div>
@@ -196,9 +333,9 @@
                                         class="form-control" accept="image/*"
                                         (change)="onImageUpload($event , 'educationalqualificationImage')">
 
-                                    @if(addNewUserForm.get('employeeData.educationalqualificationImage')?.value){
+                                    @if(employeeData.get('educationalqualificationImage')?.value){
                                     <div>
-                                        <img [src]="imgUrl + addNewUserForm.get('employeeData.educationalqualificationImage')?.value"
+                                        <img [src]="imgUrl + employeeData.get('educationalqualificationImage')?.value"
                                             alt="Preview" class="mt-2 img-thumbnail"
                                             style="width: 120px; height: 120px; object-fit: cover;">
                                     </div>
@@ -210,9 +347,9 @@
                                     <input type="file" formControlName="malitaryStatusImage" class="form-control"
                                         accept="image/*" (change)="onImageUpload($event , 'malitaryStatusImage')">
 
-                                    @if(addNewUserForm.get('employeeData.malitaryStatusImage')?.value){
+                                    @if(employeeData.get('malitaryStatusImage')?.value){
                                     <div>
-                                        <img [src]="imgUrl + addNewUserForm.get('employeeData.malitaryStatusImage')?.value"
+                                        <img [src]="imgUrl + employeeData.get('malitaryStatusImage')?.value"
                                             alt="Preview" class="mt-2 img-thumbnail"
                                             style="width: 120px; height: 120px; object-fit: cover;">
                                     </div>
@@ -223,9 +360,71 @@
                         <div class="flex pt-4 justify-between">
                             <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
                                 (onClick)="activateCallback(1)" />
+                            <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
+                                (onClick)="activateCallback(3)" />
+
                         </div>
+
                     </ng-template>
                 </p-step-panel>
+
+                <p-step-panel [value]="3">
+                    <ng-template #content let-activateCallback="activateCallback">
+                        <div class="container-fluid">
+                            <div class="flex justify-between items-center mb-4">
+                                <h5>Other Attachments</h5>
+                                <p-button label="Add Attachment" icon="pi pi-plus" (onClick)="addAttachment()" />
+                            </div>
+                            <div formArrayName="otherAttachments">
+                                @for (attachment of otherAttachments.controls; track attachment; let i = $index) {
+                                <div [formGroupName]="i" class="row mt-3 border p-3 rounded mb-4 position-relative">
+                                    <div class="col-md-12 mb-3">
+                                        <div class="form-floating">
+                                            <textarea id="description-{{i}}" formControlName="description"
+                                                class="form-control" placeholder="Description"></textarea>
+                                            <label for="description-{{i}}">Description</label>
+                                            @if(attachment.get('description')?.invalid &&
+                                            attachment.get('description')?.touched){
+                                            <div class="text-danger mt-1 text-xs">
+                                                <div>Description is required.</div>
+                                            </div>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label for="file-{{i}}" class="form-label">File</label>
+                                        <input type="file" id="file-{{i}}" formControlName="file" class="form-control"
+                                            (change)="onImageUpload($event, 'file', i)">
+                                        @if(attachment.get('file')?.invalid && attachment.get('file')?.touched){
+                                        <div class="text-danger mt-1 text-xs">
+                                            <div>File is required.</div>
+                                        </div>
+                                        }
+                                        @if(attachment.get('file')?.value){
+                                        <div class="mt-2">File selected: {{ attachment.get('file')?.value }}</div>
+                                        }
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-12 text-left">
+                                            <div class="absolute top-0 right-0 p-2">
+                                                <p-button icon="pi pi-times" severity="danger" [text]="true"
+                                                    (onClick)="removeAttachment(i)" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                        <div class="flex pt-4 justify-between">
+                            <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
+                                (onClick)="activateCallback(2)" />
+
+                        </div>
+                    </ng-template>
+
+                </p-step-panel>
+
 
 
             </p-step-panels>
@@ -241,8 +440,8 @@
     <ng-template pTemplate="footer">
         <div class="flex flex-col gap-2 md:flex-row md:justify-end md:gap-4 w-full px-2 py-2">
             <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog();" class="w-full md:w-auto" />
-            <p-button label="Save" [disabled]="addNewUserForm.invalid" [outlined]="true" severity="success"
-                (onClick)="isEdit ?  updateSelectedUser():addNewUser()" class="w-full md:w-auto" />
+            <p-button label="Save" [outlined]="true" severity="success" (onClick)="submitUser()"
+                class="w-full md:w-auto" />
         </div>
     </ng-template>
 </p-dialog>
