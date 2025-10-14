@@ -22,6 +22,7 @@ import { BenefitsComponent } from './benefits/benefits.component';
 import { SuccessStoreisComponent } from './success-storeis/success-storeis.component';
 import { HowItWorksComponent } from './how-it-works/how-it-works.component';
 import { EducationComponent } from './education-page/education.component';
+import { WorkingHoursComponent } from './working-hours/working-hours.component';
 export default [
     {
         path: 'adduser',
@@ -37,6 +38,11 @@ export default [
         path: 'addgroup',
         data: { breadcrumb: 'Add group' },
         component: AddGroupComponent
+    },
+    {
+        path: 'workinghours',
+        data: { breadcrumb: 'Add group' },
+        component: WorkingHoursComponent
     },
     {
         path: 'addpermission',

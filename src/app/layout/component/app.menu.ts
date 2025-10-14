@@ -82,6 +82,11 @@ export class AppMenu {
                         routerLink: ['/uikit/trackingattendance']
                     },
                     {
+                        label: 'Working hours',
+                        icon: '',
+                        routerLink: ['/uikit/workinghours']
+                    },
+                    {
                         label: 'Calendar',
                         icon: '',
                         routerLink: ['/uikit/calendar']
