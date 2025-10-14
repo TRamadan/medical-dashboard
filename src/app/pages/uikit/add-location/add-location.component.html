@@ -1,3 +1,6 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
         <div class="flex flex-wrap gap-2">
@@ -10,76 +13,94 @@
     </ng-template>
 </p-toolbar>
 <p-card>
-    <p-table #dt [value]="locations" [rows]="10" [paginator]="true" [tableStyle]="{ 'min-width': '75rem' }"
-        [rowHover]="true" dataKey="id" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} locations"
-        [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]">
-        <ng-template pTemplate="caption">
-            <div class="flex items-center justify-between">
-                <h5 class="m-0">Manage Locations</h5>
-                <p-iconfield>
-                    <p-inputicon styleClass="pi pi-search" />
-                    <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..." />
-                </p-iconfield>
-            </div>
-        </ng-template>
-        <ng-template pTemplate="header">
-            <tr>
-                <th style="min-width: 16rem">Location code</th>
-                <th style="min-width: 8rem">Location name</th>
-                <th style="min-width: 8rem">Location address</th>
-                <th style="min-width: 8rem">Location phone</th>
-                <th style="min-width: 12rem">Options</th>
-            </tr>
-        </ng-template>
-        <ng-template pTemplate="body" let-location>
-            <tr>
-                <td>{{location.code}}</td>
-                <td>{{location.name}}</td>
-                <td>{{location.address}}</td>
-                <td>{{location.phone}}</td>
-                <td>
-                    <p-button icon="pi pi-pencil" severity="info" class="mr-2" (onClick)="editLocation(location)" />
-                    <p-button icon="pi pi-trash" severity="danger" (onClick)="deleteLocation(location)" />
-                </td>
-            </tr>
-        </ng-template>
-    </p-table>
+    <app-table [data]="locations" [headers]="tableColumns" [showActions]="true" (edit)="editLocation($event)"
+        (delete)="deleteLocation($event)"></app-table>
 </p-card>
 
 
 <!-- here is the dialog needed to add a new service-->
-<p-dialog [(visible)]="isLocationDialog" [header]="'Add new location'" [modal]="true" [closable]="true"
-    [dismissableMask]="true" [style]="{ width: '90vw', maxWidth: '600px' }">
-    <p-card>
-        <form [formGroup]="addLocationForm">
-            <div class="grid p-fluid">
-                <div class="col-12 md:col-6">
-                    <p-floatlabel variant="on">
-                        <input pInputText formControlName="name" />
-                        <label>Location name</label>
-                    </p-floatlabel>
+<p-dialog [(visible)]="isLocationDialog" [header]="isEditService ? 'Edit Location' : 'Add New Location'" [modal]="true"
+    [closable]="true" [dismissableMask]="true" [style]="{ width: '90vw', maxWidth: '600px' }">
+    <ng-template pTemplate="content">
+        <form [formGroup]="addLocationForm" class="mt-4">
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-md-6">
+                    <label for="name">Location Name (English)</label>
+                    <input type="text" id="name" class="form-control" formControlName="nameEN"
+                        [ngClass]="{ 'is-invalid': addLocationForm.get('nameEN')?.invalid && addLocationForm.get('nameEN')?.touched }">
+                    <div *ngIf="addLocationForm.get('nameEN')?.errors && addLocationForm.get('nameEN')?.touched"
+                        class="invalid-feedback">
+                        <div *ngIf="addLocationForm.get('nameEN')?.errors?.['required']">Name (English) is required.
+                        </div>
+                        <div *ngIf="addLocationForm.get('nameEN')?.errors?.['pattern']">Only English letters are
+                            allowed.
+                        </div>
+                    </div>
                 </div>
-
-                <div class="col-12 md:col-6">
-                    <p-floatlabel variant="on">
-                        <input pInputText formControlName="address" />
-                        <label>Location address</label>
-                    </p-floatlabel>
+                <div class="col-12 col-md-6">
+                    <label for="name">Location Name (Arabic)</label>
+                    <input type="text" id="name" class="form-control" formControlName="nameAR"
+                        [ngClass]="{ 'is-invalid': addLocationForm.get('nameAR')?.invalid && addLocationForm.get('nameEN')?.touched }">
+                    <div *ngIf="addLocationForm.get('nameAR')?.errors && addLocationForm.get('nameAR')?.touched"
+                        class="invalid-feedback">
+                        <div *ngIf="addLocationForm.get('nameAR')?.errors?.['required']">Name (Arabic) is required.
+                        </div>
+                        <div *ngIf="addLocationForm.get('nameAR')?.errors?.['pattern']">Only Arabic letters are allowed.
+                        </div>
+                    </div>
                 </div>
+            </div>
 
-                <div class="col-12">
-                    <p-floatlabel variant="on">
-                        <input pInputText formControlName="phone" />
-                        <label>Location phone</label>
-                    </p-floatlabel>
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label for="addressAr">Location Address (Arabic)</label>
+                    <input type="text" id="name" class="form-control" formControlName="addressAr"
+                        [ngClass]="{ 'is-invalid': addLocationForm.get('addressAr')?.invalid && addLocationForm.get('addressAr')?.touched }">
+                    <div *ngIf="addLocationForm.get('addressAr')?.errors && addLocationForm.get('addressAr')?.touched"
+                        class="invalid-feedback">
+                        <div *ngIf="addLocationForm.get('addressAr')?.errors?.['required']">Location address is
+                            required.
+                        </div>
+                        <div *ngIf="addLocationForm.get('addressAr')?.errors?.['pattern']">Only Arabic letters, numbers,
+                            and symbols (,.-) are allowed.</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label for="addressEn">Location Address (English)</label>
+                    <input type="text" id="addressEn" class="form-control" formControlName="addressEn"
+                        [ngClass]="{ 'is-invalid': addLocationForm.get('addressEn')?.invalid && addLocationForm.get('addressEn')?.touched }">
+                    <div *ngIf="addLocationForm.get('addressEn')?.errors && addLocationForm.get('addressEn')?.touched"
+                        class="invalid-feedback">
+                        <div *ngIf="addLocationForm.get('addressEn')?.errors?.['required']">Location address is
+                            required.</div>
+                        <div *ngIf="addLocationForm.get('addressEn')?.errors?.['pattern']">Only English letters,
+                            numbers, and symbols (,.-) are allowed.</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label for="name">Location Phone</label>
+                    <input type="text" id="phone" class="form-control" formControlName="phoneNumber"
+                        [ngClass]="{ 'is-invalid': addLocationForm.get('phoneNumber')?.invalid && addLocationForm.get('phoneNumber')?.touched }">
+                    <div *ngIf="addLocationForm.get('phoneNumber')?.errors && addLocationForm.get('phoneNumber')?.touched"
+                        class="invalid-feedback">
+                        <div *ngIf="addLocationForm.get('phoneNumber')?.errors?.['required']">Phone number is required.
+                        </div>
+                        <div *ngIf="addLocationForm.get('phoneNumber')?.errors?.['phoneNumber']">Only numbers are
+                            allowed.
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </form>
-    </p-card>
-
-    <ng-template #footer>
-        <p-button label="Cancel" [text]="true" severity="danger" (click)="isLocationDialog = false" />
-        <p-button label="Save" [disabled]="addLocationForm.invalid" [outlined]="true" severity="success"
-            (onClick)="addNewLocation()" />
     </ng-template>
+
+    <ng-template pTemplate="footer">
+        <div class="flex flex-col gap-2 md:flex-row md:justify-end md:gap-4 w-full px-2 py-2">
+            <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog()" class="w-full md:w-auto" />
+            <p-button label="Save" [outlined]="true" severity="success" (click)="addNewLocation()"
+                class="w-full md:w-auto" />
+        </div>
+    </ng-template>
+
 </p-dialog>

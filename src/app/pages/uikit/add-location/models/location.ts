@@ -1,6 +1,8 @@
 export interface Location {
     id?: number;
-    name?: string;
-    address?: string;
+    nameAr?: string;
+    nameEn?: string;
+    addressAr?: string;
+    addressEn?: string;
     phone?: string;
 }

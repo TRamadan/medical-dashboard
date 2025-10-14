@@ -10,28 +10,68 @@
     </ng-template>
 </p-toolbar>
 
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
 <p-card>
     <div class="flex items-center justify-between mb-2">
-        <h5 class="m-0">Manage categories and services</h5>
+        <h5 class="m-0">Manage service categories and services</h5>
     </div>
+
     <app-table [headers]="headers" [data]="data" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true" [globalFilterPlaceholder]="'Search...'"
         [showActions]="true" [isAddDetails]="true" (addDetails)="addServiceCategory($event)"
-        (edit)="editSelectedService($event)" (details)="showServicesForSelectedCategory($event)"></app-table>
+        (edit)="editCategory($event)" (delete)="deleteCategory($event)"
+        (details)="showServicesForSelectedCategory($event)" [isShowDetails]="true">
+        <ng-template #details let-category>
+            <div class="p-3">
+                <h5>Services in {{ category.nameEn }}</h5>
+                @if(category.services && category.services.length > 0){
+                <app-table [data]="category.services" [headers]="subHeaders" [showActions]="true"
+                    (edit)="editSubService($event, category)" (delete)="deleteSubService($event)"></app-table>
+                } @else {
+                <p>No services found for this category.</p>
+                }
+            </div>
+        </ng-template>
+    </app-table>
+
 </p-card>
 
+
 <!-- here is the dialog needed to add a new service-->
-<p-dialog [(visible)]="isServiceDialog" [header]="!isNewServiceSubCategory ? 'Add new category' : 'Add new service'"
+<p-dialog [(visible)]="isServiceDialog"
+    [header]="isNewServiceSubCategory ? (isEditServiceMode ? 'Edit Service' : 'Add New Service') : (isEditMode ? 'Edit Category' : 'Add New Category')"
     [modal]="true" [closable]="true" [dismissableMask]="true" [style]="{ width: '90vw', maxWidth: '800px' }">
     <p-card>
         @if (!isNewServiceSubCategory) {
         <form [formGroup]="addServiceForm">
-            <div class="grid p-fluid">
-                <div class="col-12">
-                    <p-floatlabel variant="on">
-                        <input pInputText formControlName="name" />
-                        <label for="value3">Category name</label>
-                    </p-floatlabel>
+            <div class="row g-3 mt-3">
+                <div class="col-12 col-md-6">
+                    <label for="nameEn">Category name (English)</label>
+
+                    <input type="text" class="form-control" id="nameEn" formControlName="nameEn"
+                        [ngClass]="{ 'is-invalid': addServiceForm.controls['nameEn'].invalid && addServiceForm.controls['nameEn'].touched }" />
+                    <div *ngIf="addServiceForm.controls['nameEn'].invalid && addServiceForm.controls['nameEn'].touched"
+                        class="invalid-feedback">
+                        <div *ngIf="addServiceForm.controls['nameEn'].errors?.['required']">Category English name is
+                            required.</div>
+                        <div *ngIf="addServiceForm.controls['nameEn'].errors?.['pattern']">Only English letters are
+                            allowed.</div>
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <label for="nameAr">Category name (Arabic)</label>
+
+                    <input type="text" class="form-control" id="nameAr" formControlName="nameAr"
+                        [ngClass]="{ 'is-invalid': addServiceForm.controls['nameAr'].invalid && addServiceForm.controls['nameAr'].touched }" />
+                    <div *ngIf="addServiceForm.controls['nameAr'].invalid && addServiceForm.controls['nameAr'].touched"
+                        class="invalid-feedback">
+                        <div *ngIf="addServiceForm.controls['nameAr'].errors?.['required']">Arabic name is required.
+                        </div>
+                        <div *ngIf="addServiceForm.controls['nameAr'].errors?.['pattern']">Only Arabic letters are
+                            allowed.</div>
+                    </div>
                 </div>
             </div>
         </form>
@@ -44,90 +84,74 @@
             </p-tablist>
 
             <p-tabpanels>
-                <form [formGroup]="serviceCategoryForm">
+                <form [formGroup]="serviceCategoryForm" (ngSubmit)="saveService()">
                     <p-tabpanel value="0">
-                        <div formGroupName="detailsForm" class="p-fluid">
-                            <p-floatlabel variant="on">
-                                <input pInputText formControlName="subCategoryName" />
-                                <label for="value3">Service name</label>
-                            </p-floatlabel>
+                        <div class="row g-3 mt-3">
+                            <div class="col-12 col-md-6">
+                                <label for="serviceNameEn">Service Name (English)</label>
+                                <input type="text" class="form-control" id="serviceNameEn" formControlName="nameEn"
+                                    [ngClass]="{'is-invalid': serviceCategoryForm.get('detailsForm.nameEn')?.invalid && serviceCategoryForm.get('detailsForm.nameEn')?.touched}" />
+                                <div *ngIf="serviceCategoryForm.get('detailsForm.nameEn')?.invalid && serviceCategoryForm.get('detailsForm.nameEn')?.touched"
+                                    class="invalid-feedback">
+                                    Service Name (English) is required.
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="serviceNameAr">Service Name (Arabic)</label>
+                                <input type="text" class="form-control" id="serviceNameAr" formControlName="nameAr"
+                                    [ngClass]="{'is-invalid': serviceCategoryForm.get('detailsForm.nameAr')?.invalid && serviceCategoryForm.get('detailsForm.nameAr')?.touched}" />
+                                <div *ngIf="serviceCategoryForm.get('detailsForm.nameAr')?.invalid && serviceCategoryForm.get('detailsForm.nameAr')?.touched"
+                                    class="invalid-feedback">
+                                    Service Name (Arabic) is required.
+                                </div>
+
+                            </div>
                         </div>
                     </p-tabpanel>
 
                     <p-tabpanel value="1">
-                        <div formGroupName="configurationForm" class="grid p-fluid">
-                            <div class="col-12 md:col-6 flex items-center">
-                                <label class="mr-2">Show on Website</label>
-                                <p-toggleswitch formControlName="isShowWebsite" />
+                        <div class="row g-3 mt-3">
+                            <div class="col-12 col-md-6">
+                                <label for="duration">Duration</label>
+                                <p-select inputId="duration" [options]="durationOptions" optionLabel="label"
+                                    optionValue="value" appendTo="body" formControlName="duration"
+                                    styleClass="w-full" />
+                                <div *ngIf="serviceCategoryForm.get('configurationForm.duration')?.invalid && serviceCategoryForm.get('configurationForm.duration')?.touched"
+                                    class="text-danger small mt-1">Duration is required.</div>
                             </div>
 
-                            <div class="col-12 md:col-6 flex items-center">
-                                <label class="mr-2">Recurring Appointment</label>
-                                <p-toggleswitch formControlName="isAppointmentRecurring" />
+                            <div class="col-12 col-md-6">
+                                <label>Price</label>
+                                <input type="number" class="form-control" formControlName="price"
+                                    [ngClass]="{'is-invalid': serviceCategoryForm.get('configurationForm.price')?.invalid && serviceCategoryForm.get('configurationForm.price')?.touched}" />
+                                <div *ngIf="serviceCategoryForm.get('configurationForm.price')?.invalid && serviceCategoryForm.get('configurationForm.price')?.touched"
+                                    class="invalid-feedback">Price is required.</div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="idealtimeBefore">Ideal Time Before</label>
+                                <p-select inputId="idealtimeBefore" [options]="durationOptions" optionLabel="label"
+                                    optionValue="value" appendTo="body" formControlName="idealtimeBefore"
+                                    styleClass="w-full" />
+                                <div *ngIf="serviceCategoryForm.get('configurationForm.idealtimeBefore')?.invalid && serviceCategoryForm.get('configurationForm.idealtimeBefore')?.touched"
+                                    class="text-danger small mt-1">Ideal time before is required.</div>
                             </div>
 
-                            <div class="col-12 md:col-6 mt-4">
-                                <p-floatlabel variant="on">
-                                    <p-cascadeselect inputId="on_label" optionLabel="cname" formControlName="duration"
-                                        optionGroupLabel="name" [optionGroupChildren]="['states', 'cities']"
-                                        styleClass="w-full" />
-                                    <label for="on_label">Duration</label>
-                                </p-floatlabel>
+                            <div class="col-12 col-md-6">
+                                <label for="idealtimeAfter">Ideal Time After</label>
+                                <p-select inputId="idealtimeAfter" [options]="durationOptions" optionLabel="label"
+                                    optionValue="value" appendTo="body" formControlName="idealtimeAfter"
+                                    styleClass="w-full" />
+                                <div *ngIf="serviceCategoryForm.get('configurationForm.idealtimeAfter')?.invalid && serviceCategoryForm.get('configurationForm.idealtimeAfter')?.touched"
+                                    class="text-danger small mt-1">Ideal time after is required.</div>
                             </div>
-                            <div class="col-12 md:col-6 mt-4">
-                                <p-floatlabel variant="on">
-                                    <input pInputText formControlName="price" />
-                                    <label for="value3">Price</label>
-                                </p-floatlabel>
-                            </div>
-
-                            <div class="col-12 md:col-6 mt-4">
-                                <p-floatlabel variant="on">
-                                    <p-cascadeselect inputId="on_label" formControlName="bufferTimeBefore"
-                                        styleClass="w-full" />
-                                    <label for="on_label">Buffer time before</label>
-                                </p-floatlabel>
-                            </div>
-
-                            <div class="col-12 md:col-6 mt-4">
-                                <p-floatlabel variant="on">
-                                    <p-cascadeselect inputId="on_label" formControlName="bufferTimeAfter"
-                                        styleClass="w-full" />
-                                    <label for="on_label">Buffer time after</label>
-                                </p-floatlabel>
-                            </div>
-
-                            <div class="col-12 md:col-6 mt-4">
-                                <p-floatlabel variant="on">
-                                    <input pInputText formControlName="minCapacity" />
-                                    <label for="value3">Min Capacity</label>
-                                </p-floatlabel>
-                            </div>
-
-                            <div class="col-12 md:col-6 mt-4">
-                                <p-floatlabel variant="on">
-                                    <input pInputText formControlName="maxCapacity" />
-                                    <label for="value3">Max Capacity</label>
-                                </p-floatlabel>
-                            </div>
-
-                            <div class="col-12 mt-4">
-                                <p-floatlabel variant="on">
-                                    <input pInputText formControlName="minimumTimeRequiredBeforeBooking" />
-                                    <label for="value3">Minimum time before booking</label>
-                                </p-floatlabel>
-                            </div>
-                            <div class="col-12 mt-4">
-                                <p-floatlabel variant="on">
-                                    <input pInputText formControlName="minimumTimeRequiredBeforeCancelation" />
-                                    <label for="value3">Minimum time before cancelation</label>
-                                </p-floatlabel>
-                            </div>
-                            <div class="col-12 mt-4">
-                                <p-floatlabel variant="on">
-                                    <input pInputText formControlName="minimumTimeRequiredBeforeReschedueling" />
-                                    <label for="value3">Minimum time before reschecdueling</label>
-                                </p-floatlabel>
+                            <div class="col-12">
+                                <label for="locations">Locations</label>
+                                <p-multiSelect id="locations" appendTo="body" formControlName="locationIds"
+                                    [options]="locations" optionLabel="name" optionValue="id"
+                                    placeholder="Select Locations" styleClass="w-full" [filter]="true" />
+                                <div *ngIf="serviceCategoryForm.get('locationIds')?.invalid && serviceCategoryForm.get('configurationForm.locations')?.touched"
+                                    class="text-danger small mt-1">At least one location is required.
+                                </div>
                             </div>
                         </div>
                     </p-tabpanel>
@@ -138,8 +162,12 @@
     </p-card>
 
     <ng-template #footer>
-        <p-button label="Cancel" [text]="true" severity="danger" (click)="isServiceDialog = false" />
-        <p-button label="Save" [disabled]="addServiceForm.invalid" [outlined]="true" severity="success"
-            (onClick)="addNewCategory()" />
+        <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog()"></p-button>
+        <p-button *ngIf="!isNewServiceSubCategory" [label]="isEditMode ? 'Update' : 'Save'"
+            [disabled]="addServiceForm.invalid" [outlined]="true" severity="success"
+            (onClick)="addNewCategory()"></p-button>
+        <p-button *ngIf="isNewServiceSubCategory" [label]="isEditServiceMode ? 'Update' : 'Save'"
+            [disabled]="serviceCategoryForm.invalid" [outlined]="true" severity="success"
+            (onClick)="saveService()"></p-button>
     </ng-template>
 </p-dialog>
