@@ -16,7 +16,7 @@ export class WorkinghoursService {
      * @param workingHours An array of working hour objects.
      */
     addWorkingHours(workingHours: Workinghours[]): Observable<Workinghours[]> {
-        return this.http.post<Workinghours[]>(this.apiUrl, workingHours);
+        return this.http.post<Workinghours[]>(this.apiUrl + '/AddList', workingHours);
     }
 
     /**

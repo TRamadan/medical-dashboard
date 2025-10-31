@@ -1,0 +1,89 @@
+<form [formGroup]="workingHoursForm">
+  <p-accordion value="0">
+    <div formArrayName="days">
+      @for (day of weekDays; track day; let dayIndex = $index) {
+      <p-accordion-panel [value]="dayIndex.toString()" [formGroupName]="dayIndex">
+        <p-accordion-header>{{ day.label }}</p-accordion-header>
+        <p-accordion-content>
+          <div formArrayName="workingHours">
+            @for(workingHour of getDayWorkingHoursArray(dayIndex).controls; track workingHour; let
+            workingHourIndex = $index){
+            <div class="row g-3 mt-3 p-4 border rounded mb-4" [formGroupName]="workingHourIndex">
+
+              <!-- Start Time -->
+              <div class="col-12 col-md-6">
+                <label [for]="'start-' + dayIndex + '-' + workingHourIndex" class="form-label">
+                  Start time
+                </label>
+                <p-select appendTo="body" formControlName="startTime"
+                  [inputId]="'start-' + dayIndex + '-' + workingHourIndex" [options]="durationOptions"
+                  optionLabel="label" optionValue="value" placeholder="Select start time" class="w-100">
+                </p-select>
+
+                @if(getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.invalid &&
+                getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.touched){
+                <div class="text-danger small mt-1">Start time is required</div>
+                }
+              </div>
+
+              <!-- End Time -->
+              <div class="col-12 col-md-6">
+                <label [for]="'end-' + dayIndex + '-' + workingHourIndex" class="form-label">
+                  End time
+                </label>
+                <p-select appendTo="body" formControlName="endTime"
+                  [inputId]="'end-' + dayIndex + '-' + workingHourIndex" [options]="durationOptions" optionLabel="label"
+                  optionValue="value" placeholder="Select end time" class="w-100">
+                </p-select>
+
+                @if(getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.invalid &&
+                getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.touched){
+                <div class="text-danger small mt-1">End time is required</div>
+                }
+              </div>
+
+              <!-- Group-level error -->
+              @if(getWorkingHourFormGroup(dayIndex, workingHourIndex).errors?.['startAfterEnd']
+              && getWorkingHourFormGroup(dayIndex, workingHourIndex).touched){
+
+              <div class="col-12 mt-1">
+                <div class="text-danger small">
+                  Start time must be earlier than end time
+                </div>
+              </div>
+              }
+
+
+              <!-- Remove Button -->
+              @if(getDayWorkingHoursArray(dayIndex).length > 0){
+              <div class="col-12 text-end">
+                <button type="button" (click)="removeWorkingHour(dayIndex, workingHourIndex)"
+                  class="btn btn-danger btn-sm">
+                  Remove Working Hour
+                </button>
+              </div>
+              }
+            </div>
+
+            }
+
+            <!-- Show message when no working hours exist for this day -->
+            @if (getDayWorkingHoursArray(dayIndex).length === 0) {
+            <div class="text-gray-500 italic mb-4">
+              No working hours added for {{ day.label }}
+            </div>
+            }
+          </div>
+
+          <!-- Add new working hour button for specific day -->
+          <button type="button" (click)="addWorkingHour(dayIndex)"
+            class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            Add Working Hour for {{ day.label }}
+          </button>
+        </p-accordion-content>
+      </p-accordion-panel>
+      }
+
+
+    </div>
+  </p-accordion>

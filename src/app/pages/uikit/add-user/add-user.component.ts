@@ -20,10 +20,28 @@ import { Group } from '../add-group/models/group';
 import { Roles } from '../add-permission/models/permission';
 import { GroupsService } from '../add-group/services/groups.service';
 import { RolesService } from '../add-permission/services/roles.service';
-
+import { SelectModule } from 'primeng/select';
+import { FileUploadInputComponent } from '../../../shared/file-upload-input/file-upload-input.component';
 @Component({
     selector: 'app-add-user',
-    imports: [InputTextModule, FormsModule, ReactiveFormsModule, FloatLabelModule, DialogModule, TableComponent, ToolbarModule, ButtonModule, CardModule, NgClass, MultiSelectModule, StepperModule, FileUploadModule, ToastModule],
+    imports: [
+        FileUploadInputComponent,
+        SelectModule,
+        InputTextModule,
+        FormsModule,
+        ReactiveFormsModule,
+        FloatLabelModule,
+        DialogModule,
+        TableComponent,
+        ToolbarModule,
+        ButtonModule,
+        CardModule,
+        NgClass,
+        MultiSelectModule,
+        StepperModule,
+        FileUploadModule,
+        ToastModule
+    ],
     standalone: true,
     providers: [MessageService],
     templateUrl: './add-user.component.html',
@@ -41,6 +59,7 @@ export class AddUserComponent implements OnInit {
     selectedUser: any;
     allRoles: Roles[] = [];
     allGroups: Group[] = [];
+    allUserTypes: any[] = [];
     public readonly imgUrl = environment.imgUrl;
 
     constructor(
@@ -64,7 +83,20 @@ export class AddUserComponent implements OnInit {
         this.getAllUsers();
         this.getAllRoles();
         this.getAllGroups();
+        this.getAllUserTypes();
         this.initialiseUserForm();
+    }
+
+    //here is the function needed to get all user types
+    getAllUserTypes(): void {
+        this.userService.getAllUserTypes().subscribe({
+            next: (users: any) => {
+                this.allUserTypes = users.data;
+            },
+            error: (err) => {
+                this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch users types.' });
+            }
+        });
     }
 
     //here is the function needed to initialise the form related for add a new user
@@ -78,7 +110,8 @@ export class AddUserComponent implements OnInit {
                 phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$'), Validators.maxLength(11)]],
                 password: ['', [Validators.required, Validators.minLength(8)]],
                 rolesId: [[], Validators.required],
-                groupesId: [[], Validators.required]
+                groupesId: [[], Validators.required],
+                employeeType: [null, Validators.required]
             }),
             employeeData: this.fb.group({
                 fullNameAr: ['', [Validators.required, Validators.pattern('^[\u0621-\u064A\u0660-\u0669\\s]{3,}$')]],
@@ -268,7 +301,7 @@ export class AddUserComponent implements OnInit {
                 this.allGroups = res.data.map((group: any) => {
                     return {
                         id: group.id,
-                        name: group.nameAr
+                        name: group.name
                     };
                 });
             },

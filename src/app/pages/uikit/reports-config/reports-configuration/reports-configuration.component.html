@@ -1,167 +1,128 @@
-<p-toolbar styleClass="mb-6">
-    <ng-template #start>
-        <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openAddReportDialog()" />
-    </ng-template>
-
-    <ng-template #end>
-        <p-button label="Export" icon="pi pi-upload" severity="secondary" />
-    </ng-template>
-</p-toolbar>
-
-<p-card>
-    <h3>User tables</h3>
-    <app-patients-report></app-patients-report>
-</p-card>
+<p-toast></p-toast>
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
 
 <div class="my-3">
     <p-card>
         <h3>Added reports</h3>
-        <app-table [headers]="columns" [data]="data()" [showActions]="true" (edit)="onEdit($event)"
-            (delete)="onDelete($event)">
-        </app-table>
+        <app-table [headers]="columns" [data]="data()" [showActions]="true" (edit)="onEdit($event)" (delete)="onDelete($event)"> </app-table>
     </p-card>
 </div>
 
 <!-- here is the dialog needed to add, edit and delete a new report-->
-<p-dialog [(visible)]="reportDialog" [header]="''" [modal]="true" contentStyleClass="responsive-dialog-content"
-    [style]="{width : '60rem', height : '40rem'}">
+<p-dialog [(visible)]="reportDialog" [header]="''" [modal]="true" contentStyleClass="responsive-dialog-content" [style]="{ width: '60rem', height: '40rem' }">
     <ng-template pTemplate="header">
         <div class="flex items-center justify-between px-2 py-2 md:px-4 md:py-3 w-full">
             <span class="text-base md:text-lg font-semibold truncate">Create new report</span>
         </div>
     </ng-template>
     <p-card>
-        @if(!isDelete){
-        <div class="my-4">
-            <h5>
-                New report form configuration
-            </h5>
-            <form [formGroup]="reportConfigForm">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
-                    <div>
-                        <p-floatlabel variant="on">
-                            <input id="reportName" pInputText formControlName="reportName"
-                                (blur)="reportConfigForm.get('reportName')?.markAsTouched()" />
-                            <label for="reportName">Table name</label>
-                        </p-floatlabel>
-                        @if (reportConfigForm.get('reportName')?.invalid && reportConfigForm.get('reportName')?.touched)
-                        {
-                        <div class="text-red-600 text-xs mt-1">
-                            @if (reportConfigForm.get('reportName')?.errors?.['required']) {
-                            <span>Table name is required.</span>
+        @if (!isDelete) {
+            <div class="my-4">
+                <h5>New report form configuration</h5>
+                <form [formGroup]="reportConfigForm">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                        <div>
+                            <p-floatlabel variant="on">
+                                <input id="reportName" pInputText formControlName="reportName" (blur)="reportConfigForm.get('reportName')?.markAsTouched()" />
+                                <label for="reportName">Table name</label>
+                            </p-floatlabel>
+                            @if (reportConfigForm.get('reportName')?.invalid && reportConfigForm.get('reportName')?.touched) {
+                                <div class="text-red-600 text-xs mt-1">
+                                    @if (reportConfigForm.get('reportName')?.errors?.['required']) {
+                                        <span>Table name is required.</span>
+                                    }
+                                </div>
                             }
                         </div>
+
+                        <div class="flex flex-row items-center gap-2">
+                            <label for="on_label">Save template for later</label>
+                            <p-toggleswitch formControlName="isSavedForLater" (onChange)="onToggleChange()" />
+                        </div>
+
+                        @if (reportConfigForm.get('isSavedForLater')?.value) {
+                            <div class="mt-3">
+                                <p-floatlabel variant="on">
+                                    <input id="templateName" pInputText formControlName="templateName" (blur)="reportConfigForm.get('templateName')?.markAsTouched()" />
+                                    <label for="templateName">Template name</label>
+                                </p-floatlabel>
+                                @if (reportConfigForm.get('templateName')?.invalid && reportConfigForm.get('templateName')?.touched) {
+                                    <div class="text-red-600 text-xs mt-1">
+                                        @if (reportConfigForm.get('templateName')?.errors?.['required']) {
+                                            <span>Template name is required when saving for later.</span>
+                                        }
+                                    </div>
+                                }
+                            </div>
                         }
-                    </div>
 
-
-
-                    <div class="flex flex-row items-center gap-2">
-                        <label for="on_label">Save template for later</label>
-                        <p-toggleswitch formControlName="isSavedForLater" (onChange)="onToggleChange()" />
-                    </div>
-
-                    @if (reportConfigForm.get('isSavedForLater')?.value) {
-                    <div class="mt-3">
-                        <p-floatlabel variant="on">
-                            <input id="templateName" pInputText formControlName="templateName"
-                                (blur)="reportConfigForm.get('templateName')?.markAsTouched()" />
-                            <label for="templateName">Template name</label>
-                        </p-floatlabel>
-                        @if (reportConfigForm.get('templateName')?.invalid &&
-                        reportConfigForm.get('templateName')?.touched) {
-                        <div class="text-red-600 text-xs mt-1">
-                            @if (reportConfigForm.get('templateName')?.errors?.['required']) {
-                            <span>Template name is required when saving for later.</span>
+                        <div>
+                            <p-floatlabel variant="on">
+                                <input id="reportColumns" pInputText formControlName="reportColumns" (blur)="reportConfigForm.get('reportColumns')?.markAsTouched()" />
+                                <label for="reportColumns">Table columns</label>
+                            </p-floatlabel>
+                            @if (reportConfigForm.get('reportColumns')?.invalid && reportConfigForm.get('reportColumns')?.touched) {
+                                <div class="text-red-600 text-xs mt-1">
+                                    @if (reportConfigForm.get('reportColumns')?.errors?.['required']) {
+                                        <span>Table columns are required.</span>
+                                    }
+                                </div>
                             }
                         </div>
-                        }
                     </div>
-                    }
-
-                    <div>
-                        <p-floatlabel variant="on">
-                            <input id="reportColumns" pInputText formControlName="reportColumns"
-                                (blur)="reportConfigForm.get('reportColumns')?.markAsTouched()" />
-                            <label for="reportColumns">Table columns</label>
-                        </p-floatlabel>
-                        @if (reportConfigForm.get('reportColumns')?.invalid &&
-                        reportConfigForm.get('reportColumns')?.touched) {
-                        <div class="text-red-600 text-xs mt-1">
-                            @if (reportConfigForm.get('reportColumns')?.errors?.['required']) {
-                            <span>Table columns are required.</span>
-                            }
-                        </div>
-                        }
-                    </div>
-
-                </div>
-
-
-            </form>
-        </div>
-        <div class="row">
-            <h5>Choose your category</h5>
-            @for(reportTemplate of reportTemplates; track reportTemplate;){
-            <div class="col-md-4" (click)="toggleReportTemplateSelection(reportTemplate)" style="cursor: pointer;">
-                <div class="card p-2"
-                    [style.border]="selectedReportTemplateIds().includes(reportTemplate.id!) ? '1px solid #1976d2' : '1px solid #ccc'"
-                    [style.border-radius]="'16px'">
-                    <h5 class="text-center">
-                        {{ reportTemplate.name }}
-                    </h5>
-                </div>
-
+                </form>
             </div>
-            }
+            <div class="row">
+                <h5>Choose your category</h5>
+                @for (reportTemplate of reportTemplates; track reportTemplate) {
+                    <div class="col-md-4" (click)="toggleReportTemplateSelection(reportTemplate)" style="cursor: pointer">
+                        <div class="card p-2" [style.border]="selectedReportTemplateIds().includes(reportTemplate.id!) ? '1px solid #1976d2' : '1px solid #ccc'" [style.border-radius]="'16px'">
+                            <h5 class="text-center">
+                                {{ reportTemplate.name }}
+                            </h5>
+                        </div>
+                    </div>
+                }
 
-            <!-- Template Details Chips -->
-            @if (selectedTemplatesWithDetails.length > 0) {
-            <div class="mt-4">
-                @for (template of selectedTemplatesWithDetails; track template.name) {
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    Template Details for:
-                    <span class="font-bold text-blue-700">
-                        {{ template.name }}
-                    </span>
-                </label>
-                <div class="flex flex-wrap gap-2 mb-4">
-                    @for (data of template.details; track data.id) {
-                    <span
-                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border cursor-pointer"
-                        [class.bg-blue-100]="isColumnSelected(template.id, data.id)"
-                        [class.text-blue-800]="isColumnSelected(template.id, data.id)"
-                        [class.bg-gray-100]="!isColumnSelected(template.id, data.id)"
-                        [class.text-gray-800]="!isColumnSelected(template.id, data.id)"
-                        [class.border-blue-200]="isColumnSelected(template.id, data.id)"
-                        [class.border-gray-300]="!isColumnSelected(template.id, data.id)"
-                        (click)="onToggleColumn(template.id, data.id, data.name)">
-                        {{ data.name }}
-                    </span>
-                    }
-                </div>
+                <!-- Template Details Chips -->
+                @if (selectedTemplatesWithDetails.length > 0) {
+                    <div class="mt-4">
+                        @for (template of selectedTemplatesWithDetails; track template.name) {
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Template Details for:
+                                <span class="font-bold text-blue-700">
+                                    {{ template.name }}
+                                </span>
+                            </label>
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                @for (data of template.details; track data.id) {
+                                    <span
+                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border cursor-pointer"
+                                        [class.bg-blue-100]="isColumnSelected(template.id, data.id)"
+                                        [class.text-blue-800]="isColumnSelected(template.id, data.id)"
+                                        [class.bg-gray-100]="!isColumnSelected(template.id, data.id)"
+                                        [class.text-gray-800]="!isColumnSelected(template.id, data.id)"
+                                        [class.border-blue-200]="isColumnSelected(template.id, data.id)"
+                                        [class.border-gray-300]="!isColumnSelected(template.id, data.id)"
+                                        (click)="onToggleColumn(template.id, data.id, data.name)"
+                                    >
+                                        {{ data.name }}
+                                    </span>
+                                }
+                            </div>
+                        }
+                    </div>
                 }
             </div>
-            }
-
-
-        </div>
-
-        }
-
-        @else {
-        <p class=" text-center">
-            Are you sure to disable the selected report config ?
-        </p>
+        } @else {
+            <p class="text-center">Are you sure to disable the selected report config ?</p>
         }
     </p-card>
 
     <ng-template pTemplate="footer">
         <div class="flex flex-col gap-2 md:flex-row md:justify-end md:gap-4 w-full px-2 py-2">
-            <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog();" class="w-full md:w-auto" />
-            <p-button label="Save" [outlined]="true" severity="success"
-                (onClick)="isEdit ?  updateSelectedReportConfig():saveReportConfig()"
-                [disabled]="reportConfigForm.invalid" class="w-full md:w-auto" />
+            <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog()" class="w-full md:w-auto" />
+            <p-button label="Save" [outlined]="true" severity="success" [disabled]="reportConfigForm.invalid" class="w-full md:w-auto" />
         </div>
     </ng-template>
 </p-dialog>

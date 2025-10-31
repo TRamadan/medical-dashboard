@@ -54,7 +54,7 @@ export class FileUploadInputComponent {
         this._uploadFileService.uploadFileService(file, this.folderName).subscribe({
             next: (res: any) => {
                 this.innerValue = res.filePath;
-                this.onChange(res.filePath); // بيرجع القيمة للفورم
+                this.onChange(res.filePath);
                 this.onTouched();
 
                 // preview

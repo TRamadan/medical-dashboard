@@ -47,7 +47,8 @@ export class SuperStarsComponent implements OnInit {
         { label: 'Athelte image', field: 'image', type: 'image' },
         {
             label: 'Is Elite',
-            field: 'isElite'
+            field: 'isElite',
+            type: 'boolean'
         }
     ];
 

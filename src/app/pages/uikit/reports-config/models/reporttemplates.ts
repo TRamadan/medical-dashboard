@@ -4,8 +4,14 @@ export interface ReportTemplateDetails {
 }
 
 export interface SubCategory {
-    id: number;
-    name: string;
+    id?: number;
+    name?: string;
+}
+
+export interface Category {
+    id?: number;
+    name?: string;
+    nameEn?: string;
 }
 
 export interface Reporttemplates {

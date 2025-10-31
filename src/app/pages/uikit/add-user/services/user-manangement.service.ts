@@ -55,4 +55,12 @@ export class UserManangementService {
     deleteUser(id: string): Observable<any> {
         return this.http.delete<any>(`${this.apiUrl}${'Delete/Delete?id='}${id}`);
     }
+
+    /**
+     * A function that gets all added users
+     * @returns An observable with the list of users.
+     */
+    getAllUserTypes(): Observable<any[]> {
+        return this.http.get<any[]>(this.apiUrl + 'GetAllEmployeeTypes');
+    }
 }

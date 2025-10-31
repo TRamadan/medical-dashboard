@@ -46,7 +46,11 @@
                             </ng-container>
                         </ng-container>
                         <ng-container *ngSwitchCase="'boolean'">
-                            {{ row[col.field] == true ? 'Yes' : 'No'}}
+                            {{
+                                    col.field === 'isElite'
+      ? (row[col.field] ? 'Elite super star' : 'Normal super star')
+      : (row[col.field] ? 'Yes' : 'No')
+                            }}
                         </ng-container>
                         <ng-container *ngSwitchCase="'link'">
                             <a (click)="openFile(row[col.field])" [href]="row[col.field]" rel="noopener noreferrer"

@@ -1,14 +1,37 @@
 <p-card>
-    <app-tabs [tabs]="[
-{ label: 'Reports configuration', template: reportsConfigTab },
-{ label: 'Reservation form configuration', template: formConfigTab },
+    <p-card header="Choose the need to make configuration" styleClass="text-center mb-3">
+        <ng-template pTemplate="content">
+            <div class="row g-4">
+                @for (item of configArr; track item) {
+                    <div class="col-12 col-sm-6">
+                        <p-card [header]="item.name" styleClass="p-card-shadow cursor-pointer hover:bg-gray-100"> </p-card>
+                    </div>
+                }
+            </div>
+        </ng-template>
+    </p-card>
+    <app-tabs
+        [tabs]="[
+            { label: 'Reports Categories and sub categories', template: reportsCategoriesConfigTab },
+            { label: 'Reports configuration', template: reportsConfigTab },
+            {
+                label: 'Users Reports',
+                template: usersReportsTab
+            },
+            { label: 'Reservation form configuration', template: formConfigTab }
+        ]"
+    ></app-tabs>
 
-]"></app-tabs>
+    <ng-template #reportsCategoriesConfigTab>
+        <app-reports-category></app-reports-category>
+    </ng-template>
     <ng-template #reportsConfigTab>
         <app-reports-configuration></app-reports-configuration>
     </ng-template>
 
-    <ng-template #formConfigTab>
-        reservation form config goes here
+    <ng-template #usersReportsTab>
+        <app-patients-report></app-patients-report>
     </ng-template>
+
+    <ng-template #formConfigTab> <app-reservation-form-configuration></app-reservation-form-configuration> </ng-template>
 </p-card>
