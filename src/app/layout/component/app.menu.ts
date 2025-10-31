@@ -147,6 +147,11 @@ export class AppMenu {
                         routerLink: ['/uikit/knowledgehub']
                     },
                     {
+                        label: 'Our solutions section config',
+                        icon: '',
+                        routerLink: ['/uikit/oursolutions']
+                    },
+                    {
                         label: 'Our partners section config',
                         icon: '',
                         routerLink: ['/uikit/partners']

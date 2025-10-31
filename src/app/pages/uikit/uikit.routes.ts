@@ -23,6 +23,7 @@ import { SuccessStoreisComponent } from './success-storeis/success-storeis.compo
 import { HowItWorksComponent } from './how-it-works/how-it-works.component';
 import { EducationComponent } from './education-page/education.component';
 import { WorkingHoursComponent } from './working-hours/working-hours.component';
+import { OurSolutionsComponent } from './our-solutions/our-solutions.component';
 export default [
     {
         path: 'adduser',
@@ -33,6 +34,11 @@ export default [
         path: 'trackingattendance',
         data: { breadcrumb: 'Tracking session attendance' },
         component: AttendanceTrackingComponent
+    },
+    {
+        path: 'oursolutions',
+        data: { breadcrumb: 'Our solutions' },
+        component: OurSolutionsComponent
     },
     {
         path: 'addgroup',

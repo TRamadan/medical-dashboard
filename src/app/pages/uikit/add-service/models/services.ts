@@ -8,4 +8,6 @@ export interface Services {
     price?: number;
     serviceCategoryId?: number;
     locationIds?: any;
+    parentServiceId?: number;
+    orderInParent?: number;
 }

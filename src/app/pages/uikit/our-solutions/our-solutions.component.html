@@ -1,3 +1,175 @@
-<p>
-  our-solutions works!
-</p>
+<p-toast></p-toast>
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
+
+<p-toolbar styleClass="mb-6">
+    <ng-template pTemplate="start">
+        <p-button label="New" icon="pi pi-plus" severity="success" (onClick)="openAddNewCategory()" />
+    </ng-template>
+    <ng-template pTemplate="end">
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+    </ng-template>
+</p-toolbar>
+
+<p-card>
+    <app-table [data]="categories" [headers]="cols" [showActions]="true" [isShowDetails]="true" [isAddDetails]="true" (edit)="editCategory($event)" (delete)="deleteCategory($event)" (addDetails)="openAddNewSolution($event)">
+        <ng-template #details let-category>
+            <div class="p-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5>Our Solutions in {{ category.nameEn }}</h5>
+                </div>
+                @if (category.solutions && category.solutions.length > 0) {
+                    <div class="row">
+                        @for (item of category.solutions; track item.id) {
+                            <div class="col-12 col-md-6 col-lg-3 mb-3">
+                                <p-card styleClass="h-100 d-flex flex-column">
+                                    <div class="text-center">
+                                        <img [src]="imgUrl + item.img" [alt]="item.titleEn" class="img-fluid rounded" style="height: 150px; width: 100%; object-fit: cover" />
+                                    </div>
+                                    <div class="d-flex flex-column flex-grow-1 p-3">
+                                        <h6 class="mb-1">{{ item.titleEn }}</h6>
+                                        <p class="text-muted small flex-grow-1">{{ item.descriptionEn }}</p>
+                                        <div class="mt-auto d-flex justify-content-end gap-2">
+                                            <p-button icon="pi pi-pencil" styleClass="p-button-sm p-button-warning" (onClick)="editSolution(item, category)"></p-button>
+                                            <p-button icon="pi pi-trash" styleClass="p-button-sm p-button-danger" (onClick)="deleteSolution(item)"></p-button>
+                                        </div>
+                                    </div>
+                                </p-card>
+                            </div>
+                        }
+                    </div>
+                } @else {
+                    <p>No content found for this category.</p>
+                }
+            </div>
+        </ng-template>
+    </app-table>
+</p-card>
+
+<!-- here is the dialog needed to add a new category-->
+<p-dialog [(visible)]="categoryDialog" [style]="{ width: '450px' }" [header]="isEditMode ? 'Edit Category' : 'Add Category'" [modal]="true" class="p-fluid">
+    <ng-template pTemplate="content">
+        <form [formGroup]="categoryForm">
+            <div class="row">
+                <!-- Title (Arabic) -->
+                <div class="col-md-6">
+                    <label for="nameAr">Category name (Arabic)</label>
+                    <input type="text" id="nameAr" class="form-control" formControlName="nameAr" [ngClass]="{ 'is-invalid': categoryForm.get('nameAr')?.invalid && categoryForm.get('nameAr')?.touched }" />
+                    @if (categoryForm.get('nameAr')?.errors && categoryForm.get('nameAr')?.touched) {
+                        <div class="invalid-feedback">
+                            @if (categoryForm.get('nameAr')?.errors?.['required']) {
+                                <div>Title (Arabic) is required.</div>
+                            }
+                            @if (categoryForm.get('nameAr')?.errors?.['pattern']) {
+                                <div>Only Arabic letters and special characters are allowed.</div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Title (English) -->
+                <div class="col-md-6">
+                    <label for="nameEn">Category name (English)</label>
+                    <input type="text" id="nameEn" class="form-control" formControlName="nameEn" [ngClass]="{ 'is-invalid': categoryForm.get('nameEn')?.invalid && categoryForm.get('nameEn')?.touched }" />
+                    @if (categoryForm.get('nameEn')?.errors && categoryForm.get('nameEn')?.touched) {
+                        <div class="invalid-feedback">
+                            @if (categoryForm.get('nameEn')?.errors?.['required']) {
+                                <div>Title (English) is required.</div>
+                            }
+                            @if (categoryForm.get('nameEn')?.errors?.['pattern']) {
+                                <div>Only English letters and special characters are allowed.</div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </form>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button severity="danger" label="Cancel" icon="pi pi-times" (onClick)="hideCategoryDialog()" class="p-button-text" />
+            <p-button severity="success" label="Save" icon="pi pi-check" (onClick)="submitCategory()" />
+        </div>
+    </ng-template>
+</p-dialog>
+
+<!-- Solution Dialog -->
+<p-dialog [(visible)]="solutionDialog" [style]="{ width: '750px' }" [header]="isEditSolutionMode ? 'Edit Solution' : 'Add Solution'" [modal]="true" class="p-fluid">
+    <ng-template pTemplate="content">
+        <form [formGroup]="solutionForm">
+            <div class="row g-3">
+                <!-- Title (Arabic) -->
+                <div class="col-md-6">
+                    <label for="titleAr">Title (Arabic)</label>
+                    <input type="text" id="titleAr" class="form-control" formControlName="titleAr" [ngClass]="{ 'is-invalid': solutionForm.get('titleAr')?.invalid && solutionForm.get('titleAr')?.touched }" />
+                    @if (solutionForm.get('titleAr')?.errors && solutionForm.get('titleAr')?.touched) {
+                        <div class="invalid-feedback">
+                            @if (solutionForm.get('titleAr')?.errors?.['required']) {
+                                <div>Title (Arabic) is required.</div>
+                            }
+                            @if (solutionForm.get('titleAr')?.errors?.['pattern']) {
+                                <div>Only Arabic letters and special characters are allowed.</div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Title (English) -->
+                <div class="col-md-6">
+                    <label for="titleEn">Title (English)</label>
+                    <input type="text" id="titleEn" class="form-control" formControlName="titleEn" [ngClass]="{ 'is-invalid': solutionForm.get('titleEn')?.invalid && solutionForm.get('titleEn')?.touched }" />
+                    @if (solutionForm.get('titleEn')?.errors && solutionForm.get('titleEn')?.touched) {
+                        <div class="invalid-feedback">
+                            @if (solutionForm.get('titleEn')?.errors?.['required']) {
+                                <div>Title (English) is required.</div>
+                            }
+                            @if (solutionForm.get('titleEn')?.errors?.['pattern']) {
+                                <div>Only English letters and special characters are allowed.</div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Description (Arabic) -->
+                <div class="col-12">
+                    <label for="descriptionAr">Description (Arabic)</label>
+                    <textarea id="descriptionAr" class="form-control" rows="3" formControlName="descriptionAr"></textarea>
+                </div>
+
+                <!-- Description (English) -->
+                <div class="col-12">
+                    <label for="descriptionEn">Description (English)</label>
+                    <textarea id="descriptionEn" class="form-control" rows="3" formControlName="descriptionEn"></textarea>
+                </div>
+
+                <!-- Link -->
+                <div class="col-12">
+                    <label for="link">Link</label>
+                    <input type="text" id="link" class="form-control" formControlName="link" [ngClass]="{ 'is-invalid': solutionForm.get('link')?.invalid && solutionForm.get('link')?.touched }" />
+                    @if (solutionForm.get('link')?.errors && solutionForm.get('link')?.touched) {
+                        <div class="invalid-feedback">
+                            @if (solutionForm.get('link')?.errors?.['required']) {
+                                <div>Link is required.</div>
+                            }
+                            @if (solutionForm.get('link')?.errors?.['pattern']) {
+                                <div>Please enter a valid URL.</div>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <!-- Image Upload -->
+                <div class="col-12 mt-3">
+                    <app-file-upload-input formControlName="img" folderName="Solutions" label="Solution Image"></app-file-upload-input>
+                </div>
+            </div>
+        </form>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <div class="flex justify-end gap-2 mt-4">
+            <p-button severity="danger" label="Cancel" icon="pi pi-times" (onClick)="hideSolutionDialog()" class="p-button-text" />
+            <p-button severity="success" label="Save" icon="pi pi-check" (onClick)="submitSolution()" [disabled]="solutionForm.invalid" />
+        </div>
+    </ng-template>
+</p-dialog>

@@ -121,7 +121,9 @@ export class AddServiceComponent implements OnInit {
             idealtimeBefore: [null, Validators.required], // for service
             idealtimeAfter: [null, Validators.required], // for service
             serviceCategoryId: [null], // for service
-            locationIds: [[], Validators.required] // for service
+            locationIds: [[], Validators.required], // for service
+            parentServiceId: [null],
+            orderInParent: [null]
         });
     }
 
@@ -162,7 +164,11 @@ export class AddServiceComponent implements OnInit {
                 });
             },
             error: (error: any) => {
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch locations' });
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to fetch locations'
+                });
             }
         });
     }
@@ -218,44 +224,80 @@ export class AddServiceComponent implements OnInit {
     private createCategory(): void {
         this.serviceCategoryService.addServiceCategory(this.addServiceForm.value).subscribe({
             next: () => {
-                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Category Created' });
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Category Created'
+                });
                 this.getAllCategories();
                 this.hideDialog();
             },
-            error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Create Failed' })
+            error: () =>
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Create Failed'
+                })
         });
     }
 
     private updateCategory(): void {
         this.serviceCategoryService.updateServiceCategory(this.addServiceForm.value).subscribe({
             next: () => {
-                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Category Updated' });
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Category Updated'
+                });
                 this.getAllCategories();
                 this.hideDialog();
             },
-            error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Update Failed' })
+            error: () =>
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Update Failed'
+                })
         });
     }
 
     private createService(serviceData: any): void {
         this.servicesService.addService(serviceData).subscribe({
             next: () => {
-                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Service Created' });
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Service Created'
+                });
                 this.getAllCategories();
                 this.hideDialog();
             },
-            error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Create Failed' })
+            error: () =>
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Create Failed'
+                })
         });
     }
 
     private updateService(serviceData: any): void {
         this.servicesService.updateService(serviceData.id, serviceData).subscribe({
             next: () => {
-                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Service Updated' });
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: 'Service Updated'
+                });
                 this.getAllCategories();
                 this.hideDialog();
             },
-            error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Update Failed' })
+            error: () =>
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Update Failed'
+                })
         });
     }
 
@@ -270,7 +312,11 @@ export class AddServiceComponent implements OnInit {
                 this.data = response;
             },
             error: () => {
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch categories' });
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to fetch categories'
+                });
             }
         });
     }
@@ -289,11 +335,20 @@ export class AddServiceComponent implements OnInit {
             accept: () => {
                 this.serviceCategoryService.deleteServiceCategory(category.id!).subscribe({
                     next: () => {
-                        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Category Deleted' });
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Success',
+                            detail: 'Category Deleted'
+                        });
                         this.getAllCategories();
                         this.isDeleteMode = false;
                     },
-                    error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Delete Failed' })
+                    error: () =>
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'Delete Failed'
+                        })
                 });
             },
             reject: () => {
@@ -311,11 +366,20 @@ export class AddServiceComponent implements OnInit {
             accept: () => {
                 this.servicesService.deleteService(service.id!).subscribe({
                     next: () => {
-                        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Service Deleted' });
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Success',
+                            detail: 'Service Deleted'
+                        });
                         this.getAllCategories();
                         this.isDeleteMode = false;
                     },
-                    error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Delete Failed' })
+                    error: () =>
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Error',
+                            detail: 'Delete Failed'
+                        })
                 });
             },
             reject: () => {
