@@ -123,7 +123,7 @@ export class AddServiceComponent implements OnInit {
             serviceCategoryId: [null], // for service
             locationIds: [[], Validators.required], // for service
             parentServiceId: [null],
-            orderInParent: [null]
+            orderInParent: [null, Validators.pattern(/^[0-9]*$/)]
         });
     }
 
@@ -321,6 +321,22 @@ export class AddServiceComponent implements OnInit {
         });
     }
 
+    /**
+     *
+     * @param parentService
+     * @param category
+     */
+    addServiceSubService(parentService: any, category: Servicecategory): void {
+        this.selectedCategoryForService = { ...category };
+        this.isServiceDialog = true;
+        this.isNewServiceSubCategory = true;
+        this.isEditServiceMode = false;
+        this.serviceCategoryForm.reset();
+        this.serviceCategoryForm.patchValue({
+            parentServiceId: parentService.id,
+            serviceCategoryId: this.selectedCategoryForService.id
+        });
+    }
     /**
      * Developer: Eng/Tarek Ahmed Ramadan
      * Created Date : 2/6/2025
