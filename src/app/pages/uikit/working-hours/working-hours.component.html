@@ -50,8 +50,16 @@
                                         </div>
                                         <div class="coach-actions">
                                             <!-- Pass the whole group to edit/delete all its time slots -->
-                                            <button class="edit-schedule-btn" (click)="editSelectedWorkingHour(workingHour, group)">Edit Schedule</button>
-                                            <button class="delete-schedule-btn" (click)="deleteSelectedWorkingHour(workingHour, group)">Delete</button>
+                                            <button pButton label="Edit Schedule" icon="pi pi-pencil" class="p-button-sm p-button-warning" (click)="editSelectedWorkingHour(workingHour, group, location)"></button>
+                                            <button
+                                                pButton
+                                                label="Delete"
+                                                icon="pi pi-trash"
+                                                class="p-button-sm p-button-danger"
+                                                (click)="deleteSelectedWorkingHour(workingHour, group)"
+                                                pTooltip="Delete all slots for this day"
+                                                appendTo="body"
+                                            ></button>
                                         </div>
                                     </div>
 
@@ -62,6 +70,7 @@
                                                 <div class="slot-time">
                                                     <strong>{{ slot.startTime }}</strong> - <strong>{{ slot.endTime }}</strong>
                                                 </div>
+                                                <button pButton icon="pi pi-trash" class="p-button-danger p-button-text p-button-sm" (click)="deleteSingleTimeSlot(workingHour, group, slot)" pTooltip="Delete this slot only"></button>
                                             </div>
                                         }
                                     </div>
@@ -81,10 +90,10 @@
         <form [formGroup]="workingHoursForm">
             <div class="row g-3">
                 <div class="col-12 col-md-6">
-                    <label for="serviceId">Service</label>
-                    <p-treeSelect inputId="serviceId" appendTo="body" [filter]="true" [filterInputAutoFocus]="true" [options]="serviceCategories" placeholder="Select Service" formControlName="serviceId" styleClass="w-full" />
-                    @if (workingHoursForm.get('serviceId')?.invalid && workingHoursForm.get('serviceId')?.touched) {
-                        <div class="text-danger small mt-1">Service is required.</div>
+                    <label for="serviceId" class="font-medium">Service</label>
+                    <p-treeSelect inputId="locationId" [filter]="true" appendTo="body" [options]="serviceCategories" optionLabel="name" optionValue="id" appendTo="body" formControlName="serviceId" styleClass="w-full" />
+                    @if (workingHoursForm.get('locationId')?.invalid && workingHoursForm.get('locationId')?.touched) {
+                        <div class="text-danger small mt-1">Location is required.</div>
                     }
                 </div>
 

@@ -16,6 +16,7 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TableColumn, TableComponent } from '../../../shared/table/table.component';
 import { Appointment } from './models/appointment';
 @Component({
     selector: 'app-appointments',
@@ -36,7 +37,8 @@ import { Appointment } from './models/appointment';
         TagModule,
         InputIconModule,
         IconFieldModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        TableComponent
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './appointments.component.html',
@@ -45,13 +47,18 @@ import { Appointment } from './models/appointment';
 export class AppointmentsComponent implements OnInit {
     allAppointments = signal<Appointment[]>([]);
     @ViewChild('dt') dt!: Table;
+    tableHeaders: TableColumn[] = [];
+    tableActions: any[] = [];
+    globalFilterFields: string[] = [];
+
     constructor(
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {}
 
     ngOnInit() {
-        this.getAllAppointement();
+        this.initializeTable();
+        this.getAllAppointments();
     }
 
     /**
@@ -60,6 +67,32 @@ export class AppointmentsComponent implements OnInit {
      * Porpuse : implement a signal that call an api that fetch all added appointments
      */
     getAllAppointement(): void {}
+    initializeTable() {
+        this.tableHeaders = [
+            { field: 'id', label: 'Session ID', type: 'text' },
+            { field: 'client', label: 'Client Name', type: 'text' },
+            { field: 'employee', label: 'Assigned To', type: 'text' },
+            { field: 'service', label: 'Service', type: 'text' },
+            { field: 'datetime', label: 'Date & Time', type: 'text' },
+            { field: 'status', label: 'Status', type: 'text' }
+        ];
+        this.tableHeaders.forEach((h) => this.globalFilterFields.push(h.field));
+
+        this.tableActions = [
+            { label: 'Complete', icon: 'pi pi-check', severity: 'success', action: (item: any) => console.log('Complete', item), condition: (item: any) => item.status !== 'completed' && item.status !== 'canceled' },
+            { label: 'Reschedule', icon: 'pi pi-calendar', severity: 'info', action: (item: any) => console.log('Reschedule', item) },
+            { label: 'Cancel', icon: 'pi pi-times', severity: 'danger', action: (item: any) => console.log('Cancel', item), condition: (item: any) => item.status !== 'canceled' }
+        ];
+    }
+
+    getAllAppointments() {
+        // this.allAppointments.set([
+        //     { id: '#S001', client: 'Alice Johnson', employee: 'John Smith', service: 'Hair Cut & Style', datetime: 'Dec 15, 2024 - 10:00 AM', status: 'scheduled' },
+        //     { id: '#S002', client: 'Bob Wilson', employee: 'Jane Doe', service: 'Massage Therapy', datetime: 'Dec 15, 2024 - 2:00 PM', status: 'completed' },
+        //     { id: '#S003', client: 'Carol Brown', employee: 'Mike Johnson', service: 'Facial Treatment', datetime: 'Dec 16, 2024 - 11:30 AM', status: 'rescheduled' },
+        //     { id: '#S004', client: 'David Lee', employee: 'John Smith', service: 'Beard Trim', datetime: 'Dec 16, 2024 - 3:00 PM', status: 'canceled' }
+        // ]);
+    }
 
     /**
      * Developer : Eng/Tarek Ahmed Ramadan

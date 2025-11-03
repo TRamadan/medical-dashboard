@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Injectable({
     providedIn: 'root'
@@ -11,12 +12,24 @@ export class UserManangementService {
 
     constructor(private http: HttpClient) {}
 
+    private handleError(error: HttpErrorResponse) {
+        let errorMessage = 'An unknown error occurred!';
+        if (error.error && error.error.error && Array.isArray(error.error.error.errors) && error.error.error.errors.length > 0) {
+            // Extract the English error message from the backend response
+            errorMessage = error.error.error.errors[0].errorEn;
+        } else if (error.message) {
+            // Fallback to the default error message
+            errorMessage = error.message;
+        }
+        return throwError(() => new Error(errorMessage));
+    }
+
     /**
      * A function that gets all added users
      * @returns An observable with the list of users.
      */
     getAllUsers(): Observable<any[]> {
-        return this.http.get<any[]>(this.apiUrl + 'GetAll/GetAll');
+        return this.http.get<any[]>(this.apiUrl + 'GetAll/GetAll').pipe(catchError(this.handleError));
     }
 
     /**
@@ -25,7 +38,7 @@ export class UserManangementService {
      * @returns An observable with the user data.
      */
     getUserById(id: string): Observable<any> {
-        return this.http.get<any>(`${this.apiUrl}${'GetById/GetById?id='}${id}`);
+        return this.http.get<any>(`${this.apiUrl}${'GetById/GetById?id='}${id}`).pipe(catchError(this.handleError));
     }
 
     /**
@@ -34,7 +47,7 @@ export class UserManangementService {
      * @returns An observable with the response.
      */
     addUser(user: any): Observable<any> {
-        return this.http.post<any>(this.apiUrl + 'RegisterAppUser', user);
+        return this.http.post<any>(this.apiUrl + 'RegisterAppUser', user).pipe(catchError(this.handleError));
     }
 
     /**
@@ -44,7 +57,7 @@ export class UserManangementService {
      * @returns An observable with the response.
      */
     updateUser(id: string, user: any): Observable<any> {
-        return this.http.put<any>(`${this.apiUrl}${'Update/Update'}/${id}`, user);
+        return this.http.put<any>(`${this.apiUrl}${'Update/Update'}/${id}`, user).pipe(catchError(this.handleError));
     }
 
     /**
@@ -53,7 +66,7 @@ export class UserManangementService {
      * @returns An observable with the response.
      */
     deleteUser(id: string): Observable<any> {
-        return this.http.delete<any>(`${this.apiUrl}${'Delete/Delete?id='}${id}`);
+        return this.http.delete<any>(`${this.apiUrl}${'Delete/Delete?id='}${id}`).pipe(catchError(this.handleError));
     }
 
     /**
@@ -61,6 +74,6 @@ export class UserManangementService {
      * @returns An observable with the list of users.
      */
     getAllUserTypes(): Observable<any[]> {
-        return this.http.get<any[]>(this.apiUrl + 'GetAllEmployeeTypes');
+        return this.http.get<any[]>(this.apiUrl + 'GetAllEmployeeTypes').pipe(catchError(this.handleError));
     }
 }

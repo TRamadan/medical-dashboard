@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { forkJoin } from 'rxjs';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { ConfirmDialog } from 'primeng/confirmdialog';
 import { Toast } from 'primeng/toast';
@@ -19,17 +20,34 @@ import { AssingHoursComponent } from './assing-hours/assing-hours.component';
 import { UserManangementService } from '../add-user/services/user-manangement.service';
 import { WorkinghoursService } from './services/workinghours.service';
 import { ServicesService } from '../add-service/services/services.service';
-import { Menu } from 'primeng/menu';
 import { TreeSelectModule } from 'primeng/treeselect';
 import { ButtonModule } from 'primeng/button';
 import { MenuItem } from 'primeng/api';
-
+import { TooltipModule } from 'primeng/tooltip';
 @Component({
     selector: 'app-working-hours',
     templateUrl: './working-hours.component.html',
     styleUrls: ['./working-hours.component.css'],
     providers: [MessageService, ConfirmationService],
-    imports: [Menu, ButtonModule, AccordionModule, Toast, ToolbarModule, TableModule, Dialog, DropdownModule, SelectModule, FormsModule, ReactiveFormsModule, Button, Card, TableComponent, AssingHoursComponent, ConfirmDialog, TreeSelectModule]
+    imports: [
+        TooltipModule,
+        ButtonModule,
+        AccordionModule,
+        Toast,
+        ToolbarModule,
+        TableModule,
+        Dialog,
+        DropdownModule,
+        SelectModule,
+        FormsModule,
+        ReactiveFormsModule,
+        Button,
+        Card,
+        TableComponent,
+        AssingHoursComponent,
+        ConfirmDialog,
+        TreeSelectModule
+    ]
 })
 export class WorkingHoursComponent implements OnInit {
     showWorkingHoursDialog: boolean = false;
@@ -56,6 +74,7 @@ export class WorkingHoursComponent implements OnInit {
     allUsers: any[] = [];
     serviceCategories: any[] = [];
     workingHoursToBeSent: any[] = [];
+    expandedRows: any = {};
     workingHoursToEdit: any[] = [];
 
     constructor(
@@ -75,7 +94,7 @@ export class WorkingHoursComponent implements OnInit {
                         label: 'Update',
                         icon: 'pi pi-pen-to-square',
                         command: () => {
-                            this.editSelectedWorkingHour('', '');
+                            this.editSelectedWorkingHour('', '', '');
                         }
                     },
                     {
@@ -178,6 +197,7 @@ export class WorkingHoursComponent implements OnInit {
                     label: category.nameEn,
                     children: category.subServices.map((service: any) => this.mapServiceToTreeNode(service))
                 }));
+                console.log(this.serviceCategories);
             },
             error: () => {
                 this.messageService.add({
@@ -199,14 +219,15 @@ export class WorkingHoursComponent implements OnInit {
 
     //here is the function needed to get all added working hours from the child component
     onWorkingHoursChanged(event: any): void {
-        let formvalues = this.workingHoursForm.value;
+        let formValues = this.workingHoursForm.value;
+        const serviceId = formValues.serviceId?.key ? +formValues.serviceId.key.split('-')[1] : 0;
         const result = event.map((e: any) => ({
             startTime: e.startTime,
             endTime: e.endTime,
             dayOfWeek: e.dayOfWeek,
-            doctorId: formvalues.doctorId ?? 0,
-            locationId: formvalues.locationId ?? 0,
-            serviceId: formvalues.serviceId ?? 0
+            doctorId: formValues.doctorId ?? 0,
+            locationId: formValues.locationId ?? 0,
+            serviceId: serviceId
         }));
         this.workingHoursToBeSent = result;
     }
@@ -216,7 +237,6 @@ export class WorkingHoursComponent implements OnInit {
         this.allWorkingHours = [];
         this._workingHoursService.getWorkingHours().subscribe({
             next: (res: any[]) => {
-                debugger;
                 this.groupWorkingHours(res);
             },
             error: (error: any) => {
@@ -277,14 +297,22 @@ export class WorkingHoursComponent implements OnInit {
         }, []);
 
         this.allWorkingHours = grouped;
+        this.expandedRows = grouped.reduce((acc, curr) => {
+            if (curr.locations && curr.locations.length > 0) {
+                acc[curr.label] = true;
+            }
+            return acc;
+        }, {});
         console.log(this.allWorkingHours);
     }
 
     //here is the function needed to add a new working hour
     addNewWorkingHour(): void {
         const body = this.workingHoursToBeSent;
+        console.log(body);
         this._workingHoursService.addWorkingHours(body).subscribe({
             next: (res: any) => {
+                debugger;
                 this.getAllAddedWorkingHours();
                 this.hideDialog();
                 this.messageService.add({
@@ -304,24 +332,61 @@ export class WorkingHoursComponent implements OnInit {
     }
 
     //here is the function needed to update the selected working hour
-    updateTheSelectedWorkingHour(): void {}
+    updateTheSelectedWorkingHour(): void {
+        const updateRequests = this.workingHoursToBeSent.map((slot) => {
+            const existingSlot = this.workingHoursToEdit.find((s) => s.dayOfWeek === slot.dayOfWeek);
+            const slotId = existingSlot ? existingSlot.id : null;
+            return this._workingHoursService.updateWorkingHour(slot);
+        });
+
+        forkJoin(updateRequests).subscribe({
+            next: () => {
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Working hours updated successfully' });
+                this.getAllAddedWorkingHours();
+                this.hideDialog();
+            },
+            error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update working hours' })
+        });
+    }
 
     //here is the function needed to delete the selected working hour
     deleteSelectedWorkingHour(workingHour: any, item: any): void {
         this.confirmationService.confirm({
-            message: `Are you sure you want to delete the selected working hour for day "${workingHour.label}" for doctor ${item.doctor.nameEn} with start time ${item.startTime} and end time ${item.endTime}?`,
+            message: `Are you sure you want to delete all working hours for Dr. ${item.doctorNameEn} on ${workingHour.label}?`,
             header: 'Confirm Deletion',
             icon: 'pi pi-exclamation-triangle',
             acceptButtonStyleClass: 'p-button-success',
             rejectButtonStyleClass: 'p-button-danger',
 
             accept: () => {
-                this._workingHoursService.deleteWorkingHour(item.id).subscribe({
+                const deleteRequests = item.timeSlots.map((slot: any) => this._workingHoursService.deleteWorkingHour(slot.id));
+
+                forkJoin(deleteRequests).subscribe({
                     next: () => {
-                        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Selected working time deleted successfully' });
+                        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'All working hours for the day deleted successfully' });
                         this.getAllAddedWorkingHours();
                     },
-                    error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete working time' })
+                    error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete working hours' })
+                });
+            }
+        });
+    }
+
+    //here is the function needed to delete a single time slot
+    deleteSingleTimeSlot(workingHour: any, item: any, slot: any): void {
+        this.confirmationService.confirm({
+            message: `Are you sure you want to delete the time slot from ${slot.startTime} to ${slot.endTime} on ${workingHour.label} for Dr. ${item.doctorNameEn}?`,
+            header: 'Confirm Deletion',
+            icon: 'pi pi-exclamation-triangle',
+            acceptButtonStyleClass: 'p-button-success',
+            rejectButtonStyleClass: 'p-button-danger',
+            accept: () => {
+                this._workingHoursService.deleteWorkingHour(slot.id).subscribe({
+                    next: () => {
+                        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Time slot deleted successfully' });
+                        this.getAllAddedWorkingHours();
+                    },
+                    error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete time slot' })
                 });
             }
         });
@@ -329,25 +394,36 @@ export class WorkingHoursComponent implements OnInit {
 
     //here is the function needed to set the choosed working hour row needed to update
     selectedDayOfWeek: any = {};
-    editSelectedWorkingHour(workingHour: any, item: any): void {
+    editSelectedWorkingHour(workingHour: any, item: any, location: any): void {
         this.showWorkingHoursDialog = true;
         this.isEdit = true;
+
+        // Find the correct serviceId format for TreeSelect
+        const serviceNode = this.findServiceNode(this.serviceCategories, item.serviceId);
+
         this.workingHoursForm.patchValue({
-            id: item.id,
-            serviceId: item.serviceId,
+            serviceId: serviceNode,
             doctorId: item.doctorId,
-            locationId: item.locationId
+            locationId: location.locationId
         });
         this.selectedDayOfWeek = Number(workingHour.value);
 
-        item.timeSlots.forEach((slots: any) => {
-            this.workingHoursToEdit = [
-                {
-                    dayOfWeek: Number(workingHour.value),
-                    startTime: slots.startTime,
-                    endTime: slots.endTime
+        this.workingHoursToEdit = item.timeSlots.map((slot: any) => ({ ...slot, dayOfWeek: Number(workingHour.value) }));
+    }
+
+    findServiceNode(nodes: any[], serviceId: number): any {
+        for (const node of nodes) {
+            const currentId = node.key ? +node.key.split('-')[1] : 0;
+            if (node.key?.startsWith('srv-') && currentId === serviceId) {
+                return node;
+            }
+            if (node.children) {
+                const found = this.findServiceNode(node.children, serviceId);
+                if (found) {
+                    return found;
                 }
-            ];
-        });
+            }
+        }
+        return null;
     }
 }

@@ -94,7 +94,7 @@ export class AddUserComponent implements OnInit {
                 this.allUserTypes = users.data;
             },
             error: (err) => {
-                this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch users types.' });
+                this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
             }
         });
     }
@@ -168,7 +168,7 @@ export class AddUserComponent implements OnInit {
                 this.allUsers = users.data;
             },
             error: (err) => {
-                this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch users.' });
+                this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
             }
         });
     }
@@ -196,7 +196,7 @@ export class AddUserComponent implements OnInit {
                 this._messageService.add({ severity: 'success', summary: 'Success', detail: 'User created successfully.' });
             },
             error: (err) => {
-                this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to create user.' });
+                this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
             }
         });
     }
@@ -232,7 +232,7 @@ export class AddUserComponent implements OnInit {
                 this._messageService.add({ severity: 'success', summary: 'Success', detail: 'User updated successfully.' });
             },
             error: (err) => {
-                this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update user.' });
+                this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
             }
         });
     }
@@ -248,8 +248,7 @@ export class AddUserComponent implements OnInit {
                 this._messageService.add({ severity: 'success', summary: 'Success', detail: 'User deleted successfully.' });
             },
             error: (err) => {
-                this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete user.' });
-                console.error(err);
+                this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
             }
         });
     }
@@ -263,7 +262,7 @@ export class AddUserComponent implements OnInit {
                 this.isEdit = true;
                 this.userDialog = true;
             },
-            error: (err) => this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch user details.' })
+            error: (err) => this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message })
         });
     }
 
