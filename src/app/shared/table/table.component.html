@@ -1,21 +1,29 @@
 <!-- Main Table -->
 <p-card>
-    <p-table #dt [value]="data" [columns]="headers" [loading]="loading" [rows]="rows" [scrollable]="scrollable"
-        [scrollHeight]="scrollHeight" [responsive]="responsive" [selectionMode]="showCheckbox ? 'multiple' : null"
-        [(selection)]="selectedItems" (selectionChange)="onSelectionChange($event)">
-
+    <p-table
+        #dt
+        [value]="data"
+        [columns]="headers"
+        [loading]="loading"
+        [rows]="rows"
+        [scrollable]="scrollable"
+        [scrollHeight]="scrollHeight"
+        [responsive]="responsive"
+        [selectionMode]="showCheckbox ? 'multiple' : null"
+        [(selection)]="selectedItems"
+        (selectionChange)="onSelectionChange($event)"
+    >
         <!-- Table Header -->
         <ng-template pTemplate="header">
             <tr>
                 <th *ngIf="showCheckbox" style="width: 3rem">
                     <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                 </th>
-                @for(col of headers; track col){
-                <!-- Data Columns -->
-                <th [style.width]="col.width" [pSortableColumn]="col.sortable ? col.field : undefined"
-                    class="text-center">
-                    {{col.label}}
-                </th>
+                @for (col of headers; track col) {
+                    <!-- Data Columns -->
+                    <th [style.width]="col.width" [pSortableColumn]="col.sortable ? col.field : undefined" class="text-center">
+                        {{ col.label }}
+                    </th>
                 }
                 <th *ngIf="showSpotsColumn" class="text-center">Spots</th>
                 <!-- Actions Column -->
@@ -25,7 +33,7 @@
 
         <!-- Table Body -->
         <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
-            <tr>
+            <tr [ngClass]="{ 'bg-light': row.showDetails }">
                 <td *ngIf="showCheckbox">
                     <p-tableCheckbox [value]="row"></p-tableCheckbox>
                 </td>
@@ -33,28 +41,20 @@
                 <td *ngFor="let col of headers" class="text-center">
                     <ng-container [ngSwitch]="col.type">
                         <ng-container *ngSwitchCase="'image'">
-                            <img *ngIf="row[col.field]"
-                                [src]="imgUrl + row[col.field] ? imgUrl + row[col.field] : '../../../assets/logo-new2-transperant.png'"
-                                alt="img" class="w-12 h-12 object-cover rounded-full inline-block" />
+                            <img *ngIf="row[col.field]" [src]="imgUrl + row[col.field] ? imgUrl + row[col.field] : '../../../assets/logo-new2-transperant.png'" alt="img" class="w-12 h-12 object-cover rounded-full inline-block" />
                         </ng-container>
 
                         <ng-container *ngSwitchCase="'date'">
-                            {{ row[col.field] | date:'medium' }}
+                            {{ row[col.field] | date: 'medium' }}
                         </ng-container>
                         <ng-container *ngSwitchCase="'custom'">
-                            <ng-container *ngTemplateOutlet="col.customTemplate; context: { $implicit: row }">
-                            </ng-container>
+                            <ng-container *ngTemplateOutlet="col.customTemplate; context: { $implicit: row }"> </ng-container>
                         </ng-container>
                         <ng-container *ngSwitchCase="'boolean'">
-                            {{
-                                    col.field === 'isElite'
-      ? (row[col.field] ? 'Elite super star' : 'Normal super star')
-      : (row[col.field] ? 'Yes' : 'No')
-                            }}
+                            {{ col.field === 'isElite' ? (row[col.field] ? 'Elite super star' : 'Normal super star') : row[col.field] ? 'Yes' : 'No' }}
                         </ng-container>
                         <ng-container *ngSwitchCase="'link'">
-                            <a (click)="openFile(row[col.field])" [href]="row[col.field]" rel="noopener noreferrer"
-                                class="text-blue-500 hover:underline">
+                            <a (click)="openFile(row[col.field])" [href]="row[col.field]" rel="noopener noreferrer" class="text-blue-500 hover:underline">
                                 {{ row[col.field] }}
                             </a>
                         </ng-container>
@@ -63,42 +63,28 @@
                         </ng-container>
                     </ng-container>
                 </td>
-                <td *ngIf="showSpotsColumn" class="text-center">
-                    <div class="flex gap-2 justify-center">
-                        <p-inputNumber *ngFor="let spot of createSpotsArray(spotsPerRow); let i = index"
-                            [disabled]="!selectedItems.includes(row)" [ngModel]="row.spots ? row.spots[i] : 1"
-                            (ngModelChange)="onSpotChange(row, i, $event)"
-                            [inputStyle]="{ width: '48px', textAlign: 'center' }" mode="decimal" min="0">
-                        </p-inputNumber>
-                    </div>
-                </td>
+
                 <!-- Actions Column -->
                 <td class="text-center" *ngIf="showActions || actions.length > 0">
                     <div class="flex justify-center gap-2">
                         <ng-container *ngIf="showActions">
-                            <button *ngIf="showEditButton" pButton icon="pi pi-pencil"
-                                class="p-button-rounded p-button-warning p-button-sm" (click)="onEdit(row)"></button>
-                            <button *ngIf="showDeleteButton" pButton icon="pi pi-trash"
-                                class="p-button-rounded p-button-danger p-button-sm" (click)="onDelete(row)"></button>
+                            <button *ngIf="showEditButton" pButton icon="pi pi-pencil" class="p-button-rounded p-button-warning p-button-sm" (click)="onEdit(row)"></button>
+                            <button *ngIf="showDeleteButton" pButton icon="pi pi-trash" class="p-button-rounded p-button-danger p-button-sm" (click)="onDelete(row)"></button>
 
-                            @if(isAddDetails){
-                            <button pButton icon="pi pi-plus" class="p-button-rounded p-button-info p-button-sm"
-                                (click)="onAddDetails(row)"></button>
+                            @if (isAddDetails) {
+                                <button pButton icon="pi pi-plus" class="p-button-rounded p-button-info p-button-sm" (click)="onAddDetails(row)"></button>
                             }
 
-                            @if(isShowDetails){
-                            <button pButton icon="pi pi-eye" class="p-button-rounded p-button-success p-button-sm"
-                                (click)="onViewDetails(row)"></button>
+                            @if (isShowDetails) {
+                                <button pButton icon="pi pi-eye" class="p-button-rounded p-button-success p-button-sm" (click)="onViewDetails(row)"></button>
                             }
-
                         </ng-container>
                     </div>
                 </td>
             </tr>
             <!-- Details Row -->
             <tr *ngIf="row.showDetails">
-                <td
-                    [attr.colspan]="headers.length + (showCheckbox ? 1 : 0) + (showSpotsColumn ? 1 : 0) + (showActions || actions.length > 0 ? 1 : 0) + (isAddDetails || isShowDetails ? 1 : 0)">
+                <td [attr.colspan]="headers.length + (showCheckbox ? 1 : 0) + (showSpotsColumn ? 1 : 0) + (showActions || actions.length > 0 ? 1 : 0) + (isAddDetails || isShowDetails ? 1 : 0)">
                     <div class="p-3">
                         <ng-container *ngTemplateOutlet="detailsTemplate; context: { $implicit: row }"></ng-container>
                     </div>
@@ -109,9 +95,7 @@
         <!-- Loading Template -->
         <ng-template pTemplate="loadingbody">
             <tr>
-                <td colspan="100%" class="text-center">
-                    Loading... Please wait.
-                </td>
+                <td colspan="100%" class="text-center">Loading... Please wait.</td>
             </tr>
         </ng-template>
 

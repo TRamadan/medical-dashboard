@@ -1,133 +1,127 @@
 <p-toast></p-toast>
-<p-confirmDialog [style]="{width: '450px'}"></p-confirmDialog>
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
 
 <p-toolbar styleClass="mb-6">
-  <ng-template #start>
-    <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openAddWorkingHours()" />
-  </ng-template>
+    <ng-template #start>
+        <p-button icon="pi pi-plus" raised label="New" class="mr-2" (onClick)="openAddWorkingHours()" />
+    </ng-template>
 
-  <ng-template #end>
-    <p-button label="Export" icon="pi pi-upload" severity="secondary" />
-  </ng-template>
+    <ng-template #end>
+        <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+    </ng-template>
 </p-toolbar>
 
 <p-card>
-  <div class="flex items-center justify-between mb-2">
-    <h5 class="m-0">Manage Working hours</h5>
-  </div>
+    <div class="flex items-center justify-between mb-2">
+        <h5 class="m-0">Manage Working hours</h5>
+    </div>
 
-  <app-table [headers]="workingHoursHeader" [data]="allWorkingHours" [paginator]="true" [rows]="10"
-    [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true"
-    [globalFilterPlaceholder]="'Search...'" [showActions]="true" [isShowDetails]="true">
-    <ng-template #details let-workingHour>
-      <div class="dashboard-layout">
-        <main class="main-content">
-          <div class="schedules-container">
-            <!-- The `workingHour` variable here represents the data for the expanded row (a single day's schedule) -->
-            <h2 class="day-title">{{ workingHour.label }}</h2>
+    <app-table
+        [headers]="workingHoursHeader"
+        [data]="allWorkingHours"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        [rowsPerPageOptions]="[10, 20, 30]"
+        [showGlobalFilter]="true"
+        [globalFilterPlaceholder]="'Search...'"
+        [showActions]="true"
+        [isShowDetails]="true"
+    >
+        <ng-template #details let-workingHour>
+            <div class="dashboard-layout">
+                <main class="main-content">
+                    <div class="schedules-container">
+                        <!-- The `workingHour` variable here represents the data for the expanded row (a single day's schedule) -->
+                        <h2 class="day-title">{{ workingHour.label }}</h2>
 
-            <!-- Loop through locations for the selected day -->
-            @for (location of workingHour.locations; track location.locationId) {
-            <h3 class="location-title">{{ location.locationNameEn }} Branch</h3>
+                        <!-- Loop through locations for the selected day -->
+                        @for (location of workingHour.locations; track location.locationId) {
+                            <h3 class="location-title">{{ location.locationNameEn }} Branch</h3>
 
-            <!-- Loop through doctor + service groups for that location -->
-            @for (group of location.items; track group.doctorNameEn + group.serviceNameEn) {
-            <div class="coach-schedule-card">
-              <div class="coach-header">
-                <div class="coach-info">
-                  <h3 class="font-semibold">Dr. {{ group.doctorNameEn }}</h3>
-                  <p class="coach-branch">{{ location.locationNameEn }} Branch</p>
-                  <p class="coach-branch">{{ group.serviceNameEn }}</p>
-                </div>
-                <div class="coach-actions">
-                  <!-- Pass the whole group to edit/delete all its time slots -->
-                  <button class="edit-schedule-btn" (click)="editSelectedWorkingHour(workingHour, group)">
-                    Edit Schedule
-                  </button>
-                  <button class="delete-schedule-btn" (click)="deleteSelectedWorkingHour(workingHour, group)">
-                    Delete
-                  </button>
-                </div>
-              </div>
+                            <!-- Loop through doctor + service groups for that location -->
+                            @for (group of location.items; track group.doctorNameEn + group.serviceNameEn) {
+                                <div class="coach-schedule-card">
+                                    <div class="coach-header">
+                                        <div class="coach-info">
+                                            <h3 class="font-semibold">Dr. {{ group.doctorNameEn }}</h3>
+                                            <p class="coach-branch">{{ location.locationNameEn }} Branch</p>
+                                            <p class="coach-branch">{{ group.serviceNameEn }}</p>
+                                        </div>
+                                        <div class="coach-actions">
+                                            <!-- Pass the whole group to edit/delete all its time slots -->
+                                            <button class="edit-schedule-btn" (click)="editSelectedWorkingHour(workingHour, group)">Edit Schedule</button>
+                                            <button class="delete-schedule-btn" (click)="deleteSelectedWorkingHour(workingHour, group)">Delete</button>
+                                        </div>
+                                    </div>
 
-              <!-- Loop through time slots for that group -->
-              <div class="schedule-grid">
-                @for (slot of group.timeSlots; track slot.id) {
-                <div class="time-slot flex justify-between items-center">
-                  <div class="slot-time">
-                    <strong>{{ slot.startTime }}</strong> - <strong>{{ slot.endTime }}</strong>
-                  </div>
-                </div>
-                }
-              </div>
-
+                                    <!-- Loop through time slots for that group -->
+                                    <div class="schedule-grid">
+                                        @for (slot of group.timeSlots; track slot.id) {
+                                            <div class="time-slot flex justify-between items-center">
+                                                <div class="slot-time">
+                                                    <strong>{{ slot.startTime }}</strong> - <strong>{{ slot.endTime }}</strong>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </main>
             </div>
-            }
-            }
-          </div>
-        </main>
-      </div>
-    </ng-template>
-
-  </app-table>
+        </ng-template>
+    </app-table>
 </p-card>
 
 <!-- here is the dialog needed to add a new or edit the selected working hour-->
-<p-dialog [(visible)]="showWorkingHoursDialog" [header]="isEdit ? 'Update working hour' : 'Add new working hour'"
-  [modal]="true" [dismissableMask]="true" styleClass="p-fluid" [style]="{ width: '100vh', maxWidth: '60rem' }">
+<p-dialog [(visible)]="showWorkingHoursDialog" [header]="isEdit ? 'Update working hour' : 'Add new working hour'" [modal]="true" [dismissableMask]="true" styleClass="p-fluid" [style]="{ width: '100vh', maxWidth: '60rem' }">
+    @if (!isDelete) {
+        <form [formGroup]="workingHoursForm">
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label for="serviceId">Service</label>
+                    <p-treeSelect inputId="serviceId" appendTo="body" [filter]="true" [filterInputAutoFocus]="true" [options]="serviceCategories" placeholder="Select Service" formControlName="serviceId" styleClass="w-full" />
+                    @if (workingHoursForm.get('serviceId')?.invalid && workingHoursForm.get('serviceId')?.touched) {
+                        <div class="text-danger small mt-1">Service is required.</div>
+                    }
+                </div>
 
-  @if(!isDelete){
-  <form [formGroup]="workingHoursForm">
-    <div class="row g-3">
-      <div class="col-12 col-md-6">
-        <label for="serviceId">Service</label>
-        <p-select inputId="serviceId" [filter]="true" appendTo="body" [options]="serviceCategories" optionLabel="name"
-          optionValue="id" appendTo="body" formControlName="serviceId" styleClass="w-full" />
-        @if(workingHoursForm.get('serviceId')?.invalid && workingHoursForm.get('serviceId')?.touched){
-        <div class="text-danger small mt-1">Service is required.</div>
-        }
-      </div>
+                <div class="col-12 col-md-6">
+                    <label for="locationId">Locations</label>
+                    <p-select inputId="locationId" [filter]="true" appendTo="body" [options]="locations" optionLabel="name" optionValue="id" appendTo="body" formControlName="locationId" styleClass="w-full" />
+                    @if (workingHoursForm.get('locationId')?.invalid && workingHoursForm.get('locationId')?.touched) {
+                        <div class="text-danger small mt-1">Location is required.</div>
+                    }
+                </div>
 
-      <div class="col-12 col-md-6">
-        <label for="locationId">Locations</label>
-        <p-select inputId="locationId" [filter]="true" appendTo="body" [options]="locations" optionLabel="name"
-          optionValue="id" appendTo="body" formControlName="locationId" styleClass="w-full" />
-        @if(workingHoursForm.get('locationId')?.invalid && workingHoursForm.get('locationId')?.touched){
-        <div class="text-danger small mt-1">
-          Location is required.</div>
-        }
-      </div>
+                <div class="col-12 col-md-6">
+                    <label for="doctorId">Users</label>
+                    <p-select inputId="doctorId" [filter]="true" appendTo="body" [options]="allUsers" optionLabel="name" optionValue="id" appendTo="body" formControlName="doctorId" styleClass="w-full" />
 
-      <div class="col-12 col-md-6">
-        <label for="doctorId">Users</label>
-        <p-select inputId="doctorId" [filter]="true" appendTo="body" [options]="allUsers" optionLabel="name"
-          optionValue="id" appendTo="body" formControlName="doctorId" styleClass="w-full" />
+                    @if (workingHoursForm.get('doctorId')?.invalid && workingHoursForm.get('doctorId')?.touched) {
+                        <div class="text-danger small mt-1">Doctor or coach is required.</div>
+                    }
+                </div>
+            </div>
 
-        @if(workingHoursForm.get('doctorId')?.invalid && workingHoursForm.get('doctorId')?.touched){
-        <div class="text-danger small mt-1">Doctor or coach is required.</div>
-        }
-      </div>
-    </div>
+            <div class="row my-5">
+                <div class="col-12 text-center">
+                    <p class="fw-bold">Assign start time and end time for each day</p>
+                </div>
+            </div>
 
-    <div class="row my-5">
-      <div class="col-12 text-center">
-        <p class="fw-bold">
-          Assign start time and end time for each day
-        </p>
-      </div>
-    </div>
-    <div class="row g-3">
-      <app-assing-hours [selectedDayOfWeek]="selectedDayOfWeek" [workingHoursToEdit]="workingHoursToEdit"
-        (workingHoursChanged)="onWorkingHoursChanged($event)"></app-assing-hours>
-    </div>
+            <div class="row g-3">
+                <app-assing-hours [selectedDayOfWeek]="selectedDayOfWeek" [workingHoursToEdit]="workingHoursToEdit" (workingHoursChanged)="onWorkingHoursChanged($event)"></app-assing-hours>
+            </div>
+        </form>
+    }
 
-  </form>
-  }
-
-  <ng-template pTemplate="footer">
-    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-      <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog();" />
-      <p-button label="Save" [outlined]="true" severity="success" (onClick)="submitWorkingHours()" />
-    </div>
-  </ng-template>
+    <ng-template pTemplate="footer">
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog()" />
+            <p-button label="Save" [outlined]="true" severity="success" (onClick)="submitWorkingHours()" />
+        </div>
+    </ng-template>
 </p-dialog>

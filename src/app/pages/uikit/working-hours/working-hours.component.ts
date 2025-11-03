@@ -20,6 +20,7 @@ import { UserManangementService } from '../add-user/services/user-manangement.se
 import { WorkinghoursService } from './services/workinghours.service';
 import { ServicesService } from '../add-service/services/services.service';
 import { Menu } from 'primeng/menu';
+import { TreeSelectModule } from 'primeng/treeselect';
 import { ButtonModule } from 'primeng/button';
 import { MenuItem } from 'primeng/api';
 
@@ -28,7 +29,7 @@ import { MenuItem } from 'primeng/api';
     templateUrl: './working-hours.component.html',
     styleUrls: ['./working-hours.component.css'],
     providers: [MessageService, ConfirmationService],
-    imports: [Menu, ButtonModule, AccordionModule, Toast, ToolbarModule, TableModule, Dialog, DropdownModule, SelectModule, FormsModule, ReactiveFormsModule, Button, Card, TableComponent, AssingHoursComponent, ConfirmDialog]
+    imports: [Menu, ButtonModule, AccordionModule, Toast, ToolbarModule, TableModule, Dialog, DropdownModule, SelectModule, FormsModule, ReactiveFormsModule, Button, Card, TableComponent, AssingHoursComponent, ConfirmDialog, TreeSelectModule]
 })
 export class WorkingHoursComponent implements OnInit {
     showWorkingHoursDialog: boolean = false;
@@ -53,7 +54,7 @@ export class WorkingHoursComponent implements OnInit {
     allWorkingHours: any[] = [];
     locations: Location[] = [];
     allUsers: any[] = [];
-    serviceCategories: Services[] = [];
+    serviceCategories: any[] = [];
     workingHoursToBeSent: any[] = [];
     workingHoursToEdit: any[] = [];
 
@@ -172,17 +173,28 @@ export class WorkingHoursComponent implements OnInit {
     getAllServicesCategory(): void {
         this.serviceCategoryService.getServices().subscribe({
             next: (response: any) => {
-                this.serviceCategories = response.map((element: any) => {
-                    return {
-                        id: element.id,
-                        name: element.nameEn
-                    };
-                });
+                this.serviceCategories = response.data.map((category: any) => ({
+                    key: `cat-${category.id}`,
+                    label: category.nameEn,
+                    children: category.subServices.map((service: any) => this.mapServiceToTreeNode(service))
+                }));
             },
             error: () => {
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch Services' });
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to fetch Services'
+                });
             }
         });
+    }
+
+    mapServiceToTreeNode(service: any): any {
+        return {
+            key: `srv-${service.id}`,
+            label: service.nameEn, // or nameAr if you want Arabic
+            children: (service.subServices || []).map((sub: any) => this.mapServiceToTreeNode(sub))
+        };
     }
 
     //here is the function needed to get all added working hours from the child component

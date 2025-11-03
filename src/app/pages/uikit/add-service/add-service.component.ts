@@ -211,12 +211,12 @@ export class AddServiceComponent implements OnInit {
             this.serviceCategoryForm.markAllAsTouched();
             return;
         }
-        this.serviceCategoryForm.removeControl('id');
         const serviceData = this.serviceCategoryForm.value;
 
         if (this.isEditServiceMode) {
             this.updateService(serviceData);
         } else {
+            this.serviceCategoryForm.removeControl('id');
             this.createService(serviceData);
         }
     }
@@ -282,7 +282,7 @@ export class AddServiceComponent implements OnInit {
     }
 
     private updateService(serviceData: any): void {
-        this.servicesService.updateService(serviceData.id, serviceData).subscribe({
+        this.servicesService.updateService(serviceData).subscribe({
             next: () => {
                 this.messageService.add({
                     severity: 'success',
@@ -309,7 +309,7 @@ export class AddServiceComponent implements OnInit {
     getAllCategories(): void {
         this.serviceCategoryService.getServiceCategories().subscribe({
             next: (response: any) => {
-                this.data = response;
+                this.data = response.data;
             },
             error: () => {
                 this.messageService.add({
@@ -417,11 +417,39 @@ export class AddServiceComponent implements OnInit {
         this.isServiceDialog = true;
     }
 
+    editService(service: any, category: Servicecategory): void {
+        this.isEditServiceMode = true;
+        this.isNewServiceSubCategory = true;
+        this.selectedCategoryForService = category;
+        this.serviceCategoryForm.reset();
+
+        const formValues = {
+            ...service,
+            locationIds: service.locations?.map((loc: any) => loc.id) || [],
+            duration: service.duration,
+            idealtimeBefore: service.idealtimeBefore,
+            idealtimeAfter: service.idealtimeAfter
+        };
+
+        this.serviceCategoryForm.patchValue(formValues);
+        this.isServiceDialog = true;
+    }
+
     editSubService(service: any, category: Servicecategory): void {
         this.isEditServiceMode = true;
         this.isNewServiceSubCategory = true;
         this.selectedCategoryForService = category;
-        this.serviceCategoryForm.patchValue(service);
+        this.serviceCategoryForm.reset();
+
+        const formValues = {
+            ...service,
+            locationIds: service.locations?.map((loc: any) => loc.id) || [],
+            duration: service.duration,
+            idealtimeBefore: service.idealtimeBefore,
+            idealtimeAfter: service.idealtimeAfter
+        };
+
+        this.serviceCategoryForm.patchValue(formValues);
         this.isServiceDialog = true;
     }
 

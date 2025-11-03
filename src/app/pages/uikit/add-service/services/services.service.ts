@@ -28,8 +28,8 @@ export class ServicesService {
     /**
      * UPDATE: Updates an existing service by its ID.
      */
-    updateService(id: number, serviceUpdate: Services): Observable<Services> {
-        return this.http.put<Services>(`${this.apiUrl}/${id}`, serviceUpdate);
+    updateService(serviceUpdate: Services): Observable<Services> {
+        return this.http.put<Services>(`${this.apiUrl}`, serviceUpdate);
     }
 
     /**

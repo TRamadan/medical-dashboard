@@ -1,33 +1,25 @@
-import { Component, effect, EventEmitter, Input, OnInit, Output, signal, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges, signal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, FormArray, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
-import { AssignedServicesStateService } from '../../add-user/services/assigned-services-state.service';
 import { AccordionModule } from 'primeng/accordion';
 import { SelectModule } from 'primeng/select';
+import { CheckboxModule } from 'primeng/checkbox';
 import { Button } from 'primeng/button';
+
 @Component({
     selector: 'app-assing-hours',
     standalone: true,
     templateUrl: './assing-hours.component.html',
     styleUrls: ['./assing-hours.component.css'],
-    imports: [AccordionModule, FormsModule, ReactiveFormsModule, SelectModule, Button]
+    imports: [AccordionModule, FormsModule, ReactiveFormsModule, SelectModule, Button, CheckboxModule]
 })
 export class AssingHoursComponent implements OnInit {
     workingHoursForm!: FormGroup;
     @Input() selectedDayOfWeek!: number;
     @Input() workingHoursToEdit: any[] = [];
     @Output() workingHoursChanged = new EventEmitter<any[]>();
+
     durationOptions: { label: string; value: string }[] = [];
-
-    allLocations: any[] = [
-        { id: 1, name: 'Main Branch' },
-        { id: 2, name: 'Downtown Clinic' },
-        { id: 3, name: 'Uptown Center' }
-    ];
-    selectedLocation: number | null = null;
-
-    // allServices is now a signal for reactivity
-    allServices = signal<any[]>([]);
-    selectedService: number | null = null;
+    applyToAllDays: boolean = false;
 
     weekDays: any[] = [
         { label: 'Monday', value: '1', times: [] },
@@ -44,6 +36,7 @@ export class AssingHoursComponent implements OnInit {
     ngOnInit(): void {
         this.InitialiseFormArray();
         this.generateDurationOptions();
+
         this.workingHoursForm.valueChanges.subscribe(() => {
             const currentData = this.buildPayload();
             this.workingHoursChanged.emit(currentData);
@@ -63,7 +56,6 @@ export class AssingHoursComponent implements OnInit {
                     startTime: wh.startTime,
                     endTime: wh.endTime
                 });
-
                 dayWorkingHoursArray.push(group);
             });
         }
@@ -76,44 +68,14 @@ export class AssingHoursComponent implements OnInit {
         for (let i = 0; i < totalMinutes; i += 30) {
             const hours = Math.floor(i / 60);
             const minutes = i % 60;
-
             const formatted = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
 
-            this.durationOptions.push({
-                label: formatted,
-                value: formatted
-            });
+            this.durationOptions.push({ label: formatted, value: formatted });
         }
 
-        // Optional: include 00:00 again at the end (like your provided array)
         this.durationOptions.push({ label: '00:00', value: '00:00' });
     }
 
-    workingHourGroup(): FormGroup {
-        return this.fb.group(
-            {
-                startTime: ['', Validators.required],
-                endTime: ['', Validators.required]
-            },
-            { validators: this.startBeforeEndValidator }
-        );
-    }
-
-    startBeforeEndValidator(group: AbstractControl): ValidationErrors | null {
-        const start = group.get('startTime')?.value;
-        const end = group.get('endTime')?.value;
-
-        if (!start || !end) return null;
-
-        // Compare (assuming time is in "HH:mm" format)
-        if (start >= end) {
-            return { startAfterEnd: true };
-        }
-
-        return null;
-    }
-
-    // Updated form initialization with days structure
     InitialiseFormArray(): void {
         this.workingHoursForm = this.fb.group({
             days: this.fb.array(this.createDaysFormArray())
@@ -151,56 +113,50 @@ export class AssingHoursComponent implements OnInit {
         );
     }
 
-    // Updated to add working hour for specific day
     addWorkingHour(dayIndex: number) {
-        const day = this.weekDays[dayIndex];
         const dayWorkingHoursArray = this.getDayWorkingHoursArray(dayIndex);
-
-        dayWorkingHoursArray.push(this.createWorkingHourFormGroup(Number(day.value)));
+        dayWorkingHoursArray.push(this.createWorkingHourFormGroup(Number(this.weekDays[dayIndex].value)));
     }
 
     removeWorkingHour(dayIndex: number, workingHourIndex: number) {
-        const dayWorkingHoursArray = this.getDayWorkingHoursArray(dayIndex);
-        dayWorkingHoursArray.removeAt(workingHourIndex);
+        this.getDayWorkingHoursArray(dayIndex).removeAt(workingHourIndex);
     }
 
     getWorkingHourFormGroup(dayIndex: number, workingHourIndex: number): FormGroup {
-        const dayWorkingHoursArray = this.getDayWorkingHoursArray(dayIndex);
-        return dayWorkingHoursArray.at(workingHourIndex) as FormGroup;
+        return this.getDayWorkingHoursArray(dayIndex).at(workingHourIndex) as FormGroup;
     }
 
-    markFormGroupTouched(): void {
-        Object.keys(this.workingHoursForm.controls).forEach((key) => {
-            const control = this.workingHoursForm.get(key);
-            if (control instanceof FormGroup) {
-                this.markFormGroupTouched();
-            } else {
-                control?.markAsTouched();
+    startBeforeEndValidator(group: AbstractControl): ValidationErrors | null {
+        const start = group.get('startTime')?.value;
+        const end = group.get('endTime')?.value;
+        if (!start || !end) return null;
+        return start >= end ? { startAfterEnd: true } : null;
+    }
+
+    onTimeChanged(dayIndex: number, workingHourIndex: number): void {
+        if (!this.applyToAllDays) return;
+        const wh = this.getWorkingHourFormGroup(dayIndex, workingHourIndex).value;
+        if (wh.startTime && wh.endTime) {
+            this.copyWorkingHoursToAllDays(wh.startTime, wh.endTime);
+        }
+    }
+
+    copyWorkingHoursToAllDays(start: string, end: string): void {
+        (this.daysArray.controls as FormGroup[]).forEach((dayCtrl: FormGroup) => {
+            const workingHours = dayCtrl.get('workingHours') as FormArray;
+
+            // If a day has no working hour, add one first
+            if (workingHours.length === 0) {
+                workingHours.push(this.createWorkingHourFormGroup(1));
             }
+
+            workingHours.controls.forEach((whCtrl) => {
+                whCtrl.patchValue({ startTime: start, endTime: end }, { emitEvent: false });
+            });
         });
-    }
 
-    workingHours = signal<any[]>(
-        this.weekDays.map((day) => ({
-            day,
-            startTime: '15:00',
-            endTime: '00:00',
-            isAvailable: true,
-            locationId: null,
-            serviceIds: []
-        }))
-    );
-
-    getWorkingHour(index: number): any {
-        return this.workingHours()[index];
-    }
-
-    onAvailabilityChange(index: number, event: Event) {
-        const target = event.target as HTMLInputElement;
-        const currentHours = this.workingHours();
-        const updatedHours = [...currentHours];
-        updatedHours[index] = { ...updatedHours[index], isAvailable: target.checked };
-        this.workingHours.set(updatedHours);
+        const updatedData = this.buildPayload();
+        this.workingHoursChanged.emit(updatedData);
     }
 
     private buildPayload(): any[] {
