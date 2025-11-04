@@ -1,19 +1,18 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable, catchError, throwError } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AppointmentService {
-    baseUrl = '';
+    apiUrl = environment.apiUrl;
+    baseUrl = 'Appointments';
     constructor(private http: HttpClient) {}
 
-    /**
-     * Developer : Eng/Tarek Ahmed Ramadan
-     * Created Date : 1/6/2025
-     * Purpose : This funcion call an endpoint that fetch all added appointments
-     */
-    getAllAppointments() {
-        return this.http.get('');
+    //here is the function needed to get all added apointments
+    getAddedApointments() {
+        return this.http.get(this.apiUrl + this.baseUrl);
     }
 }

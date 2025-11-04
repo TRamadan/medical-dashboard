@@ -1,0 +1,116 @@
+<div class="container-fluid px-3 px-md-4">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="text-center mb-4 mb-md-5">
+                <h2 class="display-6 fw-bold text-dark mb-3">Patient Information</h2>
+                <p class="lead text-muted">Please fill out the form below to complete your booking.</p>
+            </div>
+
+            <form [formGroup]="patientForm" novalidate>
+                <div class="card shadow-sm mb-4 border-0">
+                    <div class="card-header text-white border-0">
+                        <h5 class="card-title mb-0 text-dark">Personal Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                <label for="firstName" class="form-label fw-semibold"> First Name <span class="text-danger">*</span> </label>
+                                <input type="text" id="firstName" class="form-control" [class.is-invalid]="isFieldInvalid('firstName')" formControlName="firstName" placeholder="Enter your first name" />
+                                <div class="invalid-feedback" *ngIf="isFieldInvalid('firstName')">
+                                    {{ getFieldError('firstName') }}
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="lastName" class="form-label fw-semibold"> Last Name <span class="text-danger">*</span> </label>
+                                <input type="text" id="lastName" class="form-control" [class.is-invalid]="isFieldInvalid('lastName')" formControlName="lastName" placeholder="Enter your last name" />
+                                <div class="invalid-feedback" *ngIf="isFieldInvalid('lastName')">
+                                    {{ getFieldError('lastName') }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Fields Row -->
+                        <div class="row mb-3">
+                            <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                <label for="email" class="form-label fw-semibold"> Email <span class="text-danger">*</span> </label>
+                                <div class="input-group">
+                                    <input type="email" id="email" class="form-control" [class.is-invalid]="isFieldInvalid('email')" formControlName="email" placeholder="Enter your email" />
+                                    <div class="invalid-feedback" *ngIf="isFieldInvalid('email')">
+                                        {{ getFieldError('email') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="phone" class="form-label fw-semibold"> Phone <span class="text-danger">*</span> </label>
+                                <div class="input-group">
+                                    <input type="tel" id="phone" class="form-control" [class.is-invalid]="isFieldInvalid('phoneNumber')" formControlName="phoneNumber" placeholder="Enter your phone number" />
+                                    <div class="invalid-feedback" *ngIf="isFieldInvalid('phoneNumber')">
+                                        {{ getFieldError('phoneNumber') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Date of Birth and Gender Row -->
+                        <div class="row mb-3">
+                            <div class="col-12 col-md-6 mb-3 mb-md-0">
+                                <label for="dateOfBirth" class="form-label fw-semibold"> Date of Birth <span class="text-danger">*</span> </label>
+                                <div class="input-group">
+                                    <input type="date" id="dateOfBirth" class="form-control" [class.is-invalid]="isFieldInvalid('dateOfBirth')" formControlName="dateOfBirth" />
+                                    <div class="invalid-feedback" *ngIf="isFieldInvalid('dateOfBirth')">
+                                        {{ getFieldError('dateOfBirth') }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="gender" class="form-label fw-semibold"> Gender <span class="text-danger">*</span> </label>
+                                <select id="gender" class="form-select" [class.is-invalid]="isFieldInvalid('gender')" formControlName="gender">
+                                    <option value="">Select Gender</option>
+                                    <option selected value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>
+                                <div class="invalid-feedback" *ngIf="isFieldInvalid('gender')">
+                                    {{ getFieldError('gender') }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Contact -->
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <label for="emergencyContact" class="form-label fw-semibold"> Emergency Contact </label>
+                                <input type="text" id="emergencyContact" class="form-control" formControlName="emergencyContact" placeholder="Enter emergency contact" />
+                            </div>
+                            <div class="col-6">
+                                <label for="favoriteSport" class="form-label fw-semibold"> Favorite Sport </label>
+                                <input type="text" id="favoriteSport" class="form-control" formControlName="favoriteSport" placeholder="Enter favorite sport" />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <label> Interested service </label>
+                                <ng-select [searchable]="true" [clearable]="true" formControlName="interestedServiceId">
+                                    @for (service of services; track $index) {
+                                        <ng-option> {{ service.nameEn }} </ng-option>
+                                    }
+                                </ng-select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medical History Card -->
+                <div class="card shadow-sm mb-4 border-0">
+                    <div class="card-header border-0">
+                        <h5 class="card-title mb-0 text-dark">Medical History</h5>
+                    </div>
+                    <div class="card-body">
+                        <label for="medicalHistory" class="form-label fw-semibold"> Please provide any relevant medical history information: </label>
+                        <textarea id="medicalHistory" class="form-control" formControlName="medicalHistory" rows="4"></textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

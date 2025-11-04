@@ -18,6 +18,8 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TableColumn, TableComponent } from '../../../shared/table/table.component';
 import { Appointment } from './models/appointment';
+import { BookingFormComponent } from './booking-form/booking-form.component';
+import { AppointmentService } from './services/appointment.service';
 @Component({
     selector: 'app-appointments',
     standalone: true,
@@ -38,7 +40,8 @@ import { Appointment } from './models/appointment';
         InputIconModule,
         IconFieldModule,
         ConfirmDialogModule,
-        TableComponent
+        TableComponent,
+        BookingFormComponent
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './appointments.component.html',
@@ -50,8 +53,10 @@ export class AppointmentsComponent implements OnInit {
     tableHeaders: TableColumn[] = [];
     tableActions: any[] = [];
     globalFilterFields: string[] = [];
+    displayNewAppointmentDialog: boolean = false;
 
     constructor(
+        private _appointmentService: AppointmentService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
     ) {}
@@ -69,11 +74,13 @@ export class AppointmentsComponent implements OnInit {
     getAllAppointement(): void {}
     initializeTable() {
         this.tableHeaders = [
-            { field: 'id', label: 'Session ID', type: 'text' },
-            { field: 'client', label: 'Client Name', type: 'text' },
-            { field: 'employee', label: 'Assigned To', type: 'text' },
-            { field: 'service', label: 'Service', type: 'text' },
-            { field: 'datetime', label: 'Date & Time', type: 'text' },
+            { field: 'id', label: 'Appointment ID', type: 'text' },
+            { field: 'patientNameEn', label: 'Client Name', type: 'text' },
+            { field: 'doctorNameEn', label: 'Assigned To', type: 'text' },
+            { field: 'serviceNameEn', label: 'Service', type: 'text' },
+            { field: 'locationNameEn', label: 'Location', type: 'text' },
+            { field: 'start time', label: 'Date & Time', type: 'text' },
+            { field: 'end time', label: 'Date & Time', type: 'text' },
             { field: 'status', label: 'Status', type: 'text' }
         ];
         this.tableHeaders.forEach((h) => this.globalFilterFields.push(h.field));
@@ -86,12 +93,9 @@ export class AppointmentsComponent implements OnInit {
     }
 
     getAllAppointments() {
-        // this.allAppointments.set([
-        //     { id: '#S001', client: 'Alice Johnson', employee: 'John Smith', service: 'Hair Cut & Style', datetime: 'Dec 15, 2024 - 10:00 AM', status: 'scheduled' },
-        //     { id: '#S002', client: 'Bob Wilson', employee: 'Jane Doe', service: 'Massage Therapy', datetime: 'Dec 15, 2024 - 2:00 PM', status: 'completed' },
-        //     { id: '#S003', client: 'Carol Brown', employee: 'Mike Johnson', service: 'Facial Treatment', datetime: 'Dec 16, 2024 - 11:30 AM', status: 'rescheduled' },
-        //     { id: '#S004', client: 'David Lee', employee: 'John Smith', service: 'Beard Trim', datetime: 'Dec 16, 2024 - 3:00 PM', status: 'canceled' }
-        // ]);
+        this._appointmentService.getAddedApointments().subscribe((response: any) => {
+            this.allAppointments.set(response.data);
+        });
     }
 
     /**
@@ -103,5 +107,9 @@ export class AppointmentsComponent implements OnInit {
      */
     onGlobalFilter(table: Table, event: Event) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
+    }
+
+    openNewAppointmentDialog() {
+        this.displayNewAppointmentDialog = true;
     }
 }

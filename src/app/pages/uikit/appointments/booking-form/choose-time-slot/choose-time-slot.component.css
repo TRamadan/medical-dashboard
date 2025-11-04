@@ -1,0 +1,70 @@
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  text-align: center;
+}
+
+.calendar-day {
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.calendar-day:hover {
+  background-color: #e9ecef;
+}
+
+.calendar-day.unavailable {
+  color: #aaa;
+  cursor: not-allowed;
+  background-color: #f8f9fa;
+}
+
+.calendar-day.not-current {
+  color: #ccc;
+}
+
+.calendar-day.selected {
+  background-color: #70f4c3 !important; /* Bootstrap primary */
+  color: #1f2949 !important;
+  font-weight: 600;
+}
+
+.time-slot-btn{
+  padding: 3px;
+}
+
+.prev-btn, .next-btn {
+      background: #70f4c3;
+}
+
+
+.slider-wrapper {
+  transition: transform 0.4s ease-in-out;
+  width: 100%;
+}
+.slide {
+  min-width: 100%;
+}
+
+.time-slot-btn {
+  border: 1px solid #ccc;
+  transition: all 0.3s ease;
+  color: #333;
+}
+
+.selected-slot {
+  background-color: #70f4c3;
+  color: #1f2949;
+  font-weight: 600;
+}
+
+.unselected-slot {
+  background-color: #f8f9fa;
+}
+
+.time-slot-btn:hover {
+  transform: scale(1.03);
+}

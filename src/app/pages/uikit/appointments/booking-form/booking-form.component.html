@@ -1,0 +1,81 @@
+<div class="min-vh-100" style="background: linear-gradient(135deg, #f8f9ff 0%, #ffffff 100%)">
+    <div class="container-fluid px-3 px-md-4 py-4">
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <!-- Progress Indicator -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header bg-white">
+                        <div class="row align-items-center mb-3">
+                            <div class="col">
+                                <h5 class="card-title mb-0">Step {{ currentStep }} of {{ totalSteps }}</h5>
+                            </div>
+                            <div class="col-auto">
+                                <small class="text-muted">{{ progressRounded }}% Complete</small>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="progress mb-4" style="height: 8px">
+                            <div class="progress-bar bg-progress-bar" role="progressbar" [style.width.%]="progress" [attr.aria-valuenow]="progress" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+
+                        <!-- Step Indicators -->
+                        <div class="row text-center">
+                            @for (step of steps; track step; let i = $index) {
+                                <div class="col" [class.text-primary]="isStepActive(i)" [class.text-muted]="!isStepActive(i)">
+                                    <div
+                                        class="rounded-circle d-inline-flex align-items-center justify-content-center mb-2"
+                                        [class.bg-primary]="isStepActive(i)"
+                                        [class.text-white]="isStepActive(i)"
+                                        [class.bg-light]="!isStepActive(i)"
+                                        style="width: 32px; height: 32px; font-size: 14px; font-weight: 600; color: #131337 !important"
+                                    >
+                                        {{ i + 1 }}
+                                    </div>
+                                    <div class="small d-none d-sm-block">{{ step }}</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step Content -->
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        @if (currentStep === 1) {
+                            <app-location-service-form (choosedServiceAndLocation)="onServiceLocationSelected($event)"></app-location-service-form>
+                        }
+                        @if (currentStep === 2) {
+                            <app-choose-time-slot [choosedLocationService]="selectedServiceAndLocation" (timeSlotSelected)="onTimeSlotSelected($event)"></app-choose-time-slot>
+                        }
+                        @if (currentStep === 3) {
+                            <app-patient-form (createBooking)="createBooking($event)" [selectedSlot]="selectedTimeSlot" [selectedLocationAndService]="selectedServiceAndLocation"></app-patient-form>
+                        }
+                        @if (currentStep === 4) {
+                            <app-confirmation [confirmationData]="confirmationData"></app-confirmation>
+                        }
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                @if (currentStep < totalSteps) {
+                    <div class="row mt-4">
+                        <div class="col-6 d-flex justify-content-start">
+                            <button type="button" class="btn btn-outline-secondary d-flex align-items-center" (click)="handlePrevious()" [hidden]="currentStep === 1">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                <span class="d-none d-sm-inline">Previous</span>
+                            </button>
+                        </div>
+
+                        <div class="col-6 d-flex justify-content-end">
+                            <button type="button" class="btn btn-primary d-flex align-items-center" (click)="handleNextOrSubmit()" [disabled]="!canProceed()">
+                                <span class="d-none d-sm-inline me-2">{{ currentStep == 3 ? 'Create Booking' : 'Next' }}</span>
+                                <i [class]="currentStep == 3 ? 'fas fa-check-circle' : 'fas fa-arrow-right'"></i>
+                            </button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
