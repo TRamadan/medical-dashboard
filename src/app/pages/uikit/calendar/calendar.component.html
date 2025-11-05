@@ -1,66 +1,72 @@
-<section>
-    <div class="calendar-container">
-        <div class="calendar-header">
-            <h1 class="calendar-title">Appointments calendar</h1>
-        </div>
-        <div class="d-flex overflow-auto gap-2 p-3">
-            @for (employee of allEmployees; track employee) {
-                <div class="d-flex flex-column align-items-center text-center" style="min-width: 100px; flex-shrink: 0" (click)="getCoachTimeSlots(employee)">
-                    <img class="img-fluid img-responsive rounded-circle" [src]="employee.img" style="width: 80px; height: 80px; object-fit: cover" />
-                    <p class="mb-0 mt-2 small text-nowrap fw-bold h5">
-                        {{ employee.name }}
-                    </p>
-                </div>
-            }
-        </div>
-
-        <div class="calender-content">
-            <div class="stats-bar">
-                <div class="stat-item">
-                    <span class="stat-number">20</span>
-                    <div class="stat-label">Total Slots</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">5</span>
-                    <div class="stat-label">Booked</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">5</span>
-                    <div class="stat-label">Available</div>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-number">10</span>
-                    <div class="stat-label">Pending</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- here is the table needed to show the appointments-->
-        <p-table [value]="timeSlots" class="p-datatable-sm p-datatable-gridlines" [scrollable]="true" scrollHeight="600px">
-            <ng-template pTemplate="header">
-                <tr>
-                    <th>Time</th>
-                    <th *ngFor="let emp of allAppointments">{{ emp.name }}</th>
-                </tr>
-            </ng-template>
-
-            <ng-template pTemplate="body" let-time>
-                <tr>
-                    <td>{{ time }}</td>
-                    @for (emp of allAppointments; track emp) {
-                        <td class="text-center align-middle" [ngClass]="getStatusColor(getAppointment(emp, time)?.status)">
-                            <ng-container *ngIf="getAppointment(emp, time) as appt">
-                                <div class="fw-bold text-white">{{ appt.patient }}</div>
-                                <div>{{ appt.service }}</div>
-                                <div class="text-muted duration">{{ appt.time.from }} - {{ appt.time.to }}</div>
-                                <span class="badge mt-1" [ngClass]="getStatusColor(appt.status)">
-                                    {{ appt.status | titlecase }}
-                                </span>
-                            </ng-container>
-                        </td>
-                    }
-                </tr>
-            </ng-template>
-        </p-table>
+<section class="calendar-section container-fluid py-4">
+    <!-- Header -->
+    <div class="calendar-header mb-3 d-flex justify-content-between align-items-center">
+        <h2 class="fw-bold mb-0 text-success"><i class="pi pi-calendar mr-2"></i> Appointments Calendar</h2>
     </div>
+
+    <!-- Employees list -->
+    <div class="d-flex overflow-auto gap-3 p-3 bg-light rounded-3 shadow-sm mb-4">
+        @for (employee of allEmployees; track employee) {
+            <div class="d-flex flex-column align-items-center text-center employee-card" style="min-width: 100px; flex-shrink: 0" (click)="getCoachTimeSlots(employee)">
+                <img class="rounded-circle shadow-sm" [src]="employee.img" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #4caf50" />
+                <p class="mb-0 mt-2 small text-nowrap fw-semibold">{{ employee.name }}</p>
+                <span class="text-muted small">{{ employee.specialty }}</span>
+            </div>
+        }
+    </div>
+
+    <!-- Stats Bar -->
+    <div class="stats-bar d-flex flex-wrap justify-content-around align-items-center bg-white rounded-3 shadow-sm py-3 mb-4 text-center">
+        <div class="stat-item px-3">
+            <span class="stat-number text-success fw-bold fs-4 d-block">20</span>
+            <div class="stat-label text-muted">Total Slots</div>
+        </div>
+        <div class="stat-item px-3">
+            <span class="stat-number text-primary fw-bold fs-4 d-block">5</span>
+            <div class="stat-label text-muted">Booked</div>
+        </div>
+        <div class="stat-item px-3">
+            <span class="stat-number text-warning fw-bold fs-4 d-block">5</span>
+            <div class="stat-label text-muted">Available</div>
+        </div>
+        <div class="stat-item px-3">
+            <span class="stat-number text-danger fw-bold fs-4 d-block">10</span>
+            <div class="stat-label text-muted">Pending</div>
+        </div>
+    </div>
+
+    <!-- Calendar Table -->
+    <p-table [value]="timeSlots" class="p-datatable-sm p-datatable-gridlines shadow-sm rounded-3 overflow-hidden" [scrollable]="true" scrollHeight="600px">
+        <ng-template pTemplate="header">
+            <tr class="bg-success text-white">
+                <th class="text-center">Time</th>
+                <th *ngFor="let emp of allAppointments" class="text-center">
+                    {{ emp.name }}
+                </th>
+            </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-time>
+            <tr>
+                <td class="fw-bold text-center text-secondary">{{ time }}</td>
+                @for (emp of allAppointments; track emp) {
+                    <td class="text-center align-middle position-relative slot-cell" [ngClass]="getStatusColor(getAppointment(emp, time)?.status)">
+                        <ng-container *ngIf="getAppointment(emp, time) as appt; else emptySlot">
+                            <div class="fw-bold">{{ appt.patient }}</div>
+                            <div class="small text-light">{{ appt.service }}</div>
+                            <div class="text-white-50 small">{{ appt.time.from }} - {{ appt.time.to }}</div>
+                            <span class="badge mt-1 rounded-pill px-2 py-1" [ngClass]="getStatusColor(appt.status)">
+                                {{ appt.status | titlecase }}
+                            </span>
+                        </ng-container>
+
+                        <!-- Empty Slot -->
+                        <ng-template #emptySlot>
+                            <div class="text-muted small fst-italic bg-light border rounded-2 py-1 px-2" title="Available">Available</div>
+                        </ng-template>
+                    </td>
+                }
+            </tr>
+        </ng-template>
+    </p-table>
 </section>

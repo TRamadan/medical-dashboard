@@ -1,0 +1,906 @@
+[
+  {
+    "doctorId": 7,
+    "doctorNameAr": "أحمد محمد أحمد",
+    "doctorNameEn": null,
+    "slotTime": [
+      {
+        "from": "00:00:00",
+        "to": "00:30:00",
+        "appointment": {
+          "id": 13,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T00:00:00",
+          "endTime": "2025-11-03T01:30:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "00:30:00",
+        "to": "01:00:00",
+        "appointment": {
+          "id": 13,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T00:00:00",
+          "endTime": "2025-11-03T01:30:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "01:00:00",
+        "to": "01:30:00",
+        "appointment": {
+          "id": 13,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T00:00:00",
+          "endTime": "2025-11-03T01:30:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "01:30:00",
+        "to": "02:00:00",
+        "appointment": null
+      },
+      {
+        "from": "02:00:00",
+        "to": "02:30:00",
+        "appointment": null
+      },
+      {
+        "from": "02:30:00",
+        "to": "03:00:00",
+        "appointment": null
+      },
+      {
+        "from": "03:00:00",
+        "to": "03:30:00",
+        "appointment": null
+      },
+      {
+        "from": "03:30:00",
+        "to": "04:00:00",
+        "appointment": null
+      },
+      {
+        "from": "04:00:00",
+        "to": "04:30:00",
+        "appointment": null
+      },
+      {
+        "from": "04:30:00",
+        "to": "05:00:00",
+        "appointment": null
+      },
+      {
+        "from": "05:00:00",
+        "to": "05:30:00",
+        "appointment": null
+      },
+      {
+        "from": "05:30:00",
+        "to": "06:00:00",
+        "appointment": null
+      }
+    ]
+  },
+  {
+    "doctorId": 7,
+    "doctorNameAr": "أحمد محمد أحمد",
+    "doctorNameEn": null,
+    "slotTime": [
+      {
+        "from": "09:00:00",
+        "to": "09:30:00",
+        "appointment": null
+      },
+      {
+        "from": "09:30:00",
+        "to": "10:00:00",
+        "appointment": null
+      },
+      {
+        "from": "10:00:00",
+        "to": "10:30:00",
+        "appointment": null
+      },
+      {
+        "from": "10:30:00",
+        "to": "11:00:00",
+        "appointment": null
+      },
+      {
+        "from": "11:00:00",
+        "to": "11:30:00",
+        "appointment": null
+      },
+      {
+        "from": "11:30:00",
+        "to": "12:00:00",
+        "appointment": null
+      },
+      {
+        "from": "12:00:00",
+        "to": "12:30:00",
+        "appointment": null
+      },
+      {
+        "from": "12:30:00",
+        "to": "13:00:00",
+        "appointment": null
+      },
+      {
+        "from": "13:00:00",
+        "to": "13:30:00",
+        "appointment": null
+      },
+      {
+        "from": "13:30:00",
+        "to": "14:00:00",
+        "appointment": null
+      },
+      {
+        "from": "14:00:00",
+        "to": "14:30:00",
+        "appointment": null
+      },
+      {
+        "from": "14:30:00",
+        "to": "15:00:00",
+        "appointment": null
+      }
+    ]
+  },
+  {
+    "doctorId": 7,
+    "doctorNameAr": "أحمد محمد أحمد",
+    "doctorNameEn": null,
+    "slotTime": [
+      {
+        "from": "20:00:00",
+        "to": "20:30:00",
+        "appointment": null
+      },
+      {
+        "from": "20:30:00",
+        "to": "21:00:00",
+        "appointment": null
+      },
+      {
+        "from": "21:00:00",
+        "to": "21:30:00",
+        "appointment": null
+      },
+      {
+        "from": "21:30:00",
+        "to": "22:00:00",
+        "appointment": null
+      },
+      {
+        "from": "22:00:00",
+        "to": "22:30:00",
+        "appointment": null
+      },
+      {
+        "from": "22:30:00",
+        "to": "23:00:00",
+        "appointment": null
+      }
+    ]
+  },
+  {
+    "doctorId": 8,
+    "doctorNameAr": "خالد محمد كمال",
+    "doctorNameEn": null,
+    "slotTime": [
+      {
+        "from": "08:00:00",
+        "to": "08:30:00",
+        "appointment": null
+      },
+      {
+        "from": "08:30:00",
+        "to": "09:00:00",
+        "appointment": {
+          "id": 20,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T08:30:00",
+          "endTime": "2025-11-03T09:00:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "09:00:00",
+        "to": "09:30:00",
+        "appointment": {
+          "id": 27,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T09:00:00",
+          "endTime": "2025-11-03T09:30:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "09:30:00",
+        "to": "10:00:00",
+        "appointment": {
+          "id": 31,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T09:30:00",
+          "endTime": "2025-11-03T10:00:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "10:00:00",
+        "to": "10:30:00",
+        "appointment": null
+      },
+      {
+        "from": "10:30:00",
+        "to": "11:00:00",
+        "appointment": null
+      },
+      {
+        "from": "11:00:00",
+        "to": "11:30:00",
+        "appointment": null
+      },
+      {
+        "from": "11:30:00",
+        "to": "12:00:00",
+        "appointment": null
+      },
+      {
+        "from": "12:00:00",
+        "to": "12:30:00",
+        "appointment": null
+      },
+      {
+        "from": "12:30:00",
+        "to": "13:00:00",
+        "appointment": {
+          "id": 37,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T12:30:00",
+          "endTime": "2025-11-03T13:00:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "13:00:00",
+        "to": "13:30:00",
+        "appointment": null
+      },
+      {
+        "from": "13:30:00",
+        "to": "14:00:00",
+        "appointment": null
+      },
+      {
+        "from": "14:00:00",
+        "to": "14:30:00",
+        "appointment": null
+      },
+      {
+        "from": "14:30:00",
+        "to": "15:00:00",
+        "appointment": null
+      },
+      {
+        "from": "15:00:00",
+        "to": "15:30:00",
+        "appointment": null
+      },
+      {
+        "from": "15:30:00",
+        "to": "16:00:00",
+        "appointment": null
+      },
+      {
+        "from": "16:00:00",
+        "to": "16:30:00",
+        "appointment": null
+      },
+      {
+        "from": "16:30:00",
+        "to": "17:00:00",
+        "appointment": null
+      },
+      {
+        "from": "17:00:00",
+        "to": "17:30:00",
+        "appointment": null
+      },
+      {
+        "from": "17:30:00",
+        "to": "18:00:00",
+        "appointment": null
+      },
+      {
+        "from": "18:00:00",
+        "to": "18:30:00",
+        "appointment": null
+      },
+      {
+        "from": "18:30:00",
+        "to": "19:00:00",
+        "appointment": null
+      },
+      {
+        "from": "19:00:00",
+        "to": "19:30:00",
+        "appointment": null
+      },
+      {
+        "from": "19:30:00",
+        "to": "20:00:00",
+        "appointment": null
+      }
+    ]
+  },
+  {
+    "doctorId": 2,
+    "doctorNameAr": "احمد سيد حمودة",
+    "doctorNameEn": null,
+    "slotTime": [
+      {
+        "from": "08:00:00",
+        "to": "08:30:00",
+        "appointment": null
+      },
+      {
+        "from": "08:30:00",
+        "to": "09:00:00",
+        "appointment": null
+      },
+      {
+        "from": "09:00:00",
+        "to": "09:30:00",
+        "appointment": {
+          "id": 21,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T09:00:00",
+          "endTime": "2025-11-03T09:30:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "09:30:00",
+        "to": "10:00:00",
+        "appointment": {
+          "id": 28,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T09:30:00",
+          "endTime": "2025-11-03T10:00:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "10:00:00",
+        "to": "10:30:00",
+        "appointment": {
+          "id": 32,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T10:00:00",
+          "endTime": "2025-11-03T10:30:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "10:30:00",
+        "to": "11:00:00",
+        "appointment": null
+      },
+      {
+        "from": "11:00:00",
+        "to": "11:30:00",
+        "appointment": null
+      },
+      {
+        "from": "11:30:00",
+        "to": "12:00:00",
+        "appointment": null
+      },
+      {
+        "from": "12:00:00",
+        "to": "12:30:00",
+        "appointment": null
+      },
+      {
+        "from": "12:30:00",
+        "to": "13:00:00",
+        "appointment": null
+      },
+      {
+        "from": "13:00:00",
+        "to": "13:30:00",
+        "appointment": {
+          "id": 38,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T13:00:00",
+          "endTime": "2025-11-03T13:30:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "13:30:00",
+        "to": "14:00:00",
+        "appointment": null
+      },
+      {
+        "from": "14:00:00",
+        "to": "14:30:00",
+        "appointment": null
+      },
+      {
+        "from": "14:30:00",
+        "to": "15:00:00",
+        "appointment": null
+      },
+      {
+        "from": "15:00:00",
+        "to": "15:30:00",
+        "appointment": null
+      },
+      {
+        "from": "15:30:00",
+        "to": "16:00:00",
+        "appointment": null
+      },
+      {
+        "from": "16:00:00",
+        "to": "16:30:00",
+        "appointment": null
+      },
+      {
+        "from": "16:30:00",
+        "to": "17:00:00",
+        "appointment": null
+      },
+      {
+        "from": "17:00:00",
+        "to": "17:30:00",
+        "appointment": null
+      },
+      {
+        "from": "17:30:00",
+        "to": "18:00:00",
+        "appointment": null
+      },
+      {
+        "from": "18:00:00",
+        "to": "18:30:00",
+        "appointment": null
+      },
+      {
+        "from": "18:30:00",
+        "to": "19:00:00",
+        "appointment": null
+      },
+      {
+        "from": "19:00:00",
+        "to": "19:30:00",
+        "appointment": null
+      },
+      {
+        "from": "19:30:00",
+        "to": "20:00:00",
+        "appointment": null
+      }
+    ]
+  },
+  {
+    "doctorId": 3,
+    "doctorNameAr": "الاسم الكامل",
+    "doctorNameEn": null,
+    "slotTime": [
+      {
+        "from": "08:00:00",
+        "to": "08:30:00",
+        "appointment": null
+      },
+      {
+        "from": "08:30:00",
+        "to": "09:00:00",
+        "appointment": null
+      },
+      {
+        "from": "09:00:00",
+        "to": "09:30:00",
+        "appointment": null
+      },
+      {
+        "from": "09:30:00",
+        "to": "10:00:00",
+        "appointment": {
+          "id": 22,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T09:30:00",
+          "endTime": "2025-11-03T10:00:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "10:00:00",
+        "to": "10:30:00",
+        "appointment": {
+          "id": 29,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T10:00:00",
+          "endTime": "2025-11-03T10:30:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "10:30:00",
+        "to": "11:00:00",
+        "appointment": {
+          "id": 33,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T10:30:00",
+          "endTime": "2025-11-03T11:00:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "11:00:00",
+        "to": "11:30:00",
+        "appointment": null
+      },
+      {
+        "from": "11:30:00",
+        "to": "12:00:00",
+        "appointment": null
+      },
+      {
+        "from": "12:00:00",
+        "to": "12:30:00",
+        "appointment": null
+      },
+      {
+        "from": "12:30:00",
+        "to": "13:00:00",
+        "appointment": null
+      },
+      {
+        "from": "13:00:00",
+        "to": "13:30:00",
+        "appointment": null
+      },
+      {
+        "from": "13:30:00",
+        "to": "14:00:00",
+        "appointment": {
+          "id": 39,
+          "doctorNameAr": null,
+          "doctorNameEn": null,
+          "patientNameAr": null,
+          "patientNameEn": null,
+          "serviceNameAr": null,
+          "serviceNameEn": null,
+          "locationNameAr": null,
+          "locationNameEn": null,
+          "servicePrice": 0,
+          "startTime": "2025-11-03T13:30:00",
+          "endTime": "2025-11-03T14:00:00",
+          "status": 0,
+          "appointmentProfileId": null,
+          "appointmentProfile": null,
+          "isAnonymousPatient": false,
+          "parentAppointmentId": null,
+          "subAppointment": []
+        }
+      },
+      {
+        "from": "14:00:00",
+        "to": "14:30:00",
+        "appointment": null
+      },
+      {
+        "from": "14:30:00",
+        "to": "15:00:00",
+        "appointment": null
+      },
+      {
+        "from": "15:00:00",
+        "to": "15:30:00",
+        "appointment": null
+      },
+      {
+        "from": "15:30:00",
+        "to": "16:00:00",
+        "appointment": null
+      },
+      {
+        "from": "16:00:00",
+        "to": "16:30:00",
+        "appointment": null
+      },
+      {
+        "from": "16:30:00",
+        "to": "17:00:00",
+        "appointment": null
+      },
+      {
+        "from": "17:00:00",
+        "to": "17:30:00",
+        "appointment": null
+      },
+      {
+        "from": "17:30:00",
+        "to": "18:00:00",
+        "appointment": null
+      },
+      {
+        "from": "18:00:00",
+        "to": "18:30:00",
+        "appointment": null
+      },
+      {
+        "from": "18:30:00",
+        "to": "19:00:00",
+        "appointment": null
+      },
+      {
+        "from": "19:00:00",
+        "to": "19:30:00",
+        "appointment": null
+      },
+      {
+        "from": "19:30:00",
+        "to": "20:00:00",
+        "appointment": null
+      }
+    ]
+  },
+  {
+    "doctorId": 5,
+    "doctorNameAr": "طارق احمد رمضان",
+    "doctorNameEn": null,
+    "slotTime": [
+      {
+        "from": "00:00:00",
+        "to": "00:30:00",
+        "appointment": null
+      },
+      {
+        "from": "00:30:00",
+        "to": "01:00:00",
+        "appointment": null
+      },
+      {
+        "from": "01:00:00",
+        "to": "01:30:00",
+        "appointment": null
+      },
+      {
+        "from": "01:30:00",
+        "to": "02:00:00",
+        "appointment": null
+      },
+      {
+        "from": "02:00:00",
+        "to": "02:30:00",
+        "appointment": null
+      },
+      {
+        "from": "02:30:00",
+        "to": "03:00:00",
+        "appointment": null
+      },
+      {
+        "from": "03:00:00",
+        "to": "03:30:00",
+        "appointment": null
+      },
+      {
+        "from": "03:30:00",
+        "to": "04:00:00",
+        "appointment": null
+      },
+      {
+        "from": "04:00:00",
+        "to": "04:30:00",
+        "appointment": null
+      },
+      {
+        "from": "04:30:00",
+        "to": "05:00:00",
+        "appointment": null
+      },
+      {
+        "from": "05:00:00",
+        "to": "05:30:00",
+        "appointment": null
+      },
+      {
+        "from": "05:30:00",
+        "to": "06:00:00",
+        "appointment": null
+      }
+    ]
+  }
+]
