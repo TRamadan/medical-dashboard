@@ -1,55 +1,88 @@
 <div class="grid grid-cols-12 gap-8 mb-4">
+    <!-- Approved appointments -->
     <div class="col-span-12 md:col-span-6 xl:col-span-3">
         <div class="card !p-0 overflow-hidden flex flex-col border-0">
             <div class="flex items-center p-6">
                 <i class="pi pi-check !text-5xl text-green-500"></i>
-                <div class="ml-6"><span class="text-green-500 block whitespace-nowrap">Approved appointments</span><span class="text-green-500 block text-4xl font-bold">20</span></div>
+                <div class="ml-6">
+                    <span class="text-green-500 block whitespace-nowrap">Approved appointments</span>
+                    <span class="text-green-500 block text-4xl font-bold"></span>
+                </div>
             </div>
             <img alt="conversion" class="w-full" src="../../../../assets/users.svg" />
         </div>
     </div>
 
+    <!-- Pending appointments -->
     <div class="col-span-12 md:col-span-6 xl:col-span-3">
         <div class="card !p-0 overflow-hidden flex flex-col border-0">
             <div class="flex items-center p-6">
                 <i class="pi pi-clock !text-5xl text-orange-500"></i>
-                <div class="ml-6"><span class="text-orange-500 block whitespace-nowrap">Pending appointments</span><span class="text-orange-500 block text-4xl font-bold">10</span></div>
+                <div class="ml-6">
+                    <span class="text-orange-500 block whitespace-nowrap">Pending appointments</span>
+                    <span class="text-orange-500 block text-4xl font-bold"></span>
+                </div>
             </div>
             <img alt="conversion" class="w-full" src="assets/users.svg" />
         </div>
     </div>
 </div>
 
+<!-- Toolbar -->
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
-        <p-button icon="pi pi-plus" raised label="New Appointment" class="mr-2" (click)="openNewAppointmentDialog()" />
+        <p-button icon="pi pi-plus" raised label="New Appointment" class="mr-2" (click)="openNewAppointmentDialog()"></p-button>
     </ng-template>
 
     <ng-template #end>
-        <p-button label="Export" icon="pi pi-upload" severity="secondary" />
+        <p-button label="Export" icon="pi pi-upload" severity="secondary"></p-button>
     </ng-template>
 </p-toolbar>
 
-<app-table
-    dataKey="id"
-    [headers]="tableHeaders"
-    [data]="allAppointments()"
-    [actions]="tableActions"
-    [paginator]="true"
-    [rows]="10"
-    [showCurrentPageReport]="true"
-    [rowsPerPageOptions]="[10, 20, 30]"
-    [globalFilterFields]="globalFilterFields"
-    [globalFilterPlaceholder]="'Search appointments...'"
-    [showActions]="true"
-></app-table>
+<!-- Grouped Appointments by Date -->
+@for (group of groupedAppointments; track group) {
+    <div>
+        <h3 class="text-xl font-semibold mb-3 mt-5">
+            {{ group.date | date: 'fullDate' }}
+        </h3>
 
+        <app-table
+            dataKey="id"
+            [headers]="tableHeaders"
+            [data]="group.appointments"
+            [actions]="tableActions"
+            [paginator]="true"
+            [rows]="10"
+            [showCurrentPageReport]="true"
+            [rowsPerPageOptions]="[10, 20, 30]"
+            [globalFilterFields]="globalFilterFields"
+            [globalFilterPlaceholder]="'Search appointments...'"
+            [showActions]="true"
+            (onPageChange)="onPageChange($event)"
+        ></app-table>
+    </div>
+}
+
+<!-- New Appointment Dialog -->
 <p-dialog header="New Appointment" [(visible)]="displayNewAppointmentDialog" [modal]="true" [style]="{ width: '50vw' }" [draggable]="false" [resizable]="false">
     <ng-template pTemplate="content">
+        <p-select [options]="customers" optionLabel="name" [(ngModel)]="selectedCustomer" [filter]="true" [showClear]="true" placeholder="Select Customer" appendTo="body">
+            <!-- 👇 Custom header (top of dropdown) -->
+            <ng-template pTemplate="header">
+                <button type="button" pButton icon="pi pi-plus" label="Create New" class="p-button-text w-full justify-start" (click)="onCreateNewCustomer($event)"></button>
+            </ng-template>
+
+            <!-- 👇 Custom item template (optional: name + email layout) -->
+            <ng-template let-customer pTemplate="item">
+                <div class="flex flex-column">
+                    <span class="font-medium">{{ customer.name }}</span>
+                    <small class="text-muted">{{ customer.email }}</small>
+                </div>
+            </ng-template>
+        </p-select>
         <app-booking-form></app-booking-form>
     </ng-template>
     <ng-template pTemplate="footer">
-        <p-button icon="pi pi-times" (click)="displayNewAppointmentDialog = false" label="Cancel" styleClass="p-button-text"></p-button>
-        <p-button icon="pi pi-check" (click)="displayNewAppointmentDialog = false" label="Save" styleClass="p-button-text"></p-button>
+        <p-button icon="pi pi-times" (click)="hideDialog()" label="Cancel" styleClass="p-button-text"></p-button>
     </ng-template>
 </p-dialog>

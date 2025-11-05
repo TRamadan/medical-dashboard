@@ -5,13 +5,17 @@
         [value]="data"
         [columns]="headers"
         [loading]="loading"
-        [rows]="rows"
+        [rows]="10"
+        [paginator]="true"
+        [rowsPerPageOptions]="[5, 10, 20, 50]"
         [scrollable]="scrollable"
         [scrollHeight]="scrollHeight"
         [responsive]="responsive"
         [selectionMode]="showCheckbox ? 'multiple' : null"
         [(selection)]="selectedItems"
         (selectionChange)="onSelectionChange($event)"
+        [currentPageReportTemplate]="'Showing {first} to {last} of {totalRecords} entries'"
+        [showCurrentPageReport]="true"
     >
         <!-- Table Header -->
         <ng-template pTemplate="header">
@@ -20,13 +24,11 @@
                     <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
                 </th>
                 @for (col of headers; track col) {
-                    <!-- Data Columns -->
                     <th [style.width]="col.width" [pSortableColumn]="col.sortable ? col.field : undefined" class="text-center">
                         {{ col.label }}
                     </th>
                 }
                 <th *ngIf="showSpotsColumn" class="text-center">Spots</th>
-                <!-- Actions Column -->
                 <th class="text-center" *ngIf="showActions || actions.length > 0">Actions</th>
             </tr>
         </ng-template>
@@ -37,34 +39,45 @@
                 <td *ngIf="showCheckbox">
                     <p-tableCheckbox [value]="row"></p-tableCheckbox>
                 </td>
+
                 <!-- Data Columns -->
                 <td *ngFor="let col of headers" class="text-center">
                     <ng-container [ngSwitch]="col.type">
+                        <!-- Image -->
                         <ng-container *ngSwitchCase="'image'">
-                            <img *ngIf="row[col.field]" [src]="imgUrl + row[col.field] ? imgUrl + row[col.field] : '../../../assets/logo-new2-transperant.png'" alt="img" class="w-12 h-12 object-cover rounded-full inline-block" />
+                            <img *ngIf="row[col.field]" [src]="imgUrl + row[col.field]" alt="img" class="w-12 h-12 object-cover rounded-full inline-block" onerror="this.src='../../../assets/logo-new2-transperant.png'" />
                         </ng-container>
 
+                        <!-- Date -->
                         <ng-container *ngSwitchCase="'date'">
                             {{ row[col.field] | date: 'medium' }}
                         </ng-container>
+
+                        <!-- Custom Template -->
                         <ng-container *ngSwitchCase="'custom'">
-                            <ng-container *ngTemplateOutlet="col.customTemplate; context: { $implicit: row }"> </ng-container>
+                            <ng-container *ngTemplateOutlet="col.customTemplate; context: { $implicit: row }"></ng-container>
                         </ng-container>
+
+                        <!-- Boolean -->
                         <ng-container *ngSwitchCase="'boolean'">
                             {{ col.field === 'isElite' ? (row[col.field] ? 'Elite super star' : 'Normal super star') : row[col.field] ? 'Yes' : 'No' }}
                         </ng-container>
+
+                        <!-- Link -->
                         <ng-container *ngSwitchCase="'link'">
                             <a (click)="openFile(row[col.field])" [href]="row[col.field]" rel="noopener noreferrer" class="text-blue-500 hover:underline">
                                 {{ row[col.field] }}
                             </a>
                         </ng-container>
+
+                        <!-- Default -->
                         <ng-container *ngSwitchDefault>
                             {{ row[col.field] ? row[col.field] : '-' }}
                         </ng-container>
                     </ng-container>
                 </td>
 
-                <!-- Actions Column -->
+                <!-- Actions -->
                 <td class="text-center" *ngIf="showActions || actions.length > 0">
                     <div class="flex justify-center gap-2">
                         <ng-container *ngIf="showActions">
@@ -82,6 +95,7 @@
                     </div>
                 </td>
             </tr>
+
             <!-- Details Row -->
             <tr *ngIf="row.showDetails">
                 <td [attr.colspan]="headers.length + (showCheckbox ? 1 : 0) + (showSpotsColumn ? 1 : 0) + (showActions || actions.length > 0 ? 1 : 0) + (isAddDetails || isShowDetails ? 1 : 0)">

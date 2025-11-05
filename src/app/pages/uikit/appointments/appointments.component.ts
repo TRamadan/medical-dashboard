@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, ViewChild } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { Table, TableModule } from 'primeng/table';
+import { PaginatorState } from 'primeng/paginator';
+import { Table } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -20,12 +21,14 @@ import { TableColumn, TableComponent } from '../../../shared/table/table.compone
 import { Appointment } from './models/appointment';
 import { BookingFormComponent } from './booking-form/booking-form.component';
 import { AppointmentService } from './services/appointment.service';
+
 @Component({
     selector: 'app-appointments',
     standalone: true,
     imports: [
         CommonModule,
-        TableModule,
+        TableComponent,
+        BookingFormComponent,
         FormsModule,
         ButtonModule,
         ToastModule,
@@ -39,9 +42,7 @@ import { AppointmentService } from './services/appointment.service';
         TagModule,
         InputIconModule,
         IconFieldModule,
-        ConfirmDialogModule,
-        TableComponent,
-        BookingFormComponent
+        ConfirmDialogModule
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './appointments.component.html',
@@ -49,11 +50,14 @@ import { AppointmentService } from './services/appointment.service';
 })
 export class AppointmentsComponent implements OnInit {
     allAppointments = signal<Appointment[]>([]);
+    groupedAppointments: { date: string; appointments: Appointment[] }[] = [];
+
     @ViewChild('dt') dt!: Table;
     tableHeaders: TableColumn[] = [];
     tableActions: any[] = [];
     globalFilterFields: string[] = [];
     displayNewAppointmentDialog: boolean = false;
+    totalRecords: number = 0;
 
     constructor(
         private _appointmentService: AppointmentService,
@@ -66,12 +70,6 @@ export class AppointmentsComponent implements OnInit {
         this.getAllAppointments();
     }
 
-    /**
-     * Developer : Eng/Tarek Ahmed Ramadan
-     * Created Date : 1/6/2025
-     * Porpuse : implement a signal that call an api that fetch all added appointments
-     */
-    getAllAppointement(): void {}
     initializeTable() {
         this.tableHeaders = [
             { field: 'id', label: 'Appointment ID', type: 'text' },
@@ -79,8 +77,8 @@ export class AppointmentsComponent implements OnInit {
             { field: 'doctorNameEn', label: 'Assigned To', type: 'text' },
             { field: 'serviceNameEn', label: 'Service', type: 'text' },
             { field: 'locationNameEn', label: 'Location', type: 'text' },
-            { field: 'start time', label: 'Date & Time', type: 'text' },
-            { field: 'end time', label: 'Date & Time', type: 'text' },
+            { field: 'starttime', label: 'Start time', type: 'text' },
+            { field: 'endtime', label: 'End time', type: 'text' },
             { field: 'status', label: 'Status', type: 'text' }
         ];
         this.tableHeaders.forEach((h) => this.globalFilterFields.push(h.field));
@@ -92,24 +90,63 @@ export class AppointmentsComponent implements OnInit {
         ];
     }
 
+    customers = [
+        { name: 'Abd rabou Mohamed Abd rabou', email: 'Aboodilielkady456@gmail.com' },
+        { name: 'Abdelrahman Sherif', email: 'abdelrahmanshrief32@yahoo.com' },
+        { name: 'Adham Khaled', email: 'adham.noaaman@gmail.com' },
+        { name: 'Ahmed Zidan', email: 'ahmedzeat5008@gmail.com' }
+    ];
+
+    selectedCustomer: any;
+
+    onCreateNewCustomer(event: Event) {
+        event.stopPropagation(); // prevent dropdown from closing
+    }
+
     getAllAppointments() {
         this._appointmentService.getAddedApointments().subscribe((response: any) => {
-            this.allAppointments.set(response.data);
+            const appointments = response.data || [];
+            this.allAppointments.set(appointments);
+            this.totalRecords = appointments.length;
+            this.groupAppointmentsByDate(appointments);
         });
     }
 
     /**
-     * Developer : Eng/Tarek Ahmed Ramadan
-     * Created Date : 1/6/2025
-     * Porpuse : fetch accurate data by search in an input in the desired table
-     * @param table
-     * @param event
+     * Groups appointments by their date field
      */
+    private groupAppointmentsByDate(appointments: Appointment[]): void {
+        const grouped: { [key: string]: Appointment[] } = {};
+
+        appointments.forEach((item: any) => {
+            // Extract only the date part (assuming item.starttime is ISO string or has date info)
+            const dateKey = new Date(item.startTime).toISOString().split('T')[0];
+            if (!grouped[dateKey]) grouped[dateKey] = [];
+            grouped[dateKey].push(item);
+        });
+
+        // Convert object to array and sort by date
+        this.groupedAppointments = Object.keys(grouped)
+            .sort()
+            .map((date) => ({
+                date,
+                appointments: grouped[date]
+            }));
+    }
+
     onGlobalFilter(table: Table, event: Event) {
         table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
     }
 
     openNewAppointmentDialog() {
         this.displayNewAppointmentDialog = true;
+    }
+
+    hideDialog(): void {
+        this.displayNewAppointmentDialog = false;
+    }
+
+    onPageChange(event: PaginatorState) {
+        // You can handle lazy loading here if needed in the future
     }
 }

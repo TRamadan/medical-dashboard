@@ -1,5 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { TableModule } from 'primeng/table';
+import { PaginatorState } from 'primeng/paginator';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { TooltipModule } from 'primeng/tooltip';
@@ -8,8 +9,7 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { FormsModule } from '@angular/forms';
 import { TagModule } from 'primeng/tag';
 import { environment } from '../../../environments/environment';
-import { Input, Output, EventEmitter, ContentChild, TemplateRef } from '@angular/core';
-import { Component } from '@angular/core';
+import { Input, Output, EventEmitter, ContentChild, TemplateRef, Component } from '@angular/core';
 
 export interface TableColumn {
     label: string;
@@ -40,10 +40,13 @@ export interface TableAction {
 })
 export class TableComponent {
     public readonly imgUrl = environment.imgUrlWebsite;
+
+    // Inputs
     @Input() headers: TableColumn[] = [];
     @Input() data: any[] = [];
     @Input() showActions: boolean = false;
     @Input() loading: boolean = false;
+    @Input() totalRecords: number = 0;
     @Input() paginator: boolean = true;
     @Input() rows: number = 10;
     @Input() showCurrentPageReport: boolean = true;
@@ -66,18 +69,26 @@ export class TableComponent {
     @Input() spotsPerRow: number = 2;
     @Input() selectedItems: any[] = [];
 
+    // Outputs
     @Output() edit = new EventEmitter<any>();
     @Output() delete = new EventEmitter<any>();
     @Output() details = new EventEmitter<any>();
     @Output() addDetails = new EventEmitter<any>();
     @Output() selectionChange = new EventEmitter<any[]>();
     @Output() selectedItemsChange = new EventEmitter<any[]>();
+    @Output() onPageChange = new EventEmitter<PaginatorState>();
 
     @ContentChild('details', { read: TemplateRef }) detailsTemplate: TemplateRef<any> | null = null;
+
+    // Pagination state
+    first: number = 0;
+    currentPage: number = 0;
 
     get searchFields(): string[] {
         return this.headers.map((h) => h.field);
     }
+
+    // ---------- ACTION HANDLERS ----------
 
     onEdit(row: any) {
         this.edit.emit(row);
@@ -89,16 +100,8 @@ export class TableComponent {
 
     onViewDetails(row: any) {
         const wasOpen = row.showDetails;
-
-        // Close all other detail rows if you only want one open at a time
-        this.data.forEach((item) => {
-            item.showDetails = false;
-        });
-
-        // Open the clicked row if it was closed
-        if (!wasOpen) {
-            row.showDetails = true;
-        }
+        this.data.forEach((item) => (item.showDetails = false)); // Close all other detail rows
+        row.showDetails = !wasOpen; // Toggle current
     }
 
     onAddDetails(row: any) {
@@ -109,18 +112,30 @@ export class TableComponent {
         row.showDetails = !row.showDetails;
     }
 
+    // ---------- PAGINATION ----------
+    /**
+     * Triggered when user changes page or rows per page.
+     * Emits event so parent component can handle server-side data fetching if needed.
+     */
+    onPage(event: PaginatorState) {
+        this.first = event.first ?? 0;
+        this.rows = event.rows ?? this.rows;
+        this.currentPage = event.page ?? 0;
+        this.onPageChange.emit(event);
+    }
+
+    // ---------- SELECTION ----------
     onSelectionChange(event: any) {
         this.selectedItems = event;
         this.selectedItemsChange.emit(this.selectedItems);
         this.selectionChange.emit(this.selectedItems);
     }
 
-    // Utility to create an array for ngFor
+    // ---------- SPOTS ----------
     createSpotsArray(count: number): number[] {
         return Array(count).fill(0);
     }
 
-    // Handle spot value change
     onSpotChange(row: any, index: number, value: number): void {
         if (!row.spots) {
             row.spots = Array(this.spotsPerRow).fill(1);
@@ -128,15 +143,14 @@ export class TableComponent {
         row.spots[index] = value;
     }
 
+    // ---------- EXPANSION ----------
     expandedRows: { [key: string]: boolean } = {};
 
     toggleRow(row: any, event: Event) {
         event.preventDefault();
-
         if (this.isRowExpanded(row)) {
             delete this.expandedRows[row.id];
         } else {
-            // Only one expanded at a time
             this.expandedRows = {};
             this.expandedRows[row.id] = true;
         }
@@ -146,6 +160,7 @@ export class TableComponent {
         return this.expandedRows[row.id] === true;
     }
 
+    // ---------- FILE ----------
     openFile(link: string): void {
         window.open(this.imgUrl + link, '_blank', 'noopener,noreferrer');
     }
