@@ -21,11 +21,13 @@ import { TableColumn, TableComponent } from '../../../shared/table/table.compone
 import { Appointment } from './models/appointment';
 import { BookingFormComponent } from './booking-form/booking-form.component';
 import { AppointmentService } from './services/appointment.service';
+import { ConfirmPopupModule } from 'primeng/confirmpopup';
 
 @Component({
     selector: 'app-appointments',
     standalone: true,
     imports: [
+        ConfirmPopupModule,
         CommonModule,
         TableComponent,
         BookingFormComponent,
@@ -52,6 +54,9 @@ export class AppointmentsComponent implements OnInit {
     allAppointments = signal<Appointment[]>([]);
     groupedAppointments: { date: string; appointments: Appointment[] }[] = [];
 
+    pendingAppointmentsCount: number = 0;
+    approvedAppointmentsCount: number = 0;
+
     @ViewChild('dt') dt!: Table;
     tableHeaders: TableColumn[] = [];
     tableActions: any[] = [];
@@ -77,17 +82,11 @@ export class AppointmentsComponent implements OnInit {
             { field: 'doctorNameEn', label: 'Assigned To', type: 'text' },
             { field: 'serviceNameEn', label: 'Service', type: 'text' },
             { field: 'locationNameEn', label: 'Location', type: 'text' },
-            { field: 'starttime', label: 'Start time', type: 'text' },
-            { field: 'endtime', label: 'End time', type: 'text' },
-            { field: 'status', label: 'Status', type: 'text' }
+            { field: 'startTime', label: 'Start time', type: 'time' },
+            { field: 'endTime', label: 'End time', type: 'time' },
+            { field: 'status', label: 'Status', type: 'status' }
         ];
         this.tableHeaders.forEach((h) => this.globalFilterFields.push(h.field));
-
-        this.tableActions = [
-            { label: 'Complete', icon: 'pi pi-check', severity: 'success', action: (item: any) => console.log('Complete', item), condition: (item: any) => item.status !== 'completed' && item.status !== 'canceled' },
-            { label: 'Reschedule', icon: 'pi pi-calendar', severity: 'info', action: (item: any) => console.log('Reschedule', item) },
-            { label: 'Cancel', icon: 'pi pi-times', severity: 'danger', action: (item: any) => console.log('Cancel', item), condition: (item: any) => item.status !== 'canceled' }
-        ];
     }
 
     customers = [
@@ -106,9 +105,17 @@ export class AppointmentsComponent implements OnInit {
     getAllAppointments() {
         this._appointmentService.getAddedApointments().subscribe((response: any) => {
             const appointments = response.data || [];
+
             this.allAppointments.set(appointments);
             this.totalRecords = appointments.length;
+
+            this.pendingAppointmentsCount = appointments.filter((a: any) => a.status === 0).length;
+            this.approvedAppointmentsCount = appointments.filter((a: any) => a.status === 1).length;
+
             this.groupAppointmentsByDate(appointments);
+
+            console.log('Pending:', this.pendingAppointmentsCount);
+            console.log('Approved:', this.approvedAppointmentsCount);
         });
     }
 
@@ -132,6 +139,7 @@ export class AppointmentsComponent implements OnInit {
                 date,
                 appointments: grouped[date]
             }));
+        console.log(this.groupedAppointments);
     }
 
     onGlobalFilter(table: Table, event: Event) {
@@ -148,5 +156,53 @@ export class AppointmentsComponent implements OnInit {
 
     onPageChange(event: PaginatorState) {
         // You can handle lazy loading here if needed in the future
+    }
+
+    selectedAppointment: any;
+    displayStatusDialog = false;
+    selectedStatusId: any;
+
+    statuses = [
+        { id: 0, label: 'Scheduled', color: 'info' },
+        { id: 1, label: 'Confirmed', color: 'success' },
+        { id: 2, label: 'Completed', color: 'secondary' },
+        { id: 3, label: 'Cancelled', color: 'danger' }
+    ];
+
+    openStatusDialog(appointment: Appointment) {
+        debugger;
+        this.selectedAppointment = appointment;
+        this.selectedStatusId = appointment.status;
+        this.displayStatusDialog = true;
+    }
+
+    confirmStatusChange() {
+        if (!this.selectedAppointment || this.selectedStatusId === null) return;
+        this._appointmentService.updateAppointmentStatus(this.selectedAppointment.id, this.selectedStatusId).subscribe({
+            next: (res: any) => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Status Updated',
+                    detail: `Appointment status changed to ${this.getStatusLabel(this.selectedStatusId)}`
+                });
+            },
+            error: (error: any) => {
+                //error handle goes here
+            }
+        });
+
+        // Optionally update local data
+        this.selectedAppointment.status = this.selectedStatusId;
+
+        this.displayStatusDialog = false;
+    }
+
+    cancelStatusChange() {
+        this.displayStatusDialog = false;
+    }
+
+    getStatusLabel(status: number): string {
+        const s = this.statuses.find((st) => st.id === status);
+        return s ? s.label : 'Unknown';
     }
 }

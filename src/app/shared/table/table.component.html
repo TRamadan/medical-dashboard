@@ -53,6 +53,15 @@
                             {{ row[col.field] | date: 'medium' }}
                         </ng-container>
 
+                        <!-- ✅ Time Only -->
+                        <ng-container *ngSwitchCase="'time'">
+                            {{ row[col.field] | date: 'shortTime' }}
+                        </ng-container>
+
+                        <ng-container *ngSwitchCase="'status'">
+                            <p-tag [value]="getStatusLabel(row[col.field])" [severity]="getStatusColor(row[col.field])"></p-tag>
+                        </ng-container>
+
                         <!-- Custom Template -->
                         <ng-container *ngSwitchCase="'custom'">
                             <ng-container *ngTemplateOutlet="col.customTemplate; context: { $implicit: row }"></ng-container>

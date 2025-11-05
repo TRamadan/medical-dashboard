@@ -1,3 +1,38 @@
 .text-primary{
     color:black;
 }
+
+.status-card {
+  width: 130px;
+  height: 110px;
+  border: 1px solid #e5e7eb; /* light gray border */
+  border-radius: 12px;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.status-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-color: #94a3b8; /* subtle bluish hover */
+}
+
+.status-card.selected {
+  border: 2px solid #16a34a; /* green border */
+  background-color: #f0fdf4;
+  box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2);
+}
+
+.icon-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

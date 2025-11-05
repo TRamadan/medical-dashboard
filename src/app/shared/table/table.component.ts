@@ -10,11 +10,10 @@ import { FormsModule } from '@angular/forms';
 import { TagModule } from 'primeng/tag';
 import { environment } from '../../../environments/environment';
 import { Input, Output, EventEmitter, ContentChild, TemplateRef, Component } from '@angular/core';
-
 export interface TableColumn {
     label: string;
     field: string;
-    type?: 'text' | 'image' | 'date' | 'boolean' | 'custom' | 'number' | 'link';
+    type?: 'text' | 'image' | 'date' | 'boolean' | 'custom' | 'number' | 'link' | 'time' | 'status';
     sortable?: boolean;
     filterable?: boolean;
     filterType?: 'text' | 'date' | 'numeric' | 'boolean';
@@ -163,5 +162,35 @@ export class TableComponent {
     // ---------- FILE ----------
     openFile(link: string): void {
         window.open(this.imgUrl + link, '_blank', 'noopener,noreferrer');
+    }
+
+    getStatusLabel(status: number): string {
+        switch (status) {
+            case 0:
+                return 'Scheduled';
+            case 1:
+                return 'Confirmed';
+            case 2:
+                return 'Completed';
+            case 3:
+                return 'Canceled';
+            default:
+                return '';
+        }
+    }
+
+    getStatusColor(status: number): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
+        switch (status) {
+            case 0:
+                return 'warn';
+            case 1:
+                return 'success';
+            case 2:
+                return 'info';
+            case 3:
+                return 'danger';
+            default:
+                return 'secondary';
+        }
     }
 }
