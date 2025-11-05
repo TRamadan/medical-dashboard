@@ -169,11 +169,19 @@ export class AppointmentsComponent implements OnInit {
         { id: 3, label: 'Cancelled', color: 'danger' }
     ];
 
-    openStatusDialog(appointment: Appointment) {
+    openStatusDialog(appointment: any) {
         debugger;
-        this.selectedAppointment = appointment;
-        this.selectedStatusId = appointment.status;
-        this.displayStatusDialog = true;
+        if (appointment.status == 0) {
+            this.selectedAppointment = appointment;
+            this.selectedStatusId = appointment.status;
+            this.displayStatusDialog = true;
+        } else {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Status Updated',
+                detail: `You cannot change this appointment status, it's status is ${this.getStatusLabel(appointment.status)}`
+            });
+        }
     }
 
     confirmStatusChange() {
