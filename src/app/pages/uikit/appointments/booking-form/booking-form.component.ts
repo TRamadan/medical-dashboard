@@ -3,7 +3,7 @@ import { LocationServiceFormComponent } from './location-service-form/location-s
 import { ChooseTimeSlotComponent } from './choose-time-slot/choose-time-slot.component';
 import { PatientFormComponent } from './patient-form/patient-form.component';
 import { ConfirmationComponent } from './confirmation/confirmation.component';
-import { Subscription } from 'rxjs';
+import { from, Subscription } from 'rxjs';
 import { BookingService } from './patient-form/services/booking.service';
 import Swal from 'sweetalert2';
 
@@ -46,8 +46,9 @@ export interface BookingData {
 })
 export class BookingFormComponent implements OnInit, OnDestroy {
     @Output() back = new EventEmitter<void>();
+    @Output() bookingSuccess = new EventEmitter<void>();
     currentStep: number = 1;
-    totalSteps: number = 4;
+    totalSteps: number = 3;
     showBookingFormFlag: boolean = false;
     @ViewChild(PatientFormComponent) patientFormComponent!: PatientFormComponent;
 
@@ -79,7 +80,7 @@ export class BookingFormComponent implements OnInit, OnDestroy {
     ngOnDestroy() {}
 
     private updateSteps(): void {
-        this.steps = ['Location & Service', 'Choose Time Slot', 'Patient Information', 'Confirmation'];
+        this.steps = ['Location & Service', 'Choose Time Slot', 'Patient Information'];
     }
 
     get progress(): number {
@@ -140,24 +141,92 @@ export class BookingFormComponent implements OnInit, OnDestroy {
     confirmBooking(bookingPayload: any): void {
         Swal.fire({
             title: 'Booking in Progress...',
-            text: 'Please wait while we confirm your appointment.',
+            text: 'Please wait while we create your appointment.',
             allowOutsideClick: false,
             didOpen: () => {
                 Swal.showLoading();
-            }
+            },
+            target: this.elementRef.nativeElement
         });
 
         this.bookingService.makeAnAppointment(bookingPayload).subscribe({
             next: (response: any) => {
+                debugger;
                 this.confirmationData = response.data;
                 Swal.fire({
-                    icon: 'success',
-                    title: 'Booking Confirmed!',
-                    text: 'Your appointment has been successfully booked.',
-                    confirmButtonText: 'OK'
+                    target: this.elementRef.nativeElement,
+                    html: `
+                        <div class="container-fluid p-3 text-start">
+                            <div class="row justify-content-center">
+                                <div class="col-12">
+                                    <div class="text-center mb-4">
+                                        <h2 class="h3 fw-bold text-dark mb-2">Booking Confirmed!</h2>
+                                        <p class="text-muted">Your appointment has been successfully booked.</p>
+                                    </div>
+                                    <div class="card shadow-sm mb-4">
+                                        <div class="card-header bg-white">
+                                            <h5 class="card-title mb-0 d-flex align-items-center">
+                                                Appointment Details
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-4">
+                                                                         <div class="col-12 col-md-6>
+                                                                <p class="text-muted small mb-1">Service</p>
+                                                    <p class="fw-semibold mb-0">${this.confirmationData.appointmentDetails.serviceNameEn} - ${this.confirmationData.appointmentDetails.to}</p>
+
+                                            </div>
+                                                <div class="col-12 col-md-6">
+                                                    <p class="text-muted small mb-1">Time</p>
+                                                    <p class="fw-semibold mb-0">${this.confirmationData.appointmentDetails.from} - ${this.confirmationData.appointmentDetails.to}</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                   <div class="col-12 col-md-6">
+                                                    <p class="text-muted small mb-1">Location</p>
+                                                    <p class="fw-semibold mb-0">${this.confirmationData.appointmentDetails.locationNameEn}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card shadow-sm mb-4">
+                                        <div class="card-header bg-white"><h5 class="card-title mb-0">Patient Information</h5></div>
+                                        <div class="card-body">
+                                        <div class="row g-4">
+                                        <div class="col-md-6">
+                                        <p class="text-muted small mb-1">Name</p>
+                                            <p class="fw-semibold">${this.confirmationData.patientInfo.name}</p>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                        <p class="text-muted small mb-1">Date of Birth</p>
+                                        <p class="fw-semibold">${this.confirmationData.patientInfo.dateOfBirth}</p>
+                                        </div>
+                                        </div>
+
+                                           <div class="row g-4">
+                                        <div class="col-md-6">
+                                        <p class="text-muted small mb-1">Mobile</p>
+                                            <p class="fw-semibold">${this.confirmationData.patientInfo.mobile}</p>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                        <p class="text-muted small mb-1"></p>
+                                        <p class="fw-semibold"></p>
+                                        </div>
+                                        </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`,
+                    showConfirmButton: true,
+                    confirmButtonText: 'OK',
+                    width: '800px'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        this.handleNext();
+                        this.bookingSuccess.emit();
                     }
                 });
             },
@@ -167,7 +236,8 @@ export class BookingFormComponent implements OnInit, OnDestroy {
                     icon: 'error',
                     title: 'Booking Failed',
                     text: 'There was an error processing your booking. Please try again.',
-                    confirmButtonText: 'OK'
+                    confirmButtonText: 'OK',
+                    target: this.elementRef.nativeElement
                 });
             }
         });

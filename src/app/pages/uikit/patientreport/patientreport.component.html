@@ -1,0 +1,154 @@
+<section>
+    <div class="container">
+        <div class="header">
+            <h1>Create Injury Report</h1>
+        </div> 
+
+            <p-stepper [value]="1" class="basis-[50rem]" [linear]="true">
+        <p-step-list *ngIf="isPatientSelected">
+            <p-step [value]="1" class="flex flex-row flex-auto gap-2">
+                <ng-template #content let-active="active">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-colors duration-200 bg-green-700 border-green-700 text-white">
+                            <i class="pi pi-user text-2xl"></i>
+                        </div>
+                        <span class="font-bold text-green-700">Patient Review</span>
+                    </div>
+                </ng-template>
+            </p-step>
+            <p-step [value]="2" class="flex flex-row flex-auto gap-2">
+                <ng-template #content let-active="active">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-colors duration-200 bg-green-700 border-green-700 text-white">
+                            <i class="pi pi-file text-2xl"></i>
+                        </div>
+                        <span class="font-bold text-green-700">Injury Report</span>
+                    </div>
+                </ng-template>
+            </p-step>
+            <p-step [value]="3" class="flex flex-row flex-auto gap-2">
+                <ng-template #content let-active="active">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-colors duration-200 bg-green-700 border-green-700 text-white">
+                            <i class="pi pi-list text-2xl"></i>
+                        </div>
+                        <span class="font-bold text-green-700">Plan configuration</span>
+                    </div>
+                </ng-template>
+            </p-step>
+            <p-step [value]="4" class="flex flex-row flex-auto gap-2">
+                <ng-template #content let-active="active">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-colors duration-200 bg-green-700 border-green-700 text-white">
+                            <i class="pi pi-sliders-h text-2xl"></i>
+                        </div>
+                        <span class="font-bold text-green-700">Phases and Protocols</span>
+                    </div>
+                </ng-template>
+            </p-step>
+
+            <p-step [value]="5" class="flex flex-row flex-auto gap-2">
+                <ng-template #content let-active="active">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-colors duration-200 bg-green-700 border-green-700 text-white">
+                            <i class="pi pi-cog text-2xl"></i>
+                        </div>
+                        <span class="font-bold text-green-700">Sessions Configuration</span>
+                    </div>
+                </ng-template>
+            </p-step>
+
+            <p-step [value]="6" class="flex flex-row flex-auto gap-2">
+                <ng-template #content let-active="active">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-colors duration-200 bg-blue-500 border-blue-500 text-white">
+                            <i class="pi pi-check-square text-2xl"></i>
+                        </div>
+                        <span class="font-bold text-blue-500">Report Preview</span>
+                    </div>
+                </ng-template>
+            </p-step>
+        </p-step-list>
+        <p-step-panels>
+            
+            <p-step-panel [value]="1">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <div class="flex flex-col">
+                        <app-patient-info #patientInfoRef (onPatientSelect)="onPatientSelection($event)"></app-patient-info>
+                        <div class="flex p-4 justify-end" *ngIf="isPatientSelected">
+                            <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" [disabled]="!patientInfoRef.selectedPatient"
+                                (onClick)="activateCallback(2)" />
+                        </div>
+                    </div>
+                </ng-template>
+            </p-step-panel>
+
+            <p-step-panel [value]="2">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <app-patient-report [(report)]="reportData"></app-patient-report>
+                    <div class="flex p-4 justify-between">
+                        <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
+                            (onClick)="goBackToReview(activateCallback)" />
+                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
+                            (onClick)="activateCallback(3)" />
+                    </div>
+                </ng-template>
+            </p-step-panel>
+
+            <p-step-panel [value]="3">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <div class="flex flex-col">
+                        <app-plan-cofig [(planConfig)]="planConfigData" (templateChange)="onTemplateChange($event)"></app-plan-cofig>
+                        <div class="flex p-4 justify-between">
+                            <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
+                                (onClick)="activateCallback(2)" />
+                            <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
+                                (onClick)="activateCallback(4)" />
+                        </div>
+                    </div>
+                </ng-template>
+            </p-step-panel>
+
+            <p-step-panel [value]="4">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <div class="flex flex-col">
+                        <app-phases-protocol [(phases)]="phasesData" [isTemplateSelected]="isTemplateSelected"></app-phases-protocol>
+                        <div class="flex p-4 justify-between">
+                            <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
+                                (onClick)="activateCallback(3)" />
+                            <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
+                                (onClick)="activateCallback(5)" />
+                        </div>
+                    </div>
+                </ng-template>
+            </p-step-panel>
+
+
+
+            <p-step-panel [value]="5">
+                <ng-template #content let-activateCallback="activateCallback">
+                     <div class="flex flex-col">
+                        <app-phases-sessions [phases]="phasesData"></app-phases-sessions>
+                        <div class="flex p-4 justify-between">
+                            <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
+                                (onClick)="activateCallback(4)" />
+                            <p-button label="Create Patient Report" icon="pi pi-arrow-right" iconPos="right"
+                                (onClick)="goToPreview(activateCallback)" />
+                        </div>
+                    </div>
+                </ng-template>
+            </p-step-panel>
+
+            <p-step-panel [value]="6">
+                <ng-template #content let-activateCallback="activateCallback">
+                    <div class="flex flex-col">
+                        <app-report-preview [data]="previewData" (back)="activateCallback(5)"></app-report-preview>
+                    </div>
+                </ng-template>
+            </p-step-panel>
+        </p-step-panels>
+    </p-stepper>
+    </div>
+
+
+</section>

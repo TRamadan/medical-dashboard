@@ -75,7 +75,13 @@ export class AppMenu {
                     { label: 'Add service', icon: '', routerLink: ['/uikit/services'] },
                     { label: 'Add location', icon: '', routerLink: ['/uikit/location'] },
                     { label: 'Appointments', icon: '', routerLink: ['/uikit/appointments'] },
-                    { label: 'Add treatment plan', icon: '', routerLink: ['/uikit/treatmentplan'] },
+                    { label: 'Add Patient report', icon: '', routerLink: ['/uikit/patientreport'] },
+                    {
+                        label: 'Add treatment plan',
+                        icon: '',
+                        routerLink: ['/uikit/treatmentplan']
+                    },
+
                     {
                         label: 'Tracking session attendance',
                         icon: '',

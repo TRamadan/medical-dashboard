@@ -51,14 +51,11 @@
                         @if (currentStep === 3) {
                             <app-patient-form (createBooking)="createBooking($event)" [selectedSlot]="selectedTimeSlot" [selectedLocationAndService]="selectedServiceAndLocation"></app-patient-form>
                         }
-                        @if (currentStep === 4) {
-                            <app-confirmation [confirmationData]="confirmationData"></app-confirmation>
-                        }
                     </div>
                 </div>
 
                 <!-- Navigation Buttons -->
-                @if (currentStep < totalSteps) {
+                @if (currentStep <= totalSteps) {
                     <div class="row mt-4">
                         <div class="col-6 d-flex justify-content-start">
                             <button type="button" class="btn btn-outline-secondary d-flex align-items-center" (click)="handlePrevious()" [hidden]="currentStep === 1">
@@ -68,9 +65,9 @@
                         </div>
 
                         <div class="col-6 d-flex justify-content-end">
-                            <button type="button" class="btn btn-primary d-flex align-items-center" (click)="handleNextOrSubmit()" [disabled]="!canProceed()">
-                                <span class="d-none d-sm-inline me-2">{{ currentStep == 3 ? 'Create Booking' : 'Next' }}</span>
-                                <i [class]="currentStep == 3 ? 'fas fa-check-circle' : 'fas fa-arrow-right'"></i>
+                            <button type="button" class="btn next-button d-flex align-items-center" (click)="handleNextOrSubmit()" [disabled]="!canProceed()">
+                                <span class="d-none d-sm-inline me-2">{{ currentStep === totalSteps ? 'Create Booking' : 'Next' }}</span>
+                                <i [class]="currentStep === totalSteps ? 'fas fa-check-circle' : 'fas fa-arrow-right'"></i>
                             </button>
                         </div>
                     </div>

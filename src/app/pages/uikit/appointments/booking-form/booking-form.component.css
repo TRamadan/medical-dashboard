@@ -21,8 +21,7 @@
 }
 
 .bg-progress-bar {
-    background-color: #fc6b44;
-}
+    background-color: #131337;}
 
 .progress {
     background-color: #e9ecef;
@@ -59,8 +58,14 @@
 }
 
 .card-title {
-    color: #fc6b44;
+    color: #131337;
+}
 
+.next-button{
+    background: #70f4c3;
+    border: none;
+    color: #131337;
+    font-weight: bold;
 }
 
 .card {

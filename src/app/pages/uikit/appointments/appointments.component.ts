@@ -56,6 +56,7 @@ export class AppointmentsComponent implements OnInit {
 
     pendingAppointmentsCount: number = 0;
     approvedAppointmentsCount: number = 0;
+    canceledAppointmentsCount: number = 0;
 
     @ViewChild('dt') dt!: Table;
     tableHeaders: TableColumn[] = [];
@@ -68,7 +69,7 @@ export class AppointmentsComponent implements OnInit {
         private _appointmentService: AppointmentService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
-    ) {}
+    ) { }
 
     ngOnInit() {
         this.initializeTable();
@@ -89,19 +90,6 @@ export class AppointmentsComponent implements OnInit {
         this.tableHeaders.forEach((h) => this.globalFilterFields.push(h.field));
     }
 
-    customers = [
-        { name: 'Abd rabou Mohamed Abd rabou', email: 'Aboodilielkady456@gmail.com' },
-        { name: 'Abdelrahman Sherif', email: 'abdelrahmanshrief32@yahoo.com' },
-        { name: 'Adham Khaled', email: 'adham.noaaman@gmail.com' },
-        { name: 'Ahmed Zidan', email: 'ahmedzeat5008@gmail.com' }
-    ];
-
-    selectedCustomer: any;
-
-    onCreateNewCustomer(event: Event) {
-        event.stopPropagation(); // prevent dropdown from closing
-    }
-
     getAllAppointments() {
         this._appointmentService.getAddedApointments().subscribe((response: any) => {
             const appointments = response.data || [];
@@ -111,11 +99,9 @@ export class AppointmentsComponent implements OnInit {
 
             this.pendingAppointmentsCount = appointments.filter((a: any) => a.status === 0).length;
             this.approvedAppointmentsCount = appointments.filter((a: any) => a.status === 1).length;
-
+            this.canceledAppointmentsCount = appointments.filter((a: any) => a.status === 3).length;
             this.groupAppointmentsByDate(appointments);
 
-            console.log('Pending:', this.pendingAppointmentsCount);
-            console.log('Approved:', this.approvedAppointmentsCount);
         });
     }
 
@@ -147,11 +133,26 @@ export class AppointmentsComponent implements OnInit {
     }
 
     openNewAppointmentDialog() {
+        this.appointmentToEdit = null;
         this.displayNewAppointmentDialog = true;
+    }
+
+    openEditAppointmentDialog(appointment: any) {
+        this.appointmentToEdit = appointment;
+        this.displayNewAppointmentDialog = true;
+    }
+
+    onDialogHide() {
+        this.appointmentToEdit = null;
     }
 
     hideDialog(): void {
         this.displayNewAppointmentDialog = false;
+    }
+
+    onBookingSuccess(): void {
+        this.hideDialog();
+        this.getAllAppointments();
     }
 
     onPageChange(event: PaginatorState) {
@@ -159,6 +160,7 @@ export class AppointmentsComponent implements OnInit {
     }
 
     selectedAppointment: any;
+    appointmentToEdit: any = null;
     displayStatusDialog = false;
     selectedStatusId: any;
 
@@ -170,7 +172,6 @@ export class AppointmentsComponent implements OnInit {
     ];
 
     openStatusDialog(appointment: any) {
-        debugger;
         if (appointment.status == 0) {
             this.selectedAppointment = appointment;
             this.selectedStatusId = appointment.status;

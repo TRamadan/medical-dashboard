@@ -32,6 +32,7 @@ export class LocationServiceFormComponent implements OnInit {
     getAllCategories(): void {
         this._serviceCategory.getServiceCategories().subscribe({
             next: (res: any) => {
+                debugger
                 this.categories = res.data;
             },
             error: (error: any) => {

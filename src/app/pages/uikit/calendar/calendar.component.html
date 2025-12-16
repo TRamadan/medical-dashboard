@@ -1,72 +1,132 @@
 <section class="calendar-section container-fluid py-4">
-    <!-- Header -->
-    <div class="calendar-header mb-3 d-flex justify-content-between align-items-center">
-        <h2 class="fw-bold mb-0 text-success"><i class="pi pi-calendar mr-2"></i> Appointments Calendar</h2>
+    <div class="d-flex justify-content-end mb-2" *ngIf="selectedEmployeeId()">
+        <button class="btn btn-danger btn-sm p-2" (click)="resetFilter()">
+            Reset Filter
+        </button>
     </div>
-
     <!-- Employees list -->
     <div class="d-flex overflow-auto gap-3 p-3 bg-light rounded-3 shadow-sm mb-4">
+
         @for (employee of allEmployees; track employee) {
-            <div class="d-flex flex-column align-items-center text-center employee-card" style="min-width: 100px; flex-shrink: 0" (click)="getCoachTimeSlots(employee)">
-                <img class="rounded-circle shadow-sm" [src]="employee.img" style="width: 80px; height: 80px; object-fit: cover; border: 3px solid #4caf50" />
-                <p class="mb-0 mt-2 small text-nowrap fw-semibold">{{ employee.name }}</p>
-                <span class="text-muted small">{{ employee.specialty }}</span>
-            </div>
+        <div class="d-flex flex-column align-items-center text-center employee-card p-2 rounded-3 transition-all cursor-pointer"
+            style="min-width: 100px; flex-shrink: 0; cursor: pointer;" [ngClass]="{
+                    'bg-success-subtle border': selectedEmployeeId() === employee.id,
+                    'hover:bg-gray-50': selectedEmployeeId() !== employee.id
+                  }" (click)="getCoachTimeSlots(employee)">
+
+            <img class="rounded-circle shadow-sm" src="../../../../assets/person-placeholder.jpg"
+                style="width: 80px; height: 80px; object-fit: cover"
+                [class.ring-2]="selectedEmployeeId() === employee.id"
+                [class.ring-success]="selectedEmployeeId() === employee.id" />
+
+            <p class="mb-0 mt-2 small text-nowrap fw-semibold"
+                [class.text-light]="selectedEmployeeId() === employee.id">
+                {{ employee.nameEn }}
+            </p>
+
+        </div>
         }
     </div>
 
     <!-- Stats Bar -->
-    <div class="stats-bar d-flex flex-wrap justify-content-around align-items-center bg-white rounded-3 shadow-sm py-3 mb-4 text-center">
+    <div
+        class="stats-bar d-flex flex-wrap justify-content-around align-items-center bg-white rounded-3 shadow-sm py-3 mb-4 text-center">
+
         <div class="stat-item px-3">
-            <span class="stat-number text-success fw-bold fs-4 d-block">20</span>
+            <span class="stat-number text-success fw-bold fs-4 d-block">{{ totalSlots() }}</span>
             <div class="stat-label text-muted">Total Slots</div>
         </div>
+
         <div class="stat-item px-3">
-            <span class="stat-number text-primary fw-bold fs-4 d-block">5</span>
+            <span class="stat-number text-primary fw-bold fs-4 d-block">{{ bookedSlots() }}</span>
             <div class="stat-label text-muted">Booked</div>
         </div>
+
         <div class="stat-item px-3">
-            <span class="stat-number text-warning fw-bold fs-4 d-block">5</span>
+            <span class="stat-number text-warning fw-bold fs-4 d-block">{{ availableSlots() }}</span>
             <div class="stat-label text-muted">Available</div>
         </div>
+
         <div class="stat-item px-3">
-            <span class="stat-number text-danger fw-bold fs-4 d-block">10</span>
+            <span class="stat-number text-danger fw-bold fs-4 d-block">{{ pendingSlots() }}</span>
             <div class="stat-label text-muted">Pending</div>
         </div>
     </div>
 
-    <!-- Calendar Table -->
-    <p-table [value]="timeSlots" class="p-datatable-sm p-datatable-gridlines shadow-sm rounded-3 overflow-hidden" [scrollable]="true" scrollHeight="600px">
-        <ng-template pTemplate="header">
-            <tr class="bg-success text-white">
-                <th class="text-center">Time</th>
-                <th *ngFor="let emp of allAppointments" class="text-center">
-                    {{ emp.name }}
-                </th>
-            </tr>
-        </ng-template>
+    <p-toolbar styleClass="mb-6 gap-2">
+        <span class="fw-bold selected-date">Select a date to view appointments:</span>
+        <p-datepicker [(ngModel)]="date" (onSelect)="onDateSelect()" dateFormat="yy-mm-dd"
+            placeholder="Please select date" [iconDisplay]="'input'" [showIcon]="true"
+            inputId="icondisplay"></p-datepicker>
+    </p-toolbar>
 
-        <ng-template pTemplate="body" let-time>
-            <tr>
-                <td class="fw-bold text-center text-secondary">{{ time }}</td>
-                @for (emp of allAppointments; track emp) {
-                    <td class="text-center align-middle position-relative slot-cell" [ngClass]="getStatusColor(getAppointment(emp, time)?.status)">
+    <!-- ❗ No Data Message -->
+    <div *ngIf="allAppointments().length === 0" class="text-center py-5 my-5 bg-light border rounded-3 shadow-sm">
+        <h5 class="text-muted mb-2">No data available</h5>
+        <p class="text-secondary small">Select another employee or date to view appointments.</p>
+    </div>
+
+    <div *ngIf="allAppointments().length > 0">
+        <div class="mb-2 selected-date fw-bold">
+            Data showing for date: {{ date | date:'yyyy-MM-dd' }}
+        </div>
+        <p-table [value]="timeSlots()" class="p-datatable-sm p-datatable-gridlines shadow-sm rounded-3 overflow-hidden"
+            [scrollable]="true" scrollHeight="600px">
+
+            <!-- Header -->
+            <ng-template pTemplate="header">
+                <tr class="bg-success text-white">
+                    <th class="text-center">Time</th>
+
+                    <th *ngFor="let emp of allAppointments()" class="text-center">
+                        {{ emp.name }}
+                    </th>
+                </tr>
+            </ng-template>
+
+
+            <!-- Body -->
+            <ng-template pTemplate="body" let-time>
+                <tr>
+                    <td class="fw-bold text-center text-secondary">{{ time }}</td>
+
+                    @for (emp of allAppointments(); track emp) {
+
+                    <td class="text-center align-middle position-relative slot-cell"
+                        [ngClass]="getStatusColor(getAppointment(emp, time)?.status)">
+
                         <ng-container *ngIf="getAppointment(emp, time) as appt; else emptySlot">
-                            <div class="fw-bold">{{ appt.patient }}</div>
-                            <div class="small text-light">{{ appt.service }}</div>
-                            <div class="text-white-50 small">{{ appt.time.from }} - {{ appt.time.to }}</div>
+
+                            <div class="text-dark fw-bold">{{ appt.patient }}</div>
+                            <div class="small text-dark my-2 fw-bold">{{ appt.serviceEn }}</div>
+                            <div class="small text-dark my-2 fw-bold">{{ appt.service }}</div>
+
+                            <div class="small text-dark my-2 fw-bold">{{ appt.location }}</div>
+                            <div class="small text-dark my-2 fw-bold">
+                                {{appt.price}}
+                            </div>
                             <span class="badge mt-1 rounded-pill px-2 py-1" [ngClass]="getStatusColor(appt.status)">
                                 {{ appt.status | titlecase }}
                             </span>
+
                         </ng-container>
 
-                        <!-- Empty Slot -->
+                        <!-- Empty slot -->
                         <ng-template #emptySlot>
-                            <div class="text-muted small fst-italic bg-light border rounded-2 py-1 px-2" title="Available">Available</div>
+                            <div class="text-muted small fst-italic bg-light border rounded-2 py-1 px-2">
+                                Available
+                            </div>
                         </ng-template>
+
                     </td>
-                }
-            </tr>
-        </ng-template>
-    </p-table>
+                    }
+
+                </tr>
+            </ng-template>
+
+        </p-table>
+    </div>
+
+
+
 </section>

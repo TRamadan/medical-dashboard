@@ -18,7 +18,6 @@ import { SharedService } from '../../../shared/services/shared.service';
 import { TabsModule } from 'primeng/tabs';
 import { ResearchesComponent } from './researches/researches.component';
 import { ExerciesComponent } from './exercies/exercies.component';
-import { Exercise } from '../treatment-plan/models/treatmnetplan';
 import { TagModule } from 'primeng/tag';
 @Component({
     selector: 'app-education',
@@ -33,7 +32,6 @@ export class EducationComponent implements OnInit {
     public readonly imgUrl = environment.imgUrlWebsite;
     categories: Category[] = [];
     allResearches: Researches[] = [];
-    allExercises: Exercise[] = [];
     cols: TableColumn[] = [];
     isDeleteMode: boolean = false;
     parsedCategories: any[] = [];

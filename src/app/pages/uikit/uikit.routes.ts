@@ -9,7 +9,6 @@ import { CalendarComponent } from './calendar/calendar.component';
 import { AttendanceTrackingComponent } from './attendance-tracking/attendance-tracking.component';
 import { SessionManagementComponent } from './session-management/session-management.component';
 import { CoachManagerComponent } from './coach-manager/coach-manager.component';
-import { TreatmentPlanComponent } from './treatment-plan/treatment-plan.component';
 import { SuperStarsComponent } from './super-stars/super-stars.component';
 import { PartnersComponent } from './partners/partners.component';
 import { AboutUsComponent } from './about-us/about-us.component';
@@ -24,6 +23,7 @@ import { HowItWorksComponent } from './how-it-works/how-it-works.component';
 import { EducationComponent } from './education-page/education.component';
 import { WorkingHoursComponent } from './working-hours/working-hours.component';
 import { OurSolutionsComponent } from './our-solutions/our-solutions.component';
+import { PatientreportComponent } from './patientreport/patientreport.component';
 export default [
     {
         path: 'adduser',
@@ -44,6 +44,11 @@ export default [
         path: 'addgroup',
         data: { breadcrumb: 'Add group' },
         component: AddGroupComponent
+    },
+    {
+        path: 'patientreport',
+        data: { breadcrumb: 'Add patient report' },
+        component: PatientreportComponent
     },
     {
         path: 'workinghours',
@@ -90,12 +95,6 @@ export default [
         path: 'coachmanagement',
         data: { breachcrumb: 'Coach management' },
         component: CoachManagerComponent
-    },
-
-    {
-        path: 'treatmentplan',
-        data: { breadcrumb: 'Treatment plan' },
-        component: TreatmentPlanComponent
     },
 
     {

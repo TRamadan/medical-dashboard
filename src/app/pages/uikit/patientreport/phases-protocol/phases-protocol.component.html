@@ -1,0 +1,134 @@
+<div class="flex flex-col gap-6">
+    <!-- Alert Banner -->
+    <div class="bg-[#FDFDEA] border border-[#F1F1C6] rounded-xl p-4 flex gap-4 items-start w-11/12 mx-auto">
+        <i class="pi pi-info-circle text-[#A4A43D] text-2xl mt-1"></i>
+        <div class="flex flex-col gap-1">
+            <span class="font-bold text-[#A4A43D] text-lg">Step 2: Define Treatment Phases & Protocol</span>
+            <span class="text-[#A4A43D]">Break down the treatment into phases with specific objectives and
+                exercises.</span>
+        </div>
+    </div>
+
+    <!-- Phases Card -->
+    <p-card>
+        <div class="flex flex-col gap-6">
+            <div class="flex justify-between items-center">
+                <span class="text-xl font-bold">Template Phases - Customize as Needed</span>
+                <p-button label="+ Add Phase" [text]="true" (onClick)="addPhase()"></p-button>
+            </div>
+
+            <!-- Phase Items -->
+            <div class="flex flex-col gap-4">
+                <div *ngFor="let phase of phases; let i = index"
+                    class="border rounded-xl p-4 flex flex-col gap-4 relative">
+                    <!-- Close Button -->
+                    <button *ngIf="i > 0" class="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+                        (click)="removePhase(i)">
+                        <i class="pi pi-times"></i>
+                    </button>
+
+                    <!-- Title -->
+                    <span *ngIf="isTemplateSelected" class="font-bold text-lg">{{ phase.title }}</span>
+                    <div *ngIf="!isTemplateSelected" class="flex flex-col gap-2">
+                        <label class="font-medium text-gray-700">Phase Name:</label>
+                        <input pInputText [(ngModel)]="phase.title" placeholder="Enter phase name" class="w-full" />
+                    </div>
+
+                    <!-- Weeks & Sessions -->
+                    <div class="flex gap-4">
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="font-medium text-gray-700">Weeks:</label>
+                            <input pInputText [(ngModel)]="phase.weeks" placeholder="eg., 12" class="w-full"
+                                type="number" />
+                        </div>
+                        <div class="flex flex-col gap-2 flex-1">
+                            <label class="font-medium text-gray-700">Sessions:</label>
+                            <input pInputText [(ngModel)]="phase.sessions" placeholder="eg., 12" class="w-full"
+                                type="number" />
+                        </div>
+                    </div>
+
+                    <!-- Objective -->
+                    <div class="flex flex-col gap-2">
+                        <label class="font-medium text-gray-700">Phase Objective:</label>
+                        <textarea pInputTextarea [(ngModel)]="phase.objective" rows="3" class="w-full"
+                            placeholder="Reduce inflammation, protect healing tissue, gentle ROM exercises"></textarea>
+                    </div>
+
+                    <!-- Edit Protocol Link -->
+                    <div *ngIf="isTemplateSelected"
+                        class="flex items-center gap-2 text-blue-500 cursor-pointer hover:text-blue-600">
+                        <i class="pi pi-file-edit"></i>
+                        <span class="font-medium">Edit Exercise Protocol</span>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-gray-200 my-2"></div>
+
+                    <!-- Measurements Section -->
+                    <div class="flex flex-col gap-6">
+                        <span class="text-xl font-bold">Measurements</span>
+                        
+                        <!-- Categories Row -->
+                        <div class="flex flex-wrap gap-8">
+                            <div *ngFor="let cat of phase.measurementCategories; let ci = index" class="flex flex-col gap-2">
+                                <div class="flex items-center gap-2">
+                                     <p-checkbox [(ngModel)]="cat.selected" [binary]="true" [inputId]="'cat_'+i+'_'+ci"></p-checkbox>
+                                    <label [for]="'cat_'+i+'_'+ci" class="cursor-pointer font-medium text-gray-800">{{ cat.label }}</label>
+                                </div>
+                                <div *ngIf="cat.selected && ci > 0" class="flex flex-col gap-2">
+                                    <div class="flex items-center gap-2 text-yellow-600 bg-yellow-50 p-2 rounded text-sm">
+                                        <i class="pi pi-exclamation-triangle"></i>
+                                        <span>No items available for this category.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Measurement Items -->
+                        <div class="flex flex-col gap-4" *ngIf="phase.measurementCategories[0].selected">
+                            <div *ngFor="let item of phase.measurementItems; let mi = index" class="flex flex-col gap-2">
+                                <div class="flex items-center gap-2">
+                                    <p-checkbox [(ngModel)]="item.selected" [binary]="true" [inputId]="'meas_'+i+'_'+mi"></p-checkbox>
+                                    <label [for]="'meas_'+i+'_'+mi" class="cursor-pointer text-gray-700">{{ item.label }}</label>
+                                </div>
+                                <input *ngIf="item.selected" pInputText [(ngModel)]="item.value" placeholder="Enter value" class="w-full p-inputtext-sm" />
+                            </div>
+                        </div>
+
+                        <!-- Repeat Measurement Box -->
+                        <div class="border rounded-xl p-6 flex flex-col gap-4">
+                            <span class="font-medium text-gray-800">Do you want repeat this measurement again ?</span>
+                            <div class="flex items-center gap-2">
+                                <p-checkbox [(ngModel)]="phase.repeatMeasurement" [binary]="true" [inputId]="'repeat_'+i"></p-checkbox>
+                                <label [for]="'repeat_'+i" class="cursor-pointer text-gray-700">Repeat Measurement</label>
+                            </div>
+                            
+                            <div *ngIf="phase.repeatMeasurement" class="flex flex-col gap-2 mt-2">
+                                <label class="font-medium text-gray-800">Repeat in Session Number:</label>
+                                <input pInputText [(ngModel)]="phase.repeatSessionNumber" placeholder="eg., 12" class="w-full" type="number" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </p-card>
+
+
+
+    <!-- Specializations Card -->
+    <p-card>
+        <div class="flex flex-col gap-4">
+            <span class="text-xl font-bold">Required Coach Specializations</span>
+            <div class="flex flex-col gap-3">
+                <div *ngFor="let spec of specializations" class="flex items-center gap-2">
+                    <p-checkbox [(ngModel)]="spec.selected" [binary]="true" [inputId]="spec.label"></p-checkbox>
+                    <label [for]="spec.label" class="cursor-pointer text-gray-700">{{ spec.label }}</label>
+                </div>
+            </div>
+        </div>
+    </p-card>
+
+
+</div>

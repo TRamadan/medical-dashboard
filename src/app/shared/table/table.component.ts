@@ -173,7 +173,7 @@ export class TableComponent {
             case 2:
                 return 'Completed';
             case 3:
-                return 'Canceled';
+                return 'Cancelled';
             default:
                 return '';
         }

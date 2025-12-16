@@ -1,0 +1,104 @@
+<div class="flex flex-col gap-6">
+    <!-- Header -->
+    <div class="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex gap-4 items-start w-full">
+        <i class="pi pi-cog text-indigo-600 text-xl mt-1"></i>
+        <div class="flex flex-col gap-1">
+            <span class="font-bold text-gray-800 text-lg">Detailed Session Configuration</span>
+            <span class="text-indigo-600">Configure exercises and protocols for each session within your defined phases.</span>
+        </div>
+    </div>
+
+    <!-- No Phases Alert -->
+    <div *ngIf="phases.length === 0" class="flex flex-col items-center justify-center p-12 text-gray-400 border-2 border-dashed rounded-xl">
+        <i class="pi pi-list text-3xl mb-2"></i>
+        <span>No phases defined. Please go back and add phases first.</span>
+    </div>
+
+    <!-- Phases Loop -->
+    <div *ngFor="let phase of phases; let i = index" class="border rounded-xl overflow-hidden shadow-sm">
+        <div class="bg-gray-100 p-4 border-b flex justify-between items-center">
+            <div class="flex flex-col">
+                <span class="font-bold text-xl text-gray-800">{{phase.title}}</span>
+                <span class="text-sm text-gray-500">{{phase.weeks}} Weeks • {{phase.sessions}} Sessions Total</span>
+            </div>
+            <div class="bg-white px-3 py-1 rounded border text-sm font-medium">Phase {{phase.id || i + 1}}</div>
+        </div>
+
+        <div class="p-4" *ngIf="phase.sessions > 0; else noSessions">
+            <p-accordion [multiple]="true" styleClass="w-full">
+                <!-- Loop through Sessions -->
+                <ng-container *ngFor="let s of getSessionsRange(phase.sessions)">
+                    <p-accordionTab [header]="'Session ' + s">
+                        <div class="flex flex-col gap-6">
+                            
+                            <!-- Sections Loop -->
+                            <div *ngFor="let section of getSections(phase, s); let secIndex = index" class="border border-gray-200 rounded-lg p-4 bg-gray-50 relative">
+                                <!-- Remove Section Button -->
+                                <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm absolute top-2 right-2" (click)="removeSection(phase, s, secIndex)"></button>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 pr-10">
+                                    <div class="flex flex-col gap-2">
+                                        <label class="font-medium text-sm text-gray-600">Section Title</label>
+                                        <input pInputText [(ngModel)]="section.title" placeholder="e.g. Warm Up" />
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <label class="font-medium text-sm text-gray-600">Duration (mins)</label>
+                                        <input pInputText type="number" [(ngModel)]="section.time" placeholder="e.g. 10" />
+                                    </div>
+                                    <div class="flex flex-col gap-2">
+                                        <label class="font-medium text-sm text-gray-600">Assign Coach</label>
+                                        <p-dropdown [options]="coaches" [(ngModel)]="section.coach" placeholder="Select Coach" styleClass="w-full" optionLabel="label" optionValue="value"></p-dropdown>
+                                    </div>
+                                </div>
+
+                                <!-- Exercises Table -->
+                                <div class="bg-white rounded border border-gray-200 overflow-hidden">
+                                     <p-table [value]="section.exercises" [tableStyle]="{ 'min-width': '50rem' }" styleClass="p-datatable-sm">
+                                        <ng-template pTemplate="header">
+                                            <tr>
+                                                <th style="width: 25%">Exercise Name</th>
+                                                <th style="width: 10%">Sets</th>
+                                                <th style="width: 10%">Reps</th>
+                                                <th style="width: 15%">Intensity</th>
+                                                <th style="width: 15%">Tempo</th>
+                                                <th style="width: 15%">Rest</th>
+                                                <th style="width: 10%"></th>
+                                            </tr>
+                                        </ng-template>
+                                        <ng-template pTemplate="body" let-ex let-exIndex="rowIndex">
+                                            <tr>
+                                                <td><input pInputText [(ngModel)]="ex.name" class="w-full p-inputtext-sm" placeholder="Name" /></td>
+                                                <td><input pInputText [(ngModel)]="ex.sets" class="w-full p-inputtext-sm" /></td>
+                                                <td><input pInputText [(ngModel)]="ex.reps" class="w-full p-inputtext-sm" /></td>
+                                                <td><input pInputText [(ngModel)]="ex.intensity" class="w-full p-inputtext-sm" /></td>
+                                                <td><input pInputText [(ngModel)]="ex.tempo" class="w-full p-inputtext-sm" /></td>
+                                                <td><input pInputText [(ngModel)]="ex.rest" class="w-full p-inputtext-sm" /></td>
+                                                <td>
+                                                    <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm" (click)="removeExercise(section, exIndex)"></button>
+                                                </td>
+                                            </tr>
+                                        </ng-template>
+                                     </p-table>
+                                     <div class="p-2 border-t bg-gray-50">
+                                         <p-button label="+ Add Exercise" [text]="true" size="small" icon="pi pi-plus" (onClick)="addExercise(section)"></p-button>
+                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Add Section Button -->
+                             <div class="flex justify-center">
+                                <p-button label="Add New Section" icon="pi pi-plus-circle" severity="secondary" [outlined]="true" (onClick)="addSection(phase, s)"></p-button>
+                             </div>
+
+                        </div>
+                    </p-accordionTab>
+                </ng-container>
+            </p-accordion>
+        </div>
+        <ng-template #noSessions>
+            <div class="p-8 text-center text-gray-400">
+                No sessions configured for this phase.
+            </div>
+        </ng-template>
+    </div>
+</div>

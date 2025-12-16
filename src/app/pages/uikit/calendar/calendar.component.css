@@ -6,6 +6,16 @@
 
 section {
     min-height: 100vh;
+} 
+
+.bg-warning {
+    --bs-bg-opacity: 1;
+    background-color: rgb(255 193 7 / 43%) !important;
+} 
+
+.bg-success {
+    --bs-bg-opacity: 1;
+    background-color: rgb(25 135 84 / 43%) !important;
 }
 
 img {
@@ -15,9 +25,23 @@ img {
     min-width: 40px;
 }
 
+.selected-date {
+    font-size: 20px;
+}
+
+.bg-success-subtle {
+    background-color: #13133775 !important;
+}
+
+::ng-deep .p-datatable-gridlines .p-datatable-thead > tr > th {
+    border-width: 1px 0 1px 1px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
 .calendar-container {
     margin: 0 auto;
-    background: rgba(255, 255, 255, .95);
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
     backdrop-filter: blur(10px);
     overflow: hidden;
@@ -64,7 +88,7 @@ img {
     font-size: clamp(1.8rem, 5vw, 2.5rem);
     font-weight: 700;
     margin-bottom: 10px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     color: #fff;
     text-align: center;
 }
@@ -84,13 +108,13 @@ img {
     border-radius: 12px;
     padding: clamp(10px, 2.5vw, 15px);
     border: 2px solid #e9ecef;
-    transition: all .3s ease;
+    transition: all 0.3s ease;
     margin-bottom: 15px;
 }
 
 .employee-column:hover {
     border-color: #2196f3;
-    box-shadow: 0 5px 15px rgba(33, 150, 243, .2);
+    box-shadow: 0 5px 15px rgba(33, 150, 243, 0.2);
     transform: translateY(-2px);
 }
 
@@ -119,7 +143,7 @@ img {
     padding: clamp(15px, 3vw, 20px);
     background: linear-gradient(135deg, #fff, #f8f9fa);
     border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, .1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     gap: 15px;
 }
 
@@ -149,7 +173,7 @@ img {
 
 .badge {
     display: inline-block;
-    padding: .35em .65em;
+    padding: 0.35em 0.65em;
     font-size: clamp(1rem, 2.5vw, 1.25rem);
     font-weight: 600;
     color: #fff;
@@ -159,6 +183,20 @@ img {
     margin: 5px;
     font-size: clamp(1rem, 2.5vw, 1.25rem);
     font-weight: bold;
+}
+
+.fab-btn {
+    position: fixed !important;
+    bottom: 30px;
+    right: 30px;
+    z-index: 9999 !important;
+}
+
+::ng-deep .fab-btn button {
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
 }
 
 /* Mobile Devices (320px to 768px) */
@@ -271,7 +309,7 @@ img {
 
     .badge {
         font-size: 0.9rem;
-        padding: .25em .5em;
+        padding: 0.25em 0.5em;
     }
 
     .duration {

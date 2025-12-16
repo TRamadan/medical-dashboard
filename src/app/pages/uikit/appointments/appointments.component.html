@@ -1,5 +1,36 @@
 <p-toast />
 <div class="grid grid-cols-12 gap-8 mb-4">
+    <!-- Pending appointments -->
+    <div class="col-span-12 md:col-span-6 xl:col-span-3">
+        <div class="card !p-0 overflow-hidden flex flex-col border-0">
+            <div class="flex items-center p-6">
+                <i class="pi pi-clock !text-5xl text-amber-500"></i>
+                <div class="ml-6">
+                    <span class="text-amber-500 block whitespace-nowrap">Scheduled appointments</span>
+                    <span class="text-amber-500 block text-4xl font-bold">
+                        {{ pendingAppointmentsCount }}
+                    </span>
+                </div>
+            </div>
+            <img alt="conversion" class="w-full" src="assets/users.svg" />
+        </div>
+    </div>
+
+    <div class="col-span-12 md:col-span-6 xl:col-span-3">
+        <div class="card !p-0 overflow-hidden flex flex-col border-0">
+            <div class="flex items-center p-6">
+                <i class="pi pi-times !text-5xl text-red-500"></i>
+                <div class="ml-6">
+                    <span class="text-red-500 block whitespace-nowrap">Canceled appointments</span>
+                    <span class="text-red-500 block text-4xl font-bold">
+                        {{ canceledAppointmentsCount }}
+                    </span>
+                </div>
+            </div>
+            <img alt="conversion" class="w-full" src="../../../../assets/users.svg" />
+        </div>
+    </div>
+
     <div class="col-span-12 md:col-span-6 xl:col-span-3">
         <div class="card !p-0 overflow-hidden flex flex-col border-0">
             <div class="flex items-center p-6">
@@ -14,28 +45,13 @@
             <img alt="conversion" class="w-full" src="../../../../assets/users.svg" />
         </div>
     </div>
-
-    <!-- Pending appointments -->
-    <div class="col-span-12 md:col-span-6 xl:col-span-3">
-        <div class="card !p-0 overflow-hidden flex flex-col border-0">
-            <div class="flex items-center p-6">
-                <i class="pi pi-clock !text-5xl text-orange-500"></i>
-                <div class="ml-6">
-                    <span class="text-orange-500 block whitespace-nowrap">Scheduled appointments</span>
-                    <span class="text-orange-500 block text-4xl font-bold">
-                        {{ pendingAppointmentsCount }}
-                    </span>
-                </div>
-            </div>
-            <img alt="conversion" class="w-full" src="assets/users.svg" />
-        </div>
-    </div>
 </div>
 
 <!-- Toolbar -->
 <p-toolbar styleClass="mb-6">
     <ng-template #start>
-        <p-button icon="pi pi-plus" raised label="New Appointment" class="mr-2" (click)="openNewAppointmentDialog()"></p-button>
+        <p-button icon="pi pi-plus" raised label="New Appointment" class="mr-2"
+            (click)="openNewAppointmentDialog()"></p-button>
     </ng-template>
 
     <ng-template #end>
@@ -45,33 +61,215 @@
 
 <!-- Grouped Appointments by Date -->
 @for (group of groupedAppointments; track group) {
-    <div>
-        <h3 class="text-xl font-semibold mb-3 mt-5">
-            {{ group.date | date: 'fullDate' }}
-        </h3>
+<div>
+    <h3 class="text-xl font-semibold mb-3 mt-5">
+        {{ group.date | date: 'fullDate' }}
+    </h3>
 
-        <app-table
-            dataKey="id"
-            [headers]="tableHeaders"
-            [data]="group.appointments"
-            [actions]="tableActions"
-            [paginator]="true"
-            [rows]="10"
-            [showCurrentPageReport]="true"
-            [rowsPerPageOptions]="[10, 20, 30]"
-            [globalFilterFields]="globalFilterFields"
-            [globalFilterPlaceholder]="'Search appointments...'"
-            [showActions]="true"
-            (edit)="openStatusDialog($event)"
-            (onPageChange)="onPageChange($event)"
-        ></app-table>
-    </div>
+    <app-table dataKey="id" [showDeleteButton] = 'false' [headers]="tableHeaders" [data]="group.appointments" [actions]="tableActions"
+        [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]"
+        [globalFilterFields]="globalFilterFields" [globalFilterPlaceholder]="'Search appointments...'"
+        [showActions]="true" [isShowDetails]="true" (edit)="openStatusDialog($event)"
+        (onPageChange)="onPageChange($event)">
+        <ng-template #details let-row>
+            <div class="p-4 bg-light rounded border">
+                <div class="row g-4 align-items-stretch">
+
+                    <!-- Patient Profile -->
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card p-0 h-100 border-0 shadow-sm d-flex flex-column">
+
+                            <div class="card-header bg-light border-bottom p-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-white p-1 shadow-sm"
+                                        style="width: 64px; height: 64px;">
+                                        <div
+                                            class="w-100 h-100 rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center text-primary fw-bold fs-5 text-uppercase">
+                                            {{ row.appointmentProfile?.firstName?.charAt(0) }}{{
+                                            row.appointmentProfile?.lastName?.charAt(0) }}
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-grow-1 min-w-0">
+                                        <h4 class="h5 fw-bold text-dark text-truncate mb-1"
+                                            [title]="row.appointmentProfile?.firstName + ' ' + row.appointmentProfile?.lastName">
+                                            {{ row.appointmentProfile?.firstName }} {{ row.appointmentProfile?.lastName
+                                            }}
+                                        </h4>
+
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span *ngIf="row.appointmentProfile?.genderName"
+                                                class="badge bg-light text-secondary border fw-normal">
+                                                {{ row.appointmentProfile?.genderName }}
+                                            </span>
+                                            <span class="small text-muted">ID: #{{ row.appointmentProfile?.id }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-body p-4 flex-grow-1">
+                                <div class="d-flex flex-column gap-3">
+
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                            style="width: 32px; height: 32px;">
+                                            <i class="pi pi-envelope"></i>
+                                        </div>
+                                        <div>
+                                            <p class="small text-muted fw-medium text-uppercase mb-0">Email</p>
+                                            <p class="mb-0 text-dark text-break">{{ row.appointmentProfile?.email ||
+                                                'N/A' }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                            style="width: 32px; height: 32px;">
+                                            <i class="pi pi-phone"></i>
+                                        </div>
+                                        <div>
+                                            <p class="small text-muted fw-medium text-uppercase mb-0">Phone</p>
+                                            <p class="mb-0 text-dark">{{ row.appointmentProfile?.phoneNumber || 'N/A' }}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start gap-3"
+                                        *ngIf="row.appointmentProfile?.emergencyPhoneNumber">
+                                        <div class="rounded bg-danger-subtle d-flex align-items-center justify-content-center text-danger"
+                                            style="width: 32px; height: 32px;">
+                                            <i class="bi bi-asterisk"></i>
+                                        </div>
+                                        <div>
+                                            <p class="small text-muted fw-medium text-uppercase mb-0">Emergency</p>
+                                            <p class="mb-0 text-danger fw-medium">{{
+                                                row.appointmentProfile?.emergencyPhoneNumber }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-start gap-3">
+                                        <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                            style="width: 32px; height: 32px;">
+                                            <i class="pi pi-calendar"></i>
+                                        </div>
+                                        <div>
+                                            <p class="small text-muted fw-medium text-uppercase mb-0">Date of Birth</p>
+                                            <p class="mb-0 text-dark">{{ row.appointmentProfile?.dateOfBirth |
+                                                date:'mediumDate' }}</p>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Appointment Info -->
+                    <div class="col-12 col-md-6 col-lg-4">
+                        <div class="card border-0 shadow-sm p-0 h-100 d-flex flex-column">
+
+                            <div class="card-header bg-light border-bottom p-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center"
+                                        style="width: 40px; height: 40px;">
+                                        <i class="pi pi-calendar-plus fs-5"></i>
+                                    </div>
+                                    <h4 class="h5 fw-semibold mb-0 text-dark">Appointment Info</h4>
+                                </div>
+                            </div>
+
+                            <div class="card-body p-4 flex-grow-1">
+                                <div class="d-flex flex-column gap-3">
+
+                                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                        <span class="text-secondary fw-medium">Service</span>
+                                        <span class="fw-bold text-success">{{ row.serviceNameEn }}</span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                        <span class="text-secondary fw-medium">Location</span>
+                                        <span class="small text-end">{{ row.locationNameEn }}</span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                        <span class="text-secondary fw-medium">Date</span>
+                                        <span>{{ row.startTime | date:'mediumDate' }}</span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                        <span class="text-secondary fw-medium">Time</span>
+                                        <span>{{ row.startTime | date:'shortTime' }} - {{ row.endTime | date:'shortTime'
+                                            }}</span>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between align-items-center pt-1">
+                                        <span class="text-secondary fw-medium">Price</span>
+                                        <span class="fw-bold text-success">{{ row.servicePrice | currency:'EGP':'symbol'
+                                            }}</span>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Session Breakdown -->
+                    <div class="col-12 col-md-12 col-lg-4">
+                        <div class="card border-0 shadow-sm p-0 h-100 d-flex flex-column">
+
+                            <div class="card-header bg-light border-bottom p-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
+                                        style="width: 40px; height: 40px;">
+                                        <i class="pi pi-list fs-5"></i>
+                                    </div>
+                                    <h4 class="h5 fw-semibold mb-0 text-dark">Session Breakdown</h4>
+                                </div>
+                            </div>
+
+                            <div class="card-body p-4 flex-grow-1 overflow-auto">
+                                <div *ngIf="!row.subAppointment || row.subAppointment.length === 0"
+                                    class="text-center text-secondary py-4">
+                                    No sub-appointments
+                                </div>
+
+                                <div *ngFor="let sub of row.subAppointment"
+                                    class="position-relative ps-4 border-start pb-4">
+                                    <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-primary border border-white"
+                                        style="width: 16px; height: 16px; left: -1px;"></div>
+
+                                    <div class="d-flex flex-column gap-1">
+                                        <span class="fw-bold text-dark small">{{ sub.serviceNameEn }}</span>
+                                        <span class="small text-secondary">{{ sub.doctorNameEn }}</span>
+
+                                        <div class="d-flex align-items-center gap-2 mt-1">
+                                            <span class="badge bg-light text-secondary border fw-normal">
+                                                {{ sub.startTime | date:'shortTime' }} - {{ sub.endTime |
+                                                date:'shortTime' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </ng-template>
+    </app-table>
+</div>
 }
 
 <!-- New Appointment Dialog -->
-<p-dialog header="New Appointment" [(visible)]="displayNewAppointmentDialog" [modal]="true" [style]="{ width: '50vw' }" [draggable]="false" [resizable]="false">
+<p-dialog header="New Appointment" [(visible)]="displayNewAppointmentDialog" [modal]="true" [style]="{ width: '50vw' }"
+    [draggable]="false" [resizable]="false">
     <ng-template pTemplate="content">
-        <app-booking-form></app-booking-form>
+        <app-booking-form (bookingSuccess)="onBookingSuccess()"></app-booking-form>
     </ng-template>
     <ng-template pTemplate="footer">
         <p-button icon="pi pi-times" (click)="hideDialog()" label="Cancel" styleClass="p-button-text"></p-button>
@@ -79,10 +277,12 @@
 </p-dialog>
 
 <!-- here is the dialog needed to show the status for update the selected appointment-->
-<p-dialog header="Change Appointment Status" [(visible)]="displayStatusDialog" [modal]="true" [style]="{ width: '500px' }" [closable]="false">
+<p-dialog header="Change Appointment Status" [(visible)]="displayStatusDialog" [modal]="true"
+    [style]="{ width: '700px' }" [closable]="false">
     <div class="flex flex-wrap gap-3 justify-center mt-3">
         <div class="flex flex-wrap justify-center gap-4 mt-3">
-            <div *ngFor="let status of statuses" (click)="selectedStatusId = status.id" class="status-card" [ngClass]="{ selected: selectedStatusId === status.id }">
+            <div *ngFor="let status of statuses" (click)="selectedStatusId = status.id" class="status-card"
+                [ngClass]="{ selected: selectedStatusId === status.id }">
                 <div class="flex flex-col items-center justify-center gap-2">
                     <div class="icon-circle" [ngClass]="'bg-' + status.color + '-100 text-' + status.color + '-600'">
                         <i class="pi pi-check-circle text-xl"></i>
@@ -95,6 +295,7 @@
 
     <ng-template pTemplate="footer">
         <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="cancelStatusChange()"></button>
-        <button pButton label="Save" icon="pi pi-check" [disabled]="selectedStatusId === null" (click)="confirmStatusChange()"></button>
+        <button pButton label="Save" icon="pi pi-check" [disabled]="selectedStatusId === null"
+            (click)="confirmStatusChange()"></button>
     </ng-template>
 </p-dialog>

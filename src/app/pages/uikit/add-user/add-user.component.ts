@@ -22,6 +22,8 @@ import { GroupsService } from '../add-group/services/groups.service';
 import { RolesService } from '../add-permission/services/roles.service';
 import { SelectModule } from 'primeng/select';
 import { FileUploadInputComponent } from '../../../shared/file-upload-input/file-upload-input.component';
+import { TabViewModule } from 'primeng/tabview';
+
 @Component({
     selector: 'app-add-user',
     imports: [
@@ -40,7 +42,8 @@ import { FileUploadInputComponent } from '../../../shared/file-upload-input/file
         MultiSelectModule,
         StepperModule,
         FileUploadModule,
-        ToastModule
+        ToastModule,
+        TabViewModule
     ],
     standalone: true,
     providers: [MessageService],
@@ -72,11 +75,18 @@ export class AddUserComponent implements OnInit {
     ) {}
 
     coachsHeader: TableColumn[] = [
-        { label: 'Username', field: 'username', type: 'text', sortable: true },
+        { label: 'Username', field: 'userName', type: 'text', sortable: true },
         { label: 'Name (AR)', field: 'nameAr', type: 'text', sortable: true },
         { label: 'Name (EN)', field: 'nameEn', type: 'text', sortable: true },
         { label: 'Email', field: 'email', type: 'text', sortable: true },
         { label: 'Phone Number', field: 'phoneNumber', type: 'text', sortable: true }
+    ];
+    genders: any[] = [
+        { id: 1, name: 'Male' },
+        {
+            id: 2,
+            name: 'Female'
+        }
     ];
 
     ngOnInit() {
@@ -111,6 +121,7 @@ export class AddUserComponent implements OnInit {
                 password: ['', [Validators.required, Validators.minLength(8)]],
                 rolesId: [[], Validators.required],
                 groupesId: [[], Validators.required],
+                genderId: [null, Validators.required],
                 employeeType: [null, Validators.required]
             }),
             employeeData: this.fb.group({
@@ -314,8 +325,15 @@ export class AddUserComponent implements OnInit {
     }
 
     showUserDetails(user: any) {
-        this.selectedUser = user;
-        this.detailsDialog = true;
+        this.userService.getUserById(user.id).subscribe({
+            next: (fullUser) => {
+                this.selectedUser = fullUser;
+                this.detailsDialog = true;
+            },
+            error: (err) => {
+                this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch user details' });
+            }
+        });
     }
 
     //here is the function needed to close the modal and rese all flags

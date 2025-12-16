@@ -1,0 +1,114 @@
+<p-accordion [activeIndex]="0">
+    <p-card *ngIf="selectedPatient" class="block mb-4">
+        <div class="flex justify-between items-center">
+            <span class="text-xl font-bold text-green-700">Selected Patient: {{selectedPatient.name}}</span>
+            <p-button label="Reset Selection" severity="secondary" icon="pi pi-refresh" (onClick)="resetSelection()" />
+        </div>
+    </p-card>
+
+    <ng-container *ngFor="let patient of patients">
+        <p-accordionTab *ngIf="!selectedPatient || selectedPatient.id === patient.id"
+            [selected]="selectedPatient?.id === patient.id">
+            <ng-template pTemplate="header">
+                <div class="flex align-items-center gap-2 w-full justify-content-between">
+                    <div class="flex align-items-center gap-2">
+                        <span class="font-bold white-space-nowrap">{{ patient.name }}</span>
+                        <p-tag [value]="patient.status" [severity]="getSeverity(patient.status)" />
+                    </div>
+
+                </div>
+            </ng-template>
+
+            <!-- Simplified View (When no patient is selected) -->
+            <div *ngIf="!selectedPatient" class="flex flex-col gap-4 p-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-base text-gray-600">Name:</span>
+                    <span class="text-base font-semibold">{{ patient.name }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-base text-gray-600">Appointment Date:</span>
+                    <span class="text-base font-semibold">{{ patient.bookingDate }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-base text-gray-600">Gender:</span>
+                    <span class="text-base font-semibold">{{ patient.gender }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-base text-gray-600">Injury:</span>
+                    <span class="text-base font-semibold">{{ patient.injury }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-base text-gray-600">Activity (Sport):</span>
+                    <span class="text-base font-semibold">{{ patient.sport }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-base text-gray-600">Injury Level:</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-base font-semibold">{{ patient.level }}</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 ml-auto">
+                    <p-button *ngIf="!selectedPatient" label="Create Injury Report" size="small" icon="pi pi-plus"
+                        (onClick)="selectPatient(patient); $event.stopPropagation()" />
+                    <p-tag *ngIf="selectedPatient?.id === patient.id" value="Selected" severity="success" />
+                </div>
+
+            </div>
+
+            <!-- Full Details View (When patient is selected) -->
+            <div *ngIf="selectedPatient" class="flex flex-col gap-6 p-3">
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Patient ID:</span>
+                    <span class="text-lg font-medium">{{ patient.id }}</span>
+                </div>
+                <!-- Adding new fields to full view as well for consistency if desired, or sticking to original set plus status -->
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Injury:</span>
+                    <span class="text-lg font-medium">{{ patient.injury }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Sport:</span>
+                    <span class="text-lg font-medium">{{ patient.sport }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Level:</span>
+                    <p-tag [value]="patient.status" [severity]="getSeverity(patient.status)" />
+                </div>
+
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Age:</span>
+                    <span class="text-lg font-medium">{{ patient.age }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Gender:</span>
+                    <span class="text-lg font-medium">{{ patient.gender }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Mobile:</span>
+                    <span class="text-lg font-medium">{{ patient.mobile }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Email:</span>
+                    <span class="text-lg font-medium">{{ patient.email }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Address:</span>
+                    <span class="text-lg font-medium">{{ patient.address }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Booking Date:</span>
+                    <span class="text-lg font-medium">{{ patient.bookingDate }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Service:</span>
+                    <span class="text-lg font-medium">{{ patient.service }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Booking Time:</span>
+                    <span class="text-lg font-medium">{{ patient.bookingTime }}</span>
+                </div>
+            </div>
+        </p-accordionTab>
+    </ng-container>
+</p-accordion>

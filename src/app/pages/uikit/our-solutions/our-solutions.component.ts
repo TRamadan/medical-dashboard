@@ -15,11 +15,11 @@ import { environment } from '../../../../environments/environment';
 import { SolutionsService } from './services/solutions.service';
 import { SelectModule } from 'primeng/select';
 import { Solution } from './models/solutions';
-
+import { FileUploadInputComponent } from '../../../shared/file-upload-input/file-upload-input.component';
 @Component({
     selector: 'app-our-solutions',
     standalone: true,
-    imports: [CommonModule, TableComponent, CardModule, ToastModule, ConfirmDialogModule, ToolbarModule, ButtonModule, DialogModule, ReactiveFormsModule, SelectModule],
+    imports: [FileUploadInputComponent, CommonModule, TableComponent, CardModule, ToastModule, ConfirmDialogModule, ToolbarModule, ButtonModule, DialogModule, ReactiveFormsModule, SelectModule],
     templateUrl: './our-solutions.component.html',
     styleUrls: ['./our-solutions.component.css'],
     providers: [ConfirmationService, MessageService]

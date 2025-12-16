@@ -1,0 +1,127 @@
+<div class="flex flex-col gap-6">
+    <!-- Alert Banner -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-4 items-start w-11/12 mx-auto">
+        <i class="pi pi-info-circle text-blue-600 text-2xl mt-1"></i>
+        <div class="flex flex-col gap-1">
+            <span class="font-bold text-gray-800 text-lg">Review Patient Information & Report</span>
+            <span class="text-blue-600">Review the consultation form and patient details before sending the report to the patient.</span>
+        </div>
+    </div>
+
+    <!-- Review Card -->
+    <p-card>
+        <ng-template pTemplate="title">
+            <div class="flex items-center gap-2">
+                <i class="pi pi-user text-xl"></i>
+                <span class="text-xl font-bold">Patient Information</span>
+            </div>
+        </ng-template>
+
+        <div class="flex flex-col gap-6 mt-4">
+            <!-- Patient Info -->
+            <div class="flex flex-col gap-4 border-b pb-6">
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Patient ID:</span>
+                    <span class="text-lg font-medium">{{ data?.patient?.id }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Name:</span>
+                    <span class="text-lg font-medium">{{ data?.patient?.name }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-lg">Age:</span>
+            <span class="font-bold text-[#A4A43D] text-lg">Step 5: Report Preview</span>
+            <span class="text-[#A4A43D]">Review all the details below before finalizing the report.</span>
+        </div>
+    </div>
+
+    <!-- Patient & Clinical Summary -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Patient Info -->
+        <p-card header="Patient Information" styleClass="h-full">
+            <div class="flex flex-col gap-3" *ngIf="data.patient">
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-gray-500">Name</span>
+                    <span class="font-bold">{{data.patient.name}}</span>
+                </div>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-gray-500">ID</span>
+                    <span class="font-bold">{{data.patient.id}}</span>
+                </div>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-gray-500">Age/Gender</span>
+                    <span class="font-bold">{{data.patient.age}} / {{data.patient.gender}}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Service</span>
+                    <p-tag [value]="data.patient.service" severity="info"></p-tag>
+                </div>
+            </div>
+        </p-card>
+
+        <!-- Injury Report -->
+        <p-card header="Clinical Report" styleClass="h-full">
+            <div class="flex flex-col gap-4" *ngIf="data.report">
+                <div class="flex flex-col gap-1">
+                    <span class="text-gray-500 font-medium">Injury Name</span>
+                    <span class="font-bold text-lg">{{data.report.injuryName || 'N/A'}}</span>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <span class="text-gray-500 font-medium">Description</span>
+                    <p class="text-gray-800 bg-gray-50 p-3 rounded-lg">{{data.report.description || 'No description provided.'}}</p>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <span class="text-gray-500 font-medium">Recommendation</span>
+                    <p class="text-gray-800 bg-gray-50 p-3 rounded-lg">{{data.report.recommendation || 'No recommendations.'}}</p>
+                </div>
+            </div>
+        </p-card>
+    </div>
+
+    <!-- Plan Configuration -->
+    <p-card header="Treatment Plan Configuration">
+        <div class="flex gap-8" *ngIf="data.plan">
+            <div class="flex flex-col">
+                <span class="text-gray-500 text-sm">Total Weeks</span>
+                <span class="text-2xl font-bold text-blue-600">{{data.plan.weeks || 0}}</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-gray-500 text-sm">Total Sessions</span>
+                <span class="text-2xl font-bold text-blue-600">{{data.plan.sessions || 0}}</span>
+            </div>
+            <div class="flex flex-col" *ngIf="data.plan.template">
+                <span class="text-gray-500 text-sm">Template Used</span>
+                <span class="font-bold">{{data.plan.template.title}}</span>
+            </div>
+        </div>
+    </p-card>
+
+    <!-- Phases Detail -->
+    <div class="flex flex-col gap-6">
+        <h2 class="text-2xl font-bold text-gray-800">Treatment Phases & Protocol</h2>
+        
+        <div *ngFor="let phase of data.phases; let i = index" class="border border-gray-300 rounded-xl overflow-hidden bg-white shadow-sm">
+            <div class="bg-gray-50 p-4 border-b border-gray-200 flex justify-between items-center">
+                <div class="flex flex-col">
+                    <span class="font-bold text-xl text-gray-800">{{phase.title}}</span>
+                    <span class="text-gray-500 text-sm">{{phase.weeks}} Weeks • {{phase.sessions}} Sessions</span>
+                </div>
+                <p-tag [value]="'Phase ' + (phase.id || i+1)" severity="warn"></p-tag>
+            </div>
+
+
+        </div>
+    </div>
+
+    <!-- Actions Footer -->
+    <div class="flex justify-between mt-4">
+        <p-button label="Back" severity="secondary" icon="pi pi-arrow-left" (onClick)="onBack()"></p-button>
+        <p-button label="Submit Report" severity="success" icon="pi pi-check" iconPos="right"></p-button>
+    </div>
+</div>
+
+<div *ngIf="!data" class="flex flex-col items-center justify-center p-12 text-gray-500">
+    <i class="pi pi-exclamation-circle text-4xl mb-4"></i>
+    <span>No preview data available. Please complete previous steps.</span>
+    <p-button label="Go Back" [text]="true" (onClick)="onBack()" class="mt-4"></p-button>
+</div>
