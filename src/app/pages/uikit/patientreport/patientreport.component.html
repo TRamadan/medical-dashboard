@@ -50,17 +50,6 @@
             <p-step [value]="5" class="flex flex-row flex-auto gap-2">
                 <ng-template #content let-active="active">
                     <div class="flex flex-col items-center gap-2">
-                        <div class="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-colors duration-200 bg-green-700 border-green-700 text-white">
-                            <i class="pi pi-cog text-2xl"></i>
-                        </div>
-                        <span class="font-bold text-green-700">Sessions Configuration</span>
-                    </div>
-                </ng-template>
-            </p-step>
-
-            <p-step [value]="6" class="flex flex-row flex-auto gap-2">
-                <ng-template #content let-active="active">
-                    <div class="flex flex-col items-center gap-2">
                         <div class="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-colors duration-200 bg-blue-500 border-blue-500 text-white">
                             <i class="pi pi-check-square text-2xl"></i>
                         </div>
@@ -117,32 +106,16 @@
                             <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
                                 (onClick)="activateCallback(3)" />
                             <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
-                                (onClick)="activateCallback(5)" />
-                        </div>
-                    </div>
-                </ng-template>
-            </p-step-panel>
-
-
-
-            <p-step-panel [value]="5">
-                <ng-template #content let-activateCallback="activateCallback">
-                     <div class="flex flex-col">
-                        <app-phases-sessions [phases]="phasesData"></app-phases-sessions>
-                        <div class="flex p-4 justify-between">
-                            <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
-                                (onClick)="activateCallback(4)" />
-                            <p-button label="Create Patient Report" icon="pi pi-arrow-right" iconPos="right"
                                 (onClick)="goToPreview(activateCallback)" />
                         </div>
                     </div>
                 </ng-template>
             </p-step-panel>
 
-            <p-step-panel [value]="6">
+            <p-step-panel [value]="5">
                 <ng-template #content let-activateCallback="activateCallback">
                     <div class="flex flex-col">
-                        <app-report-preview [data]="previewData" (back)="activateCallback(5)"></app-report-preview>
+                        <app-report-preview [data]="previewData" (back)="activateCallback(4)"></app-report-preview>
                     </div>
                 </ng-template>
             </p-step-panel>

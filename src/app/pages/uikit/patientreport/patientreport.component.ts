@@ -8,11 +8,10 @@ import { PatientReportComponent } from './patient-report/patient-report.componen
 import { ReportPreviewComponent } from './report-preview/report-preview.component';
 import { PlanCofigComponent } from './plan-cofig/plan-cofig.component';
 import { PhasesProtocolComponent } from './phases-protocol/phases-protocol.component';
-import { PhasesSessionsComponent } from './phases-sessions/phases-sessions.component';
 
 @Component({
     selector: 'app-patientreport',
-    imports: [CommonModule, StepperModule, CardModule, ButtonModule, PatientInfoComponent, PatientReportComponent, ReportPreviewComponent, PlanCofigComponent, PhasesProtocolComponent, PhasesSessionsComponent],
+    imports: [CommonModule, StepperModule, CardModule, ButtonModule, PatientInfoComponent, PatientReportComponent, ReportPreviewComponent, PlanCofigComponent, PhasesProtocolComponent],
     templateUrl: './patientreport.component.html',
     styleUrl: './patientreport.component.scss'
 })
@@ -58,6 +57,6 @@ export class PatientreportComponent {
             },
             phases: this.phasesData
         };
-        activateCallback(6);
+        activateCallback(5);
     }
 }

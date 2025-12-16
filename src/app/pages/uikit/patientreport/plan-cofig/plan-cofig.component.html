@@ -19,14 +19,14 @@
             <!-- Weeks Input -->
             <div class="flex flex-col gap-2">
                 <label class="font-medium text-gray-700">Total Number Of Weeks <span class="text-red-500">*</span></label>
-                <input pInputText [(ngModel)]="numberOfWeeks" placeholder="eg., 12" class="w-full" type="number" />
+                <input pInputText [(ngModel)]="planConfig.weeks" (ngModelChange)="onConfigChange()" placeholder="eg., 12" class="w-full" type="number" />
                 <small class="text-gray-500">Typical range: 8-16 weeks</small>
             </div>
 
             <!-- Sessions Input -->
             <div class="flex flex-col gap-2">
                 <label class="font-medium text-gray-700">Total Number of Sessions <span class="text-red-500">*</span></label>
-                <input pInputText [(ngModel)]="numberOfSessions" placeholder="eg., 3" class="w-full" type="number" />
+                <input pInputText [(ngModel)]="planConfig.sessions" (ngModelChange)="onConfigChange()" placeholder="eg., 3" class="w-full" type="number" />
             </div>
         </div>
     </p-card> 

@@ -24,17 +24,17 @@
         <div class="flex flex-col gap-6 mt-4">
             <div class="flex flex-col gap-2">
                 <label class="text-lg font-medium text-gray-700">Injury Name</label>
-                <input pInputText type="text" class="w-full" placeholder="Enter injury name here" />
+                <input pInputText type="text" [(ngModel)]="report.injuryName" class="w-full" placeholder="Enter injury name here" />
             </div>
 
             <div class="flex flex-col gap-2">
-                <label class="text-lg font-medium text-gray-700">Diagnoses</label>
-                <textarea rows="5" cols="30" pTextarea [autoResize]="true" placeholder="Enter Diagnoses here"></textarea>
+                <label class="text-lg font-medium text-gray-700">Description</label>
+                <textarea rows="5" cols="30" pTextarea [autoResize]="true" [(ngModel)]="report.description" placeholder="Enter Description here"></textarea>
             </div>
 
             <div class="flex flex-col gap-2">
                 <label class="text-lg font-medium text-gray-700">Recommendation</label>
-                <textarea rows="5" cols="30" pTextarea [autoResize]="true" placeholder="Enter Recommendation here"></textarea>
+                <textarea rows="5" cols="30" pTextarea [autoResize]="true" [(ngModel)]="report.recommendation" placeholder="Enter Recommendation here"></textarea>
             </div>
         </div>
     </p-card>

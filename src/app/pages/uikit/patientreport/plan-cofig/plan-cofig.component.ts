@@ -47,11 +47,12 @@ export class PlanCofigComponent {
         }
     ];
 
-    numberOfWeeks: number | null = null;
-    numberOfSessions: number | null = null;
-
     @Input() planConfig: any = { weeks: null, sessions: null, template: null };
     @Output() planConfigChange = new EventEmitter<any>();
+
+    onConfigChange() {
+        this.planConfigChange.emit(this.planConfig);
+    }
 
     selectTemplate(template: any) {
         this.selectedTemplate = template;
@@ -59,38 +60,32 @@ export class PlanCofigComponent {
 
         // Extract number of weeks from duration string (e.g. "12 weeks" -> 12)
         const weeks = parseInt(template.duration);
-        this.numberOfWeeks = isNaN(weeks) ? null : weeks;
-        this.planConfig.weeks = this.numberOfWeeks;
+        this.planConfig.weeks = isNaN(weeks) ? null : weeks;
 
         // Extract frequency per week (e.g. "3x/week" -> 3)
         const frequencyMatch = template.frequency.match(/(\d+)x/);
         const frequency = frequencyMatch ? parseInt(frequencyMatch[1]) : 0;
 
         // Calculate total sessions
-        if (this.numberOfWeeks && frequency) {
-            this.numberOfSessions = this.numberOfWeeks * frequency;
-            this.planConfig.sessions = this.numberOfSessions;
+        if (this.planConfig.weeks && frequency) {
+            this.planConfig.sessions = this.planConfig.weeks * frequency;
         } else {
-            this.numberOfSessions = null;
             this.planConfig.sessions = null;
         }
 
         this.templateChange.emit(true);
-        this.planConfigChange.emit(this.planConfig);
+        this.onConfigChange();
     }
 
     onToggleTemplate() {
         if (!this.useTemplate) {
             this.selectedTemplate = null;
-            this.numberOfWeeks = null;
-            this.numberOfSessions = null;
-
             this.planConfig.template = null;
             this.planConfig.weeks = null;
             this.planConfig.sessions = null;
 
             this.templateChange.emit(false);
-            this.planConfigChange.emit(this.planConfig);
+            this.onConfigChange();
         }
     }
 }
