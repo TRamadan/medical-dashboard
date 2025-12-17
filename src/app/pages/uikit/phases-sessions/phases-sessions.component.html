@@ -59,7 +59,7 @@
                     </div>
 
                     <div class="flex gap-2 ml-auto">
-                        <p-button *ngIf="!selectedPatient" label="Add sessions" size="small" icon="pi pi-plus"
+                        <p-button *ngIf="!selectedPatient" label="Add treatment plan" size="small" icon="pi pi-plus"
                             (onClick)="selectPatient(patient); $event.stopPropagation()" />
                         <p-tag *ngIf="selectedPatient?.id === patient.id" value="Selected" severity="success" />
                     </div>
