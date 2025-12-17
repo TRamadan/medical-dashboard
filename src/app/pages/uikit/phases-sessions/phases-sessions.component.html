@@ -14,6 +14,20 @@
                 <ng-template pTemplate="header">
                     <div class="flex align-items-center gap-2 w-full justify-content-between">
                         <div class="flex align-items-center gap-2">
+                            <!-- Report Accepted Status Icon -->
+                            <div *ngIf="patient.acceptedReport" 
+                                 class="flex items-center justify-center w-8 h-8 rounded-full bg-green-500"
+                                 pTooltip="Report Accepted" 
+                                 tooltipPosition="top">
+                                <i class="pi pi-check text-white text-sm"></i>
+                            </div>
+                            <div *ngIf="!patient.acceptedReport" 
+                                 class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-300"
+                                 pTooltip="Report Pending" 
+                                 tooltipPosition="top">
+                                <i class="pi pi-clock text-white text-sm"></i>
+                            </div>
+                            
                             <span class="font-bold white-space-nowrap">{{ patient.name }}</span>
                             <p-tag [value]="patient.status" [severity]="getSeverity(patient.status)" />
                             <p-tag *ngIf="patient.acceptedReport" value="✓ Accepted Report" severity="success" icon="pi pi-check" />
@@ -306,7 +320,10 @@
                                                          size="small"></p-button>
                                                 <p-button label="Save" 
                                                          severity="success"
-                                                         size="small"></p-button>
+                                                         size="small"
+                                                         [disabled]="!isSectionValid(section)"
+                                                         pTooltip="{{isSectionValid(section) ? 'Save section' : 'Please add at least one exercise with name, sets, and reps'}}"
+                                                         tooltipPosition="top"></p-button>
                                             </div>
                                         </div>
 
@@ -320,13 +337,6 @@
                                 </ng-container>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- No Sessions Message -->
-                    <div *ngIf="!phase.weeksCount || !phase.sessionsPerWeek" 
-                         class="flex flex-col items-center justify-center p-8 text-gray-400 border-2 border-dashed rounded-xl">
-                        <i class="pi pi-info-circle text-3xl mb-2"></i>
-                        <span class="text-center">Enter weeks and sessions per week to configure sessions</span>
                     </div>
                 </div>
             </p-accordionTab>

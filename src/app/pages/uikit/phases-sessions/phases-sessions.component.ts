@@ -41,53 +41,68 @@ export class PhasesSessionsComponent {
             sport: 'Football',
             acceptedReport: true,
             reportPhases: [
-                { id: 1, title: 'Initial Recovery Phase', weeks: 4, sessions: 12, weeksCount: undefined, sessionsPerWeek: undefined, selectedSessionTab: 1 },
-                { id: 2, title: 'Strengthening Phase', weeks: 6, sessions: 18, weeksCount: undefined, sessionsPerWeek: undefined, selectedSessionTab: 1 },
-                { id: 3, title: 'Return to Sport Phase', weeks: 4, sessions: 12, weeksCount: undefined, sessionsPerWeek: undefined, selectedSessionTab: 1 }
-            ]
-        },
-        {
-            id: 'PT-202226',
-            name: 'Sarah Mohamed',
-            age: '28 Years',
-            gender: 'Female',
-            mobile: '01020202020',
-            email: 'sarah.mohamed@gmail.com',
-            address: '15 Tahrir Square - Cairo',
-            bookingDate: '2025-12-16',
-            service: 'Consultation',
-            bookingTime: '01:00 PM - 02:00 PM',
-            status: 'Moderate',
-            level: 'Moderate',
-            injury: 'Ankle Sprain',
-            sport: 'Tennis',
-            acceptedReport: true,
-            reportPhases: [
-                { id: 1, title: 'Acute Phase', weeks: 2, sessions: 6, weeksCount: undefined, sessionsPerWeek: undefined, selectedSessionTab: 1 },
-                { id: 2, title: 'Rehabilitation Phase', weeks: 4, sessions: 12, weeksCount: undefined, sessionsPerWeek: undefined, selectedSessionTab: 1 }
+                {
+                    id: 1,
+                    title: 'Phase 1: Foundation',
+                    weeksCount: undefined,
+                    sessionsPerWeek: undefined,
+                    selectedSessionTab: 1
+                },
+                {
+                    id: 2,
+                    title: 'Phase 2: Strength Building',
+                    weeksCount: undefined,
+                    sessionsPerWeek: undefined,
+                    selectedSessionTab: 1
+                },
+                {
+                    id: 3,
+                    title: 'Phase 3: Advanced Training',
+                    weeksCount: undefined,
+                    sessionsPerWeek: undefined,
+                    selectedSessionTab: 1
+                }
             ]
         },
 
         {
-            id: 'PT-202228',
-            name: 'Sarah Mohamed',
-            age: '28 Years',
+            id: 'PT-202227',
+            name: 'Sara Ahmed',
+            age: '42 Years',
             gender: 'Female',
-            mobile: '01020202020',
-            email: 'sarah.mohamed@gmail.com',
-            address: '15 Tahrir Square - Cairo',
-            bookingDate: '2025-12-16',
-            service: 'Consultation',
-            bookingTime: '01:00 PM - 02:00 PM',
-            // status missing in original, defaulting
-            status: 'Moderate',
-            level: 'Low',
-            injury: 'Muscle Strain',
-            sport: 'Running',
+            mobile: '01030303030',
+            email: 'sara.ahmed@gmail.com',
+            address: '25 Heliopolis - Cairo',
+            bookingDate: '2025-12-17',
+            service: 'Physiotherapy',
+            bookingTime: '03:00 PM - 04:00 PM',
+            status: 'VIP',
+            level: 'High',
+            injury: 'Shoulder Injury',
+            sport: 'Swimming',
             acceptedReport: true,
             reportPhases: [
-                { id: 1, title: 'Recovery Phase', weeks: 3, sessions: 9, weeksCount: undefined, sessionsPerWeek: undefined, selectedSessionTab: 1 },
-                { id: 2, title: 'Progressive Loading Phase', weeks: 3, sessions: 9, weeksCount: undefined, sessionsPerWeek: undefined, selectedSessionTab: 1 }
+                {
+                    id: 1,
+                    title: 'Phase 1: Initial Assessment',
+                    weeksCount: undefined,
+                    sessionsPerWeek: undefined,
+                    selectedSessionTab: 1
+                },
+                {
+                    id: 2,
+                    title: 'Phase 2: Progressive Training',
+                    weeksCount: undefined,
+                    sessionsPerWeek: undefined,
+                    selectedSessionTab: 1
+                },
+                {
+                    id: 3,
+                    title: 'Phase 3: Performance',
+                    weeksCount: undefined,
+                    sessionsPerWeek: undefined,
+                    selectedSessionTab: 1
+                }
             ]
         }
     ];
@@ -191,6 +206,19 @@ export class PhasesSessionsComponent {
 
     removeExercise(section: any, index: number) {
         section.exercises.splice(index, 1);
+    }
+
+    // Validation method to check if section can be saved
+    isSectionValid(section: any): boolean {
+        // Check if section has at least one exercise
+        if (!section.exercises || section.exercises.length === 0) {
+            return false;
+        }
+
+        // Check if all exercises have required fields filled
+        return section.exercises.every((exercise: any) => {
+            return exercise.name && exercise.name.trim() !== '' && exercise.sets && exercise.sets.trim() !== '' && exercise.reps && exercise.reps.trim() !== '';
+        });
     }
 
     // Helper methods for week/session calculations
