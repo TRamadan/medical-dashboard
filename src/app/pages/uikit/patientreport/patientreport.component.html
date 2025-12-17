@@ -78,7 +78,7 @@
                     <div class="flex p-4 justify-between">
                         <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
                             (onClick)="goBackToReview(activateCallback)" />
-                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
+                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" [disabled]="!reportData.injuryName || !reportData.description"
                             (onClick)="activateCallback(3)" />
                     </div>
                 </ng-template>

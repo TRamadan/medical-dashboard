@@ -24,6 +24,7 @@ import { EducationComponent } from './education-page/education.component';
 import { WorkingHoursComponent } from './working-hours/working-hours.component';
 import { OurSolutionsComponent } from './our-solutions/our-solutions.component';
 import { PatientreportComponent } from './patientreport/patientreport.component';
+import { PhasesSessionsComponent } from './phases-sessions/phases-sessions.component';
 export default [
     {
         path: 'adduser',
@@ -49,6 +50,11 @@ export default [
         path: 'patientreport',
         data: { breadcrumb: 'Add patient report' },
         component: PatientreportComponent
+    },
+    {
+        path: 'phases-sessions',
+        data: { breadcrumb: 'Add patient report' },
+        component: PhasesSessionsComponent
     },
     {
         path: 'workinghours',

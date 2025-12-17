@@ -79,7 +79,7 @@ export class AppMenu {
                     {
                         label: 'Add treatment plan',
                         icon: '',
-                        routerLink: ['/uikit/treatmentplan']
+                        routerLink: ['/uikit/phases-sessions']
                     },
 
                     {
