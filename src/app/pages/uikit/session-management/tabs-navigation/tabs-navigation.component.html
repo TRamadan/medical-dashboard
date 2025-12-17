@@ -1,0 +1,10 @@
+<div class="tabs-container">
+    <div class="tabs-wrapper">
+        @for(tab of tabs; track tab.id){
+            <button class="tab-button" [class.active]="tab.id === activeTab"
+                (click)="selectTab(tab.id)" type="button">
+                {{ tab.label }}
+            </button>
+        }
+    </div>
+</div>
