@@ -187,33 +187,30 @@
                                     <!-- Sections for this session in this week -->
                                     <div class="flex flex-col gap-4">
                                         <div *ngFor="let section of getSections(phase, globalSessionNum); let secIndex = index" 
-                                             class="border border-gray-300 rounded-lg p-4 bg-white relative">
+                                             class="border border-gray-300 rounded-lg p-4 bg-white">
                                             
-                                            <!-- Remove Section Button -->
-                                            <button pButton icon="pi pi-trash" 
-                                                    class="p-button-text p-button-danger p-button-sm absolute top-2 right-2" 
-                                                    (click)="removeSection(phase, globalSessionNum, secIndex)"></button>
-                                            
-                                            <!-- Section Header with Number Badge -->
-                                            <div class="flex items-center gap-3 mb-4 pr-10">
-                                                <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-400 text-white font-bold">
-                                                    {{secIndex + 1}}
+                                            <!-- Section Header with Number Badge and Delete Button -->
+                                            <div class="flex items-center justify-between mb-4">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-400 text-white font-bold">
+                                                        {{secIndex + 1}}
+                                                    </div>
+                                                    <span class="font-medium text-lg">{{section.title || 'Section ' + (secIndex + 1)}}</span>
                                                 </div>
-                                                <span class="font-medium text-lg">{{section.title || 'Section ' + (secIndex + 1)}}</span>
+                                                <button pButton icon="pi pi-trash" 
+                                                        class="p-button-text p-button-danger p-button-sm" 
+                                                        (click)="removeSection(phase, globalSessionNum, secIndex)"></button>
                                             </div>
 
                                             <!-- Section Configuration -->
                                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                           
                                                 <div class="flex flex-col gap-2">
-                                                    <label class="font-medium text-sm text-gray-600">Section Title</label>
-                                                    <input pInputText [(ngModel)]="section.title" placeholder="e.g. Warm Up" />
-                                                </div>
-                                                <div class="flex flex-col gap-2">
-                                                    <label class="font-medium text-sm text-gray-600">Duration (mins)</label>
+                                                    <label class="font-medium text-sm text-gray-600">Time</label>
                                                     <input pInputText type="number" [(ngModel)]="section.time" placeholder="e.g. 10" />
                                                 </div>
                                                 <div class="flex flex-col gap-2">
-                                                    <label class="font-medium text-sm text-gray-600">Assign Coach</label>
+                                                    <label class="font-medium text-sm text-gray-600"> Coach</label>
                                                     <p-dropdown [options]="coaches" [(ngModel)]="section.coach" 
                                                                placeholder="Select Coach" styleClass="w-full" 
                                                                optionLabel="label" optionValue="value"></p-dropdown>
@@ -222,17 +219,19 @@
 
                                             <!-- Exercises Table -->
                                             <div class="bg-white rounded border border-gray-200 overflow-hidden">
-                                                <p-table [value]="section.exercises" [tableStyle]="{ 'min-width': '50rem' }" styleClass="p-datatable-sm">
+                                                <p-table [value]="section.exercises" styleClass="p-datatable-sm">
                                                     <ng-template pTemplate="header">
                                                         <tr>
                                                             <th style="width: 3%"></th>
-                                                            <th style="width: 22%">Exercise Name</th>
-                                                            <th style="width: 10%">Sets</th>
-                                                            <th style="width: 10%">Reps</th>
-                                                            <th style="width: 15%">Intensity</th>
-                                                            <th style="width: 15%">Tempo</th>
-                                                            <th style="width: 15%">Rest</th>
-                                                            <th style="width: 10%"></th>
+                                                            <th style="width: 12%">Name</th>
+                                                            <th style="width: 18%">Description</th>
+                                                            <th style="width: 8%">Sets</th>
+                                                            <th style="width: 8%">Reps</th>
+                                                            <th style="width: 10%">Intensity</th>
+                                                            <th style="width: 8%">Tempo</th>
+                                                            <th style="width: 10%">Rest</th>
+                                                            <th style="width: 18%">Video URL</th>
+                                                            <th style="width: 5%"></th>
                                                         </tr>
                                                     </ng-template>
                                                     <ng-template pTemplate="body" let-ex let-exIndex="rowIndex">
@@ -244,12 +243,47 @@
                                                                       tooltipPosition="top"
                                                                       style="cursor: move; color: #6b7280;"></span>
                                                             </td>
-                                                            <td><input pInputText [(ngModel)]="ex.name" class="w-full p-inputtext-sm" placeholder="Name" /></td>
-                                                            <td><input pInputText [(ngModel)]="ex.sets" class="w-full p-inputtext-sm" /></td>
-                                                            <td><input pInputText [(ngModel)]="ex.reps" class="w-full p-inputtext-sm" /></td>
-                                                            <td><input pInputText [(ngModel)]="ex.intensity" class="w-full p-inputtext-sm" /></td>
-                                                            <td><input pInputText [(ngModel)]="ex.tempo" class="w-full p-inputtext-sm" /></td>
-                                                            <td><input pInputText [(ngModel)]="ex.rest" class="w-full p-inputtext-sm" /></td>
+                                                            <td>
+                                                                <input pInputText [(ngModel)]="ex.name" 
+                                                                       class="w-full p-inputtext-sm" 
+                                                                       placeholder="Exercise name" />
+                                                            </td>
+                                                            <td>
+                                                                <textarea pInputTextarea [(ngModel)]="ex.description" 
+                                                                         rows="2" 
+                                                                         class="w-full p-inputtext-sm" 
+                                                                         placeholder="Description"></textarea>
+                                                            </td>
+                                                            <td>
+                                                                <input pInputText [(ngModel)]="ex.sets" 
+                                                                       class="w-full p-inputtext-sm" 
+                                                                       placeholder="3" />
+                                                            </td>
+                                                            <td>
+                                                                <input pInputText [(ngModel)]="ex.reps" 
+                                                                       class="w-full p-inputtext-sm" 
+                                                                       placeholder="10" />
+                                                            </td>
+                                                            <td>
+                                                                <input pInputText [(ngModel)]="ex.intensity" 
+                                                                       class="w-full p-inputtext-sm" 
+                                                                       placeholder="Moderate" />
+                                                            </td>
+                                                            <td>
+                                                                <input pInputText [(ngModel)]="ex.tempo" 
+                                                                       class="w-full p-inputtext-sm" 
+                                                                       placeholder="2-0-2" />
+                                                            </td>
+                                                            <td>
+                                                                <input pInputText [(ngModel)]="ex.rest" 
+                                                                       class="w-full p-inputtext-sm" 
+                                                                       placeholder="60s" />
+                                                            </td>
+                                                            <td>
+                                                                <input pInputText [(ngModel)]="ex.videoUrl" 
+                                                                       class="w-full p-inputtext-sm" 
+                                                                       placeholder="Video URL" />
+                                                            </td>
                                                             <td>
                                                                 <button pButton icon="pi pi-trash" 
                                                                         class="p-button-text p-button-danger p-button-sm" 
@@ -259,9 +293,20 @@
                                                     </ng-template>
                                                 </p-table>
                                                 <div class="p-2 border-t bg-gray-50">
-                                                    <p-button label="+ Add Exercise" [text]="true" size="small" 
+                                                    <p-button label="Add Exercise" [text]="true" size="small" 
                                                              icon="pi pi-plus" (onClick)="addExercise(section)"></p-button>
                                                 </div>
+                                            </div>
+
+                                            <!-- Section Action Buttons -->
+                                            <div class="flex justify-end gap-3 mt-4">
+                                                <p-button label="Cancel" 
+                                                         [outlined]="true" 
+                                                         severity="secondary"
+                                                         size="small"></p-button>
+                                                <p-button label="Save" 
+                                                         severity="success"
+                                                         size="small"></p-button>
                                             </div>
                                         </div>
 

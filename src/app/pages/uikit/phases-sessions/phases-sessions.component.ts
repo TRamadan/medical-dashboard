@@ -3,16 +3,18 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
+import { InputTextarea } from 'primeng/inputtextarea';
 import { TableModule } from 'primeng/table';
 import { AccordionModule } from 'primeng/accordion';
 import { DividerModule } from 'primeng/divider';
 import { DropdownModule } from 'primeng/dropdown';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
     selector: 'app-phases-sessions',
-    imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, TableModule, AccordionModule, DividerModule, DropdownModule, CardModule, TagModule],
+    imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, InputTextarea, TableModule, AccordionModule, DividerModule, DropdownModule, CardModule, TagModule, TooltipModule],
     templateUrl: './phases-sessions.component.html',
     styleUrl: './phases-sessions.component.scss'
 })
@@ -138,7 +140,7 @@ export class PhasesSessionsComponent {
                 sections: [
                     {
                         title: 'Warm Up',
-                        time: 10,
+                        time: '',
                         coach: null,
                         exercises: []
                     }
@@ -152,9 +154,20 @@ export class PhasesSessionsComponent {
         const sections = this.getSections(phase, sessionNum);
         sections.push({
             title: 'New Section',
-            time: 10,
+            time: '',
             coach: null,
-            exercises: []
+            exercises: [
+                {
+                    name: '',
+                    description: '',
+                    sets: '',
+                    reps: '',
+                    intensity: '',
+                    tempo: '',
+                    rest: '',
+                    videoUrl: ''
+                }
+            ]
         });
     }
 
@@ -171,7 +184,8 @@ export class PhasesSessionsComponent {
             reps: '',
             intensity: '',
             tempo: '',
-            rest: ''
+            rest: '',
+            videoUrl: ''
         });
     }
 
