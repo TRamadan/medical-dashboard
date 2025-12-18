@@ -315,81 +315,114 @@
      }
  } 
 
+ .percentage-style {
+    font-size : 18px;
+ }
+ 
 
-     .workflow-section {
-      background-color: #1976d2 !important;
+ .coaches-container {
+      padding: 1rem;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .workflow-section .card-body {
-      color: white;
+    .card {
+      border: none;
+      border-radius: 8px;
     }
 
-    /* Icon spacing */
-    .pi {
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #000;
+      margin: 0;
+    }
+
+    .coaches-list {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .coach-item {
+      padding: 1rem 0;
+    }
+
+    .coach-item.border-bottom {
+      border-bottom: 1px solid #e5e7eb !important;
+    }
+
+    .coach-item:last-child {
+      padding-bottom: 0;
+    }
+
+    .coach-info {
+      flex: 1;
+    }
+
+    .coach-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #000;
+    }
+
+    .coach-specialty {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    .coach-badge {
       flex-shrink: 0;
     }
 
-    /* Button styles */
-    .btn {
-      padding: 14px 32px;
-      border: none;
-      border-radius: 12px;
-      font-size: 15px;
+    .badge {
+      padding: 0.5rem 1.25rem;
+      border-radius: 6px;
+      font-size: 0.875rem;
       font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-      min-width: 160px;
     }
 
-    .btn-no-show {
-      background: #dc2626;
-      color: white;
-    }
-
-    .btn-no-show:hover {
-      background: #b91c1c;
-      color: white;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    .btn-start {
-      background: white;
-      color: #1976d2;
-    }
-
-    .btn-start:hover {
-      background: #f0f8ff;
-      color: #1976d2;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-
-    .workflow-details span {
-      font-size: 14px;
-      line-height: 1.5;
+    .bg-primary-custom {
+      background-color: #bfdbfe !important;
+      color: #1e40af !important;
     }
 
     /* Responsive adjustments */
-    @media (max-width: 991.98px) {
-      .workflow-actions {
-        justify-content: center !important;
-        margin-top: 1rem;
+    @media (max-width: 575.98px) {
+      .coaches-container {
+        padding: 0.5rem;
       }
+
+      .section-title {
+        font-size: 1.125rem;
+      }
+
+      .coach-name {
+        font-size: 0.9375rem;
+      }
+
+      .coach-specialty {
+        font-size: 0.8125rem;
+      }
+
+      .coach-badge {
+        align-self: flex-start;
+      }
+    } 
+
+    .buttons-style{
+        position: relative;
+        top:25px;
     }
 
-    @media (max-width: 575.98px) {
-      .workflow-details span {
-        font-size: 13px;
+    /* Small mobile */
+    @media (max-width: 374.98px) {
+      .section-title {
+        font-size: 1rem;
       }
-      
-      .workflow-actions {
-        flex-direction: column !important;
-      }
-      
-      .btn {
-        width: 100%;
-        min-width: auto;
+
+      .badge {
+        padding: 0.4rem 1rem;
+        font-size: 0.8125rem;
       }
     }

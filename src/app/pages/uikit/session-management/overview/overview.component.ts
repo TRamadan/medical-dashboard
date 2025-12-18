@@ -18,6 +18,12 @@ export class OverviewComponent {
         injuryDate: '25-11-2025'
     };
 
+    coaches: any = {
+        name: 'You ( Ahmed Samir )',
+        specialty: 'Physical Therapy',
+        isPrimary: true
+    };
+
     @Input() progressData: any = {
         completed: 6,
         total: 36

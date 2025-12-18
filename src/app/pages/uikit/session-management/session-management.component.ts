@@ -73,7 +73,5 @@ export class SessionManagementComponent implements OnInit {
     onTabChange(tabId: any): void {
         this.currentTab = tabId;
     }
-    ngOnInit(): void {
-        throw new Error('Method not implemented.');
-    }
+    ngOnInit(): void {}
 }
