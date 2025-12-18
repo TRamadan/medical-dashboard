@@ -1,0 +1,395 @@
+ .workflow-section {
+     background-color: #1976d2 !important;
+ }
+
+ .workflow-section .card-body {
+     color: white;
+ }
+
+ /* Icon spacing */
+ .pi {
+     flex-shrink: 0;
+ }
+
+ /* Button styles */
+ .btn {
+     padding: 12px 20px;
+     border: none;
+     border-radius: 8px;
+     font-size: 14px;
+     font-weight: 600;
+     cursor: pointer;
+     transition: all 0.2s ease;
+ }
+
+ .btn-no-show {
+     background: #dc2626;
+     color: white;
+ }
+
+ .btn-no-show:hover {
+     background: #b91c1c;
+     color: white;
+ }
+
+ .btn-start {
+     background: white;
+     color: #1976d2;
+ }
+
+ .btn-start:hover {
+     background: #f0f0f0;
+     color: #1976d2;
+ }
+
+ .workflow-details span {
+     font-size: 14px;
+     line-height: 1.5;
+ }
+
+ /* Responsive adjustments */
+ @media (max-width: 767.98px) {
+     .workflow-actions {
+         margin-top: 1rem;
+     }
+ }
+
+ @media (max-width: 575.98px) {
+     .workflow-details span {
+         font-size: 13px;
+     }
+ }
+
+ .patient-info-container {
+     margin: 0 auto;
+     padding: 16px;
+ }
+
+ .section {
+     background: white;
+     border-radius: 8px;
+     padding: 20px;
+     margin-bottom: 16px;
+     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+ }
+
+
+
+ .section-header {
+     display: flex;
+     align-items: center;
+     gap: 8px;
+     margin-bottom: 16px;
+ }
+
+ .icon {
+     width: 24px;
+     height: 24px;
+ }
+
+ .section-header h2 {
+     margin: 0;
+     font-size: 18px;
+     font-weight: 600;
+ }
+
+ .info-grid {
+     display: flex;
+     flex-direction: column;
+     gap: 12px;
+ }
+
+ .info-row {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     padding: 8px 0;
+ }
+
+
+
+ .info-label {
+     font-size: 14px;
+     color: #000;
+     font-weight: bold;
+
+ }
+
+ .info-value {
+     font-size: 14px;
+     font-weight: 500;
+     color: #000;
+     text-align: right;
+ }
+
+ /* Progress Section */
+ .section-title {
+     margin: 0 0 16px 0;
+     font-size: 18px;
+     font-weight: 600;
+ }
+
+ .progress-info {
+     display: flex;
+     justify-content: space-between;
+     align-items: center;
+     margin-bottom: 12px;
+ }
+
+ .progress-label {
+     font-size: 14px;
+     color: #666;
+ }
+
+ .progress-count {
+     font-size: 16px;
+     font-weight: 600;
+ }
+
+ .progress-bar-container {
+     width: 100%;
+     height: 24px;
+     background: #e0e0e0;
+     border-radius: 12px;
+     overflow: hidden;
+     position: relative;
+ }
+
+ .progress-bar {
+     height: 100%;
+     background: #1976d2;
+     border-radius: 12px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     transition: width 0.3s ease;
+     min-width: 50px;
+ }
+
+ .progress-text {
+     color: white;
+     font-size: 12px;
+     font-weight: 600;
+ }
+
+ /* Workflow Section */
+ .workflow-section {
+     background: #1976d2;
+     color: white;
+ }
+
+ .workflow-header {
+     display: flex;
+     align-items: center;
+     gap: 8px;
+     margin-bottom: 20px;
+ }
+
+ .workflow-icon {
+     width: 24px;
+     height: 24px;
+ }
+
+ .workflow-header h3 {
+     margin: 0;
+     font-size: 18px;
+     font-weight: 600;
+     color: white;
+ }
+
+ .workflow-details {
+     display: flex;
+     flex-direction: column;
+     gap: 12px;
+     margin-bottom: 20px;
+ }
+
+ .workflow-item {
+     display: flex;
+     align-items: center;
+     gap: 8px;
+ }
+
+ .detail-icon {
+     width: 20px;
+     height: 20px;
+     flex-shrink: 0;
+ }
+
+ .workflow-item span {
+     font-size: 14px;
+ }
+
+ .workflow-actions {
+     display: flex;
+     gap: 12px;
+ }
+
+ .btn {
+     flex: 1;
+     padding: 12px 20px;
+     border: none;
+     border-radius: 8px;
+     font-size: 14px;
+     font-weight: 600;
+     cursor: pointer;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+     gap: 8px;
+     transition: all 0.2s ease;
+ }
+
+ .btn-icon {
+     width: 20px;
+     height: 20px;
+ }
+
+ .btn-no-show {
+     background: #dc2626;
+     color: white;
+ }
+
+ .btn-no-show:hover {
+     background: #b91c1c;
+ }
+
+ .btn-start {
+     background: white;
+     color: #1976d2;
+ }
+
+ .btn-start:hover {
+     background: #f0f0f0;
+ }
+
+ /* Responsive Design */
+ @media (max-width: 768px) {
+     .patient-info-container {
+         padding: 12px;
+     }
+
+     .section {
+         padding: 16px;
+     }
+
+     .section-header h2,
+     .section-title,
+     .workflow-header h3 {
+         font-size: 16px;
+     }
+
+     .info-label,
+     .info-value,
+     .workflow-item span {
+         font-size: 13px;
+     }
+ }
+
+ @media (max-width: 480px) {
+     .patient-info-container {
+         padding: 8px;
+     }
+
+     .section {
+         padding: 12px;
+         margin-bottom: 12px;
+     }
+
+     .workflow-actions {
+         flex-direction: column;
+     }
+
+     .btn {
+         width: 100%;
+     }
+
+     .info-row {
+         flex-direction: column;
+         align-items: flex-start;
+         gap: 4px;
+     }
+
+     .info-value {
+         text-align: left;
+     }
+ } 
+
+
+     .workflow-section {
+      background-color: #1976d2 !important;
+    }
+
+    .workflow-section .card-body {
+      color: white;
+    }
+
+    /* Icon spacing */
+    .pi {
+      flex-shrink: 0;
+    }
+
+    /* Button styles */
+    .btn {
+      padding: 14px 32px;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      min-width: 160px;
+    }
+
+    .btn-no-show {
+      background: #dc2626;
+      color: white;
+    }
+
+    .btn-no-show:hover {
+      background: #b91c1c;
+      color: white;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-start {
+      background: white;
+      color: #1976d2;
+    }
+
+    .btn-start:hover {
+      background: #f0f8ff;
+      color: #1976d2;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .workflow-details span {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 991.98px) {
+      .workflow-actions {
+        justify-content: center !important;
+        margin-top: 1rem;
+      }
+    }
+
+    @media (max-width: 575.98px) {
+      .workflow-details span {
+        font-size: 13px;
+      }
+      
+      .workflow-actions {
+        flex-direction: column !important;
+      }
+      
+      .btn {
+        width: 100%;
+        min-width: auto;
+      }
+    }

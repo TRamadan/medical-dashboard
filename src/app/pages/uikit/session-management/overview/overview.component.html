@@ -1,0 +1,113 @@
+<div class="container-fluid patient-info-container">
+    <div class="row g-3">
+        <!-- Patient Information Section -->
+        <div class="col-12">
+            <div class="card shadow-sm patient-info border-none">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <svg class="icon me-2" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                        </svg>
+                        <h2 class="h5 mb-0 fw-semibold">Patient Information</h2>
+                    </div>
+
+                    <div class="info-grid">
+                        <div class="d-flex justify-content-between align-items-center py-2  info-row">
+                            <span class="info-label">Patient ID:</span>
+                            <span class="info-value fw-medium">{{ patientData.patientId }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 info-row">
+                            <span class="info-label ">Name:</span>
+                            <span class="info-value fw-medium">{{ patientData.name }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2  info-row">
+                            <span class="info-label ">Age:</span>
+                            <span class="info-value fw-medium">{{ patientData.age }} Years</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2  info-row">
+                            <span class="info-label ">Gender:</span>
+                            <span class="info-value fw-medium">{{ patientData.gender }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2  info-row">
+                            <span class="info-label ">Injury:</span>
+                            <span class="info-value fw-medium">{{ patientData.injury }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center py-2 info-row">
+                            <span class="info-label ">Injury Date:</span>
+                            <span class="info-value fw-medium">{{ patientData.injuryDate }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Progress Section -->
+        <div class="col-12">
+            <div class="card shadow-sm border-none">
+                <div class="card-body">
+                    <h3 class="h5 mb-3 fw-semibold">Overall Progress</h3>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span>Sessions Completed:</span>
+                        <span class="fw-semibold fs-6">{{ progressData.completed }} of {{ progressData.total }}</span>
+                    </div>
+
+                    <div class="progress" style="height: 24px; border-radius: 12px;">
+                        <div class="progress-bar bg-primary d-flex align-items-center justify-content-center"
+                            role="progressbar" [style.width.%]="getProgressPercentage()"
+                            [attr.aria-valuenow]="getProgressPercentage()" aria-valuemin="0" aria-valuemax="100">
+                            <small class="fw-semibold">{{ getProgressPercentage() }}%</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Plan Activation Workflow Section -->
+  <div class="col-12">
+      <div class="card shadow-sm workflow-section text-white p-2">
+        <div class="card-body">
+          <div class="d-flex align-items-center mb-3 gap-2">
+            <i class="pi pi-calendar fs-5"></i>
+            <h3 class="h5 mb-0 fw-semibold">Plan Activation Workflow</h3>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="workflow-details mb-3">
+                <div class="d-flex align-items-center mb-2 gap-2">
+                  <i class="pi pi-clock fs-6"></i>
+                  <span>{{ workflowData.dateTime }}</span>
+                </div>
+
+                <div class="d-flex align-items-center mb-2 gap-2">
+                  <i class="pi pi-chart-line fs-6"></i>
+                  <span>{{ workflowData.session }}</span>
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                  <i class="pi pi-map-marker fs-6"></i>
+                  <span>{{ workflowData.location }}</span>
+                </div>
+              </div>
+            </div> 
+
+            <div class="col-md-5">
+              <div class="workflow-actions d-flex gap-2">
+                <button class="btn btn-no-show d-flex align-items-center justify-content-center gap-2 flex-fill" (click)="onNoShow()">
+                  <i class="pi pi-eye-slash"></i>
+                  <span>No Show</span>
+                </button>
+                <button class="btn btn-start d-flex align-items-center justify-content-center gap-2 flex-fill" (click)="onStartSession()">
+                  <i class="pi pi-power-off"></i>
+                  <span>Start Session</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+</div>
