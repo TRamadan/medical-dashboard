@@ -74,7 +74,9 @@
                     <div class="flex flex-col gap-4" *ngIf="data.report">
                         <div class="flex flex-col gap-1">
                             <span class="text-gray-500 font-medium">Injury Name</span>
-                            <span class="font-bold text-lg">{{data.report.injuryName || 'N/A'}}</span>
+                            <span class="font-bold text-lg">
+                                {{ data.report.injuryNames?.join(', ') || 'N/A' }}
+                            </span>
                         </div>
                         <div class="flex flex-col gap-1">
                             <span class="text-gray-500 font-medium">Description</span>

@@ -27,7 +27,7 @@ export class PatientreportComponent {
 
     // Persisted State
     selectedPatient: any = null;
-    reportData: any = { injuryName: '', description: '', recommendation: '' };
+    reportData: any = { injuryNames: [], description: '', recommendation: '' };
     planConfigData: any = { weeks: null, sessions: null, template: null };
     phasesData: any[] = [];
 
