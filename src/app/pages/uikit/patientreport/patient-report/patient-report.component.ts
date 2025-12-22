@@ -25,14 +25,13 @@ export class PatientReportComponent {
         }
     }
 
-    currentInjuryName: string = ''; // Temporary variable for input
+    currentInjuryName: string = '';
 
     addInjuryName(event: Event): void {
-        event.preventDefault(); // Prevent form submission if inside a form
+        event.preventDefault();
 
         const trimmedName = this.currentInjuryName.trim();
 
-        // Only add if the input is not empty and not a duplicate
         if (trimmedName && !this.report.injuryNames.includes(trimmedName)) {
             this.report.injuryNames.push(trimmedName);
             this.currentInjuryName = ''; // Clear the input field
