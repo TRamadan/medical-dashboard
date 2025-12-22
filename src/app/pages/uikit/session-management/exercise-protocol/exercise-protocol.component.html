@@ -1,1 +1,82 @@
-<p>exercise-protocol works!</p>
+<div class="container-fluid py-3">
+  <div class="row">
+    <div class="col-12">
+      <p-accordion [value]="1">
+        @for (phase of phases; track phase.id) {
+          <p-accordion-panel [value]="phase.id">
+            <p-accordion-header>
+              <div class="d-flex align-items-center w-100 phase-header" 
+                   [class.completed-phase]="phase.completed"
+                   [class.current-phase]="phase.current">
+                
+                <!-- Status Icon/Number -->
+                <div class="phase-icon me-3">
+                  @if (phase.completed) {
+                    <i class="pi pi-check"></i>
+                  }
+                  @if (!phase.completed) {
+                    <span>{{ phase.id }}</span>
+                  }
+                </div>
+                
+                <!-- Phase Details -->
+                <div class="flex-grow-1">
+                  <div class="phase-title">{{ phase.title }}</div>
+                  <div class="phase-meta">
+                    <span class="me-3">{{ phase.weeks }}</span>
+                    <span class="me-3">{{ phase.sessions }}</span>
+                    @if (phase.current) {
+                      <span class="current-badge">
+                        <i class="pi pi-bolt me-1"></i>Current Phase
+                      </span>
+                    }
+                  </div>
+                </div>
+              </div>
+            </p-accordion-header>
+            
+            <p-accordion-content>
+              <div class="accordion-body-content">
+                
+                <!-- Phase Objectives -->
+                @if (phase.objectives) {
+                  <div class="mb-4">
+                    <h4 class="section-title mb-3">Phase Objectives:</h4>
+                    <p class="objectives-text ms-3">{{ phase.objectives }}</p>
+                  </div>
+                }
+                
+                <!-- Exercise Protocol -->
+                @if (phase.exercises && phase.exercises.length > 0) {
+                  <div class="mb-4">
+                    <h4 class="section-title mb-3">Exercise Protocol:</h4>
+                    <div class="exercise-list">
+                      @for (exercise of phase.exercises; track exercise.name) {
+                        <div class="exercise-item d-flex align-items-start mb-2">
+                          <i class="pi pi-check-circle exercise-check me-2"></i>
+                          <span>{{ exercise.name }}</span>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+                
+                <!-- Measurement Recording -->
+                @if (phase.measurementNote) {
+                  <div class="measurement-section">
+                    <h4 class="section-title mb-3">Measurement Recording:</h4>
+                    <div class="alert alert-warning d-flex align-items-center" role="alert">
+                      <i class="pi pi-info-circle me-2"></i>
+                      <span>{{ phase.measurementNote }}</span>
+                    </div>
+                  </div>
+                }
+                
+              </div>
+            </p-accordion-content>
+          </p-accordion-panel>
+        }
+      </p-accordion>
+    </div>
+  </div>
+</div>

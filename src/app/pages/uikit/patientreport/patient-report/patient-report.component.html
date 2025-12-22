@@ -22,10 +22,36 @@
         </ng-template>
 
         <div class="flex flex-col gap-6 mt-4">
-            <div class="flex flex-col gap-2">
+            <!-- <div class="flex flex-col gap-2">
                 <label class="text-lg font-medium text-gray-700">Injury Name</label>
-                <input pInputText type="text" [(ngModel)]="report.injuryName" class="w-full" placeholder="Enter injury name here" />
-            </div>
+                <input pInputText type="text" [(ngModel)]="report.injuryName" class="w-full" placeholder="Enter injury name here, press enter to add more than one injury name" />
+            </div> --> 
+
+            <div class="flex flex-col gap-2">
+    <label class="text-lg font-medium text-gray-700">Injury Name</label>
+    <input 
+        pInputText 
+        type="text" 
+        [(ngModel)]="currentInjuryName" 
+        (keydown.enter)="addInjuryName($event)"
+        class="w-full" 
+        placeholder="Enter injury name here, press enter to add more than one injury name" 
+    />
+    
+    <!-- Display added injury names as PrimeNG chips/tags -->
+     @if(report.injuryNames && report.injuryNames.length > 0){        
+         <div class="flex flex-wrap gap-2 mt-2">
+            @for(injury of report.injuryNames; track injury; let i = $index){
+                <p-chip 
+                    [label]="injury" 
+                    [removable]="true"
+                    (onRemove)="removeInjuryName(i)"
+                    styleClass="p-chip-custom"
+                ></p-chip>
+            }
+         </div>
+     }
+</div>
 
             <div class="flex flex-col gap-2">
                 <label class="text-lg font-medium text-gray-700">Description</label>

@@ -1,1 +1,87 @@
-<p>sessions works!</p>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+
+            <!-- Upcoming Sessions Section -->
+             <div class="my-3">
+                 <p-card>
+                     <div class="sessions-section mb-4">
+                         <h5 class="section-title mb-3">Upcoming Sessions</h5>
+     
+                         <div class="sessions-container">
+                             @for (session of upcomingSessions; track session.id) {
+                             <div class="session-card upcoming-session">
+                                 <div class="d-flex align-items-center w-100">
+     
+                                     <!-- Session Number Badge -->
+                                     <div class="session-badge upcoming-badge me-3">
+                                         <span>{{ session.sessionNumber }}</span>
+                                     </div>
+     
+                                     <!-- Session Details -->
+                                     <div class="flex-grow-1">
+                                         <div class="session-datetime">
+                                             {{ formatDate(session.date) }} at {{ session.time }}
+                                         </div>
+                                         <div class="session-phase">{{ session.phase }}</div>
+                                     </div>
+     
+                                     <!-- Status Badge -->
+                                     <div class="status-badge scheduled-badge">
+                                         Scheduled
+                                     </div>
+                                 </div>
+                             </div>
+                             }
+                         </div>
+                     </div>
+                 </p-card>
+             </div>
+
+            <!-- Completed Sessions Section -->
+             <div class="my-3">
+                 <p-card>
+                     <div class="sessions-section">
+                         <h5 class="section-title mb-3">Completed Sessions</h5>
+     
+                         <div class="sessions-container">
+                             @for (session of completedSessions; track session.id) {
+                             <div class="session-card completed-session">
+                                 <div class="d-flex align-items-start w-100">
+     
+                                     <!-- Completed Checkmark Badge -->
+                                     <div class="session-badge completed-badge me-3">
+                                         <i class="pi pi-check"></i>
+                                     </div>
+     
+                                     <!-- Session Details -->
+                                     <div class="flex-grow-1">
+                                         <div class="session-title">
+                                             Session #{{ session.sessionNumber }} - {{ formatDate(session.date) }}
+                                         </div>
+                                         <div class="session-info">
+                                             {{ session.phase }} • {{ session.time }}
+                                         </div>
+                                         @if (session.notes) {
+                                         <div class="session-notes">
+                                             "{{ session.notes }}"
+                                         </div>
+                                         }
+                                     </div>
+     
+                                     <!-- View Details Link -->
+                                     <div class="view-details-link">
+                                         <i class="pi pi-eye me-2"></i>
+                                         <span>View Details</span>
+                                     </div>
+                                 </div>
+                             </div>
+                             }
+                         </div>
+                     </div>
+                 </p-card>
+             </div>
+
+        </div>
+    </div>
+</div>
