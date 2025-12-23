@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { CoachAssignmentComponent } from './coach-assignment.component';
+import { EditProtocolComponent } from './edit-protocol.component';
 
-describe('CoachAssignmentComponent', () => {
-  let component: CoachAssignmentComponent;
-  let fixture: ComponentFixture<CoachAssignmentComponent>;
+describe('EditProtocolComponent', () => {
+  let component: EditProtocolComponent;
+  let fixture: ComponentFixture<EditProtocolComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CoachAssignmentComponent]
+      imports: [EditProtocolComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(CoachAssignmentComponent);
+    fixture = TestBed.createComponent(EditProtocolComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

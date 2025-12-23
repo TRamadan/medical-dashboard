@@ -3,441 +3,61 @@
     <p>Welcome back, test username</p>
 </p-toolbar>
 <br />
-<p-tabs value="0">
-    <div class="overflow-x-auto whitespace-nowrap mb-2">
-        <p-tablist class="min-w-[600px]">
-            <p-tab value="0">Injury details</p-tab>
-            <p-tab value="1">Schedule Management</p-tab>
-            <p-tab value="2">Coach Assignment</p-tab>
-            <p-tab value="3">Treatment Plans</p-tab>
-        </p-tablist>
+<section>
+  <div class="container">
+    <div class="header">
+      <h1>Session managment</h1>
     </div>
 
-    <p-tabpanels>
-        <p-tabpanel value="0">
-            <section class="bg-white rounded-lg shadow-sm p-2 md:p-4">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800 my-3">Patient Injury Details</h2>
-                </div>
+    @if(selectedPatient){
+      <div class="treatment-plan-container">
+        <h2 class="title p-2">Treatment Plan</h2>
+  
+        <div class="stats-grid">
+          <div class="stat-card blue">
+            <div class="stat-value">{{ data.sessionsDone }}</div>
+            <div class="stat-label">Session Done</div>
+          </div>
+  
+          <div class="stat-card green">
+            <div class="stat-value">{{ data.remaining }}</div>
+            <div class="stat-label">Remaining</div>
+          </div>
+  
+          <div class="stat-card pink">
+            <div class="stat-value">{{ data.currentPhase }}</div>
+            <div class="stat-label">Current Phase</div>
+          </div>
+  
+          <div class="stat-card orange">
+            <div class="stat-value">{{ data.totalWeeks }}</div>
+            <div class="stat-label">Total Weeks</div>
+          </div>
+        </div>
+  
+      </div>
+    }
 
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <div class="md:col-span-2">
-                        <p-card header="Patient files">
-                            @for (patient of patients; track patient) {
-                            <div class="bg-white rounded-lg shadow-md p-4 mb-4 border-l-4 border-blue-500 cursor-pointer hover:bg-blue-50 transition"
-                                (click)="setSelectedPatientDetail(patient)">
-                                <div class="flex justify-between items-start">
-                                    <div class="flex items-center gap-3">
-                                        <p-avatar label="{{ getInitials(patient.name) }}" shape="circle"
-                                            class="bg-secondary text-white"></p-avatar>
-                                        <div>
-                                            <div class="font-medium mb-3">{{ patient.name }}</div>
-                                            <small class="font-medium h5">{{ patient.injury }}</small>
-                                        </div>
-                                    </div>
-                                    <p-tag [value]="patient.severity"
-                                        [severity]="getSeveritySeverity(patient.severity)"></p-tag>
-                                </div>
-                            </div>
-                            }
-                        </p-card>
-                    </div>
+    <div class="my-2">
+      <app-tabs-navigation [tabs]="tabs" [activeTab]="currentTab"
+        (tabChange)="onTabChange($event)"></app-tabs-navigation>
+    </div> 
 
-                    <!-- here is the details for the selected patient-->
-                    <div class="md:col-span-3 p-2 md:p-4">
-                        @if (currentPatient) {
-                        <p-card>
-                            <div class="flex flex-col md:flex-row justify-between items-center">
-                                <div class="flex items-center gap-3">
-                                    <p-avatar label="{{ getInitials(currentPatient?.name) }}" size="large"
-                                        class="bg-secondary text-white"></p-avatar>
-                                    <div>
-                                        <div class="text-xl font-semibold">{{ currentPatient?.name }}</div>
-                                        <small class="text-muted text-lg">Age: {{ currentPatient?.age }} • {{
-                                            currentPatient?.injury }}</small>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2 mt-3 md:mt-0">
-                                    <p-tag [value]="currentPatient?.severity + ' Priority'"
-                                        [severity]="getSeveritySeverity(currentPatient?.severity)"></p-tag>
-                                    <p-tag value="{{ currentPatient?.status }}" severity="info"
-                                        styleClass="p-tag-outlined"></p-tag>
-                                </div>
-                            </div>
+    <ng-container [ngSwitch]="currentTab">
+      <ng-container *ngSwitchCase="'overview'">
+        <app-patient-overview  (patientSelected) = "onPatientSelected($event)"></app-patient-overview>
+      </ng-container>
+      <ng-container *ngSwitchCase="'edit'"> 
+        <app-edit-protocol></app-edit-protocol>
+      </ng-container>
+      <ng-container *ngSwitchCase="'assign'">
+        <app-assign-sessions></app-assign-sessions>
+      </ng-container>
+      <ng-container *ngSwitchCase="'schedule'">
+        <app-schedule></app-schedule>
+      </ng-container>
+    </ng-container>
 
-                            <p-tabs value="5">
-                                <div class="overflow-x-auto whitespace-nowrap mb-2">
-                                    <p-tablist class="min-w-[400px]">
-                                        <p-tab value="5"> Overview </p-tab>
-                                        <p-tab value="6"> Treatment History </p-tab>
-                                        <p-tab value="7"> Progress </p-tab>
-                                    </p-tablist>
-                                </div>
 
-                                <p-tabpanels>
-                                    <p-tabpanel value="5">
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div>
-                                                <h5 class="mb-2">Injury Details</h5>
-                                                <ul class="list-none p-0">
-                                                    <li class="mb-2">
-                                                        Date of Injury: <strong>{{ currentPatient.dateOfInjury
-                                                            }}</strong>
-                                                    </li>
-                                                    <li class="mb-2">
-                                                        Treating Doctor: <strong>{{ currentPatient.doctor }}</strong>
-                                                    </li>
-                                                    <li class="mb-2">
-                                                        Current Plan: <strong>{{ currentPatient.currentPlan }}</strong>
-                                                    </li>
-                                                    <li class="mb-2">
-                                                        Next Appointment: <strong>{{ currentPatient.nextAppointment
-                                                            }}</strong>
-                                                    </li>
-                                                    <li class="mb-2">
-                                                        Injury Location: <strong>{{ currentPatient.injuryLocation ||
-                                                            'Not specified' }}</strong>
-                                                    </li>
-                                                    <li class="mb-2">
-                                                        Mechanism of Injury: <strong>{{ currentPatient.mechanismOfInjury
-                                                            || 'Not specified' }}</strong>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                            <div>
-                                                <h5 class="mb-2">Current Symptoms</h5>
-                                                <ul class="list-none p-0">
-                                                    <li *ngFor="let symptom of currentPatient.symptoms" class="mb-1"><i
-                                                            class="pi pi-exclamation-triangle text-orange-500 mr-2"></i>{{
-                                                        symptom }}</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <h5 class="mb-2">Description</h5>
-                                        <div class="p-3 bg-gray-100 rounded">{{ currentPatient.description }}</div>
-
-                                        <!-- Treatment Plan Integration -->
-                                        <div class="mt-4" *ngIf="currentPatient.currentPlan">
-                                            <h5 class="mb-2">Treatment Plan Integration</h5>
-                                            <div class="p-3 bg-blue-50 rounded border-blue-200">
-                                                <div class="flex items-center gap-2 mb-2">
-                                                    <i class="pi pi-file-edit text-blue-600"></i>
-                                                    <strong>Current Treatment Plan: {{ currentPatient.currentPlan
-                                                        }}</strong>
-                                                </div>
-                                                <p class="mb-2 text-sm">This injury requires specific treatment
-                                                    protocols. Click on "Treatment Plans" tab to view and modify the
-                                                    exercise plan.</p>
-                                                <button class="btn-primary" (click)="navigateToTreatmentPlans()">
-                                                    <i class="pi pi-arrow-right"></i> Go to Treatment Plans
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </p-tabpanel>
-
-                                    <p-tabpanel value="6">
-                                        <h5>Treatment history</h5>
-
-                                        @for (treatment of currentPatient.treatmentHistory; track treatment) {
-                                        <div class="mb-3">
-                                            <p-card>
-                                                <div class="flex justify-between">
-                                                    <div>
-                                                        <strong>{{ treatment.treatment }}</strong><br />
-                                                        <small class="text-muted">by {{ treatment.provider }}</small>
-                                                    </div>
-                                                    <small class="text-muted">{{ treatment.date }}</small>
-                                                </div>
-                                            </p-card>
-                                        </div>
-                                        }
-                                    </p-tabpanel>
-
-                                    <p-tabpanel value="7">
-                                        <div class="flex flex-col md:flex-row justify-between items-center mb-3 gap-4">
-                                            <h5>Recovery Progress</h5>
-                                            <span class="text-green-600 text-2xl font-bold">{{ currentPatient.progress
-                                                }}%</span>
-                                        </div>
-                                        <p-progressBar [value]="currentPatient.progress"></p-progressBar>
-
-                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                                            <div>
-                                                <p-card class="text-center">
-                                                    <i class="pi pi-directions text-primary text-3xl mb-2"></i>
-                                                    <div>Mobility</div>
-                                                    <strong>75%</strong>
-                                                </p-card>
-                                            </div>
-                                            <div>
-                                                <p-card class="text-center">
-                                                    <i class="pi pi-chart-line text-success text-3xl mb-2"></i>
-                                                    <div>Strength</div>
-                                                    <strong>60%</strong>
-                                                </p-card>
-                                            </div>
-                                            <div>
-                                                <p-card class="text-center">
-                                                    <i
-                                                        class="pi pi-exclamation-triangle text-orange-500 text-3xl mb-2"></i>
-                                                    <div>Pain Level</div>
-                                                    <strong>3/10</strong>
-                                                </p-card>
-                                            </div>
-                                        </div>
-                                    </p-tabpanel>
-                                </p-tabpanels>
-                            </p-tabs>
-                        </p-card>
-                        } @else {
-                        <p-card>
-                            <div class="flex flex-col items-center text-center min-w-[100px] flex-shrink-0">
-                                <i class="pi pi-user" style="font-size: 5rem"></i>
-                                <p class="mb-0 mt-2 font-medium text-nowrap font-bold text-lg">Please, Select a patient
-                                    to see full
-                                    details</p>
-                            </div>
-                        </p-card>
-                        }
-                    </div>
-                </div>
-            </section>
-        </p-tabpanel>
-
-        <p-tabpanel value="1">
-            <app-manage-scheduels></app-manage-scheduels>
-        </p-tabpanel>
-        <p-tabpanel value="2">
-            <section class="bg-white rounded-lg shadow-sm p-2 md:p-4">
-                <app-coach-assignment></app-coach-assignment>
-            </section>
-        </p-tabpanel>
-        <p-tabpanel value="3">
-            <section class="bg-white rounded-lg shadow-sm p-2 md:p-4">
-                <div class="treatment-plans-header mb-4">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Treatment Plans Management</h2>
-                    <p class="text-gray-600 mb-6">Update or modify exercise plans in coordination with the doctor using
-                        pre-defined templates created by super admin</p>
-                </div>
-
-                <div class="treatment-plans-content">
-                    <!-- Doctor Coordination Notice -->
-                    <div class="doctor-coordination-notice mb-6">
-                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                            <div class="flex items-center gap-2 mb-2">
-                                <i class="pi pi-user-md text-blue-600 text-xl"></i>
-                                <h4 class="text-blue-800 font-semibold mb-0">Doctor Coordination Required</h4>
-                            </div>
-                            <p class="text-blue-700 text-sm mb-0">
-                                All treatment plan modifications must be coordinated with the treating doctor.
-                                Templates are pre-approved by medical staff and can be customized based on patient
-                                needs.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Patient Selection -->
-                    <div class="patient-selection mb-6">
-                        <span class="p-float-label w-full">
-                            <p-dropdown [options]="patients" [(ngModel)]="selectedPatientForPlan"
-                                (onChange)="onPatientForPlanChange()" optionLabel="name" optionValue="id"
-                                placeholder=" " class="w-full" inputId="patientDropdown">
-                            </p-dropdown>
-                            <label for="patientDropdown">Select Patient</label>
-                        </span>
-                    </div>
-
-                    <!-- Treatment Plan Templates -->
-                    <div class="templates-section mb-6 overflow-x-auto">
-                        <h3 class="text-lg font-semibold mb-3">Available Templates (Super Admin Approved)</h3>
-                        <p class="text-gray-600 mb-4">Select a template to customize for the patient. All templates are
-                            pre-approved by medical staff.</p>
-                        <div
-                            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 gap-y-4 w-full min-w-0 templates-grid">
-                            <div *ngFor="let template of treatmentTemplates"
-                                class="template-card w-full p-4 rounded-lg shadow cursor-pointer transition hover:bg-blue-50 mb-4"
-                                [class.selected]="selectedTemplate?.id === template.id"
-                                (click)="selectTemplate(template)" tabindex="0">
-                                <div class="template-header flex justify-between items-center mb-2">
-                                    <h4 class="template-title font-semibold">{{ template.name }}</h4>
-                                    <span
-                                        class="template-category text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">{{
-                                        template.category }}</span>
-                                </div>
-                                <div class="template-description mb-2">
-                                    <p>{{ template.description }}</p>
-                                </div>
-                                <div class="template-details flex gap-4 mb-2">
-                                    <span class="detail-item flex items-center gap-1">
-                                        <i class="pi pi-calendar"></i>
-                                        {{ template.duration }} weeks
-                                    </span>
-                                    <span class="detail-item flex items-center gap-1">
-                                        <i class="pi pi-clock"></i>
-                                        {{ template.sessionsPerWeek }} sessions/week
-                                    </span>
-                                </div>
-                                <div class="template-exercises mb-2">
-                                    <h5 class="font-semibold">Key Exercises:</h5>
-                                    <ul class="exercise-list list-disc ml-5">
-                                        <li *ngFor="let exercise of template.exercises.slice(0, 3)">{{ exercise }}</li>
-                                        <li *ngIf="template.exercises.length > 3" class="more-exercises">
-                                            +{{ template.exercises.length - 3 }} more
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="template-approval mt-2">
-                                    <span class="approval-badge flex items-center gap-1 text-green-700">
-                                        <i class="pi pi-check-circle text-green-600"></i>
-                                        Medical Staff Approved
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Current Treatment Plan -->
-                    <div class="current-plan-section mb-6 overflow-x-auto">
-                        <h3 class="text-lg font-semibold mb-3">Current Treatment Plan</h3>
-                        <div class="current-plan-card p-4 rounded-lg shadow bg-white mb-4">
-                            <div
-                                class="plan-header flex flex-col md:flex-row justify-between items-center mb-2 gap-2 min-w-0">
-                                <div class="flex items-center gap-3">
-                                    <p-avatar label="{{ getInitials(currentTreatmentPlan?.name || '') }}" size="large"
-                                        class="bg-secondary text-white"></p-avatar>
-                                    <div>
-                                        <div class="text-xl font-semibold">{{ currentTreatmentPlan?.name }}</div>
-                                        <small class="text-muted text-lg">Duration: {{ currentTreatmentPlan?.duration }}
-                                            weeks</small>
-                                    </div>
-                                </div>
-                                <div class="plan-actions flex flex-col md:flex-row gap-2 w-full md:w-auto">
-                                    <button class="btn-edit w-full md:w-auto" (click)="editCurrentPlan()"
-                                        aria-label="Edit Plan">
-                                        <i class="pi pi-pencil"></i> Edit Plan
-                                    </button>
-                                    <button class="btn-view w-full md:w-auto" (click)="viewCurrentPlan()"
-                                        aria-label="View Plan Details">
-                                        <i class="pi pi-eye"></i> View Details
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="plan-progress mb-2">
-                                <div class="progress-info flex items-center gap-2 mb-2">
-                                    <span>Progress: {{ currentTreatmentPlan?.progress }}%</span>
-                                    <div class="progress-bar bg-gray-200 rounded h-2 w-32 overflow-hidden">
-                                        <div class="progress-fill bg-blue-500 h-2"
-                                            [style.width.%]="currentTreatmentPlan?.progress">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="plan-stats grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    <div class="stat">
-                                        <span class="stat-label">Sessions Completed:</span>
-                                        <span class="stat-value">{{ currentTreatmentPlan?.completedSessions }}/{{
-                                            currentTreatmentPlan?.totalSessions }}</span>
-                                    </div>
-                                    <div class="stat">
-                                        <span class="stat-label">Next Session:</span>
-                                        <span class="stat-value">{{ currentTreatmentPlan?.nextSession }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Plan Editor -->
-                    <div class="plan-editor overflow-x-auto mb-4"
-                        *ngIf="isEditingPlan && selectedTemplate && editingPlan">
-                        <h3 class="text-lg font-semibold mb-3">Edit Treatment Plan (Doctor Coordination Required)</h3>
-                        <div class="editor-container grid grid-cols-1 md:grid-cols-3 gap-4 min-w-0">
-                            <div class="editor-section md:col-span-1 mb-4 md:mb-0">
-                                <h4>Plan Configuration</h4>
-                                <div class="form-group mb-2">
-                                    <label>Plan Name:</label>
-                                    <input type="text" [(ngModel)]="editingPlan!.name" class="form-input w-full">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label>Duration (weeks):</label>
-                                    <input type="number" [(ngModel)]="editingPlan!.duration" class="form-input w-full">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label>Sessions per Week:</label>
-                                    <input type="number" [(ngModel)]="editingPlan!.sessionsPerWeek"
-                                        class="form-input w-full">
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label>Session Duration (minutes):</label>
-                                    <input type="number" [(ngModel)]="editingPlan!.sessionDuration"
-                                        class="form-input w-full">
-                                </div>
-                            </div>
-
-                            <div class="editor-section md:col-span-1 mb-4 md:mb-0">
-                                <h4>Exercises (Based on Template)</h4>
-                                <div class="exercises-list flex flex-col gap-2">
-                                    <div *ngFor="let exercise of editingPlan!.exercises; let i = index"
-                                        class="exercise-item bg-gray-50 p-2 rounded shadow-sm flex flex-col gap-2">
-                                        <div class="exercise-header flex items-center gap-2">
-                                            <input type="text" [(ngModel)]="exercise.name" class="exercise-name flex-1">
-                                            <button class="btn-remove" (click)="removeExercise(i)">
-                                                <i class="pi pi-trash"></i>
-                                            </button>
-                                        </div>
-                                        <div class="exercise-details grid grid-cols-1 md:grid-cols-3 gap-2">
-                                            <div class="detail-row">
-                                                <label>Sets:</label>
-                                                <input type="number" [(ngModel)]="exercise.sets"
-                                                    class="detail-input w-full">
-                                            </div>
-                                            <div class="detail-row">
-                                                <label>Reps:</label>
-                                                <input type="number" [(ngModel)]="exercise.reps"
-                                                    class="detail-input w-full">
-                                            </div>
-                                            <div class="detail-row">
-                                                <label>Duration:</label>
-                                                <input type="number" [(ngModel)]="exercise.duration"
-                                                    class="detail-input w-full">
-                                                <span>seconds</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <button class="btn-add-exercise mt-2 w-full md:w-auto" (click)="addExercise()"
-                                        aria-label="Add Exercise">
-                                        <i class="pi pi-plus"></i> Add Exercise
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="editor-section md:col-span-1 mb-4 md:mb-0">
-                                <h4>Goals & Notes (Doctor Consultation)</h4>
-                                <div class="form-group mb-2">
-                                    <label>Goals:</label>
-                                    <textarea [(ngModel)]="editingPlan!.goals" class="form-textarea w-full" rows="3"
-                                        placeholder="Enter treatment goals in consultation with the doctor"></textarea>
-                                </div>
-                                <div class="form-group mb-2">
-                                    <label>Notes:</label>
-                                    <textarea [(ngModel)]="editingPlan!.notes" class="form-textarea w-full" rows="3"
-                                        placeholder="Add notes from doctor consultation"></textarea>
-                                </div>
-                            </div>
-
-                            <div
-                                class="editor-actions md:col-span-3 flex flex-col md:flex-row gap-2 justify-end mt-4 w-full">
-                                <button class="btn-cancel w-full md:w-auto" (click)="cancelEdit()"
-                                    aria-label="Cancel Edit">
-                                    Cancel
-                                </button>
-                                <button class="btn-save w-full md:w-auto" (click)="savePlan()" aria-label="Save Plan">
-                                    <i class="pi pi-check"></i> Save Plan (Doctor Approved)
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </p-tabpanel>
-    </p-tabpanels>
-</p-tabs>
+  </div>
+</section>
