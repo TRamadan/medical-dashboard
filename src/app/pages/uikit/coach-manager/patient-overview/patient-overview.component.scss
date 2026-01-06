@@ -1,4 +1,72 @@
- .icon {
-     width: 24px;
-     height: 24px;
- }
+.icon {
+    width: 24px;
+    height: 24px;
+}
+
+.card {
+    padding: 15px;
+}
+
+.workflow-step {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+}
+
+.workflow-step .icon {
+    font-size: 26px;
+}
+
+/* Success */
+.workflow-step.success {
+    background: #ecfdf3;
+    border: 1px solid #b7ebc6;
+    color: #0f5132;
+}
+
+/* Warning */
+.workflow-step.warning {
+    background: #fff7e6;
+    border: 1px solid #ffcc80;
+    color: #92400e;
+}
+
+/* Disabled */
+.workflow-step.disabled {
+    background: #f8f9fa;
+    border: 1px solid #e5e7eb;
+    color: #9ca3af;
+}
+
+.workflow-step.disabled .icon {
+    color: #cbd5e1;
+}
+
+/* Mobile Optimization */
+@media (max-width: 576px) {
+    .workflow-step {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .workflow-step .icon {
+        font-size: 22px;
+    }
+}
+
+.specs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    gap: 0.5rem;
+    width: 100%;
+    justify-content: start; /* Default to start for mobile */
+
+    @media (min-width: 1200px) {
+        /* xl breakpoint */
+        grid-template-columns: repeat(4, max-content);
+        justify-content: end; /* Align to end for desktop */
+    }
+}

@@ -1,6 +1,6 @@
 <p-toolbar>
-    <h1 class="text-2xl font-bold">Coaches Manager Dashboard</h1>
-    <p>Welcome back, test username</p>
+  <h1 class="text-2xl font-bold">Coaches Manager Dashboard</h1>
+  <p>Welcome back, test username</p>
 </p-toolbar>
 <br />
 <section>
@@ -10,44 +10,45 @@
     </div>
 
     @if(selectedPatient){
-      <div class="treatment-plan-container">
-        <h2 class="title p-2">Treatment Plan</h2>
-  
-        <div class="stats-grid">
-          <div class="stat-card blue">
-            <div class="stat-value">{{ data.sessionsDone }}</div>
-            <div class="stat-label">Session Done</div>
-          </div>
-  
-          <div class="stat-card green">
-            <div class="stat-value">{{ data.remaining }}</div>
-            <div class="stat-label">Remaining</div>
-          </div>
-  
-          <div class="stat-card pink">
-            <div class="stat-value">{{ data.currentPhase }}</div>
-            <div class="stat-label">Current Phase</div>
-          </div>
-  
-          <div class="stat-card orange">
-            <div class="stat-value">{{ data.totalWeeks }}</div>
-            <div class="stat-label">Total Weeks</div>
-          </div>
+    <div class="treatment-plan-container">
+      <h2 class="title p-2">Treatment Plan</h2>
+
+      <div class="stats-grid">
+        <div class="stat-card blue">
+          <div class="stat-value">{{ data.sessionsDone }}</div>
+          <div class="stat-label">Session Done</div>
         </div>
-  
+
+        <div class="stat-card green">
+          <div class="stat-value">{{ data.remaining }}</div>
+          <div class="stat-label">Remaining</div>
+        </div>
+
+        <div class="stat-card pink">
+          <div class="stat-value">{{ data.currentPhase }}</div>
+          <div class="stat-label">Current Phase</div>
+        </div>
+
+        <div class="stat-card orange">
+          <div class="stat-value">{{ data.totalWeeks }}</div>
+          <div class="stat-label">Total Weeks</div>
+        </div>
       </div>
+
+    </div>
     }
 
     <div class="my-2">
       <app-tabs-navigation [tabs]="tabs" [activeTab]="currentTab"
         (tabChange)="onTabChange($event)"></app-tabs-navigation>
-    </div> 
+    </div>
 
     <ng-container [ngSwitch]="currentTab">
       <ng-container *ngSwitchCase="'overview'">
-        <app-patient-overview  (patientSelected) = "onPatientSelected($event)"></app-patient-overview>
+        <app-patient-overview [selectedPatient]="selectedPatient" (patientSelected)="onPatientSelected($event)"
+          (navigateToAssign)="onTabChange('assign')"></app-patient-overview>
       </ng-container>
-      <ng-container *ngSwitchCase="'edit'"> 
+      <ng-container *ngSwitchCase="'edit'">
         <app-edit-protocol></app-edit-protocol>
       </ng-container>
       <ng-container *ngSwitchCase="'assign'">

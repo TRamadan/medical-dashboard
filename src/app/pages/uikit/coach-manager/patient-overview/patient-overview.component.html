@@ -1,3 +1,26 @@
+<div class="container my-4">
+    <div class="alert alert-warning  p-3 rounded-3" role="alert" style="border-left: 5px solid #e07b00;">
+        <div class="flex-grow-1">
+            <h5 class="mb-1 fw-bold">Action Required: Coach Assignment Needed</h5>
+            <p class="mb-0">The doctor has created these treatment plans and patients have approved it. You need to
+                assign coaches and coordinate scheduling to activate the plan.</p>
+        </div>
+
+        @if(selectedPatient){
+        <div class="row">
+            <div class="col-md-12 mt-3">
+                <button class="btn btn-warning text-dark fw-bold" (click)="navigateToAssign.emit()">
+                    <i class=" pi pi-users"></i>
+                    Assign Coaches Now for <b>{{selectedPatient.name}}</b>
+                </button>
+            </div>
+        </div>
+        }
+    </div>
+</div>
+
+
+
 <div class="flex flex-col gap-6 mb-6">
     <p-accordion [value]="selectedPatient?.id">
         @if (selectedPatient) {
@@ -10,6 +33,7 @@
         </p-card>
         }
         @for (patient of patients; track patient) {
+        @if (!selectedPatient || selectedPatient.id === patient.id) {
         <p-accordion-panel [value]="patient.id">
             <!-- HEADER -->
             <p-accordion-header>
@@ -47,55 +71,55 @@
             <p-accordion-content>
                 <div class="card shadow-sm patient-info border-none">
                     <div class="card-body">
-                        @if (!selectedPatient) {
-                        <div class="d-flex align-items-center mb-3">
-                            <svg class="icon me-2" viewBox="0 0 24 24" fill="currentColor">
-                                <path
-                                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                            </svg>
-                            <h2 class="h5 mb-0 fw-semibold">Patient Information</h2>
-                        </div>
-                        <div class="flex flex-col gap-4 p-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-base text-gray-600">Name:</span>
-                                <span class="text-base font-semibold">{{ patient.name }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-base text-gray-600">Appointment Date:</span>
-                                <span class="text-base font-semibold">{{ patient.bookingDate }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-base text-gray-600">Gender:</span>
-                                <span class="text-base font-semibold">{{ patient.gender }}</span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-base text-gray-600">Injury:</span>
-                                <span class="text-base font-semibold">{{ patient.injury }}</span>
-                            </div>
+                        <div class="card-body">
 
-                            <div class="flex justify-between items-center">
-                                <span class="text-base text-gray-600">Report Status:</span>
-                                <div class="flex items-center gap-2">
-                                    @if (patient.acceptedReport) {
-                                    <p-tag value="Accepted" severity="success" icon="pi pi-check-circle" />
+                            <div class="d-flex align-items-center mb-3">
+                                <svg class="icon me-2" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                                </svg>
+                                <h2 class="h5 mb-0 fw-semibold">Patient Information</h2>
+                            </div>
+                            <div class="flex flex-col gap-4 p-3">
+                                <div class="flex justify-between items-center">
+                                    <span class="text-base text-gray-600">Name:</span>
+                                    <span class="text-base font-semibold">{{ patient.name }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-base text-gray-600">Appointment Date:</span>
+                                    <span class="text-base font-semibold">{{ patient.bookingDate }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-base text-gray-600">Gender:</span>
+                                    <span class="text-base font-semibold">{{ patient.gender }}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-base text-gray-600">Injury:</span>
+                                    <span class="text-base font-semibold">{{ patient.injury }}</span>
+                                </div>
+
+                                <div class="flex justify-between items-center">
+                                    <span class="text-base text-gray-600">Report Status:</span>
+                                    <div class="flex items-center gap-2">
+                                        @if (patient.acceptedReport) {
+                                        <p-tag value="Accepted" severity="success" icon="pi pi-check-circle" />
+                                        }
+                                        @if (!patient.acceptedReport) {
+                                        <p-tag value="Not Accepted" severity="danger" icon="pi pi-times-circle" />
+                                        }
+                                    </div>
+                                </div>
+
+                                <div class="flex gap-2 ml-auto">
+                                    @if (!selectedPatient) {
+                                    <p-button label="Select Patient" size="small" icon="pi pi-check"
+                                        (onClick)="selectPatient(patient); $event.stopPropagation()" />
                                     }
-                                    @if (!patient.acceptedReport) {
-                                    <p-tag value="Not Accepted" severity="danger" icon="pi pi-times-circle" />
-                                    }
+
                                 </div>
                             </div>
-
-                            <div class="flex gap-2 ml-auto">
-                                @if (!selectedPatient) {
-                                <p-button label="Select Patient" size="small" icon="pi pi-check"
-                                    (onClick)="selectPatient(patient); $event.stopPropagation()" />
-                                }
-                                @if (selectedPatient?.id === patient.id) {
-                                <p-tag value="Selected" severity="success" />
-                                }
-                            </div>
                         </div>
-                        }
+
                     </div>
                 </div>
 
@@ -144,48 +168,53 @@
                                 <strong>({{patient.treatmentPlan.sessionsPerWeek}}x/week)</strong></span>
                         </div>
                     </div>
-
-
-
                 </div>
 
                 <!-- here is the card needed for to show the phases for the treatment plan-->
-                <div class="card shadow-sm patient-info border-none">
+                <div class="card shadow-sm patient-info border-none mt-4">
                     <div class="container my-4">
-                        <h3 class="mb-4">Treatment Phases Overview</h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="mb-0">Treatment Phases Overview</h3>
+                        </div>
 
                         @for(phase of patient?.treatmentPlan?.phases; track phase; let i = $index){
-                        <div class="card mb-3 shadow-sm">
-                            <div class="row g-0 align-items-center p-3">
-
-                                <!-- Phase Number Badge -->
-                                <div class="col-auto">
-                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                                        style="width: 40px; height: 40px; font-weight: bold;">
-                                        {{ i + 1 }}
+                        <div class="card mb-3 surface-card p-4 border-round shadow-sm border-0">
+                            <div class="row align-items-center gy-3">
+                                <div class="col-12 col-xl-7">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <!-- Number Badge -->
+                                        <div class="d-flex align-items-center justify-content-center bg-blue-500 text-white font-bold text-xl flex-shrink-0"
+                                            style="width: 2.5rem; height: 2.5rem; border-radius: 50%;">
+                                            {{ i + 1 }}
+                                        </div>
+                                        <!-- Phase Detail -->
+                                        <div>
+                                            <div class="text-xl font-bold text-900 mb-1">{{ phase.phaseName }}</div>
+                                            <div class="text-sm font-bold text-700 mb-1 text-muted">
+                                                {{phase.objective}}
+                                            </div>
+                                            <div class="text-600">Weeks {{phase.phaseWeeks}} • Sessions per week
+                                                {{phase.sessionsPerWeek}} </div>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <!-- Phase Info -->
-                                <div class="col ms-3">
-                                    <h5 class="mb-1">{{ phase.phase }}</h5>
-                                    <small class="text-muted">Weeks {{ phase.weeks }} • Sessions {{ phase.sessions
-                                        }}</small>
-                                </div>
-
                                 <!-- Specializations -->
-                                <div class="col-auto text-end d-flex flex-wrap gap-1">
-                                    <span class="text-muted me-2">Required Specializations:</span>
-                                    <ng-container *ngFor="let spec of phase.specializations">
-                                        <span class="badge bg-primary">{{ spec }}</span>
-                                    </ng-container>
+                                <div class="col-12 col-xl-5">
+                                    <div class="d-flex flex-column align-items-start align-items-xl-end gap-2">
+                                        <span class="text-sm text-600">Required Specializations:</span>
+                                        <div class="specs-grid">
+                                            @for(spec of phase.specializations; track spec){
+                                            <p-tag [value]="spec"
+                                                styleClass="bg-blue-100 text-blue-700 border-none px-3 white-space-nowrap"></p-tag>
+                                            }
+                                        </div>
+                                    </div>
                                 </div>
-
                             </div>
                         </div>
                         }
                     </div>
-
                 </div>
 
 
@@ -193,6 +222,7 @@
 
             </p-accordion-content>
         </p-accordion-panel>
+        }
         }
     </p-accordion>
 </div>

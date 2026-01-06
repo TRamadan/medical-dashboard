@@ -1,1 +1,24 @@
-<p>edit-protocol works!</p>
+<div class="container my-3">
+    <div class="row align-items-center g-2">
+        <div class="container my-4">
+            <div class="alert alert-primary  p-3 rounded-3" role="alert" style="border-left: 5px solid #3890f5;">
+                <div class="flex-grow-1">
+                    <h5 class="mb-1 fw-bold">Edit Protocol from Template</h5>
+                    <p class="mb-0">You can customize the exercise protocols created by the doctor to fit specific
+                        patient needs.</p>
+                </div>
+
+                <button class="btn  btn-primary mt-3">Edit Protocol</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<p-card [styleClass]="'my-3'">
+    <ng-template pTemplate="header">
+        <div class="px-4 pt-4 pb-2">
+            <h2 class="text-2xl font-bold text-gray-800 mb-1">Treatment Phases from Report</h2>
+        </div>
+    </ng-template>
+</p-card>
