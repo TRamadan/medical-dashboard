@@ -49,7 +49,7 @@
           (navigateToAssign)="onTabChange('assign')"></app-patient-overview>
       </ng-container>
       <ng-container *ngSwitchCase="'edit'">
-        <app-edit-protocol></app-edit-protocol>
+        <app-edit-protocol [selectedPatient]="selectedPatient"></app-edit-protocol>
       </ng-container>
       <ng-container *ngSwitchCase="'assign'">
         <app-assign-sessions></app-assign-sessions>
