@@ -25,6 +25,7 @@ import { WorkingHoursComponent } from './working-hours/working-hours.component';
 import { OurSolutionsComponent } from './our-solutions/our-solutions.component';
 import { PatientreportComponent } from './patientreport/patientreport.component';
 import { PhasesSessionsComponent } from './phases-sessions/phases-sessions.component';
+import { MeasurementsConfigComponent } from './measurements-config/measurements-config.component';
 export default [
     {
         path: 'adduser',
@@ -151,5 +152,9 @@ export default [
     {
         path: 'our-team',
         component: OurTeamComponent
+    },
+    {
+        path: 'measurements-config',
+        component: MeasurementsConfigComponent
     }
 ] as Routes;

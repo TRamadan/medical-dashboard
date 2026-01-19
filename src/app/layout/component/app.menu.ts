@@ -69,6 +69,7 @@ export class AppMenu {
                     // }
                 ]
             },
+
             {
                 label: 'Doctor',
                 items: [
@@ -187,15 +188,25 @@ export class AppMenu {
                 ]
             },
             {
-                label: 'Reports and forms configuration',
+                label: 'Measurements configuration',
                 items: [
                     {
-                        label: 'reports',
+                        label: 'measurements configuration',
                         icon: '',
-                        routerLink: ['/uikit/reportconfig']
+                        routerLink: ['/uikit/measurements-config']
                     }
                 ]
             }
+            // {
+            //     label: 'Reports and forms configuration',
+            //     items: [
+            //         {
+            //             label: 'reports',
+            //             icon: '',
+            //             routerLink: ['/uikit/reportconfig']
+            //         }
+            //     ]
+            // }
         ];
     }
 }

@@ -1,0 +1,64 @@
+<p-toast></p-toast>
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center gap-2">
+        <i class="pi pi-file text-xl text-primary"></i>
+        <h5 class="m-0 font-bold text-xl">Saved Templates</h5>
+    </div>
+    <span class="bg-gray-100 text-gray-600 px-3 py-1 border-round font-medium text-sm">
+        {{ templates.length }} templates
+    </span>
+</div>
+
+<div class="d-flex flex-column gap-3">
+    <div *ngFor="let template of templates" class="surface-card p-4 border-round shadow-1 border-1 surface-border">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="flex-grow-1 pr-3">
+                <h2 class="text-xl font-bold text-900 mb-2">{{ template.name }}</h2>
+                <p class="text-600 line-height-3 m-0 mb-3">{{ template.description }}</p>
+
+                <div class="d-flex align-items-center gap-4 text-sm text-500 mb-3">
+                    <span class="d-flex align-items-center gap-1">
+                        <i class="pi pi-list"></i>
+                        <span>{{ template.itemsCount || (template.measurements?.length || 0) }} items</span>
+                    </span>
+                    <span class="d-flex align-items-center gap-1">
+                        <i class="pi pi-calendar"></i>
+                        <span>{{ template.date || 'Unknown Date' }}</span>
+                    </span>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                    <ng-container *ngFor="let item of template.previewItems; let i = index">
+                        <span *ngIf="i < 4"
+                            class="surface-100 text-700 px-3 py-1 border-round font-medium text-sm border-1 surface-border">
+                            {{ item }}
+                        </span>
+                    </ng-container>
+                    <span *ngIf="template.previewItems?.length > 4"
+                        class="surface-100 text-700 px-3 py-1 border-round font-bold text-sm border-1 surface-border">
+                        +{{ template.previewItems.length - 4 }} more
+                    </span>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <button pButton icon="pi pi-pencil" class="p-button-text p-button-rounded p-button-secondary"
+                    (click)="editTemplate(template)"></button>
+
+                <button pButton label="Edit Items" icon="pi pi-plus" class="p-button-success"
+                    (click)="editItems(template)"></button>
+
+                <button pButton icon="pi pi-trash" class="p-button-text p-button-rounded p-button-danger"
+                    (click)="deleteTemplate(template.id)"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="templates.length === 0" class="text-center p-5 surface-card border-round border-1 surface-border">
+        <i class="pi pi-file text-500 text-5xl mb-3"></i>
+        <div class="text-900 font-bold text-xl mb-3">No Templates Found</div>
+        <p class="text-600 m-0">Create a new template to get started.</p>
+    </div>
+</div>

@@ -1,0 +1,274 @@
+<p-toast position="top-center"></p-toast>
+<div class="row m-4">
+    <div class="col-12 text-center mb-4 position-relative">
+        <p-selectButton [options]="options" [(ngModel)]="value" [allowEmpty]="false" optionLabel="label"
+            optionValue="value">
+            <ng-template let-item pTemplate>
+                <i [class]="item.icon" class="me-2"></i>
+                {{ item.label }}
+            </ng-template>
+        </p-selectButton>
+
+        <p-button *ngIf="categories.length > 0 && value === 'categories'" label="Add Category" icon="pi pi-plus"
+            class="position-absolute end-0 top-50 translate-middle-y" [outlined]="true"
+            (click)="showDialog()"></p-button>
+    </div>
+
+    <div class="col-12" *ngIf="value === 'categories'">
+        <!-- Empty State -->
+        <div *ngIf="categories.length === 0" class="text-center p-5 surface-50 border-round-xl border-1 surface-border">
+            <div class="mb-3">
+                <i class="pi pi-inbox text-600" style="font-size: 4rem"></i>
+            </div>
+            <h3 class="mb-2 text-900 font-semibold">No Categories Found</h3>
+            <p class="text-600 mb-4 line-height-3">
+                It seems there are no measurement categories configured yet.<br>
+                Start by adding a new category to organize your measurements efficiently.
+            </p>
+            <p-button label="Create First Category" icon="pi pi-plus" (click)="showDialog()"></p-button>
+        </div>
+
+        <!-- Categories List -->
+        <div *ngIf="categories.length > 0" class="d-flex flex-column gap-3">
+            <p-accordion class="w-full">
+                <p-accordion-panel *ngFor="let category of categories" [value]="category.id" class="mb-3">
+                    <p-accordion-header iconPos="start">
+                        <div class="d-flex align-items-center w-100">
+                            <!-- Icon -->
+                            <div [class]="category.iconBg"
+                                class="rounded p-3 d-flex align-items-center justify-content-center me-3"
+                                style="width: 50px; height: 50px">
+                                <i [class]="category.icon + ' ' + category.iconColor" style="font-size: 1.5rem"></i>
+                            </div>
+
+                            <!-- Text Content -->
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1 text-900 font-bold">{{ category.name }}</h5>
+                                <span class="text-600">
+                                    {{ category.subCategories?.length || 0 }} subcategories • {{ category.description }}
+                                </span>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2">
+                                <p-button icon="pi pi-pencil" [rounded]="true" [text]="true" severity="secondary"
+                                    (click)="$event.stopPropagation(); openEditCategory(category)"></p-button>
+                                <p-button label="Add Subcategory" icon="pi pi-plus" [outlined]="true"
+                                    severity="secondary" styleClass="bg-white"
+                                    (click)="$event.stopPropagation(); openAddSubCategory(category)"></p-button>
+                            </div>
+                        </div>
+                    </p-accordion-header>
+                    <p-accordion-content>
+                        <!-- Subcategories List -->
+                        <div class="px-3 pb-3">
+                            <div *ngIf="category.subCategories && category.subCategories.length > 0; else noSub"
+                                class="d-flex flex-column gap-3">
+                                <div *ngFor="let sub of category.subCategories"
+                                    class="surface-0 border-round border-1 surface-border mb-2 overflow-hidden">
+                                    <div class="p-3 d-flex align-items-center justify-content-between bg-white cursor-pointer hover:surface-50 transition-colors-150"
+                                        (click)="toggleSubCategory(sub)">
+                                        <div class="d-flex align-items-center">
+                                            <i class="pi pi-angle-right text-500 mr-2 transition-duration-200"
+                                                [ngClass]="{'rotate-90': sub.expanded}"></i>
+                                            <span class="font-medium text-900 mr-2">{{ sub.name }}</span>
+                                            <span
+                                                class="bg-gray-100 text-gray-600 px-2 py-1 border-round text-sm font-bold">
+                                                {{ sub.measurements?.length || sub.itemsCount || 0 }} items
+                                            </span>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-2" (click)="$event.stopPropagation()">
+                                            <!-- Add Item Button -->
+                                            <button pButton icon="pi pi-plus"
+                                                class="p-button-text p-button-rounded p-button-secondary p-button-sm"
+                                                pTooltip="Add Measurement" tooltipPosition="top"
+                                                (click)="openAddMeasurement(sub)"></button>
+                                            <!-- Edit Subcategory -->
+                                            <button pButton icon="pi pi-pencil"
+                                                class="p-button-text p-button-rounded p-button-secondary p-button-sm"
+                                                pTooltip="Edit Subcategory" tooltipPosition="top"
+                                                (click)="openEditSubCategory(sub, category.id)"></button>
+                                            <!-- Delete Subcategory -->
+                                            <button pButton icon="pi pi-trash"
+                                                class="p-button-text p-button-rounded p-button-danger p-button-sm"
+                                                pTooltip="Delete Subcategory" tooltipPosition="top"
+                                                (click)="deleteSubCategory(sub.id)"></button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Measurements List (Expanded) -->
+                                    <div *ngIf="sub.expanded" class="border-top-1 surface-border bg-gray-50 p-3">
+                                        <div *ngIf="!sub.measurements || sub.measurements.length === 0"
+                                            class="text-center text-sm text-500 py-2">
+                                            No measurements added yet.
+                                        </div>
+                                        <div *ngIf="sub.measurements?.length > 0" class="d-flex flex-column gap-2">
+                                            <div *ngFor="let m of sub.measurements"
+                                                class="surface-card p-2 border-round shadow-1 d-flex align-items-center justify-content-between">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="pi pi-circle-fill" style="font-size: 0.5rem"
+                                                        [class.text-blue-500]="category.type === 1"
+                                                        [class.text-purple-500]="category.type === 2"></i>
+                                                    <span class="text-sm font-medium">{{ m.name }}</span>
+                                                    <span *ngIf="m.unit"
+                                                        class="text-xs text-500 bg-gray-100 px-1 border-round">{{ m.unit
+                                                        }}</span>
+                                                    <span *ngIf="m.inputType"
+                                                        class="text-xs text-500 border-1 surface-border px-1 border-round">
+                                                        {{ m.inputType === 1 ? 'Number' : m.inputType === 2 ?
+                                                        'Boolean' : m.inputType === 3 ? 'Scale' : 'Text' }}
+                                                    </span>
+                                                </div>
+                                                <div class="d-flex gap-1">
+                                                    <button pButton icon="pi pi-pencil"
+                                                        class="p-button-text p-button-rounded p-button-secondary p-button-sm"
+                                                        style="width: 2rem; height: 2rem"
+                                                        (click)="openEditMeasurement(m, sub.id)"></button>
+                                                    <button pButton icon="pi pi-trash"
+                                                        class="p-button-text p-button-rounded p-button-danger p-button-sm"
+                                                        style="width: 2rem; height: 2rem"
+                                                        (click)="deleteMeasurement(m.id, sub.id)"></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <ng-template #noSub>
+                                <div class="text-center p-3 text-500">
+                                    No subcategories added yet.
+                                </div>
+                            </ng-template>
+                        </div>
+                    </p-accordion-content>
+                </p-accordion-panel>
+            </p-accordion>
+        </div>
+    </div>
+
+    <!-- here is the component needed for save and create your needed template-->
+
+    <div class="col-12" *ngIf="value === 'templates'">
+        <app-measurement-templates></app-measurement-templates>
+
+    </div>
+
+    <!-- Category Dialog -->
+    <p-dialog [header]="isEditingCategory ? 'Edit Category' : 'Add New Category'" [(visible)]="displayDialog"
+        [modal]="true" [style]="{ width: '450px' }" styleClass="p-fluid">
+        <div class="d-flex flex-column gap-3">
+            <div class="field">
+                <label for="name" class="fw-bold mb-2 d-block">Name</label>
+                <input type="text" pInputText id="name" [(ngModel)]="newCategory.name" required autofocus
+                    class="w-100" />
+            </div>
+            <div class="field">
+                <label for="description" class="fw-bold mb-2 d-block">Description</label>
+                <textarea id="description" pTextarea [(ngModel)]="newCategory.description" required rows="3" cols="20"
+                    class="w-100"></textarea>
+            </div>
+            <div class="field">
+                <label for="type" class="fw-bold mb-2 d-block">Type</label>
+                <p-dropdown [appendTo]="'body'" [options]="types" [(ngModel)]="newCategory.type" optionLabel="label"
+                    optionValue="value" placeholder="Select a Type" styleClass="w-100"></p-dropdown>
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <p-button label="Cancel" icon="pi pi-times" [text]="true" (click)="displayDialog = false"></p-button>
+            <p-button label="Save" icon="pi pi-check" [text]="true" (click)="saveCategory()"></p-button>
+        </ng-template>
+    </p-dialog>
+
+    <!-- Subcategory Dialog -->
+    <p-dialog [header]="isEditingSubCategory ? 'Edit Subcategory' : 'Add New Subcategory'"
+        [(visible)]="displaySubCategoryDialog" [modal]="true" [style]="{ width: '450px' }" styleClass="p-fluid">
+        <div class="d-flex flex-column gap-3">
+            <div class="field">
+                <label for="subName" class="fw-bold mb-2 d-block">Name</label>
+                <input type="text" pInputText id="subName" [(ngModel)]="newSubCategory.name" required autofocus
+                    class="w-100" />
+            </div>
+            <div class="field">
+                <label for="subDescription" class="fw-bold mb-2 d-block">Description</label>
+                <textarea id="subDescription" pTextarea [(ngModel)]="newSubCategory.description" required rows="3"
+                    cols="20" class="w-100"></textarea>
+            </div>
+        </div>
+        <ng-template pTemplate="footer">
+            <p-button label="Cancel" icon="pi pi-times" [text]="true"
+                (click)="displaySubCategoryDialog = false"></p-button>
+            <p-button label="Save" icon="pi pi-check" [text]="true" (click)="saveSubCategory()"></p-button>
+        </ng-template>
+    </p-dialog>
+    <!-- Measurement Dialog -->
+    <p-dialog [header]="isEditingMeasurement ? 'Edit Measurement' : 'Add New Measurement'"
+        [(visible)]="displayMeasurementDialog" [modal]="true" [style]="{ width: '500px' }" styleClass="p-fluid">
+        <div class="d-flex flex-column gap-3">
+            <div class="field">
+                <label for="mName" class="fw-bold mb-2 d-block">Name</label>
+                <input type="text" pInputText id="mName" [(ngModel)]="newMeasurement.name" required class="w-100" />
+            </div>
+            <div class="field">
+                <label for="inputType" class="fw-bold mb-2 d-block">{{ isSubjective(newMeasurement.subCategoryId) ?
+                    'Answer Type' : 'Input Type' }}</label>
+
+                <ng-container *ngIf="!isSubjective(newMeasurement.subCategoryId); else subjectiveTemplate">
+                    <p-dropdown [appendTo]="'body'" [options]="inputTypes" [(ngModel)]="newMeasurement.inputType"
+                        optionLabel="label" optionValue="value" placeholder="Select Input Type"
+                        styleClass="w-100"></p-dropdown>
+                </ng-container>
+
+                <ng-template #subjectiveTemplate>
+                    <p-dropdown [appendTo]="'body'" [options]="subjectiveAnswerTypes"
+                        [(ngModel)]="newMeasurement.answerType" optionLabel="label" optionValue="value"
+                        placeholder="Select Answer Type" styleClass="w-100"></p-dropdown>
+                </ng-template>
+            </div>
+
+            <ng-container
+                *ngIf="!isSubjective(newMeasurement.subCategoryId) && (newMeasurement.inputType === 1 || newMeasurement.inputType === 3)">
+                <!-- Number (1) or Scale (3) -->
+                <div class="field">
+                    <label for="unit" class="fw-bold mb-2 d-block">Unit</label>
+                    <input type="text" pInputText id="unit" [(ngModel)]="newMeasurement.unit" class="w-100"
+                        placeholder="e.g. kg, cm" />
+                </div>
+                <div class="formgrid grid">
+                    <div class="field col">
+                        <label for="min" class="fw-bold mb-2 d-block">Min</label>
+                        <p-inputNumber id="min" [(ngModel)]="newMeasurement.minValue"
+                            styleClass="w-100"></p-inputNumber>
+                    </div>
+                    <div class="field col">
+                        <label for="max" class="fw-bold mb-2 d-block">Max</label>
+                        <p-inputNumber id="max" [(ngModel)]="newMeasurement.maxValue"
+                            styleClass="w-100"></p-inputNumber>
+                    </div>
+                    <div class="field col" *ngIf="newMeasurement.inputType === 3">
+                        <label for="step" class="fw-bold mb-2 d-block">Step</label>
+                        <p-inputNumber id="step" [(ngModel)]="newMeasurement.step" styleClass="w-100"></p-inputNumber>
+                    </div>
+                </div>
+            </ng-container>
+
+            <div class="field" *ngIf="isSubjective(newMeasurement.subCategoryId)">
+                <label for="question" class="fw-bold mb-2 d-block">Question</label>
+                <input type="text" pInputText id="question" [(ngModel)]="newMeasurement.question" class="w-100" />
+            </div>
+
+            <div class="field" *ngIf="!isSubjective(newMeasurement.subCategoryId)">
+                <label for="rangeHint" class="fw-bold mb-2 d-block">Normal Range Hint</label>
+                <input type="text" pInputText id="rangeHint" [(ngModel)]="newMeasurement.normalRangeHint"
+                    class="w-100" />
+            </div>
+
+            <!-- Add other type specific fields if needed later -->
+        </div>
+        <ng-template pTemplate="footer">
+            <p-button label="Cancel" icon="pi pi-times" [text]="true"
+                (click)="displayMeasurementDialog = false"></p-button>
+            <p-button label="Save" icon="pi pi-check" [text]="true" (click)="saveMeasurement()"></p-button>
+        </ng-template>
+    </p-dialog>
+</div>
