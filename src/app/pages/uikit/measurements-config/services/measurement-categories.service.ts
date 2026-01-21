@@ -82,6 +82,15 @@ export class MeasurementCategoriesService {
         return this.http.delete<any>(`${this.apiUrl}MeasurementSubCategories/${id}`);
     }
 
+    /**
+     * A function to get subcategory details with measurements by ID
+     * @param id The ID of the subcategory.
+     * @returns An observable with the subcategory details including measurements.
+     */
+    getSubCategoryById(id: number): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}MeasurementSubCategories/${id}`);
+    }
+
     // Measurements
 
     /**

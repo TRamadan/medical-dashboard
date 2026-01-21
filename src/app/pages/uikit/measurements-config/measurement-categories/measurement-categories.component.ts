@@ -18,10 +18,12 @@ import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TooltipModule } from 'primeng/tooltip';
 import { MeasurementTemplatesComponent } from '../measurement-templates/measurement-templates.component';
+import { TagModule } from 'primeng/tag';
 
 @Component({
     selector: 'app-measurement-categories',
     imports: [
+        TagModule,
         CommonModule,
         FormsModule,
         ButtonModule,
@@ -107,6 +109,24 @@ export class MeasurementCategoriesComponent {
                     c.icon = 'pi pi-comments';
                     c.iconBg = 'bg-purple-100';
                     c.iconColor = 'text-purple-500';
+                }
+            });
+
+            // Load subcategories and nest them under categories
+            this.measurementCategoriesService.getAllSubCategories().subscribe({
+                next: (subCategories) => {
+                    this.categories.forEach((category) => {
+                        // Filter subcategories that belong to this category
+                        category.subCategories = subCategories.filter((sub) => sub.categoryId === category.id || sub.category?.id === category.id);
+                    });
+                },
+                error: (err) => {
+                    console.error('Error loading subcategories', err);
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to load subcategories'
+                    });
                 }
             });
         });
@@ -231,17 +251,23 @@ export class MeasurementCategoriesComponent {
 
     toggleSubCategory(subCategory: any) {
         subCategory.expanded = !subCategory.expanded;
-        // if (subCategory.expanded && !subCategory.measurements) {
-        //     // Lazy load measurements
-        //     this.measurementCategoriesService.getMeasurements(subCategory.id).subscribe({
-        //         next: (data) => {
-        //             subCategory.measurements = data;
-        //         },
-        //         error: (err) => {
-        //             console.error('Error loading measurements', err);
-        //         }
-        //     });
-        // }
+
+        // Load measurements when expanding and if not already loaded
+        if (subCategory.expanded && subCategory.measurements) {
+            this.measurementCategoriesService.getSubCategoryById(subCategory.id).subscribe({
+                next: (data) => {
+                    // The API returns the subcategory object with measurements array
+                    subCategory.measurements = data.measurements || [];
+                },
+                error: (err) => {
+                    this.messageService.add({
+                        severity: 'error',
+                        summary: 'Error',
+                        detail: 'Failed to load measurements'
+                    });
+                }
+            });
+        }
     }
 
     openAddMeasurement(subCategory: any) {

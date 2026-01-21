@@ -1,64 +1,246 @@
 <p-toast></p-toast>
 
-<div class="d-flex align-items-center justify-content-between mb-4">
-    <div class="d-flex align-items-center gap-2">
-        <i class="pi pi-file text-xl text-primary"></i>
-        <h5 class="m-0 font-bold text-xl">Saved Templates</h5>
-    </div>
-    <span class="bg-gray-100 text-gray-600 px-3 py-1 border-round font-medium text-sm">
-        {{ templates.length }} templates
-    </span>
-</div>
-
-<div class="d-flex flex-column gap-3">
-    <div *ngFor="let template of templates" class="surface-card p-4 border-round shadow-1 border-1 surface-border">
-        <div class="d-flex justify-content-between align-items-start mb-3">
-            <div class="flex-grow-1 pr-3">
-                <h2 class="text-xl font-bold text-900 mb-2">{{ template.name }}</h2>
-                <p class="text-600 line-height-3 m-0 mb-3">{{ template.description }}</p>
-
-                <div class="d-flex align-items-center gap-4 text-sm text-500 mb-3">
-                    <span class="d-flex align-items-center gap-1">
-                        <i class="pi pi-list"></i>
-                        <span>{{ template.itemsCount || (template.measurements?.length || 0) }} items</span>
-                    </span>
-                    <span class="d-flex align-items-center gap-1">
-                        <i class="pi pi-calendar"></i>
-                        <span>{{ template.date || 'Unknown Date' }}</span>
+<p-tabs value="0">
+    <p-tablist>
+        <p-tab value="0">Added Templates</p-tab>
+        <p-tab value="1">Add a New Template</p-tab>
+    </p-tablist>
+    <p-tabpanels>
+        <p-tabpanel value="0">
+            <p-card>
+                <div class="d-flex align-items-center justify-content-between mb-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="pi pi-file text-xl text-primary"></i>
+                        <h5 class="m-0 font-bold text-xl">Saved Templates</h5>
+                    </div>
+                    <span class="bg-gray-100 text-gray-600 px-3 py-1 border-round font-medium text-sm">
+                        {{ templates.length }} templates
                     </span>
                 </div>
 
-                <div class="d-flex flex-wrap gap-2">
-                    <ng-container *ngFor="let item of template.previewItems; let i = index">
-                        <span *ngIf="i < 4"
-                            class="surface-100 text-700 px-3 py-1 border-round font-medium text-sm border-1 surface-border">
-                            {{ item }}
-                        </span>
-                    </ng-container>
-                    <span *ngIf="template.previewItems?.length > 4"
-                        class="surface-100 text-700 px-3 py-1 border-round font-bold text-sm border-1 surface-border">
-                        +{{ template.previewItems.length - 4 }} more
-                    </span>
+                <div class="d-flex flex-column gap-3">
+                    <div *ngFor="let template of templates"
+                        class="surface-card p-4 border-round shadow-1  surface-border">
+                        <p-card>
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="flex-grow-1 pr-3">
+                                    <h2 class="text-xl font-bold text-900 mb-2">{{ template.name }}</h2>
+                                    <p class="text-600 line-height-3 m-0 mb-3">{{ template.description }}</p>
+
+                                    <div class="d-flex align-items-center gap-4 text-sm text-500 mb-3">
+                                        <span class="d-flex align-items-center gap-1">
+                                            <i class="pi pi-list"></i>
+                                            <span>{{ template.itemsCount || (template.measurements?.length || 0) }}
+                                                items</span>
+                                        </span>
+                                        <span class="d-flex align-items-center gap-1">
+                                            <i class="pi pi-calendar"></i>
+                                            <span>{{ template.date || 'Unknown Date' }}</span>
+                                        </span>
+                                    </div>
+
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <ng-container *ngFor="let item of template.previewItems; let i = index">
+                                            <span *ngIf="i < 4"
+                                                class="surface-100 text-700 px-3 py-1 border-round font-medium text-sm border-1 surface-border">
+                                                {{ item }}
+                                            </span>
+                                        </ng-container>
+                                        <span *ngIf="template.previewItems?.length > 4"
+                                            class="surface-100 text-700 px-3 py-1 border-round font-bold text-sm border-1 surface-border">
+                                            +{{ template.previewItems.length - 4 }} more
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex align-items-center gap-2">
+                                    <button pButton icon="pi pi-pencil"
+                                        class="p-button-text p-button-rounded p-button-secondary"
+                                        (click)="editTemplate(template)"></button>
+
+                                    <button pButton label="Edit Items" icon="pi pi-plus" class="p-button-success"
+                                        (click)="editItems(template)"></button>
+
+                                    <button pButton icon="pi pi-trash"
+                                        class="p-button-text p-button-rounded p-button-danger"
+                                        (click)="deleteTemplate(template.id)"></button>
+                                </div>
+                            </div>
+                        </p-card>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div *ngIf="templates.length === 0"
+                        class="text-center p-5 surface-card border-round border-1 surface-border">
+                        <i class="pi pi-file text-500 text-5xl mb-3"></i>
+                        <div class="text-900 font-bold text-xl mb-3">No Templates Found</div>
+                        <p class="text-600 m-0">Create a new template to get started.</p>
+                    </div>
                 </div>
-            </div>
+            </p-card>
+        </p-tabpanel>
+        <p-tabpanel value="1">
+            <p-card>
+                <div class="p-4">
+                    <div class="d-flex align-items-center gap-2 mb-4">
+                        <i class="pi pi-file-plus text-xl text-primary"></i>
+                        <h5 class="m-0 font-bold text-xl">Create New Template</h5>
+                    </div>
 
-            <div class="d-flex align-items-center gap-2">
-                <button pButton icon="pi pi-pencil" class="p-button-text p-button-rounded p-button-secondary"
-                    (click)="editTemplate(template)"></button>
+                    <div class="grid">
+                        <div class="col-12 md:col-6 mb-4">
+                            <p-floatLabel>
+                                <input pInputText id="templateName" [(ngModel)]="newTemplate.name" class="w-full" />
+                                <label for="templateName">Template Name</label>
+                            </p-floatLabel>
+                        </div>
+                        <div class="col-12 mb-4">
+                            <p-floatLabel>
+                                <textarea pInputTextarea id="templateDesc" [(ngModel)]="newTemplate.description"
+                                    rows="3" class="w-full"></textarea>
+                                <label for="templateDesc">Description</label>
+                            </p-floatLabel>
+                        </div>
+                    </div>
 
-                <button pButton label="Edit Items" icon="pi pi-plus" class="p-button-success"
-                    (click)="editItems(template)"></button>
+                    <div class="mb-4">
+                        <h6 class="font-bold mb-3">Select Measurements</h6>
 
-                <button pButton icon="pi pi-trash" class="p-button-text p-button-rounded p-button-danger"
-                    (click)="deleteTemplate(template.id)"></button>
-            </div>
-        </div>
-    </div>
+                        <!-- Search Bar -->
+                        <div class="mb-3">
+                            <span class="p-input-icon-left w-full">
+                                <i class="pi pi-search"></i>
+                                <input type="text" pInputText [(ngModel)]="searchQuery"
+                                    (ngModelChange)="onSearchChange()" placeholder="Search measurements..."
+                                    class="w-full" style="padding-left: 2.5rem;" />
+                            </span>
+                        </div>
 
-    <!-- Empty State -->
-    <div *ngIf="templates.length === 0" class="text-center p-5 surface-card border-round border-1 surface-border">
-        <i class="pi pi-file text-500 text-5xl mb-3"></i>
-        <div class="text-900 font-bold text-xl mb-3">No Templates Found</div>
-        <p class="text-600 m-0">Create a new template to get started.</p>
-    </div>
-</div>
+                        <!-- Category Filter Tabs -->
+                        <div class="mb-4">
+                            <div class="d-flex gap-2">
+                                <button pButton label="All Categories"
+                                    [class]="selectedCategoryFilter === 'all' ? 'p-button-outlined' : 'p-button-text'"
+                                    [style.background-color]="selectedCategoryFilter === 'all' ? '#f3f4f6' : 'transparent'"
+                                    [style.color]="selectedCategoryFilter === 'all' ? '#374151' : '#6b7280'"
+                                    (click)="filterByCategory('all')" class="flex-1"></button>
+                                <button pButton label="Objective"
+                                    [class]="selectedCategoryFilter === 'objective' ? 'p-button-outlined' : 'p-button-text'"
+                                    [style.background-color]="selectedCategoryFilter === 'objective' ? '#f3f4f6' : 'transparent'"
+                                    [style.color]="selectedCategoryFilter === 'objective' ? '#374151' : '#6b7280'"
+                                    (click)="filterByCategory('objective')" class="flex-1"></button>
+                                <button pButton label="Subjective"
+                                    [class]="selectedCategoryFilter === 'subjective' ? 'p-button-outlined' : 'p-button-text'"
+                                    [style.background-color]="selectedCategoryFilter === 'subjective' ? '#a855f7' : 'transparent'"
+                                    [style.color]="selectedCategoryFilter === 'subjective' ? '#ffffff' : '#6b7280'"
+                                    (click)="filterByCategory('subjective')" class="flex-1"></button>
+                            </div>
+                        </div>
+
+                        <!-- Categories Accordion -->
+                        <div class="categories-container">
+                            <div *ngFor="let category of filteredCategories" class="mb-3">
+                                <div class="category-card p-3 border-round cursor-pointer"
+                                    [class.expanded]="expandedCategories.includes(category.id)"
+                                    [style.background-color]="getCategoryBackgroundColor(category)"
+                                    (click)="toggleCategory(category.id)">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <i [class]="getCategoryIcon(category)"
+                                                [style.color]="getCategoryIconColor(category)"
+                                                style="font-size: 1.5rem;"></i>
+                                            <div>
+                                                <div class="font-bold text-900" style="font-size: 1.1rem;">{{
+                                                    category.name }}</div>
+                                                <div class="text-600 text-sm">{{ getCategoryDescription(category) }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-3">
+                                            <span *ngIf="getCategoryBadge(category)"
+                                                class="badge px-3 py-1 border-round font-medium text-sm"
+                                                [style.background-color]="getCategoryBadgeColor(category)"
+                                                [style.color]="getCategoryBadgeTextColor(category)">
+                                                {{ getCategoryBadge(category) }}
+                                            </span>
+                                            <i class="pi"
+                                                [class.pi-chevron-right]="!expandedCategories.includes(category.id)"
+                                                [class.pi-chevron-down]="expandedCategories.includes(category.id)"
+                                                style="color: #6b7280;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Expanded Content -->
+                                <div *ngIf="expandedCategories.includes(category.id)" class="mt-2 ml-4">
+                                    <div *ngIf="category.subCategories && category.subCategories.length > 0">
+                                        <div *ngFor="let sub of category.subCategories" class="mb-2">
+                                            <div class="p-2 cursor-pointer"
+                                                style="background-color: #f3f4f6; border-radius: 15px;"
+                                                [class.expanded]="expandedSubCategories.includes(sub.id)"
+                                                (click)="toggleSubCategory(sub.id)">
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <i class="pi pi-chevron-right"
+                                                            [class.pi-chevron-down]="expandedSubCategories.includes(sub.id)"
+                                                            style="font-size: 0.8rem; color: #6b7280;"></i>
+                                                        <span class="font-semibold text-900">{{ sub.name }}</span>
+                                                    </div>
+                                                    <span class="text-xs px-2 py-1 border-round"
+                                                        style="background-color: #ffffff; color: #6b7280;">
+                                                        {{ sub.measurements?.length || 0 }} items
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Measurements -->
+                                            <div *ngIf="expandedSubCategories.includes(sub.id)" class="mt-2 ml-3">
+                                                <div class="grid">
+                                                    <div *ngFor="let m of sub.measurements"
+                                                        class="col-12 md:col-6 lg:col-4 py-1">
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <p-checkbox [value]="m.id"
+                                                                [(ngModel)]="selectedMeasurementIds"
+                                                                [inputId]="'m' + m.id" name="measurements"></p-checkbox>
+                                                            <label [for]="'m' + m.id" class="cursor-pointer text-sm">{{
+                                                                m.name }}</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div *ngIf="!sub.measurements || sub.measurements.length === 0"
+                                                    class="text-500 text-sm italic py-2 text-center">
+                                                    No measurements found for this sub-category.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="!category.subCategories || category.subCategories.length === 0"
+                                        class="text-center p-3 surface-50 border-round">
+                                        <i class="pi pi-info-circle text-500 mb-2"></i>
+                                        <p class="text-500 text-sm italic m-0">No sub-categories found for this
+                                            category.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- No Results Message -->
+                            <div *ngIf="filteredCategories.length === 0"
+                                class="text-center p-5 surface-card border-round">
+                                <i class="pi pi-search text-500 text-4xl mb-3"></i>
+                                <div class="text-900 font-bold text-lg mb-2">No Results Found</div>
+                                <p class="text-600 m-0">Try adjusting your search or filter criteria.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button pButton label="Cancel" class="p-button-text p-button-secondary"
+                            (click)="resetForm()"></button>
+                        <button pButton label="Save Template" icon="pi pi-check" (click)="saveTemplate()"
+                            [disabled]="loading"></button>
+                    </div>
+                </div>
+            </p-card>
+        </p-tabpanel>
+    </p-tabpanels>
+</p-tabs>

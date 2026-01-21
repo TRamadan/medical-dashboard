@@ -64,18 +64,18 @@
                         <div class="px-3 pb-3">
                             <div *ngIf="category.subCategories && category.subCategories.length > 0; else noSub"
                                 class="d-flex flex-column gap-3">
-                                <div *ngFor="let sub of category.subCategories"
-                                    class="surface-0 border-round border-1 surface-border mb-2 overflow-hidden">
-                                    <div class="p-3 d-flex align-items-center justify-content-between bg-white cursor-pointer hover:surface-50 transition-colors-150"
+                                <div *ngFor="let sub of category.subCategories" class="mb-2 overflow-hidden"
+                                    style="background-color: #f3f4f6; border-radius: 15px;">
+                                    <div class="p-3 d-flex align-items-center justify-content-between cursor-pointer hover:surface-100 transition-colors-150"
                                         (click)="toggleSubCategory(sub)">
                                         <div class="d-flex align-items-center">
                                             <i class="pi pi-angle-right text-500 mr-2 transition-duration-200"
                                                 [ngClass]="{'rotate-90': sub.expanded}"></i>
                                             <span class="font-medium text-900 mr-2">{{ sub.name }}</span>
-                                            <span
-                                                class="bg-gray-100 text-gray-600 px-2 py-1 border-round text-sm font-bold">
-                                                {{ sub.measurements?.length || sub.itemsCount || 0 }} items
-                                            </span>
+                                            <p-tag severity="secondary"
+                                                [value]="sub.measurements?.length + ' ' + 'items' || sub.itemsCount || 0 + ' items'" />
+
+
                                         </div>
 
                                         <div class="d-flex align-items-center gap-2" (click)="$event.stopPropagation()">
@@ -100,25 +100,29 @@
                                     <!-- Measurements List (Expanded) -->
                                     <div *ngIf="sub.expanded" class="border-top-1 surface-border bg-gray-50 p-3">
                                         <div *ngIf="!sub.measurements || sub.measurements.length === 0"
-                                            class="text-center text-sm text-500 py-2">
+                                            class="text-center py-2">
                                             No measurements added yet.
                                         </div>
                                         <div *ngIf="sub.measurements?.length > 0" class="d-flex flex-column gap-2">
                                             <div *ngFor="let m of sub.measurements"
                                                 class="surface-card p-2 border-round shadow-1 d-flex align-items-center justify-content-between">
-                                                <div class="d-flex align-items-center gap-2">
+                                                <div class="d-flex align-items-center gap-2"
+                                                    [pTooltip]="m.normalRangeHint">
                                                     <i class="pi pi-circle-fill" style="font-size: 0.5rem"
                                                         [class.text-blue-500]="category.type === 1"
                                                         [class.text-purple-500]="category.type === 2"></i>
-                                                    <span class="text-sm font-medium">{{ m.name }}</span>
-                                                    <span *ngIf="m.unit"
-                                                        class="text-xs text-500 bg-gray-100 px-1 border-round">{{ m.unit
-                                                        }}</span>
-                                                    <span *ngIf="m.inputType"
-                                                        class="text-xs text-500 border-1 surface-border px-1 border-round">
-                                                        {{ m.inputType === 1 ? 'Number' : m.inputType === 2 ?
-                                                        'Boolean' : m.inputType === 3 ? 'Scale' : 'Text' }}
-                                                    </span>
+                                                    <span class="font-bold">{{ m.name }}</span>
+
+                                                    @if(m.unit){
+                                                    <p-tag severity="secondary" [value]="m.unit" />
+                                                    }
+
+
+
+                                                    @if(m.inputType){
+                                                    <p-tag [value]=" m.inputType === 1 ? 'Number' : m.inputType === 2 ?
+                                                        'Boolean' : m.inputType === 3 ? 'Scale' : 'Text' " />
+                                                    }
                                                 </div>
                                                 <div class="d-flex gap-1">
                                                     <button pButton icon="pi pi-pencil"
