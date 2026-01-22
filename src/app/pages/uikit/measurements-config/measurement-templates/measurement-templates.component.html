@@ -175,7 +175,7 @@
                                 <div *ngIf="expandedCategories.includes(category.id)" class="mt-2 ml-4">
                                     <div *ngIf="category.subCategories && category.subCategories.length > 0">
                                         <div *ngFor="let sub of category.subCategories" class="mb-2">
-                                            <div class="p-2 cursor-pointer"
+                                            <div class="p-3 cursor-pointer"
                                                 style="background-color: #f3f4f6; border-radius: 15px;"
                                                 [class.expanded]="expandedSubCategories.includes(sub.id)"
                                                 (click)="toggleSubCategory(sub.id)">
@@ -202,8 +202,18 @@
                                                             <p-checkbox [value]="m.id"
                                                                 [(ngModel)]="selectedMeasurementIds"
                                                                 [inputId]="'m' + m.id" name="measurements"></p-checkbox>
-                                                            <label [for]="'m' + m.id" class="cursor-pointer text-sm">{{
-                                                                m.name }}</label>
+                                                            <label [for]="'m' + m.id"
+                                                                class="cursor-pointer  d-flex align-items-center gap-2 w-100">{{
+                                                                m.name }}
+
+                                                                @if(m.unit){
+                                                                <p-tag severity="secondary" [value]="m.unit">
+                                                                </p-tag> }
+                                                                <p-tag class="ms-auto"
+                                                                    [icon]="getInputTypeIcon(m.inputType)"
+                                                                    [value]="getInputTypeText(m)" />
+
+                                                            </label>
                                                         </div>
                                                     </div>
                                                 </div>

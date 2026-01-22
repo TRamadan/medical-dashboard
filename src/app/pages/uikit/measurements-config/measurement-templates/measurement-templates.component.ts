@@ -12,14 +12,30 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { TextareaModule } from 'primeng/textarea';
 import { MessageService } from 'primeng/api';
-import { forkJoin, map, switchMap } from 'rxjs';
+import { forkJoin, map } from 'rxjs';
 import { MeasurementTemplatesService } from '../services/measurement-templates.service';
 import { MeasurementCategoriesService } from '../services/measurement-categories.service';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { TooltipModule } from 'primeng/tooltip';
+import { TagModule } from 'primeng/tag';
+
+export enum InputType {
+    Number = 1,
+    Boolean = 2,
+    Scale = 3,
+    Text = 4
+}
+
+interface Measurement {
+    inputType: InputType;
+    minValue: number;
+    maxValue: number;
+}
 
 @Component({
     selector: 'app-measurement-templates',
     standalone: true,
-    imports: [CommonModule, ToastModule, ToolbarModule, ButtonModule, CardModule, TabsModule, FormsModule, AccordionModule, CheckboxModule, InputTextModule, FloatLabelModule, TextareaModule],
+    imports: [TagModule, TooltipModule, SelectButtonModule, CommonModule, ToastModule, ToolbarModule, ButtonModule, CardModule, TabsModule, FormsModule, AccordionModule, CheckboxModule, InputTextModule, FloatLabelModule, TextareaModule],
     templateUrl: './measurement-templates.component.html',
     styleUrl: './measurement-templates.component.scss',
     providers: [MessageService]
@@ -54,7 +70,8 @@ export class MeasurementTemplatesComponent implements OnInit {
 
     ngOnInit() {
         this.loadTemplates();
-        this.loadCategoriesTree();
+        this.loadCategories();
+        // this.loadCategoriesTree();
     }
 
     loadTemplates() {
@@ -62,32 +79,8 @@ export class MeasurementTemplatesComponent implements OnInit {
             next: (data) => {
                 this.templates = data;
                 // Mock tags for design if needed, or assume backend sends them
-                this.templates.forEach((t) => {
-                    if (!t.previewItems) t.previewItems = [];
-                });
             },
-            error: (err) => {
-                console.error('Error loading templates', err);
-                // Mock data for display verification if backend is down
-                this.templates = [
-                    {
-                        id: 1,
-                        name: 'Shoulder Assessment Form',
-                        description: 'Comprehensive shoulder evaluation including patient info, self-evaluation, ROM, signs, and instability tests based on HSAM ZIDAN clinical form.',
-                        date: 'Jan 1, 2026',
-                        itemsCount: 89,
-                        previewItems: ['Unknown', 'Unknown', 'Unknown', 'Unknown']
-                    },
-                    {
-                        id: 2,
-                        name: 'test',
-                        description: 'sgsgsgsg',
-                        date: 'Jan 11, 2026',
-                        itemsCount: 5,
-                        previewItems: ['Shoulder Flexion', 'Shoulder Extension', 'Shoulder Abduction', 'Does pain occur at rest?']
-                    }
-                ];
-            }
+            error: (err) => {}
         });
     }
 
@@ -104,39 +97,52 @@ export class MeasurementTemplatesComponent implements OnInit {
         });
     }
 
-    loadCategoriesTree() {
-        this.loading = true;
+    loadCategories(): void {
         this.measurementCategoriesService.getAllCategories().subscribe({
-            next: (categories) => {
-                this.categories = categories;
-
-                // Check if subcategories are already nested or need fetching
-                const needsSubFetching = !this.categories.some((cat) => cat.subCategories && cat.subCategories.length > 0);
-
-                if (needsSubFetching) {
-                    this.measurementCategoriesService.getAllSubCategories().subscribe({
-                        next: (subCategories) => {
-                            this.categories.forEach((cat) => {
-                                // Use loose equality in case of string vs number IDs
-                                cat.subCategories = subCategories.filter((sub) => (sub.categoryId || sub.categoryID) == cat.id);
-                            });
-                            this.fetchAllMeasurements();
-                        },
-                        error: (err) => {
-                            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load subcategories' });
-                            this.loading = false;
-                        }
-                    });
-                } else {
-                    this.fetchAllMeasurements();
-                }
+            next: (data) => {
+                this.categories = data;
             },
             error: (err) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load categories' });
-                this.loading = false;
+                console.error(err);
             }
         });
     }
+
+    // loadCategoriesTree() {
+    //     this.loading = true;
+    //     this.measurementCategoriesService.getAllCategories().subscribe({
+    //         next: (categories) => {
+    //             debugger;
+    //             this.categories = categories;
+
+    //             // Check if subcategories are already nested or need fetching
+    //             const needsSubFetching = !this.categories.some((cat) => cat.subCategories && cat.subCategories.length > 0);
+
+    //             if (needsSubFetching) {
+    //                 this.measurementCategoriesService.getAllSubCategories().subscribe({
+    //                     next: (subCategories) => {
+    //                         this.categories.forEach((cat) => {
+    //                             // Use loose equality in case of string vs number IDs
+    //                             cat.subCategories = subCategories.filter((sub) => (sub.categoryId || sub.categoryID) == cat.id);
+    //                         });
+    //                         this.fetchAllMeasurements();
+    //                     },
+    //                     error: (err) => {
+    //                         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load subcategories' });
+    //                         this.loading = false;
+    //                     }
+    //                 });
+    //             } else {
+    //                 this.fetchAllMeasurements();
+    //             }
+    //         },
+    //         error: (err) => {
+    //             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load categories' });
+    //             this.loading = false;
+    //         }
+    //     });
+    // }
 
     fetchAllMeasurements() {
         const obs = [];
@@ -206,6 +212,34 @@ export class MeasurementTemplatesComponent implements OnInit {
         });
     }
 
+    getInputTypeIcon(inputType: InputType): string {
+        const iconMap: Record<InputType, string> = {
+            [InputType.Number]: 'pi pi-hashtag',
+            [InputType.Boolean]: 'pi pi-check-square',
+            [InputType.Scale]: 'pi pi-sliders-h',
+            [InputType.Text]: 'pi pi-align-left'
+        };
+        return iconMap[inputType] ?? 'pi pi-question-circle';
+    }
+
+    getInputTypeText(measurement: Measurement): string {
+        debugger;
+        if ((measurement.minValue !== 0 || measurement.maxValue !== 0) && (measurement.minValue !== null || measurement.maxValue !== null)) {
+            return `${measurement.minValue} - ${measurement.maxValue}`;
+        } else if (measurement.minValue === null || measurement.maxValue === null) {
+            return `Yes/No question`;
+        }
+
+        const typeMap: Record<InputType, string> = {
+            [InputType.Number]: 'Number',
+            [InputType.Boolean]: 'Yes or No question',
+            [InputType.Scale]: 'Scale',
+            [InputType.Text]: 'Text'
+        };
+
+        return typeMap[measurement.inputType] ?? '';
+    }
+
     resetForm() {
         this.newTemplate = {
             name: '',
@@ -215,13 +249,9 @@ export class MeasurementTemplatesComponent implements OnInit {
         this.selectedMeasurementIds = [];
     }
 
-    editItems(template: any) {
-        console.log('Edit items for', template);
-    }
+    editItems(template: any) {}
 
-    editTemplate(template: any) {
-        console.log('Edit template', template);
-    }
+    editTemplate(template: any) {}
 
     // Search and filter methods
     onSearchChange() {
@@ -244,31 +274,6 @@ export class MeasurementTemplatesComponent implements OnInit {
             });
         }
 
-        // Apply search filter
-        if (this.searchQuery && this.searchQuery.trim() !== '') {
-            const query = this.searchQuery.toLowerCase();
-            filtered = filtered.filter((cat) => {
-                // Search in category name
-                if (cat.name.toLowerCase().includes(query)) {
-                    return true;
-                }
-                // Search in subcategories
-                if (cat.subCategories) {
-                    return cat.subCategories.some((sub: any) => {
-                        if (sub.name.toLowerCase().includes(query)) {
-                            return true;
-                        }
-                        // Search in measurements
-                        if (sub.measurements) {
-                            return sub.measurements.some((m: any) => m.name.toLowerCase().includes(query));
-                        }
-                        return false;
-                    });
-                }
-                return false;
-            });
-        }
-
         this.filteredCategories = filtered;
     }
 
@@ -283,29 +288,28 @@ export class MeasurementTemplatesComponent implements OnInit {
     }
 
     toggleSubCategory(subCategoryId: number) {
-        console.log('toggleSubCategory called with ID:', subCategoryId);
-
+        debugger;
         const index = this.expandedSubCategories.indexOf(subCategoryId);
         if (index > -1) {
             this.expandedSubCategories.splice(index, 1);
-            console.log('Subcategory collapsed:', subCategoryId);
         } else {
             this.expandedSubCategories.push(subCategoryId);
-            console.log('Subcategory expanded:', subCategoryId);
 
             // Find the subcategory and load measurements if not already loaded
             for (const category of this.categories) {
+                debugger;
                 if (category.subCategories) {
                     const subCategory = category.subCategories.find((sub: any) => sub.id === subCategoryId);
                     if (subCategory) {
                         console.log('Found subcategory:', subCategory.name);
 
-                        if (!subCategory.measurements) {
+                        if (subCategory.measurements) {
                             console.log('Fetching measurements for subcategory ID:', subCategoryId);
 
                             // Fetch measurements for this subcategory
                             this.measurementCategoriesService.getSubCategoryById(subCategoryId).subscribe({
                                 next: (data) => {
+                                    debugger;
                                     console.log('Received data from API:', data);
                                     subCategory.measurements = data.measurements || [];
                                     console.log('Assigned measurements:', subCategory.measurements.length, 'items');
