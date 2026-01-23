@@ -1,1 +1,92 @@
-<p>view-measurement-template works!</p>
+<form [formGroup]="form">
+
+    @if (data.category.type === 2) {
+    <!-- ================= Subjective ================= -->
+    <h3>{{ data.name }} (Subjective)</h3>
+
+    @for (m of data.measurements; track m.id) {
+    <div class="mb-3">
+        <label class="fw-bold">{{ m.question }}</label>
+
+        @switch (m.answerType) {
+
+        @case (1) {
+        <!-- Yes / No -->
+        <div>
+            <label>
+                <input type="radio" [formControlName]="controlName(m)" value="yes" /> Yes
+            </label>
+
+            <label class="ms-3">
+                <input type="radio" [formControlName]="controlName(m)" value="no" /> No
+            </label>
+        </div>
+        }
+
+        @case (2) {
+        <!-- Radio -->
+        <div>
+            <label>
+                <input type="radio" [formControlName]="controlName(m)" value="option1" /> Option 1
+            </label>
+            <label class="ms-3">
+                <input type="radio" [formControlName]="controlName(m)" value="option2" /> Option 2
+            </label>
+        </div>
+        }
+
+        @case (3) {
+        <!-- Checkbox -->
+        <div>
+            <label>
+                <input type="checkbox" (change)="form.get(controlName(m))?.setValue($event.target.checked)" />
+                Yes
+            </label>
+        </div>
+        }
+
+        }
+    </div>
+    }
+    }
+
+    @if (data.category.type === 1) {
+    <!-- ================= Objective ================= -->
+    <h3>{{ data.name }} (Objective)</h3>
+
+    @for (m of data.measurements; track m.id) {
+    <div class="mb-3">
+        <label class="fw-bold">{{ m.name }}</label>
+
+        @switch (m.inputType) {
+
+        @case (1) {
+        <input type="number" class="form-control" [min]="m.minValue" [max]="m.maxValue"
+            [formControlName]="controlName(m)" />
+        }
+
+        @case (2) {
+        <input type="text" class="form-control" [formControlName]="controlName(m)" />
+        }
+
+        @case (3) {
+        <input type="range" class="form-range" [min]="m.minValue" [max]="m.maxValue" [step]="m.step"
+            [formControlName]="controlName(m)" />
+        }
+
+        @case (4) {
+        <input type="number" class="form-control" [formControlName]="controlName(m)" />
+        <small>{{ m.unit }}</small>
+        }
+
+        }
+
+        @if (m.normalRangeHint) {
+        <small class="text-muted">{{ m.normalRangeHint }}</small>
+        }
+    </div>
+    }
+    }
+
+    <button class="btn btn-primary" (click)="submit()">Submit</button>
+</form>
