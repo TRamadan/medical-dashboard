@@ -126,6 +126,6 @@ export class MeasurementCategoriesService {
      * @returns An observable with the response.
      */
     deleteMeasurement(id: string | number): Observable<any> {
-        return this.http.delete<any>(`${this.apiUrl}Measurements?id=${id}`);
+        return this.http.delete<any>(`${this.apiUrl}Measurements/${id}`);
     }
 }

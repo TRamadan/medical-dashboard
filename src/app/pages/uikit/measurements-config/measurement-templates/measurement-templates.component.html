@@ -33,10 +33,7 @@
                                             <span>{{ template.itemsCount || (template.measurements?.length || 0) }}
                                                 items</span>
                                         </span>
-                                        <span class="d-flex align-items-center gap-1">
-                                            <i class="pi pi-calendar"></i>
-                                            <span>{{ template.date || 'Unknown Date' }}</span>
-                                        </span>
+
                                     </div>
 
                                     <div class="d-flex flex-wrap gap-2">
@@ -54,16 +51,16 @@
                                 </div>
 
                                 <div class="d-flex align-items-center gap-2">
-                                    <button pButton icon="pi pi-pencil"
-                                        class="p-button-text p-button-rounded p-button-secondary"
+                                    <button pTooltip="Edit template" tooltipPosition="top" pButton icon="pi pi-pencil"
+                                        [rounded]="true" [text]="true" [raised]="true" severity="secondary"
                                         (click)="editTemplate(template)"></button>
-
-                                    <button pButton label="Edit Items" icon="pi pi-plus" class="p-button-success"
-                                        (click)="editItems(template)"></button>
-
-                                    <button pButton icon="pi pi-trash"
-                                        class="p-button-text p-button-rounded p-button-danger"
+                                    <button pTooltip="Delete template" tooltipPosition="top" pButton icon="pi pi-trash"
+                                        [rounded]="true" [text]="true" [raised]="true" severity="danger"
                                         (click)="deleteTemplate(template.id)"></button>
+                                    <button pTooltip="View template entries" tooltipPosition="top" pButton
+                                        icon="pi pi-eye" [rounded]="true" [text]="true" [raised]="true" severity="info"
+                                        (click)="viewTemplateDataEntry(template)"></button>
+
                                 </div>
                             </div>
                         </p-card>
@@ -89,52 +86,61 @@
 
                     <div class="grid">
                         <div class="col-12 md:col-6 mb-4">
-                            <p-floatLabel>
+                            <p-floatLabel variant="on">
                                 <input pInputText id="templateName" [(ngModel)]="newTemplate.name" class="w-full" />
                                 <label for="templateName">Template Name</label>
                             </p-floatLabel>
                         </div>
                         <div class="col-12 mb-4">
-                            <p-floatLabel>
-                                <textarea pInputTextarea id="templateDesc" [(ngModel)]="newTemplate.description"
-                                    rows="3" class="w-full"></textarea>
-                                <label for="templateDesc">Description</label>
-                            </p-floatLabel>
+                            <p-floatlabel variant="on">
+                                <textarea pTextarea id="over_label" [(ngModel)]="newTemplate.description" rows="3"
+                                    class="h-full w-full"></textarea>
+                                <label for="on_label">Description</label>
+                            </p-floatlabel>
+
                         </div>
                     </div>
 
                     <div class="mb-4">
-                        <h6 class="font-bold mb-3">Select Measurements</h6>
-
+                        <div class="d-flex align-items-center gap-2 mb-4">
+                            <i class="pi pi-search text-xl text-primary"></i>
+                            <h5 class="m-0 font-bold text-xl">Search for measurement</h5>
+                        </div>
                         <!-- Search Bar -->
                         <div class="mb-3">
                             <span class="p-input-icon-left w-full">
-                                <i class="pi pi-search"></i>
-                                <input type="text" pInputText [(ngModel)]="searchQuery"
-                                    (ngModelChange)="onSearchChange()" placeholder="Search measurements..."
-                                    class="w-full" style="padding-left: 2.5rem;" />
+                                <p-iconfield>
+                                    <p-inputicon styleClass="pi pi-search" />
+                                    <input type="text" class="w-full" (ngModelChange)="onSearchChange()"
+                                        [(ngModel)]="searchQuery" placeholder="Search measurements..." pInputText />
+                                </p-iconfield>
+
                             </span>
                         </div>
 
-                        <!-- Category Filter Tabs -->
                         <div class="mb-4">
-                            <div class="d-flex gap-2">
-                                <button pButton label="All Categories"
-                                    [class]="selectedCategoryFilter === 'all' ? 'p-button-outlined' : 'p-button-text'"
-                                    [style.background-color]="selectedCategoryFilter === 'all' ? '#f3f4f6' : 'transparent'"
-                                    [style.color]="selectedCategoryFilter === 'all' ? '#374151' : '#6b7280'"
-                                    (click)="filterByCategory('all')" class="flex-1"></button>
-                                <button pButton label="Objective"
-                                    [class]="selectedCategoryFilter === 'objective' ? 'p-button-outlined' : 'p-button-text'"
-                                    [style.background-color]="selectedCategoryFilter === 'objective' ? '#f3f4f6' : 'transparent'"
-                                    [style.color]="selectedCategoryFilter === 'objective' ? '#374151' : '#6b7280'"
-                                    (click)="filterByCategory('objective')" class="flex-1"></button>
-                                <button pButton label="Subjective"
-                                    [class]="selectedCategoryFilter === 'subjective' ? 'p-button-outlined' : 'p-button-text'"
-                                    [style.background-color]="selectedCategoryFilter === 'subjective' ? '#a855f7' : 'transparent'"
-                                    [style.color]="selectedCategoryFilter === 'subjective' ? '#ffffff' : '#6b7280'"
-                                    (click)="filterByCategory('subjective')" class="flex-1"></button>
-                            </div>
+                            <p-card>
+                                <ng-template #content>
+                                    <div class="d-flex gap-2">
+                                        <button pButton label="All Categories"
+                                            [class]="selectedCategoryFilter === 'all' ? 'p-button-outlined' : 'p-button-text'"
+                                            [style.background-color]="selectedCategoryFilter === 'all' ? '#f3f4f6' : 'transparent'"
+                                            [style.color]="selectedCategoryFilter === 'all' ? '#374151' : '#6b7280'"
+                                            (click)="filterByCategory('all')" class="flex-1"></button>
+                                        <button pButton label="Objective"
+                                            [class]="selectedCategoryFilter === 'objective' ? 'p-button-outlined' : 'p-button-text'"
+                                            [style.background-color]="selectedCategoryFilter === 'objective' ? '#f3f4f6' : 'transparent'"
+                                            [style.color]="selectedCategoryFilter === 'objective' ? '#374151' : '#6b7280'"
+                                            (click)="filterByCategory('objective')" class="flex-1"></button>
+                                        <button pButton label="Subjective"
+                                            [class]="selectedCategoryFilter === 'subjective' ? 'p-button-outlined' : 'p-button-text'"
+                                            [style.background-color]="selectedCategoryFilter === 'subjective' ? '#a855f7' : 'transparent'"
+                                            [style.color]="selectedCategoryFilter === 'subjective' ? '#ffffff' : '#6b7280'"
+                                            (click)="filterByCategory('subjective')" class="flex-1"></button>
+                                    </div>
+                                </ng-template>
+                            </p-card>
+
                         </div>
 
                         <!-- Categories Accordion -->
@@ -254,3 +260,22 @@
         </p-tabpanel>
     </p-tabpanels>
 </p-tabs>
+
+<!-- here is the dialog needed to manage show template data entry and confirmation message for delete-->
+<p-dialog header="Header" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }"
+    [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
+    @if(isDeleteTemplate) {
+    <p class="fw-bold text-center">
+        Are you sure you want to delete this template ?
+    </p>
+    <ng-template #footer>
+        <p-button label="Cancel" [outlined]="true" severity="secondary"
+            (click)="visible = false; isDeleteTemplate = false;" />
+        <p-button label="Save" [text]="true" severity="secondary" (click)="confirmDeleteTemplate()" />
+    </ng-template>
+    }
+
+    @if(isViewTemplateEntries){
+    <app-view-measurement-template></app-view-measurement-template>
+    }
+</p-dialog>

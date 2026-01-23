@@ -42,6 +42,6 @@ export class MeasurementTemplatesService {
      * @returns An observable with the response.
      */
     deleteTemplate(id: string | number): Observable<any> {
-        return this.http.delete<any>(`${this.apiUrl}MeasurementTemplates?id=${id}`);
+        return this.http.delete<any>(`${this.apiUrl}MeasurementTemplates/${id}`);
     }
 }

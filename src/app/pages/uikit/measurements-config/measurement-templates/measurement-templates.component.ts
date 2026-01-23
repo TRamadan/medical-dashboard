@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { ButtonModule } from 'primeng/button';
+import { DialogModule } from 'primeng/dialog';
+
 import { CardModule } from 'primeng/card';
 import { TabsModule } from 'primeng/tabs';
 import { AccordionModule } from 'primeng/accordion';
@@ -18,6 +20,9 @@ import { MeasurementCategoriesService } from '../services/measurement-categories
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TooltipModule } from 'primeng/tooltip';
 import { TagModule } from 'primeng/tag';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { ViewMeasurementTemplateComponent } from '../view-measurement-template/view-measurement-template.component';
 
 export enum InputType {
     Number = 1,
@@ -35,7 +40,27 @@ interface Measurement {
 @Component({
     selector: 'app-measurement-templates',
     standalone: true,
-    imports: [TagModule, TooltipModule, SelectButtonModule, CommonModule, ToastModule, ToolbarModule, ButtonModule, CardModule, TabsModule, FormsModule, AccordionModule, CheckboxModule, InputTextModule, FloatLabelModule, TextareaModule],
+    imports: [
+        DialogModule,
+        InputIconModule,
+        IconFieldModule,
+        TagModule,
+        TooltipModule,
+        SelectButtonModule,
+        CommonModule,
+        ToastModule,
+        ToolbarModule,
+        ButtonModule,
+        CardModule,
+        TabsModule,
+        FormsModule,
+        AccordionModule,
+        CheckboxModule,
+        InputTextModule,
+        FloatLabelModule,
+        TextareaModule,
+        ViewMeasurementTemplateComponent
+    ],
     templateUrl: './measurement-templates.component.html',
     styleUrl: './measurement-templates.component.scss',
     providers: [MessageService]
@@ -44,7 +69,10 @@ export class MeasurementTemplatesComponent implements OnInit {
     templates: any[] = [];
     categories: any[] = [];
     filteredCategories: any[] = [];
+    visible: boolean = false;
     loading: boolean = false;
+    isDeleteTemplate: boolean = false;
+    isViewTemplateEntries: boolean = false;
 
     newTemplate = {
         name: '',
@@ -84,15 +112,25 @@ export class MeasurementTemplatesComponent implements OnInit {
         });
     }
 
+    choosedTemplateId: number = 0;
     deleteTemplate(id: number) {
-        this.measurementTemplatesService.deleteTemplate(id).subscribe({
+        this.choosedTemplateId = id;
+        this.isDeleteTemplate = true;
+        this.visible = true;
+    }
+
+    confirmDeleteTemplate(): void {
+        this.measurementTemplatesService.deleteTemplate(this.choosedTemplateId).subscribe({
             next: () => {
+                debugger;
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Template deleted successfully' });
                 this.loadTemplates();
+                this.isDeleteTemplate = false;
+                this.visible = false;
             },
             error: (err) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete template' });
-                console.error(err);
+                this.isDeleteTemplate = false;
             }
         });
     }
@@ -264,6 +302,7 @@ export class MeasurementTemplatesComponent implements OnInit {
     }
 
     applyFilters() {
+        debugger;
         let filtered = [...this.categories];
 
         // Apply category type filter
@@ -400,4 +439,6 @@ export class MeasurementTemplatesComponent implements OnInit {
         const type = this.getCategoryType(category);
         return type === 'subjective' ? '#7c3aed' : '#1e40af';
     }
+
+    viewTemplateDataEntry(choosedTemplate: any): void {}
 }
