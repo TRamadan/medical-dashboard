@@ -1,18 +1,20 @@
 <p-toast position="top-center"></p-toast>
 <div class="row m-4">
-    <div class="col-12 text-center mb-4 position-relative">
-        <p-selectButton [options]="options" [(ngModel)]="value" [allowEmpty]="false" optionLabel="label"
-            optionValue="value">
-            <ng-template let-item pTemplate>
-                <i [class]="item.icon" class="me-2"></i>
-                {{ item.label }}
-            </ng-template>
-        </p-selectButton>
+    <p-card class="my-3">
+        <div class="col-12 text-center mb-4 position-relative">
+            <p-selectButton [options]="options" [(ngModel)]="value" [allowEmpty]="false" optionLabel="label"
+                optionValue="value">
+                <ng-template let-item pTemplate>
+                    <i [class]="item.icon" class="me-2"></i>
+                    {{ item.label }}
+                </ng-template>
+            </p-selectButton>
 
-        <p-button *ngIf="categories.length > 0 && value === 'categories'" label="Add Category" icon="pi pi-plus"
-            class="position-absolute end-0 top-50 translate-middle-y" [outlined]="true"
-            (click)="showDialog()"></p-button>
-    </div>
+            <p-button *ngIf="categories.length > 0 && value === 'categories'" label="Add Category" icon="pi pi-plus"
+                class="position-absolute end-0 top-50 translate-middle-y" [outlined]="true"
+                (click)="showDialog()"></p-button>
+        </div>
+    </p-card>
 
     <div class="col-12" *ngIf="value === 'categories'">
         <!-- Empty State -->
@@ -111,7 +113,11 @@
                                                     <i class="pi pi-circle-fill" style="font-size: 0.5rem"
                                                         [class.text-blue-500]="category.type === 1"
                                                         [class.text-purple-500]="category.type === 2"></i>
-                                                    <span class="font-bold">{{ m.name }}</span>
+                                                    <span class="font-bold"
+                                                        [pTooltip]="m.inputType == 2 && m.question ? m.question : ''">{{
+                                                        m.name }}</span>
+                                                    <br />
+
 
                                                     @if(m.unit){
                                                     <p-tag severity="secondary" [value]="m.unit" />
@@ -123,6 +129,7 @@
                                                     <p-tag [value]=" m.inputType === 1 ? 'Number' : m.inputType === 2 ?
                                                         'Boolean' : m.inputType === 3 ? 'Scale' : 'Text' " />
                                                     }
+
                                                 </div>
                                                 <div class="d-flex gap-1">
                                                     <button pButton icon="pi pi-pencil"
@@ -239,29 +246,35 @@
                         placeholder="e.g. kg, cm" />
                 </div>
                 <div class="formgrid grid">
-                    <div class="field col">
-                        <label for="min" class="fw-bold mb-2 d-block">Min</label>
-                        <p-inputNumber id="min" [(ngModel)]="newMeasurement.minValue"
-                            styleClass="w-100"></p-inputNumber>
+                    <div class="row">
+                        <div class="field col-6">
+                            <label for="min" class="fw-bold mb-2 d-block">Min</label>
+                            <p-inputNumber id="min" [(ngModel)]="newMeasurement.minValue"
+                                styleClass="w-100"></p-inputNumber>
+                        </div>
+                        <div class="field col-6">
+                            <label for="max" class="fw-bold mb-2 d-block">Max</label>
+                            <p-inputNumber id="max" [(ngModel)]="newMeasurement.maxValue"
+                                styleClass="w-100"></p-inputNumber>
+                        </div>
                     </div>
-                    <div class="field col">
-                        <label for="max" class="fw-bold mb-2 d-block">Max</label>
-                        <p-inputNumber id="max" [(ngModel)]="newMeasurement.maxValue"
-                            styleClass="w-100"></p-inputNumber>
-                    </div>
-                    <div class="field col" *ngIf="newMeasurement.inputType === 3">
-                        <label for="step" class="fw-bold mb-2 d-block">Step</label>
-                        <p-inputNumber id="step" [(ngModel)]="newMeasurement.step" styleClass="w-100"></p-inputNumber>
+
+                    <div class="row">
+                        <div class="col-md-12" *ngIf="newMeasurement.inputType === 3">
+                            <label for="step" class="fw-bold mb-2 d-block">Step</label>
+                            <p-inputNumber id="step" [(ngModel)]="newMeasurement.step"
+                                styleClass="w-100"></p-inputNumber>
+                        </div>
                     </div>
                 </div>
             </ng-container>
 
-            <div class="field" *ngIf="isSubjective(newMeasurement.subCategoryId)">
+            <div class="field" *ngIf="isSubjective(newMeasurement.subCategoryId) || newMeasurement.inputType === 2">
                 <label for="question" class="fw-bold mb-2 d-block">Question</label>
                 <input type="text" pInputText id="question" [(ngModel)]="newMeasurement.question" class="w-100" />
             </div>
 
-            <div class="field" *ngIf="!isSubjective(newMeasurement.subCategoryId)">
+            <div class="field" *ngIf="!isSubjective(newMeasurement.subCategoryId) && newMeasurement.inputType != 2">
                 <label for="rangeHint" class="fw-bold mb-2 d-block">Normal Range Hint</label>
                 <input type="text" pInputText id="rangeHint" [(ngModel)]="newMeasurement.normalRangeHint"
                     class="w-100" />

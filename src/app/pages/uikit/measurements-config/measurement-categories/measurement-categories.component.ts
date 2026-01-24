@@ -19,10 +19,12 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { TooltipModule } from 'primeng/tooltip';
 import { MeasurementTemplatesComponent } from '../measurement-templates/measurement-templates.component';
 import { TagModule } from 'primeng/tag';
+import { CardModule } from 'primeng/card';
 
 @Component({
     selector: 'app-measurement-categories',
     imports: [
+        CardModule,
         TagModule,
         CommonModule,
         FormsModule,
@@ -285,6 +287,7 @@ export class MeasurementCategoriesComponent {
     }
 
     saveMeasurement() {
+        debugger;
         let payload = { ...this.newMeasurement };
 
         // Find parent category to check type
@@ -294,7 +297,7 @@ export class MeasurementCategoriesComponent {
             if (parentCategory.type === 1) {
                 // Objective: Remove subjective fields
                 delete payload.answerType;
-                delete payload.question;
+                payload.inputType != 2 ? delete payload.question : null;
             } else if (parentCategory.type === 2) {
                 // Subjective: Remove objective fields
                 delete payload.inputType;
