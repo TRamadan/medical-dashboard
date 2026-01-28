@@ -237,6 +237,11 @@
                 </ng-template>
             </div>
 
+            <div class="field" *ngIf="isSubjective(newMeasurement.subCategoryId) || newMeasurement.inputType === 2">
+                <label for="question" class="fw-bold mb-2 d-block">Question</label>
+                <input type="text" pInputText id="question" [(ngModel)]="newMeasurement.question" class="w-100" />
+            </div>
+
             <ng-container
                 *ngIf="!isSubjective(newMeasurement.subCategoryId) && (newMeasurement.inputType === 1 || newMeasurement.inputType === 3)">
                 <!-- Number (1) or Scale (3) -->
@@ -268,12 +273,6 @@
                     </div>
                 </div>
             </ng-container>
-
-            <div class="field" *ngIf="isSubjective(newMeasurement.subCategoryId) || newMeasurement.inputType === 2">
-                <label for="question" class="fw-bold mb-2 d-block">Question</label>
-                <input type="text" pInputText id="question" [(ngModel)]="newMeasurement.question" class="w-100" />
-            </div>
-
             <div class="field" *ngIf="!isSubjective(newMeasurement.subCategoryId) && newMeasurement.inputType != 2">
                 <label for="rangeHint" class="fw-bold mb-2 d-block">Normal Range Hint</label>
                 <input type="text" pInputText id="rangeHint" [(ngModel)]="newMeasurement.normalRangeHint"
@@ -281,6 +280,52 @@
             </div>
 
             <!-- Add other type specific fields if needed later -->
+            <!-- this control is for handle values for radio buttons and check-boxes-->
+            @if(newMeasurement.answerType == 2 || newMeasurement.answerType == 3){
+            <form [formGroup]="form">
+
+                <p-card>
+                    <ng-template pTemplate="content">
+                        <h4 class="text-center mb-3">
+                            Add values (Radio / Checkbox)
+                        </h4>
+
+                        <div formArrayName="options">
+
+                            @for (ctrl of measurementOptions.controls; let i = $index; track i; let last = $last) {
+                            <div class="d-flex align-items-center gap-2 mb-2">
+
+                                <input pInputText class="w-full" placeholder="Option {{ i + 1 }}"
+                                    [formControlName]="i" />
+
+                                @if(last){
+                                <button pButton icon="pi pi-trash" severity="danger"
+                                    class="p-button-rounded p-button-text" (click)="removeOption(i)"
+                                    [disabled]="options.length === 1">
+                                </button>
+                                }
+
+                            </div>
+                            }
+
+                        </div>
+
+                        <div class="mt-3 text-center">
+                            <button pButton icon="pi pi-plus" label="Add Option" (click)="addOption()" type="button">
+                            </button>
+                        </div>
+
+                    </ng-template>
+                </p-card>
+
+                <!-- <div class="mt-4 text-center">
+                    <button pButton label="Submit" icon="pi pi-check" (click)="submit()" [disabled]="form.invalid">
+                    </button>
+                </div> -->
+
+            </form>
+
+            }
         </div>
         <ng-template pTemplate="footer">
             <p-button label="Cancel" icon="pi pi-times" [text]="true"

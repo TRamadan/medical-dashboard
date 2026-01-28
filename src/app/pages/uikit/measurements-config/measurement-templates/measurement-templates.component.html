@@ -192,10 +192,12 @@
                                                             style="font-size: 0.8rem; color: #6b7280;"></i>
                                                         <span class="font-semibold text-900">{{ sub.name }}</span>
                                                     </div>
+                                                    @if(sub.measurements?.length){
                                                     <span class="text-xs px-2 py-1 border-round"
                                                         style="background-color: #ffffff; color: #6b7280;">
                                                         {{ sub.measurements?.length || 0 }} items
                                                     </span>
+                                                    }
                                                 </div>
                                             </div>
 

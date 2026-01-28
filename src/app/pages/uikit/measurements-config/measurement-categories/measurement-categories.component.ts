@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup, FormsModule, Validators, ReactiveFormsModule } from '@angular/forms';
 import { AccordionModule } from 'primeng/accordion';
 import { RippleModule } from 'primeng/ripple';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -20,10 +20,10 @@ import { TooltipModule } from 'primeng/tooltip';
 import { MeasurementTemplatesComponent } from '../measurement-templates/measurement-templates.component';
 import { TagModule } from 'primeng/tag';
 import { CardModule } from 'primeng/card';
-
 @Component({
     selector: 'app-measurement-categories',
     imports: [
+        ReactiveFormsModule,
         CardModule,
         TagModule,
         CommonModule,
@@ -54,6 +54,8 @@ export class MeasurementCategoriesComponent {
     ];
 
     value: string = 'categories';
+
+    form!: FormGroup;
 
     categories: any[] = [];
     displayDialog: boolean = false;
@@ -90,11 +92,35 @@ export class MeasurementCategoriesComponent {
 
     constructor(
         private measurementCategoriesService: MeasurementCategoriesService,
-        private messageService: MessageService
+        private messageService: MessageService,
+        private fb: FormBuilder
     ) {}
 
     ngOnInit() {
         this.loadCategories();
+        this.form = this.fb.group({
+            options: this.fb.array([this.createOption()]) // ✅ initial input
+        });
+    }
+
+    neededMeasurementOptions: any[] = [];
+    get measurementOptions(): FormArray {
+        return this.form.get('options') as FormArray;
+    }
+
+    createOption(): any {
+        return this.fb.control('', Validators.required);
+    }
+
+    addOption() {
+        this.measurementOptions.push(this.createOption());
+    }
+
+    removeOption(index: number) {
+        debugger;
+        if (this.measurementOptions.length > 1) {
+            this.measurementOptions.removeAt(index);
+        }
     }
 
     loadCategories() {
@@ -287,7 +313,6 @@ export class MeasurementCategoriesComponent {
     }
 
     saveMeasurement() {
-        debugger;
         let payload = { ...this.newMeasurement };
 
         // Find parent category to check type
