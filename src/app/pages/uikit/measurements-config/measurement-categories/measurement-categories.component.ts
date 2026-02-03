@@ -117,7 +117,7 @@ export class MeasurementCategoriesComponent {
     }
 
     removeOption(index: number) {
-        debugger;
+        ;
         if (this.measurementOptions.length > 1) {
             this.measurementOptions.removeAt(index);
         }
@@ -334,6 +334,15 @@ export class MeasurementCategoriesComponent {
             }
         }
 
+        // Check if we need to add options for subjective types (Radio/Checkbox)
+        if (this.isSubjective(payload.subCategoryId) && (payload.answerType === 2 || payload.answerType === 3)) {
+            const optionsArray = this.measurementOptions.controls.map((control, index) => ({
+                text: control.value,
+                order: index + 1
+            }));
+            payload.options = optionsArray;
+        }
+
         if (this.isEditingMeasurement) {
             this.measurementCategoriesService.updateMeasurement(payload).subscribe({
                 next: () => {
@@ -377,12 +386,12 @@ export class MeasurementCategoriesComponent {
 
     refreshMeasurements(subCategoryId: number) {
         // Find the category/subcategory in the list and reload its measurements
-        this.measurementCategoriesService.getMeasurements(subCategoryId).subscribe((data) => {
+        this.measurementCategoriesService.getSubCategoryById(subCategoryId).subscribe((data) => {
             for (let cat of this.categories) {
                 if (cat.subCategories) {
                     let sub = cat.subCategories.find((s: any) => s.id === subCategoryId);
                     if (sub) {
-                        sub.measurements = data;
+                        sub.measurements = data.measurements || [];
                         break;
                     }
                 }

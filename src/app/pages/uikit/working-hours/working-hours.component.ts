@@ -312,7 +312,7 @@ export class WorkingHoursComponent implements OnInit {
         console.log(body);
         this._workingHoursService.addWorkingHours(body).subscribe({
             next: (res: any) => {
-                debugger;
+                ;
                 this.getAllAddedWorkingHours();
                 this.hideDialog();
                 this.messageService.add({

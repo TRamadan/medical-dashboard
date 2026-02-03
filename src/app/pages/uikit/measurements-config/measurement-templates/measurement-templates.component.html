@@ -1,6 +1,6 @@
 <p-toast></p-toast>
 
-<p-tabs value="0">
+<p-tabs [(value)]="activeTabValue">
     <p-tablist>
         <p-tab value="0">Added Templates</p-tab>
         <p-tab value="1">Add a New Template</p-tab>
@@ -254,7 +254,7 @@
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <button pButton label="Cancel" class="p-button-text p-button-secondary"
                             (click)="resetForm()"></button>
-                        <button pButton label="Save Template" icon="pi pi-check" (click)="saveTemplate()"
+                        <button pButton label="Save Template" icon="pi pi-check" (click)=" saveTemplate()"
                             [disabled]="loading"></button>
                     </div>
                 </div>

@@ -151,7 +151,7 @@ export class BookingFormComponent implements OnInit, OnDestroy {
 
         this.bookingService.makeAnAppointment(bookingPayload).subscribe({
             next: (response: any) => {
-                debugger;
+                ;
                 this.confirmationData = response.data;
                 Swal.fire({
                     target: this.elementRef.nativeElement,

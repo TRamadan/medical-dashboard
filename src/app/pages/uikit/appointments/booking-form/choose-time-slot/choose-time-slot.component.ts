@@ -199,7 +199,7 @@ export class ChooseTimeSlotComponent implements OnInit, OnDestroy {
     }
 
     formatTime(dateTime: string): string {
-        debugger;
+        ;
         const date = new Date(dateTime);
         return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }

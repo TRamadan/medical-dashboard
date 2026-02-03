@@ -32,7 +32,7 @@ export class LocationServiceFormComponent implements OnInit {
     getAllCategories(): void {
         this._serviceCategory.getServiceCategories().subscribe({
             next: (res: any) => {
-                debugger
+                
                 this.categories = res.data;
             },
             error: (error: any) => {
@@ -46,7 +46,7 @@ export class LocationServiceFormComponent implements OnInit {
     }
 
     handleServiceSelection(category: any, service: any): void {
-        debugger;
+        ;
         const prevServiceId = this.bookingData.serviceId ?? null;
         this.bookingData.serviceCategoryId = category.id;
         this.bookingData.serviceCategoryName = category.nameEn;

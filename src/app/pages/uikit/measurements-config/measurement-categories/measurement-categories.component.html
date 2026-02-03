@@ -292,18 +292,16 @@
 
                         <div formArrayName="options">
 
-                            @for (ctrl of measurementOptions.controls; let i = $index; track i; let last = $last) {
+                            @for (ctrl of measurementOptions.controls; let i = $index; track i;) {
                             <div class="d-flex align-items-center gap-2 mb-2">
 
                                 <input pInputText class="w-full" placeholder="Option {{ i + 1 }}"
                                     [formControlName]="i" />
 
-                                @if(last){
                                 <button pButton icon="pi pi-trash" severity="danger"
                                     class="p-button-rounded p-button-text" (click)="removeOption(i)"
                                     [disabled]="options.length === 1">
                                 </button>
-                                }
 
                             </div>
                             }

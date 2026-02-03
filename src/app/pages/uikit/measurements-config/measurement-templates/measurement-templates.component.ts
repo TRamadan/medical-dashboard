@@ -69,11 +69,14 @@ export class MeasurementTemplatesComponent implements OnInit {
     templates: any[] = [];
     categories: any[] = [];
     filteredCategories: any[] = [];
-    templateMeasurementDetails : any[] = []
+    templateMeasurementDetails: any[] = [];
+    editingTemplateId: any;
     visible: boolean = false;
     loading: boolean = false;
     isDeleteTemplate: boolean = false;
+    isEditTemplate: boolean = false;
     isViewTemplateEntries: boolean = false;
+    activeTabValue: string = '0';
 
     newTemplate = {
         name: '',
@@ -117,13 +120,14 @@ export class MeasurementTemplatesComponent implements OnInit {
     deleteTemplate(id: number) {
         this.choosedTemplateId = id;
         this.isDeleteTemplate = true;
+        this.isViewTemplateEntries = false;
         this.visible = true;
     }
 
     confirmDeleteTemplate(): void {
         this.measurementTemplatesService.deleteTemplate(this.choosedTemplateId).subscribe({
             next: () => {
-                debugger;
+                ;
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Template deleted successfully' });
                 this.loadTemplates();
                 this.isDeleteTemplate = false;
@@ -152,7 +156,7 @@ export class MeasurementTemplatesComponent implements OnInit {
     //     this.loading = true;
     //     this.measurementCategoriesService.getAllCategories().subscribe({
     //         next: (categories) => {
-    //             debugger;
+    //             ;
     //             this.categories = categories;
 
     //             // Check if subcategories are already nested or need fetching
@@ -219,6 +223,7 @@ export class MeasurementTemplatesComponent implements OnInit {
     }
 
     saveTemplate() {
+        
         if (!this.newTemplate.name) {
             this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please enter a template name' });
             return;
@@ -230,6 +235,7 @@ export class MeasurementTemplatesComponent implements OnInit {
         }
 
         const payload = {
+            ...(this.editingTemplateId !== null && { id: this.editingTemplateId }),
             name: this.newTemplate.name,
             description: this.newTemplate.description,
             measurements: this.selectedMeasurementIds.map((id, index) => ({
@@ -238,14 +244,26 @@ export class MeasurementTemplatesComponent implements OnInit {
             }))
         };
 
-        this.measurementTemplatesService.addTemplate(payload).subscribe({
+        const isEditing = this.editingTemplateId !== null;
+
+        const action$ = isEditing ? this.measurementTemplatesService.updateTemplate(payload , this.editingTemplateId) : this.measurementTemplatesService.addTemplate(payload);
+
+        action$.subscribe({
             next: () => {
-                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Template created successfully' });
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: isEditing ? 'Template updated successfully' : 'Template created successfully'
+                });
                 this.resetForm();
                 this.loadTemplates();
             },
             error: (err) => {
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to create template' });
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: isEditing ? 'Failed to update template' : 'Failed to create template'
+                });
                 console.error(err);
             }
         });
@@ -262,7 +280,7 @@ export class MeasurementTemplatesComponent implements OnInit {
     }
 
     getInputTypeText(measurement: Measurement): string {
-        debugger;
+        ;
         if ((measurement.minValue !== 0 || measurement.maxValue !== 0) && (measurement.minValue !== null || measurement.maxValue !== null)) {
             return `${measurement.minValue} - ${measurement.maxValue}`;
         } else if (measurement.minValue === null || measurement.maxValue === null) {
@@ -290,7 +308,15 @@ export class MeasurementTemplatesComponent implements OnInit {
 
     editItems(template: any) {}
 
-    editTemplate(template: any) {}
+    editTemplate(template: any) {
+        this.isEditTemplate = true;
+
+        this.newTemplate.name = template.name;
+        this.newTemplate.description = template.description;
+        this.selectedMeasurementIds = template.measurements ? template.measurements.map((m: any) => m.measurementId) : [];
+        this.activeTabValue = '1';
+        this.editingTemplateId = template.id
+    }
 
     // Search and filter methods
     onSearchChange() {
@@ -303,7 +329,6 @@ export class MeasurementTemplatesComponent implements OnInit {
     }
 
     applyFilters() {
-        debugger;
         let filtered = [...this.categories];
 
         // Apply category type filter
@@ -328,7 +353,6 @@ export class MeasurementTemplatesComponent implements OnInit {
     }
 
     toggleSubCategory(subCategoryId: number) {
-        debugger;
         const index = this.expandedSubCategories.indexOf(subCategoryId);
         if (index > -1) {
             this.expandedSubCategories.splice(index, 1);
@@ -337,7 +361,7 @@ export class MeasurementTemplatesComponent implements OnInit {
 
             // Find the subcategory and load measurements if not already loaded
             for (const category of this.categories) {
-                debugger;
+                ;
                 if (category.subCategories) {
                     const subCategory = category.subCategories.find((sub: any) => sub.id === subCategoryId);
                     if (subCategory) {
@@ -349,7 +373,7 @@ export class MeasurementTemplatesComponent implements OnInit {
                             // Fetch measurements for this subcategory
                             this.measurementCategoriesService.getSubCategoryById(subCategoryId).subscribe({
                                 next: (data) => {
-                                    debugger;
+                                    ;
                                     console.log('Received data from API:', data);
                                     subCategory.measurements = data.measurements || [];
                                     console.log('Assigned measurements:', subCategory.measurements.length, 'items');
@@ -443,16 +467,16 @@ export class MeasurementTemplatesComponent implements OnInit {
 
     viewTemplateDataEntry(choosedTemplate: any): void {
         this.measurementTemplatesService.getSpecificTemplateData(choosedTemplate.id).subscribe({
-            next :(res:any)=>{
+            next: (res: any) => {
                 this.isViewTemplateEntries = true;
                 this.visible = true;
-                this.templateMeasurementDetails = res.measurements
-            }, 
-            error:(error : any)=>{
+                this.templateMeasurementDetails = res.measurements;
+            },
+            error: (error: any) => {
                 this.visible = true;
-                this.isViewTemplateEntries = false
-                console.log(error)
+                this.isViewTemplateEntries = false;
+                console.log(error);
             }
-        })
+        });
     }
 }

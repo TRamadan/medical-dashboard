@@ -4,11 +4,11 @@
 
 export const environment = {
     production: false,
-    apiUrl: 'http://localhost:5000/api/',
-    imgUrl: 'http://localhost:5000/',
+    apiUrl: 'http://portalapi.thesportsdoctorlab.com/api/',
+    imgUrl: 'http://portalapi.thesportsdoctorlab.com/',
 
-    apiUrlWebsite: 'http://localhost:5001/api/',
-    imgUrlWebsite: 'http://localhost:5001/'
+    apiUrlWebsite: 'http://websiteapi.thesportsdoctorlab.com/api/',
+    imgUrlWebsite: 'http://websiteapi.thesportsdoctorlab.com/'
 };
 
 /*
