@@ -43,5 +43,13 @@ export class MeasurementTemplatesService {
      */
     deleteTemplate(id: string | number): Observable<any> {
         return this.http.delete<any>(`${this.apiUrl}MeasurementTemplates/${id}`);
+    } 
+
+       /**
+     * Get all measurement templates
+     * @returns An observable with the list of templates.
+     */
+    getSpecificTemplateData(templateId : number): Observable<any[]> {
+        return this.http.get<any[]>(this.apiUrl + 'MeasurementTemplates/' + templateId);
     }
 }

@@ -69,6 +69,7 @@ export class MeasurementTemplatesComponent implements OnInit {
     templates: any[] = [];
     categories: any[] = [];
     filteredCategories: any[] = [];
+    templateMeasurementDetails : any[] = []
     visible: boolean = false;
     loading: boolean = false;
     isDeleteTemplate: boolean = false;
@@ -440,5 +441,18 @@ export class MeasurementTemplatesComponent implements OnInit {
         return type === 'subjective' ? '#7c3aed' : '#1e40af';
     }
 
-    viewTemplateDataEntry(choosedTemplate: any): void {}
+    viewTemplateDataEntry(choosedTemplate: any): void {
+        this.measurementTemplatesService.getSpecificTemplateData(choosedTemplate.id).subscribe({
+            next :(res:any)=>{
+                this.isViewTemplateEntries = true;
+                this.visible = true;
+                this.templateMeasurementDetails = res.measurements
+            }, 
+            error:(error : any)=>{
+                this.visible = true;
+                this.isViewTemplateEntries = false
+                console.log(error)
+            }
+        })
+    }
 }

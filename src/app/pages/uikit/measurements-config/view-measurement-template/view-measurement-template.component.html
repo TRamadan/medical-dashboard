@@ -1,3 +1,148 @@
-<p>
-    view measurement template component
-</p>
+<div class="template-form-wrapper">
+
+    <form [formGroup]="form" class="measurement-form">
+
+      @for (entry of templateData; track entry.id) {
+        <div class="card" [class]="'card--' + getWidgetType(entry.measurement)">
+
+          <!-- Card header: name + unit badge -->
+          <div class="card__header">
+            <span class="card__name">{{ entry.measurement.name }}</span>
+            @if (entry.measurement.unit) {
+              <span class="card__unit">{{ entry.measurement.unit }}</span>
+            }
+          </div>
+
+          <!-- Optional question label -->
+          @if (entry.measurement.question) {
+            <p class="card__question">{{ entry.measurement.question }}</p>
+          }
+
+          <!-- hint -->
+          @if (entry.measurement.normalRangeHint) {
+            <p class="card__hint">Normal: {{ entry.measurement.normalRangeHint }}</p>
+          }
+
+          <!-- ═══ NUMBER input (p-inputNumber) ═══ -->
+          @if (getWidgetType(entry.measurement) === 'number') {
+            <div class="input-row">
+              <p-inputNumber
+                [formControl]="getControl(entry)"
+                [min]="entry.measurement.minValue ?? undefined"
+                [max]="entry.measurement.maxValue ?? undefined"
+                [step]="entry.measurement.step ?? 1"
+                [suffix]="entry.measurement.unit ?? ''"
+                placeholder="Enter value"
+                styleClass="w-full"
+              />
+            </div>
+            @if (getControl(entry).invalid && getControl(entry).touched) {
+              <div class="card__error">
+                @if (getControl(entry).errors?.['required']) {
+                  <span>Value is required.</span>
+                }
+                @if (getControl(entry).errors?.['min']) {
+                  <span>Minimum is {{ entry.measurement.minValue }}.</span>
+                }
+                @if (getControl(entry).errors?.['max']) {
+                  <span>Maximum is {{ entry.measurement.maxValue }}.</span>
+                }
+              </div>
+            }
+          }
+
+          <!-- ═══ BOOLEAN toggle ═══ -->
+          @if (getWidgetType(entry.measurement) === 'boolean') {
+            <div class="toggle-group">
+              <button
+                type="button"
+                class="toggle-btn"
+                [class.toggle-btn--active]="getControl(entry).value === true"
+                (click)="getControl(entry).setValue(true)"
+              >Yes</button>
+              <button
+                type="button"
+                class="toggle-btn"
+                [class.toggle-btn--active]="getControl(entry).value === false"
+                (click)="getControl(entry).setValue(false)"
+              >No</button>
+            </div>
+            @if (getControl(entry).invalid && getControl(entry).touched) {
+              <div class="card__error">
+                Answer is required.
+              </div>
+            }
+          }
+
+          <!-- ═══ SCALE slider (p-slider) ═══ -->
+          @if (getWidgetType(entry.measurement) === 'scale') {
+            <div class="scale-wrapper">
+              <p-slider
+                [formControl]="getControl(entry)"
+                [min]="entry.measurement.minValue ?? 0"
+                [max]="entry.measurement.maxValue ?? 10"
+                [step]="entry.measurement.step ?? 1"
+                styleClass="w-full mt-3 mb-2"
+              />
+              <div class="scale-labels">
+                <span>{{ entry.measurement.minValue ?? 0 }}</span>
+                <span>{{ entry.measurement.maxValue ?? 10 }}</span>
+              </div>
+              <div class="scale-value">
+                <span>Selected: <strong>{{ getControl(entry).value ?? '—' }}</strong></span>
+                @if (entry.measurement.unit) {
+                  <span class="scale-value__unit">{{ entry.measurement.unit }}</span>
+                }
+              </div>
+            </div>
+            @if (getControl(entry).invalid && getControl(entry).touched) {
+              <div class="card__error">
+                Value is required.
+              </div>
+            }
+          }
+
+          <!-- ═══ TEXT input (p-textarea) ═══ -->
+          @if (getWidgetType(entry.measurement) === 'text') {
+            <p-textarea
+              [formControl]="getControl(entry)"
+              placeholder="Type your answer…"
+              rows="2"
+              styleClass="w-full"
+            />
+            @if (getControl(entry).invalid && getControl(entry).touched) {
+              <div class="card__error">
+                Answer is required.
+              </div>
+            }
+          }
+
+          <!-- ═══ YES / NO (Text + answerType YesNo) ═══ -->
+          @if (getWidgetType(entry.measurement) === 'yesno') {
+            <div class="toggle-group">
+              <button
+                type="button"
+                class="toggle-btn"
+                [class.toggle-btn--active]="getControl(entry).value === 'Yes'"
+                (click)="getControl(entry).setValue('Yes')"
+              >Yes</button>
+              <button
+                type="button"
+                class="toggle-btn"
+                [class.toggle-btn--active]="getControl(entry).value === 'No'"
+                (click)="getControl(entry).setValue('No')"
+              >No</button>
+            </div>
+            @if (getControl(entry).invalid && getControl(entry).touched) {
+              <div class="card__error">
+                Answer is required.
+              </div>
+            }
+          }
+
+        </div><!-- end card -->
+      }
+
+    </form>
+
+</div>

@@ -264,7 +264,7 @@
 </p-tabs>
 
 <!-- here is the dialog needed to manage show template data entry and confirmation message for delete-->
-<p-dialog header="Header" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }"
+<p-dialog [header]="isViewTemplateEntries ? 'template details' : 'Confirm delete message'" [modal]="true" [(visible)]="visible" [style]="{ width: '50rem' }"
     [breakpoints]="{ '1199px': '75vw', '575px': '90vw' }" [maximizable]="true">
     @if(isDeleteTemplate) {
     <p class="fw-bold text-center">
@@ -278,6 +278,6 @@
     }
 
     @if(isViewTemplateEntries){
-    <app-view-measurement-template></app-view-measurement-template>
+    <app-view-measurement-template [templateMeasurements] = templateMeasurementDetails></app-view-measurement-template>
     }
 </p-dialog>
