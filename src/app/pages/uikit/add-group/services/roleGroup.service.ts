@@ -6,9 +6,9 @@ import { Observable } from 'rxjs';
     providedIn: 'root'
 })
 export class RoleGroupService {
-    private apiUrl = 'http://localhost:5000/api/RoleGroupe';
+    private apiUrl = 'https://portalapi.thesportsdoctorlab.com/api/RoleGroupe';
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     /**
      * Adds a list of role-group associations.

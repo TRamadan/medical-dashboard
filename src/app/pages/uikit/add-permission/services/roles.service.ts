@@ -7,9 +7,9 @@ import { Roles } from '../models/permission';
     providedIn: 'root'
 })
 export class RolesService {
-    private apiUrl = 'http://localhost:5000/api/';
+    private apiUrl = 'https://portalapi.thesportsdoctorlab.com/api/';
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     /**
      * A function to get all added roles

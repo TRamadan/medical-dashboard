@@ -131,7 +131,7 @@ export class AddServiceComponent implements OnInit {
         this.durationOptions = [];
         const maxMinutes = 24 * 60; // 24 hours in minutes
 
-        for (let i = 30; i <= maxMinutes; i += 30) {
+        for (let i = 10; i <= maxMinutes; i += 10) {
             const hours = Math.floor(i / 60);
             const minutes = i % 60;
 

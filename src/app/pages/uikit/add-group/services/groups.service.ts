@@ -7,9 +7,9 @@ import { Group } from '../models/group';
     providedIn: 'root'
 })
 export class GroupsService {
-    private apiUrl = 'http://localhost:5000/api/';
+    private apiUrl = 'https://portalapi.thesportsdoctorlab.com/api/';
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
     /**
      * A function to get all added groups
      * @returns An observable with the list of groups.

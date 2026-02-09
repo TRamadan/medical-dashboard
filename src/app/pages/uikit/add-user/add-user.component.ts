@@ -72,7 +72,7 @@ export class AddUserComponent implements OnInit {
         private _uploadFileService: SharedService,
         private _groupsService: GroupsService,
         private _rolesService: RolesService
-    ) {}
+    ) { }
 
     coachsHeader: TableColumn[] = [
         { label: 'Username', field: 'userName', type: 'text', sortable: true },

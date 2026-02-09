@@ -7,9 +7,9 @@ import { Workinghours } from '../models/workinghours';
     providedIn: 'root'
 })
 export class WorkinghoursService {
-    private apiUrl = 'http://localhost:5000/api/WorkingHours';
+    private apiUrl = 'https://portalapi.thesportsdoctorlab.com/api/WorkingHours';
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     /**
      * CREATE: Adds a new working hours to the backend.

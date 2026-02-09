@@ -7,9 +7,9 @@ import { Services } from '../models/services';
     providedIn: 'root'
 })
 export class ServicesService {
-    private apiUrl = 'http://localhost:5000/api/Serivces';
+    private apiUrl = 'https://portalapi.thesportsdoctorlab.com/api/Serivces';
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     /**
      * CREATE: Adds a new service to the backend.

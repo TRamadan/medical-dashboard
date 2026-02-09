@@ -10,11 +10,11 @@ import { ApiService } from '../../service/api.service';
 export class AuthService {
     private readonly apiService = inject(ApiService);
 
-    private baseUrl = 'http://localhost:5000/api/UserAuth/';
+    private baseUrl = 'https://portalapi.thesportsdoctorlab.com/api/UserAuth/';
     private isRefreshing = false;
     private refreshTokenSubject: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(null);
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     /**
      * Logs in a user using the provided credentials and user type.

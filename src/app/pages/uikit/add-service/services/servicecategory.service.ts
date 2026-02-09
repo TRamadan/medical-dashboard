@@ -7,9 +7,9 @@ import { Servicecategory } from '../models/servicecategory';
     providedIn: 'root'
 })
 export class ServicecategoryService {
-    private apiUrl = 'http://localhost:5000/api/ServiceCategories';
+    private apiUrl = 'https://portalapi.thesportsdoctorlab.com/api/ServiceCategories';
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     /**
      * CREATE: Adds a new service category to the backend.

@@ -10,9 +10,9 @@ import Swal from 'sweetalert2';
   providedIn: 'root',
 })
 export class ServiceslocationService {
-  private apiUrl = 'http://localhost:5000/api/ServiceCategories';
-  private ServicesApiUrl = 'http://localhost:5000/api/Serivces';
-  constructor(private http: HttpClient) {}
+  private apiUrl = 'https://portalapi.thesportsdoctorlab.com/api/ServiceCategories';
+  private ServicesApiUrl = 'https://portalapi.thesportsdoctorlab.com/api/Serivces';
+  constructor(private http: HttpClient) { }
 
   /**
    * READ: Retrieves all service categories from the backend.
@@ -41,9 +41,8 @@ export class ServiceslocationService {
       console.error(
         `Backend returned code ${error.status}, ` + `body was: ${error.error}`
       );
-      errorMessage = `Server returned code ${error.status}: ${
-        error.error || error.statusText
-      }`;
+      errorMessage = `Server returned code ${error.status}: ${error.error || error.statusText
+        }`;
     }
     Swal.fire({
       icon: 'error',

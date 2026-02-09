@@ -7,9 +7,9 @@ import { Observable } from 'rxjs';
 })
 export class LocationService {
     // Replace with your actual backend API endpoint
-    private apiUrl = 'http://localhost:5000/api/Locations';
+    private apiUrl = 'https://portalapi.thesportsdoctorlab.com/api/Locations';
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     // CREATE: Add a new location
     addLocation(location: Location): Observable<Location> {

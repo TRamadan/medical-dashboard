@@ -9,10 +9,10 @@ import Swal from 'sweetalert2';
 })
 export class WorkingdaysService {
   private apiUrl =
-    'http://localhost:5000/api/Appointments/GetAvailableSlotsWithinMoth';
-  private slotsUrl = 'http://localhost:5000/api/Appointments/GetAvailableSlots';
+    'https://portalapi.thesportsdoctorlab.com/api/Appointments/GetAvailableSlotsWithinMoth';
+  private slotsUrl = 'https://portalapi.thesportsdoctorlab.com/api/Appointments/GetAvailableSlots';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   //here is the function needed to update the calendar
   getWorkingDaysWithinMonth(
@@ -51,9 +51,8 @@ export class WorkingdaysService {
     if (error.error instanceof ErrorEvent) {
       errorMessage = `An error occurred: ${error.error.message}`;
     } else {
-      errorMessage = `Server returned code ${error.status}: ${
-        error.error || error.statusText
-      }`;
+      errorMessage = `Server returned code ${error.status}: ${error.error || error.statusText
+        }`;
     }
 
     Swal.fire({

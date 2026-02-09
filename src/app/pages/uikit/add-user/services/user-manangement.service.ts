@@ -8,9 +8,9 @@ import { catchError } from 'rxjs/operators';
 })
 export class UserManangementService {
     // I'll use a placeholder for your API URL.
-    private apiUrl = 'http://localhost:5000/api/User/';
+    private apiUrl = 'https://portalapi.thesportsdoctorlab.com/api/User/';
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     private handleError(error: HttpErrorResponse) {
         let errorMessage = 'An unknown error occurred!';

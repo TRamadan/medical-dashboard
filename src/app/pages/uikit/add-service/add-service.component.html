@@ -180,17 +180,17 @@
                                 <div class="col-12 col-md-6">
                                     <label for="idealtimeBefore">Ideal Time Before</label>
                                     <p-select inputId="idealtimeBefore" [options]="durationOptions" optionLabel="label" optionValue="value" appendTo="body" formControlName="idealtimeBefore" styleClass="w-full" />
-                                    <div *ngIf="serviceCategoryForm.get('configurationForm.idealtimeBefore')?.invalid && serviceCategoryForm.get('configurationForm.idealtimeBefore')?.touched" class="text-danger small mt-1">
+                                    <!-- <div *ngIf="serviceCategoryForm.get('configurationForm.idealtimeBefore')?.invalid && serviceCategoryForm.get('configurationForm.idealtimeBefore')?.touched" class="text-danger small mt-1">
                                         Ideal time before is required.
-                                    </div>
+                                    </div> -->
                                 </div>
 
                                 <div class="col-12 col-md-6">
                                     <label for="idealtimeAfter">Ideal Time After</label>
                                     <p-select inputId="idealtimeAfter" [options]="durationOptions" optionLabel="label" optionValue="value" appendTo="body" formControlName="idealtimeAfter" styleClass="w-full" />
-                                    <div *ngIf="serviceCategoryForm.get('configurationForm.idealtimeAfter')?.invalid && serviceCategoryForm.get('configurationForm.idealtimeAfter')?.touched" class="text-danger small mt-1">
+                                    <!-- <div *ngIf="serviceCategoryForm.get('configurationForm.idealtimeAfter')?.invalid && serviceCategoryForm.get('configurationForm.idealtimeAfter')?.touched" class="text-danger small mt-1">
                                         Ideal time after is required.
-                                    </div>
+                                    </div> -->
                                 </div>
                                 <div class="col-12">
                                     <label for="locations">Locations</label>
