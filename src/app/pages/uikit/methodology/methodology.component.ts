@@ -44,7 +44,7 @@ export class MethodologyComponent implements OnInit {
         private _methodologyService: MethodologyService,
         private _messageService: MessageService,
         private _uploadFileService: SharedService
-    ) {}
+    ) { }
 
     tableHeaders: TableColumn[] = [
         { label: 'Title', field: 'title', type: 'text' },
@@ -241,5 +241,11 @@ export class MethodologyComponent implements OnInit {
                 }
             });
         }
+    }
+
+    hideDialog(): void {
+        this.isDelete = false;
+        this.isEdit = false;
+        this.showAddDialog = false;
     }
 }

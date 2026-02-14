@@ -111,8 +111,8 @@ export class SuperStarsComponent implements OnInit {
     addNewSuperStar(): void {
         this.addSuperStarForm.removeControl('id');
         if (this.addSuperStarForm.invalid) return;
-
         const payload: Superstars = this.addSuperStarForm.value;
+        payload.isElite = this.addSuperStarForm.controls['isElite'].value == true ? true : false;
 
         this._superStarsService.addNewSuperStar(payload).subscribe({
             next: (res) => {
@@ -243,7 +243,7 @@ export class SuperStarsComponent implements OnInit {
      */
     onImageUpload(event: any): void {
         const file = event.target.files[0];
-        let folderName = this.addSuperStarForm.controls['isElite'].value == true ? 'Ordinarysuperstars' : 'Elitesuperstars';
+        let folderName = this.addSuperStarForm.controls['isElite'].value == true ? 'Elitesuperstars' : 'Ordinarysuperstars';
         if (file) {
             this._uploadFileService.uploadFileService(file, folderName).subscribe({
                 next: (res: any) => {
@@ -275,5 +275,11 @@ export class SuperStarsComponent implements OnInit {
                 }
             });
         }
+    }
+
+    hideDialog(): void {
+        this.isDelete = false;
+        this.isEdit = false;
+        this.showAddDialog = false;
     }
 }

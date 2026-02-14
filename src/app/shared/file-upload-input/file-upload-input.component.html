@@ -1,6 +1,12 @@
 <div class="col-12 mt-3">
   <label>{{ label }}</label>
-  <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)" [disabled]="disabled" />
+  <div class="flex align-items-center">
+    <input type="file" class="form-control" accept="image/*" (change)="onFileSelected($event)"
+      [disabled]="disabled || isUploading" />
+    @if (isUploading) {
+    <i class="pi pi-spin pi-spinner text-2xl ml-2"></i>
+    }
+  </div>
 
   @if(previewUrl){
   <ng-container>

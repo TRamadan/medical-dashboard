@@ -22,13 +22,14 @@ export class FileUploadInputComponent {
 
     previewUrl: string | null = null;
     disabled: boolean = false;
+    isUploading: boolean = false;
     private innerValue: string | null = null;
-    onChange: any = () => {};
-    onTouched: any = () => {};
+    onChange: any = () => { };
+    onTouched: any = () => { };
     constructor(
         private _uploadFileService: SharedService,
         private _messageService: MessageService
-    ) {}
+    ) { }
 
     writeValue(value: string | null): void {
         this.innerValue = value;
@@ -51,8 +52,10 @@ export class FileUploadInputComponent {
         const file = event.target.files[0];
         if (!file) return;
 
+        this.isUploading = true;
         this._uploadFileService.uploadFileService(file, this.folderName).subscribe({
             next: (res: any) => {
+                this.isUploading = false;
                 this.innerValue = res.filePath;
                 this.onChange(res.filePath);
                 this.onTouched();
@@ -71,6 +74,7 @@ export class FileUploadInputComponent {
                 });
             },
             error: () => {
+                this.isUploading = false;
                 this._messageService.add({
                     severity: 'error',
                     summary: 'Upload Failed',

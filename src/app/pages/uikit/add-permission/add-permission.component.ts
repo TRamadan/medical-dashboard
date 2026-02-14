@@ -240,7 +240,12 @@ export class AddPermissionComponent implements OnInit {
      * Shows a confirmation dialog before deleting a permission.
      * @param role The permission to delete.
      */
-    onDeletePermission(role: Roles) {}
+    onDeletePermission(role: Roles) {
+        this.isDelete = true;
+        this.displayDialog = true;
+        this.addPermissionForm.controls['id'].setValue(role.id);
+
+    }
 
     /**
      * Deletes the selected permission using an API call.

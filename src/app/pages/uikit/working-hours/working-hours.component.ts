@@ -67,6 +67,8 @@ export class WorkingHoursComponent implements OnInit {
 
     isEdit: boolean = false;
     isDelete: boolean = false;
+    isSaving: boolean = false;
+    isDeleting: boolean = false;
 
     workingHoursHeader: TableColumn[] = [];
     allWorkingHours: any[] = [];
@@ -308,11 +310,12 @@ export class WorkingHoursComponent implements OnInit {
 
     //here is the function needed to add a new working hour
     addNewWorkingHour(): void {
+        this.isSaving = true;
         const body = this.workingHoursToBeSent;
         console.log(body);
         this._workingHoursService.addWorkingHours(body).subscribe({
             next: (res: any) => {
-                ;
+                this.isSaving = false;
                 this.getAllAddedWorkingHours();
                 this.hideDialog();
                 this.messageService.add({
@@ -322,6 +325,7 @@ export class WorkingHoursComponent implements OnInit {
                 });
             },
             error: (error: any) => {
+                this.isSaving = false;
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Add working hour',
@@ -333,6 +337,7 @@ export class WorkingHoursComponent implements OnInit {
 
     //here is the function needed to update the selected working hour
     updateTheSelectedWorkingHour(): void {
+        this.isSaving = true;
         const updateRequests = this.workingHoursToBeSent.map((slot) => {
             const existingSlot = this.workingHoursToEdit.find((s) => s.dayOfWeek === slot.dayOfWeek);
             const slotId = existingSlot ? existingSlot.id : null;
@@ -341,16 +346,21 @@ export class WorkingHoursComponent implements OnInit {
 
         forkJoin(updateRequests).subscribe({
             next: () => {
+                this.isSaving = false;
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Working hours updated successfully' });
                 this.getAllAddedWorkingHours();
                 this.hideDialog();
             },
-            error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update working hours' })
+            error: () => {
+                this.isSaving = false;
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update working hours' });
+            }
         });
     }
 
     //here is the function needed to delete the selected working hour
     deleteSelectedWorkingHour(workingHour: any, item: any): void {
+        debugger
         this.confirmationService.confirm({
             message: `Are you sure you want to delete all working hours for Dr. ${item.doctorNameEn} on ${workingHour.label}?`,
             header: 'Confirm Deletion',
@@ -359,14 +369,19 @@ export class WorkingHoursComponent implements OnInit {
             rejectButtonStyleClass: 'p-button-danger',
 
             accept: () => {
+                this.isDeleting = true;
                 const deleteRequests = item.timeSlots.map((slot: any) => this._workingHoursService.deleteWorkingHour(slot.id));
 
                 forkJoin(deleteRequests).subscribe({
                     next: () => {
+                        this.isDeleting = false;
                         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'All working hours for the day deleted successfully' });
                         this.getAllAddedWorkingHours();
                     },
-                    error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete working hours' })
+                    error: () => {
+                        this.isDeleting = false;
+                        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete working hours' });
+                    }
                 });
             }
         });
@@ -381,12 +396,17 @@ export class WorkingHoursComponent implements OnInit {
             acceptButtonStyleClass: 'p-button-success',
             rejectButtonStyleClass: 'p-button-danger',
             accept: () => {
+                this.isDeleting = true;
                 this._workingHoursService.deleteWorkingHour(slot.id).subscribe({
                     next: () => {
+                        this.isDeleting = false;
                         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Time slot deleted successfully' });
                         this.getAllAddedWorkingHours();
                     },
-                    error: () => this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete time slot' })
+                    error: () => {
+                        this.isDeleting = false;
+                        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete time slot' });
+                    }
                 });
             }
         });
@@ -399,7 +419,9 @@ export class WorkingHoursComponent implements OnInit {
         this.isEdit = true;
 
         // Find the correct serviceId format for TreeSelect
-        const serviceNode = this.findServiceNode(this.serviceCategories, item.serviceId);
+        // The ServiceId is 12, so we look for 'srv-12'
+        const targetKey = `srv-${item.serviceId}`;
+        const serviceNode = this.findServiceNodeByKey(this.serviceCategories, targetKey);
 
         this.workingHoursForm.patchValue({
             serviceId: serviceNode,
@@ -411,14 +433,14 @@ export class WorkingHoursComponent implements OnInit {
         this.workingHoursToEdit = item.timeSlots.map((slot: any) => ({ ...slot, dayOfWeek: Number(workingHour.value) }));
     }
 
-    findServiceNode(nodes: any[], serviceId: number): any {
+    findServiceNodeByKey(nodes: any[], targetKey: string): any {
+        if (!nodes) return null;
         for (const node of nodes) {
-            const currentId = node.key ? +node.key.split('-')[1] : 0;
-            if (node.key?.startsWith('srv-') && currentId === serviceId) {
+            if (node.key === targetKey) {
                 return node;
             }
             if (node.children) {
-                const found = this.findServiceNode(node.children, serviceId);
+                const found = this.findServiceNodeByKey(node.children, targetKey);
                 if (found) {
                     return found;
                 }

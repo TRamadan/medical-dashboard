@@ -114,8 +114,7 @@
   }
 
   <div class="flex justify-end gap-2 mt-4">
-    <p-button severity="danger" label="Cancel" icon="pi pi-times" (onClick)="showAddDialog = false"
-      class="p-button-text" />
+    <p-button severity="danger" label="Cancel" icon="pi pi-times" (onClick)="hideDialog()" class="p-button-text" />
     <p-button severity="success" label="Save" icon="pi pi-check"
       (onClick)=" !isDelete ? (isEdit ? updatedMethodology() : addNewMethodology()) : deleteSelectedMethodology()" />
   </div>

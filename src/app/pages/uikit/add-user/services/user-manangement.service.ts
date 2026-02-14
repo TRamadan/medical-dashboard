@@ -14,8 +14,20 @@ export class UserManangementService {
 
     private handleError(error: HttpErrorResponse) {
         let errorMessage = 'An unknown error occurred!';
-        if (error.error && error.error.error && Array.isArray(error.error.error.errors) && error.error.error.errors.length > 0) {
-            // Extract the English error message from the backend response
+        if (error.error && error.error.errors && typeof error.error.errors === 'object') {
+            // Handle validation errors (Object with keys)
+            const errors = error.error.errors;
+            const errorMessages: string[] = [];
+            for (const key in errors) {
+                if (Object.prototype.hasOwnProperty.call(errors, key)) {
+                    errorMessages.push(...errors[key]);
+                }
+            }
+            if (errorMessages.length > 0) {
+                errorMessage = errorMessages.join('\n');
+            }
+        } else if (error.error && error.error.error && Array.isArray(error.error.error.errors) && error.error.error.errors.length > 0) {
+            // Extract the English error message from the backend response (Old format?)
             errorMessage = error.error.error.errors[0].errorEn;
         } else if (error.message) {
             // Fallback to the default error message
@@ -75,5 +87,14 @@ export class UserManangementService {
      */
     getAllUserTypes(): Observable<any[]> {
         return this.http.get<any[]>(this.apiUrl + 'GetAllEmployeeTypes').pipe(catchError(this.handleError));
+    }
+
+    /**
+     * A function that gets employees based on employee type
+     * @param employeeType The employee type ID.
+     * @returns An observable with the list of employees.
+     */
+    getAllSystemEmployeeWithProfileBasedOnEmployeeType(employeeType: number): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}GetAllSystemEmployeeWithProfileBasedOnEmployeeType/${employeeType}`).pipe(catchError(this.handleError));
     }
 }

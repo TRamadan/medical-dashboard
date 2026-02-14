@@ -54,6 +54,7 @@ export class AddServiceComponent implements OnInit {
     isDeleteMode: boolean = false;
     isEditServiceMode: boolean = false;
     isServiceDialog: boolean = false;
+    isSaving: boolean = false;
     selectedService: Servicecategory = {};
     selectedCategoryForService: Servicecategory | null = null;
 
@@ -79,7 +80,7 @@ export class AddServiceComponent implements OnInit {
         private confirmationService: ConfirmationService,
         private servicesService: ServicesService,
         private locationService: LocationService
-    ) {}
+    ) { }
 
     ngOnInit() {
         this.getAllCategories();
@@ -116,7 +117,7 @@ export class AddServiceComponent implements OnInit {
             id: [null],
             nameAr: [null, Validators.required], // for service
             nameEn: [null, Validators.required], // for service
-            duration: [null, Validators.required], // for service
+            durationTime: [null, Validators.required], // for service
             price: [null, Validators.required], // for service
             idealtimeBefore: [null, Validators.required], // for service
             idealtimeAfter: [null, Validators.required], // for service
@@ -212,6 +213,10 @@ export class AddServiceComponent implements OnInit {
             return;
         }
         const serviceData = this.serviceCategoryForm.value;
+        if (serviceData.orderInParent) {
+            serviceData.orderInParent = Number(serviceData.orderInParent);
+        }
+
 
         if (this.isEditServiceMode) {
             this.updateService(serviceData);
@@ -222,8 +227,10 @@ export class AddServiceComponent implements OnInit {
     }
 
     private createCategory(): void {
+        this.isSaving = true;
         this.serviceCategoryService.addServiceCategory(this.addServiceForm.value).subscribe({
             next: () => {
+                this.isSaving = false;
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Success',
@@ -232,18 +239,22 @@ export class AddServiceComponent implements OnInit {
                 this.getAllCategories();
                 this.hideDialog();
             },
-            error: () =>
+            error: () => {
+                this.isSaving = false;
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Error',
                     detail: 'Create Failed'
-                })
+                });
+            }
         });
     }
 
     private updateCategory(): void {
+        this.isSaving = true;
         this.serviceCategoryService.updateServiceCategory(this.addServiceForm.value).subscribe({
             next: () => {
+                this.isSaving = false;
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Success',
@@ -252,18 +263,22 @@ export class AddServiceComponent implements OnInit {
                 this.getAllCategories();
                 this.hideDialog();
             },
-            error: () =>
+            error: () => {
+                this.isSaving = false;
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Error',
                     detail: 'Update Failed'
-                })
+                });
+            }
         });
     }
 
     private createService(serviceData: any): void {
+        this.isSaving = true;
         this.servicesService.addService(serviceData).subscribe({
             next: () => {
+                this.isSaving = false;
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Success',
@@ -272,18 +287,22 @@ export class AddServiceComponent implements OnInit {
                 this.getAllCategories();
                 this.hideDialog();
             },
-            error: () =>
+            error: () => {
+                this.isSaving = false;
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Error',
                     detail: 'Create Failed'
-                })
+                });
+            }
         });
     }
 
     private updateService(serviceData: any): void {
+        this.isSaving = true;
         this.servicesService.updateService(serviceData).subscribe({
             next: () => {
+                this.isSaving = false;
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Success',
@@ -292,12 +311,14 @@ export class AddServiceComponent implements OnInit {
                 this.getAllCategories();
                 this.hideDialog();
             },
-            error: () =>
+            error: () => {
+                this.isSaving = false;
                 this.messageService.add({
                     severity: 'error',
                     summary: 'Error',
                     detail: 'Update Failed'
-                })
+                });
+            }
         });
     }
 
@@ -349,8 +370,10 @@ export class AddServiceComponent implements OnInit {
             header: 'Confirm Deletion',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
+                this.isSaving = true;
                 this.serviceCategoryService.deleteServiceCategory(category.id!).subscribe({
                     next: () => {
+                        this.isSaving = false;
                         this.messageService.add({
                             severity: 'success',
                             summary: 'Success',
@@ -359,12 +382,14 @@ export class AddServiceComponent implements OnInit {
                         this.getAllCategories();
                         this.isDeleteMode = false;
                     },
-                    error: () =>
+                    error: () => {
+                        this.isSaving = false;
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Error',
                             detail: 'Delete Failed'
-                        })
+                        });
+                    }
                 });
             },
             reject: () => {
@@ -380,6 +405,7 @@ export class AddServiceComponent implements OnInit {
             header: 'Confirm Deletion',
             icon: 'pi pi-exclamation-triangle',
             accept: () => {
+                this.isSaving = true;
                 this.servicesService.deleteService(service.id!).subscribe({
                     next: () => {
                         this.messageService.add({
@@ -390,12 +416,14 @@ export class AddServiceComponent implements OnInit {
                         this.getAllCategories();
                         this.isDeleteMode = false;
                     },
-                    error: () =>
+                    error: () => {
+                        this.isSaving = false;
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Error',
                             detail: 'Delete Failed'
-                        })
+                        });
+                    }
                 });
             },
             reject: () => {
@@ -425,6 +453,7 @@ export class AddServiceComponent implements OnInit {
 
         const formValues = {
             ...service,
+            id: service.id,
             locationIds: service.locations?.map((loc: any) => loc.id) || [],
             duration: service.duration,
             idealtimeBefore: service.idealtimeBefore,
@@ -435,7 +464,7 @@ export class AddServiceComponent implements OnInit {
         this.isServiceDialog = true;
     }
 
-    editSubService(service: any, category: Servicecategory): void {
+    editSubService(service: any, category: Servicecategory, parentService: any): void {
         this.isEditServiceMode = true;
         this.isNewServiceSubCategory = true;
         this.selectedCategoryForService = category;
@@ -443,10 +472,12 @@ export class AddServiceComponent implements OnInit {
 
         const formValues = {
             ...service,
+            id: service.id,
             locationIds: service.locations?.map((loc: any) => loc.id) || [],
-            duration: service.duration,
+            durationTime: service.duration,
             idealtimeBefore: service.idealtimeBefore,
-            idealtimeAfter: service.idealtimeAfter
+            idealtimeAfter: service.idealtimeAfter,
+            parentServiceId: parentService.id
         };
 
         this.serviceCategoryForm.patchValue(formValues);

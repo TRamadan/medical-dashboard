@@ -56,6 +56,7 @@ export class AddUserComponent implements OnInit {
     userDialog: boolean = false;
     isEdit: boolean = false;
     isDelete: boolean = false;
+    isSaving: boolean = false;
     isEmployee: boolean = false;
     showPassword = false;
     detailsDialog: boolean = false;
@@ -186,6 +187,7 @@ export class AddUserComponent implements OnInit {
 
     //here is the function needed to add a new user
     addNewUser(): void {
+        this.isSaving = true;
         // Combine form data from both steps
         const userPayload = {
             registerDTO: {
@@ -202,11 +204,13 @@ export class AddUserComponent implements OnInit {
 
         this.userService.addUser(userPayload).subscribe({
             next: () => {
+                this.isSaving = false;
                 this.hideDialog();
                 this.getAllUsers();
                 this._messageService.add({ severity: 'success', summary: 'Success', detail: 'User created successfully.' });
             },
             error: (err) => {
+                this.isSaving = false;
                 this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
             }
         });
@@ -236,13 +240,16 @@ export class AddUserComponent implements OnInit {
             ...this.addNewUserForm.value.employeeData
         };
 
+        this.isSaving = true;
         this.userService.updateUser(this.selectedUser.id, userPayload).subscribe({
             next: () => {
+                this.isSaving = false;
                 this.hideDialog();
                 this.getAllUsers();
                 this._messageService.add({ severity: 'success', summary: 'Success', detail: 'User updated successfully.' });
             },
             error: (err) => {
+                this.isSaving = false;
                 this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
             }
         });
@@ -252,13 +259,16 @@ export class AddUserComponent implements OnInit {
     confirmDeleteSelectedUser(): void {
         if (!this.selectedUser) return;
 
+        this.isSaving = true;
         this.userService.deleteUser(this.selectedUser.id).subscribe({
             next: () => {
+                this.isSaving = false;
                 this.hideDialog();
                 this.getAllUsers();
                 this._messageService.add({ severity: 'success', summary: 'Success', detail: 'User deleted successfully.' });
             },
             error: (err) => {
+                this.isSaving = false;
                 this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
             }
         });

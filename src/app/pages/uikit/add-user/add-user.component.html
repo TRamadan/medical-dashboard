@@ -153,7 +153,19 @@
                                         }
                                     </div>
                                 </div>
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-3 mb-3">
+                                    <label for="genderId" class="form-label">Gender</label>
+                                    <p-select [showClear]="true" id="genderId" appendTo="body"
+                                        formControlName="genderId" [options]="genders" optionLabel="name"
+                                        optionValue="id" placeholder="Select Gender" styleClass="w-full" />
+                                    @if (personalData.get('genderId')?.invalid &&
+                                    personalData.get('genderId')?.touched) {
+                                    <div class="text-danger mt-1 text-xs">
+                                        <div>Gender is required.</div>
+                                    </div>
+                                    }
+                                </div>
+                                <div class="col-md-3 mb-3">
                                     <label for="employeeType" class="form-label">User type</label>
                                     <p-select [showClear]="true" id="employeeType" appendTo="body"
                                         formControlName="employeeType" [options]="allUserTypes" optionLabel="name"
@@ -165,7 +177,7 @@
                                     </div>
                                     }
                                 </div>
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-3 mb-3">
                                     <label for="rolesId" class="form-label">Roles</label>
                                     <p-multiSelect [showClear]="true" id="rolesId" appendTo="body"
                                         formControlName="rolesId" [options]="allRoles" optionLabel="name"
@@ -177,7 +189,7 @@
                                     </div>
                                     }
                                 </div>
-                                <div class="col-md-4 mb-3">
+                                <div class="col-md-3 mb-3">
                                     <label for="groupesId" class="form-label">Groups</label>
                                     <p-multiSelect [showClear]="true" id="groupesId" appendTo="body"
                                         formControlName="groupesId" [options]="allGroups" optionLabel="name"
@@ -408,7 +420,7 @@
     <ng-template pTemplate="footer">
         <div class="flex flex-col gap-2 md:flex-row md:justify-end md:gap-4 w-full px-2 py-2">
             <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog()" class="w-full md:w-auto" />
-            <p-button label="Save" [outlined]="true" severity="success" (onClick)="submitUser()"
+            <p-button label="Save" [outlined]="true" severity="success" (onClick)="submitUser()" [loading]="isSaving"
                 class="w-full md:w-auto" />
         </div>
     </ng-template>

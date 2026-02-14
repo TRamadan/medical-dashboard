@@ -4,18 +4,22 @@ import { AccordionModule } from 'primeng/accordion';
 import { SelectModule } from 'primeng/select';
 import { CheckboxModule } from 'primeng/checkbox';
 import { Button } from 'primeng/button';
+import { MessageService } from 'primeng/api';
+import { Toast } from 'primeng/toast';
 
 @Component({
     selector: 'app-assing-hours',
     standalone: true,
     templateUrl: './assing-hours.component.html',
     styleUrls: ['./assing-hours.component.css'],
-    imports: [AccordionModule, FormsModule, ReactiveFormsModule, SelectModule, Button, CheckboxModule]
+    imports: [AccordionModule, FormsModule, ReactiveFormsModule, SelectModule, Button, CheckboxModule, Toast],
+    providers: [MessageService]
 })
 export class AssingHoursComponent implements OnInit {
     workingHoursForm!: FormGroup;
     @Input() selectedDayOfWeek!: number;
     @Input() workingHoursToEdit: any[] = [];
+    @Input() isEdit: boolean = false;
     @Output() workingHoursChanged = new EventEmitter<any[]>();
 
     durationOptions: { label: string; value: string }[] = [];
@@ -31,7 +35,10 @@ export class AssingHoursComponent implements OnInit {
         { label: 'Sunday', value: '7', times: [] }
     ];
 
-    constructor(private fb: FormBuilder) {}
+    constructor(
+        private fb: FormBuilder,
+        private messageService: MessageService
+    ) { }
 
     ngOnInit(): void {
         this.InitialiseFormArray();
@@ -138,6 +145,39 @@ export class AssingHoursComponent implements OnInit {
         const wh = this.getWorkingHourFormGroup(dayIndex, workingHourIndex).value;
         if (wh.startTime && wh.endTime) {
             this.copyWorkingHoursToAllDays(wh.startTime, wh.endTime);
+        }
+    }
+
+    onApplyToAllChange(): void {
+        if (this.applyToAllDays) {
+            // Find the first day with a valid start and end time
+            let found = false;
+            for (let i = 0; i < this.daysArray.length; i++) {
+                const dayGroup = this.getDayFormGroup(i);
+                const workingHours = dayGroup.get('workingHours') as FormArray;
+
+                for (let j = 0; j < workingHours.length; j++) {
+                    const wh = workingHours.at(j).value;
+                    if (wh.startTime && wh.endTime) {
+                        this.copyWorkingHoursToAllDays(wh.startTime, wh.endTime);
+                        found = true;
+                        break;
+                    }
+                }
+                if (found) break;
+            }
+
+            if (!found) {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Please select start and end time for at least one day before applying to all.'
+                });
+                // Uncheck the box using setTimeout to avoid change detection errors
+                setTimeout(() => {
+                    this.applyToAllDays = false;
+                });
+            }
         }
     }
 

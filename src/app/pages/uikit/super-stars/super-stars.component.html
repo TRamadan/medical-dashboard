@@ -148,7 +148,7 @@
 
   @if(!isDelete){
   <div class=" flex justify-end gap-2 mt-4">
-    <p-button severity="danger" label="Cancel" icon="pi pi-times" (click)="showAddDialog = false" class="p-button-text"
+    <p-button severity="danger" label="Cancel" icon="pi pi-times" (click)="hideDialog()" class="p-button-text"
       type="button" />
     <p-button severity="success" label="Save" icon="pi pi-check" type="submit"
       (onClick)=" !isDelete ? isEdit ? updateSelectedSuperStar() :addNewSuperStar() : deleteSelectedSuperStar()" />
