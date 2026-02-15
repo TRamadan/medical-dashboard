@@ -134,11 +134,15 @@
 
                             <div class="col-12 col-md-6">
                                 <label>Price</label>
-                                <input type="number" class="form-control" formControlName="price" [ngClass]="{
-                                            'is-invalid': serviceCategoryForm.get('configurationForm.price')?.invalid && serviceCategoryForm.get('configurationForm.price')?.touched
-                                        }" />
+                                <input type="number" class="form-control" formControlName="price"
+                                    [attr.disabled]="serviceCategoryForm.get('parentServiceId')?.value ? true : null"
+                                    [ngClass]="{
+                                        'is-invalid': serviceCategoryForm.get('configurationForm.price')?.invalid && serviceCategoryForm.get('configurationForm.price')?.touched
+                                    }" />
                                 <div *ngIf="serviceCategoryForm.get('configurationForm.price')?.invalid && serviceCategoryForm.get('configurationForm.price')?.touched"
                                     class="invalid-feedback">Price is required.</div>
+                                <small *ngIf="serviceCategoryForm.get('parentServiceId')?.value"
+                                    class="text-muted">Price is inherited from parent service</small>
                             </div>
                             <div class="col-12 col-md-6">
                                 <label for="idealtimeBefore">Ideal Time Before</label>
@@ -163,9 +167,12 @@
                                 <label for="locations">Locations</label>
                                 <p-multiSelect id="locations" appendTo="body" formControlName="locationIds"
                                     [options]="locations" optionLabel="name" optionValue="id"
-                                    placeholder="Select Locations" styleClass="w-full" [filter]="true" />
+                                    placeholder="Select Locations" styleClass="w-full" [filter]="true"
+                                    [disabled]="serviceCategoryForm.get('parentServiceId')?.value" />
                                 <div *ngIf="serviceCategoryForm.get('locationIds')?.invalid && serviceCategoryForm.get('configurationForm.locations')?.touched"
                                     class="text-danger small mt-1">At least one location is required.</div>
+                                <small *ngIf="serviceCategoryForm.get('parentServiceId')?.value"
+                                    class="text-muted">Locations are inherited from parent service</small>
                             </div>
                             <div class="col-12 col-md-6" *ngIf="serviceCategoryForm.get('parentServiceId')?.value">
                                 <label for="orderInParent">Order In Parent</label>

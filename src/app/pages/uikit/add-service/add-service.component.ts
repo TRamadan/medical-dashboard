@@ -132,19 +132,23 @@ export class AddServiceComponent implements OnInit {
         this.durationOptions = [];
         const maxMinutes = 24 * 60; // 24 hours in minutes
 
-        for (let i = 10; i <= maxMinutes; i += 10) {
+        for (let i = 0; i <= maxMinutes; i += 10) {
             const hours = Math.floor(i / 60);
             const minutes = i % 60;
 
             let label = '';
-            if (hours > 0) {
-                label += `${hours} hour${hours > 1 ? 's' : ''}`;
-            }
-            if (minutes > 0) {
-                label += ` ${minutes}min`;
+
+            if (hours === 0 && minutes === 0) {
+                label = '0 min';
+            } else {
+                if (hours > 0) {
+                    label += `${hours} hour${hours > 1 ? 's' : ''}`;
+                }
+                if (minutes > 0) {
+                    label += ` ${minutes} min`;
+                }
             }
 
-            // value بصيغة HH:MM
             const formattedValue = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`;
 
             this.durationOptions.push({
@@ -184,6 +188,9 @@ export class AddServiceComponent implements OnInit {
         this.isNewServiceSubCategory = true;
         this.isEditServiceMode = false;
         this.serviceCategoryForm.reset();
+
+
+
         this.serviceCategoryForm.patchValue({
             serviceCategoryId: this.selectedCategoryForService.id
         });
@@ -353,10 +360,22 @@ export class AddServiceComponent implements OnInit {
         this.isNewServiceSubCategory = true;
         this.isEditServiceMode = false;
         this.serviceCategoryForm.reset();
+
+        // Get parent service location IDs
+        const parentLocationIds = parentService.locations?.map((loc: any) => loc.id) || [];
+
         this.serviceCategoryForm.patchValue({
             parentServiceId: parentService.id,
-            serviceCategoryId: this.selectedCategoryForService.id
+            serviceCategoryId: this.selectedCategoryForService.id,
+            price: 0,
+            locationIds: parentLocationIds,
+            idealtimeBefore: '00:00',
+            idealtimeAfter: '00:00'
         });
+
+        // Disable price and location fields for sub-services
+        this.serviceCategoryForm.get('price')?.disable();
+        this.serviceCategoryForm.get('locationIds')?.disable();
     }
     /**
      * Developer: Eng/Tarek Ahmed Ramadan
@@ -451,6 +470,10 @@ export class AddServiceComponent implements OnInit {
         this.selectedCategoryForService = category;
         this.serviceCategoryForm.reset();
 
+        // Enable price and location fields for regular services
+        this.serviceCategoryForm.get('price')?.enable();
+        this.serviceCategoryForm.get('locationIds')?.enable();
+
         const formValues = {
             ...service,
             id: service.id,
@@ -481,6 +504,11 @@ export class AddServiceComponent implements OnInit {
         };
 
         this.serviceCategoryForm.patchValue(formValues);
+
+        // Disable price and location fields for sub-services
+        this.serviceCategoryForm.get('price')?.disable();
+        this.serviceCategoryForm.get('locationIds')?.disable();
+
         this.isServiceDialog = true;
     }
 
