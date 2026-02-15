@@ -1,269 +1,752 @@
-<p-toast />
-<div class="grid grid-cols-12 gap-8 mb-4">
-    <!-- Pending appointments -->
-    <div class="col-span-12 md:col-span-6 xl:col-span-3">
-        <div class="card !p-0 overflow-hidden flex flex-col border-0">
-            <div class="flex items-center p-6">
-                <i class="pi pi-clock !text-5xl text-amber-500"></i>
-                <div class="ml-6">
-                    <span class="text-amber-500 block whitespace-nowrap">Scheduled appointments</span>
-                    <span class="text-amber-500 block text-4xl font-bold">
-                        {{ pendingAppointmentsCount }}
-                    </span>
-                </div>
-            </div>
-            <img alt="conversion" class="w-full" src="assets/users.svg" />
-        </div>
-    </div>
-
-    <div class="col-span-12 md:col-span-6 xl:col-span-3">
-        <div class="card !p-0 overflow-hidden flex flex-col border-0">
-            <div class="flex items-center p-6">
-                <i class="pi pi-times !text-5xl text-red-500"></i>
-                <div class="ml-6">
-                    <span class="text-red-500 block whitespace-nowrap">Canceled appointments</span>
-                    <span class="text-red-500 block text-4xl font-bold">
-                        {{ canceledAppointmentsCount }}
-                    </span>
-                </div>
-            </div>
-            <img alt="conversion" class="w-full" src="../../../../assets/users.svg" />
-        </div>
-    </div>
-
-    <div class="col-span-12 md:col-span-6 xl:col-span-3">
-        <div class="card !p-0 overflow-hidden flex flex-col border-0">
-            <div class="flex items-center p-6">
-                <i class="pi pi-check !text-5xl text-green-500"></i>
-                <div class="ml-6">
-                    <span class="text-green-500 block whitespace-nowrap">Confirmed appointments</span>
-                    <span class="text-green-500 block text-4xl font-bold">
-                        {{ approvedAppointmentsCount }}
-                    </span>
-                </div>
-            </div>
-            <img alt="conversion" class="w-full" src="../../../../assets/users.svg" />
+<div class="card mb-4 border-0 shadow-sm">
+    <div class="flex items-center gap-4">
+        <i class="pi pi-map-marker text-primary text-xl"></i>
+        <div class="flex flex-col gap-2 w-full max-w-md">
+            <label class="font-medium text-gray-700">Locations</label>
+            <p-dropdown [options]="locations" [(ngModel)]="selectedLocation" optionLabel="nameEn"
+                placeholder="Select a Location" (onChange)="onLocationChange()" styleClass="w-full" [showClear]="true">
+            </p-dropdown>
         </div>
     </div>
 </div>
 
+
+
+<!-- Stats Cards Removed -->
+
+<!-- Placeholder for No Location Selected -->
+<div *ngIf="!selectedLocation"
+    class="flex flex-col items-center justify-center p-8 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 mt-4 min-h-[400px]">
+    <div class="w-24 h-24 rounded-full bg-blue-50 flex items-center justify-center mb-4 animate-pulse">
+        <i class="pi pi-map-marker text-4xl text-blue-500"></i>
+    </div>
+    <h3 class="text-2xl font-semibold text-gray-800 mb-2">Select a Location</h3>
+    <p class="text-gray-500 max-w-md mx-auto">
+        Please choose a location from the dropdown above to manage appointments, view statistics, and access scheduling
+        tools.
+    </p>
+</div>
+
 <!-- Toolbar -->
-<p-toolbar styleClass="mb-6">
+<p-toolbar *ngIf="selectedLocation" styleClass="mb-6">
     <ng-template #start>
         <p-button icon="pi pi-plus" raised label="New Appointment" class="mr-2"
             (click)="openNewAppointmentDialog()"></p-button>
     </ng-template>
-
-    <ng-template #end>
-        <p-button label="Export" icon="pi pi-upload" severity="secondary"></p-button>
-    </ng-template>
 </p-toolbar>
 
-<!-- Grouped Appointments by Date -->
-@for (group of groupedAppointments; track group) {
-<div>
-    <h3 class="text-xl font-semibold mb-3 mt-5">
-        {{ group.date | date: 'fullDate' }}
-    </h3>
+<!-- Pending Appointments Section -->
+<div *ngIf="selectedLocation" class="card border-0 shadow-sm mb-4">
+    <div class="flex items-center justify-between mb-3">
+        <h3 class="text-xl font-semibold m-0">Pending Appointments</h3>
+    </div>
+    @for (group of groupedPendingAppointments; track group) {
+    <div>
+        <h3 class="text-xl font-semibold mb-3 mt-5">
+            {{ group.date | date: 'fullDate' }}
+        </h3>
 
-    <app-table dataKey="id" [showDeleteButton] = 'false' [headers]="tableHeaders" [data]="group.appointments" [actions]="tableActions"
-        [paginator]="true" [rows]="10" [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]"
-        [globalFilterFields]="globalFilterFields" [globalFilterPlaceholder]="'Search appointments...'"
-        [showActions]="true" [isShowDetails]="true" (edit)="openStatusDialog($event)"
-        (onPageChange)="onPageChange($event)">
-        <ng-template #details let-row>
-            <div class="p-4 bg-light rounded border">
-                <div class="row g-4 align-items-stretch">
+        <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="group.appointments"
+            [actions]="tableActions" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+            [rowsPerPageOptions]="[10, 20, 30]" [globalFilterFields]="globalFilterFields"
+            [globalFilterPlaceholder]="'Search appointments...'" [showActions]="true" [isShowDetails]="true"
+            (edit)="openStatusDialog($event)" (onPageChange)="onPageChange($event)">
+            <ng-template #details let-row>
+                <div class="p-4 bg-light rounded border">
+                    <div class="row g-4 align-items-stretch">
 
-                    <!-- Patient Profile -->
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <div class="card p-0 h-100 border-0 shadow-sm d-flex flex-column">
+                        <!-- Patient Profile -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card p-0 h-100 border-0 shadow-sm d-flex flex-column">
 
-                            <div class="card-header bg-light border-bottom p-4">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="rounded-circle bg-white p-1 shadow-sm"
-                                        style="width: 64px; height: 64px;">
+                                <div class="card-header bg-light border-bottom p-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-white p-1 shadow-sm"
+                                            style="width: 64px; height: 64px;">
+                                            <div
+                                                class="w-100 h-100 rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center text-primary fw-bold fs-5 text-uppercase">
+                                                {{ row.appointmentProfile?.firstName?.charAt(0) }}{{
+                                                row.appointmentProfile?.lastName?.charAt(0) }}
+                                            </div>
+                                        </div>
+
+                                        <div class="flex-grow-1 min-w-0">
+                                            <h4 class="h5 fw-bold text-dark text-truncate mb-1"
+                                                [title]="row.appointmentProfile?.firstName + ' ' + row.appointmentProfile?.lastName">
+                                                {{ row.appointmentProfile?.firstName }} {{
+                                                row.appointmentProfile?.lastName
+                                                }}
+                                            </h4>
+
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span *ngIf="row.appointmentProfile?.genderName"
+                                                    class="badge bg-light text-secondary border fw-normal">
+                                                    {{ row.appointmentProfile?.genderName }}
+                                                </span>
+                                                <span class="small text-muted">ID: #{{ row.appointmentProfile?.id
+                                                    }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="card-body p-4 flex-grow-1">
+                                    <div class="d-flex flex-column gap-3">
+
+                                        <div class="d-flex align-items-start gap-3">
+                                            <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                                style="width: 32px; height: 32px;">
+                                                <i class="pi pi-envelope"></i>
+                                            </div>
+                                            <div>
+                                                <p class="small text-muted fw-medium text-uppercase mb-0">Email</p>
+                                                <p class="mb-0 text-dark text-break">{{ row.appointmentProfile?.email ||
+                                                    'N/A' }}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-start gap-3">
+                                            <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                                style="width: 32px; height: 32px;">
+                                                <i class="pi pi-phone"></i>
+                                            </div>
+                                            <div>
+                                                <p class="small text-muted fw-medium text-uppercase mb-0">Phone</p>
+                                                <p class="mb-0 text-dark">{{ row.appointmentProfile?.phoneNumber ||
+                                                    'N/A' }}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-start gap-3"
+                                            *ngIf="row.appointmentProfile?.emergencyPhoneNumber">
+                                            <div class="rounded bg-danger-subtle d-flex align-items-center justify-content-center text-danger"
+                                                style="width: 32px; height: 32px;">
+                                                <i class="bi bi-asterisk"></i>
+                                            </div>
+                                            <div>
+                                                <p class="small text-muted fw-medium text-uppercase mb-0">Emergency</p>
+                                                <p class="mb-0 text-danger fw-medium">{{
+                                                    row.appointmentProfile?.emergencyPhoneNumber }}</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex align-items-start gap-3">
+                                            <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                                style="width: 32px; height: 32px;">
+                                                <i class="pi pi-calendar"></i>
+                                            </div>
+                                            <div>
+                                                <p class="small text-muted fw-medium text-uppercase mb-0">Date of Birth
+                                                </p>
+                                                <p class="mb-0 text-dark">{{ row.appointmentProfile?.dateOfBirth |
+                                                    date:'mediumDate' }}</p>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Appointment Info -->
+                        <div class="col-12 col-md-6 col-lg-4">
+                            <div class="card border-0 shadow-sm p-0 h-100 d-flex flex-column">
+
+                                <div class="card-header bg-light border-bottom p-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center"
+                                            style="width: 40px; height: 40px;">
+                                            <i class="pi pi-calendar-plus fs-5"></i>
+                                        </div>
+                                        <h4 class="h5 fw-semibold mb-0 text-dark">Appointment Info</h4>
+                                    </div>
+                                </div>
+
+                                <div class="card-body p-4 flex-grow-1">
+                                    <div class="d-flex flex-column gap-3">
+
                                         <div
-                                            class="w-100 h-100 rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center text-primary fw-bold fs-5 text-uppercase">
-                                            {{ row.appointmentProfile?.firstName?.charAt(0) }}{{
-                                            row.appointmentProfile?.lastName?.charAt(0) }}
+                                            class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                            <span class="text-secondary fw-medium">Service</span>
+                                            <span class="fw-bold text-success">{{ row.serviceNameEn }}</span>
                                         </div>
+
+                                        <div
+                                            class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                            <span class="text-secondary fw-medium">Location</span>
+                                            <span class="small text-end">{{ row.locationNameEn }}</span>
+                                        </div>
+
+                                        <div
+                                            class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                            <span class="text-secondary fw-medium">Date</span>
+                                            <span>{{ row.startTime | date:'mediumDate' }}</span>
+                                        </div>
+
+                                        <div
+                                            class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                            <span class="text-secondary fw-medium">Time</span>
+                                            <span>{{ row.startTime | date:'shortTime' }} - {{ row.endTime |
+                                                date:'shortTime'
+                                                }}</span>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between align-items-center pt-1">
+                                            <span class="text-secondary fw-medium">Price</span>
+                                            <span class="fw-bold text-success">{{ row.servicePrice |
+                                                currency:'EGP':'symbol'
+                                                }}</span>
+                                        </div>
+
                                     </div>
-
-                                    <div class="flex-grow-1 min-w-0">
-                                        <h4 class="h5 fw-bold text-dark text-truncate mb-1"
-                                            [title]="row.appointmentProfile?.firstName + ' ' + row.appointmentProfile?.lastName">
-                                            {{ row.appointmentProfile?.firstName }} {{ row.appointmentProfile?.lastName
-                                            }}
-                                        </h4>
-
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span *ngIf="row.appointmentProfile?.genderName"
-                                                class="badge bg-light text-secondary border fw-normal">
-                                                {{ row.appointmentProfile?.genderName }}
-                                            </span>
-                                            <span class="small text-muted">ID: #{{ row.appointmentProfile?.id }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="card-body p-4 flex-grow-1">
-                                <div class="d-flex flex-column gap-3">
-
-                                    <div class="d-flex align-items-start gap-3">
-                                        <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
-                                            style="width: 32px; height: 32px;">
-                                            <i class="pi pi-envelope"></i>
-                                        </div>
-                                        <div>
-                                            <p class="small text-muted fw-medium text-uppercase mb-0">Email</p>
-                                            <p class="mb-0 text-dark text-break">{{ row.appointmentProfile?.email ||
-                                                'N/A' }}</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex align-items-start gap-3">
-                                        <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
-                                            style="width: 32px; height: 32px;">
-                                            <i class="pi pi-phone"></i>
-                                        </div>
-                                        <div>
-                                            <p class="small text-muted fw-medium text-uppercase mb-0">Phone</p>
-                                            <p class="mb-0 text-dark">{{ row.appointmentProfile?.phoneNumber || 'N/A' }}
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex align-items-start gap-3"
-                                        *ngIf="row.appointmentProfile?.emergencyPhoneNumber">
-                                        <div class="rounded bg-danger-subtle d-flex align-items-center justify-content-center text-danger"
-                                            style="width: 32px; height: 32px;">
-                                            <i class="bi bi-asterisk"></i>
-                                        </div>
-                                        <div>
-                                            <p class="small text-muted fw-medium text-uppercase mb-0">Emergency</p>
-                                            <p class="mb-0 text-danger fw-medium">{{
-                                                row.appointmentProfile?.emergencyPhoneNumber }}</p>
-                                        </div>
-                                    </div>
-
-                                    <div class="d-flex align-items-start gap-3">
-                                        <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
-                                            style="width: 32px; height: 32px;">
-                                            <i class="pi pi-calendar"></i>
-                                        </div>
-                                        <div>
-                                            <p class="small text-muted fw-medium text-uppercase mb-0">Date of Birth</p>
-                                            <p class="mb-0 text-dark">{{ row.appointmentProfile?.dateOfBirth |
-                                                date:'mediumDate' }}</p>
-                                        </div>
-                                    </div>
-
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Appointment Info -->
-                    <div class="col-12 col-md-6 col-lg-4">
-                        <div class="card border-0 shadow-sm p-0 h-100 d-flex flex-column">
+                        <!-- Session Breakdown -->
+                        <div class="col-12 col-md-12 col-lg-4">
+                            <div class="card border-0 shadow-sm p-0 h-100 d-flex flex-column">
 
-                            <div class="card-header bg-light border-bottom p-4">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center"
-                                        style="width: 40px; height: 40px;">
-                                        <i class="pi pi-calendar-plus fs-5"></i>
+                                <div class="card-header bg-light border-bottom p-4">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
+                                            style="width: 40px; height: 40px;">
+                                            <i class="pi pi-list fs-5"></i>
+                                        </div>
+                                        <h4 class="h5 fw-semibold mb-0 text-dark">Session Breakdown</h4>
                                     </div>
-                                    <h4 class="h5 fw-semibold mb-0 text-dark">Appointment Info</h4>
-                                </div>
-                            </div>
-
-                            <div class="card-body p-4 flex-grow-1">
-                                <div class="d-flex flex-column gap-3">
-
-                                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
-                                        <span class="text-secondary fw-medium">Service</span>
-                                        <span class="fw-bold text-success">{{ row.serviceNameEn }}</span>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
-                                        <span class="text-secondary fw-medium">Location</span>
-                                        <span class="small text-end">{{ row.locationNameEn }}</span>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
-                                        <span class="text-secondary fw-medium">Date</span>
-                                        <span>{{ row.startTime | date:'mediumDate' }}</span>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3">
-                                        <span class="text-secondary fw-medium">Time</span>
-                                        <span>{{ row.startTime | date:'shortTime' }} - {{ row.endTime | date:'shortTime'
-                                            }}</span>
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center pt-1">
-                                        <span class="text-secondary fw-medium">Price</span>
-                                        <span class="fw-bold text-success">{{ row.servicePrice | currency:'EGP':'symbol'
-                                            }}</span>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Session Breakdown -->
-                    <div class="col-12 col-md-12 col-lg-4">
-                        <div class="card border-0 shadow-sm p-0 h-100 d-flex flex-column">
-
-                            <div class="card-header bg-light border-bottom p-4">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
-                                        style="width: 40px; height: 40px;">
-                                        <i class="pi pi-list fs-5"></i>
-                                    </div>
-                                    <h4 class="h5 fw-semibold mb-0 text-dark">Session Breakdown</h4>
-                                </div>
-                            </div>
-
-                            <div class="card-body p-4 flex-grow-1 overflow-auto">
-                                <div *ngIf="!row.subAppointment || row.subAppointment.length === 0"
-                                    class="text-center text-secondary py-4">
-                                    No sub-appointments
                                 </div>
 
-                                <div *ngFor="let sub of row.subAppointment"
-                                    class="position-relative ps-4 border-start pb-4">
-                                    <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-primary border border-white"
-                                        style="width: 16px; height: 16px; left: -1px;"></div>
+                                <div class="card-body p-4 flex-grow-1 overflow-auto">
+                                    <div *ngIf="!row.subAppointment || row.subAppointment.length === 0"
+                                        class="text-center text-secondary py-4">
+                                        No sub-appointments
+                                    </div>
 
-                                    <div class="d-flex flex-column gap-1">
-                                        <span class="fw-bold text-dark small">{{ sub.serviceNameEn }}</span>
-                                        <span class="small text-secondary">{{ sub.doctorNameEn }}</span>
+                                    <div *ngFor="let sub of row.subAppointment"
+                                        class="position-relative ps-4 border-start pb-4">
+                                        <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-primary border border-white"
+                                            style="width: 16px; height: 16px; left: -1px;"></div>
 
-                                        <div class="d-flex align-items-center gap-2 mt-1">
-                                            <span class="badge bg-light text-secondary border fw-normal">
-                                                {{ sub.startTime | date:'shortTime' }} - {{ sub.endTime |
-                                                date:'shortTime' }}
-                                            </span>
+                                        <div class="d-flex flex-column gap-1">
+                                            <span class="fw-bold text-dark small">{{ sub.serviceNameEn }}</span>
+                                            <span class="small text-secondary">{{ sub.doctorNameEn }}</span>
+
+                                            <div class="d-flex align-items-center gap-2 mt-1">
+                                                <span class="badge bg-light text-secondary border fw-normal">
+                                                    {{ sub.startTime | date:'shortTime' }} - {{ sub.endTime |
+                                                    date:'shortTime' }}
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
+
                                 </div>
 
                             </div>
-
                         </div>
-                    </div>
 
+                    </div>
                 </div>
-            </div>
 
-        </ng-template>
-    </app-table>
+            </ng-template>
+        </app-table>
+    </div>
+    }
 </div>
-}
+
+<!-- Other Statuses Tabs -->
+<div *ngIf="selectedLocation" class="card border-0 shadow-sm">
+    <div class="flex flex-col sm:flex-row items-center justify-between mb-4 gap-3">
+        <h3 class="text-xl font-semibold m-0">Appointments</h3>
+        <p-calendar [(ngModel)]="dateRange" selectionMode="range" (onSelect)="onDateRangeSelect()"
+            [readonlyInput]="true" placeholder="Filter by date range" [showIcon]="false" styleClass="w-full sm:w-auto"
+            [showClear]="true" (onClear)="onDateRangeSelect()" appendTo="body"></p-calendar>
+    </div>
+    <p-tabView>
+        <p-tabPanel>
+            <ng-template pTemplate="header">
+                <span class="font-bold mr-2">Confirmed</span>
+                <p-badge [value]="approvedAppointmentsCount" severity="success"></p-badge>
+            </ng-template>
+            @for (group of groupedConfirmedAppointments; track group) {
+            <div>
+                <h3 class="text-xl font-semibold mb-3 mt-5">
+                    {{ group.date | date: 'fullDate' }}
+                </h3>
+
+                <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="group.appointments"
+                    [actions]="tableActions" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+                    [rowsPerPageOptions]="[10, 20, 30]" [globalFilterFields]="globalFilterFields"
+                    [globalFilterPlaceholder]="'Search appointments...'" [showActions]="true" [isShowDetails]="true"
+                    (edit)="openStatusDialog($event)" (onPageChange)="onPageChange($event)">
+                    <ng-template #details let-row>
+                        <div class="p-4 bg-light rounded border">
+                            <div class="row g-4 align-items-stretch">
+
+                                <!-- Patient Profile -->
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="card p-0 h-100 border-0 shadow-sm d-flex flex-column">
+
+                                        <div class="card-header bg-light border-bottom p-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded-circle bg-white p-1 shadow-sm"
+                                                    style="width: 64px; height: 64px;">
+                                                    <div
+                                                        class="w-100 h-100 rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center text-primary fw-bold fs-5 text-uppercase">
+                                                        {{ row.appointmentProfile?.firstName?.charAt(0) }}{{
+                                                        row.appointmentProfile?.lastName?.charAt(0) }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex-grow-1 min-w-0">
+                                                    <h4 class="h5 fw-bold text-dark text-truncate mb-1"
+                                                        [title]="row.appointmentProfile?.firstName + ' ' + row.appointmentProfile?.lastName">
+                                                        {{ row.appointmentProfile?.firstName }} {{
+                                                        row.appointmentProfile?.lastName
+                                                        }}
+                                                    </h4>
+
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span *ngIf="row.appointmentProfile?.genderName"
+                                                            class="badge bg-light text-secondary border fw-normal">
+                                                            {{ row.appointmentProfile?.genderName }}
+                                                        </span>
+                                                        <span class="small text-muted">ID: #{{
+                                                            row.appointmentProfile?.id
+                                                            }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-body p-4 flex-grow-1">
+                                            <div class="d-flex flex-column gap-3">
+
+                                                <div class="d-flex align-items-start gap-3">
+                                                    <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                                        style="width: 32px; height: 32px;">
+                                                        <i class="pi pi-envelope"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="small text-muted fw-medium text-uppercase mb-0">Email
+                                                        </p>
+                                                        <p class="mb-0 text-dark text-break">{{
+                                                            row.appointmentProfile?.email ||
+                                                            'N/A' }}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex align-items-start gap-3">
+                                                    <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                                        style="width: 32px; height: 32px;">
+                                                        <i class="pi pi-phone"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="small text-muted fw-medium text-uppercase mb-0">Phone
+                                                        </p>
+                                                        <p class="mb-0 text-dark">{{ row.appointmentProfile?.phoneNumber
+                                                            ||
+                                                            'N/A' }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex align-items-start gap-3"
+                                                    *ngIf="row.appointmentProfile?.emergencyPhoneNumber">
+                                                    <div class="rounded bg-danger-subtle d-flex align-items-center justify-content-center text-danger"
+                                                        style="width: 32px; height: 32px;">
+                                                        <i class="bi bi-asterisk"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="small text-muted fw-medium text-uppercase mb-0">
+                                                            Emergency</p>
+                                                        <p class="mb-0 text-danger fw-medium">{{
+                                                            row.appointmentProfile?.emergencyPhoneNumber }}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex align-items-start gap-3">
+                                                    <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                                        style="width: 32px; height: 32px;">
+                                                        <i class="pi pi-calendar"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="small text-muted fw-medium text-uppercase mb-0">Date
+                                                            of Birth
+                                                        </p>
+                                                        <p class="mb-0 text-dark">{{ row.appointmentProfile?.dateOfBirth
+                                                            |
+                                                            date:'mediumDate' }}</p>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Appointment Info -->
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="card border-0 shadow-sm p-0 h-100 d-flex flex-column">
+
+                                        <div class="card-header bg-light border-bottom p-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center"
+                                                    style="width: 40px; height: 40px;">
+                                                    <i class="pi pi-calendar-plus fs-5"></i>
+                                                </div>
+                                                <h4 class="h5 fw-semibold mb-0 text-dark">Appointment Info</h4>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-body p-4 flex-grow-1">
+                                            <div class="d-flex flex-column gap-3">
+
+                                                <div
+                                                    class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                                    <span class="text-secondary fw-medium">Service</span>
+                                                    <span class="fw-bold text-success">{{ row.serviceNameEn }}</span>
+                                                </div>
+
+                                                <div
+                                                    class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                                    <span class="text-secondary fw-medium">Location</span>
+                                                    <span class="small text-end">{{ row.locationNameEn }}</span>
+                                                </div>
+
+                                                <div
+                                                    class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                                    <span class="text-secondary fw-medium">Date</span>
+                                                    <span>{{ row.startTime | date:'mediumDate' }}</span>
+                                                </div>
+
+                                                <div
+                                                    class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                                    <span class="text-secondary fw-medium">Time</span>
+                                                    <span>{{ row.startTime | date:'shortTime' }} - {{ row.endTime |
+                                                        date:'shortTime'
+                                                        }}</span>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center pt-1">
+                                                    <span class="text-secondary fw-medium">Price</span>
+                                                    <span class="fw-bold text-success">{{ row.servicePrice |
+                                                        currency:'EGP':'symbol'
+                                                        }}</span>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Session Breakdown -->
+                                <div class="col-12 col-md-12 col-lg-4">
+                                    <div class="card border-0 shadow-sm p-0 h-100 d-flex flex-column">
+
+                                        <div class="card-header bg-light border-bottom p-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
+                                                    style="width: 40px; height: 40px;">
+                                                    <i class="pi pi-list fs-5"></i>
+                                                </div>
+                                                <h4 class="h5 fw-semibold mb-0 text-dark">Session Breakdown</h4>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-body p-4 flex-grow-1 overflow-auto">
+                                            <div *ngIf="!row.subAppointment || row.subAppointment.length === 0"
+                                                class="text-center text-secondary py-4">
+                                                No sub-appointments
+                                            </div>
+
+                                            <div *ngFor="let sub of row.subAppointment"
+                                                class="position-relative ps-4 border-start pb-4">
+                                                <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-primary border border-white"
+                                                    style="width: 16px; height: 16px; left: -1px;"></div>
+
+                                                <div class="d-flex flex-column gap-1">
+                                                    <span class="fw-bold text-dark small">{{ sub.serviceNameEn }}</span>
+                                                    <span class="small text-secondary">{{ sub.doctorNameEn }}</span>
+
+                                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                                        <span class="badge bg-light text-secondary border fw-normal">
+                                                            {{ sub.startTime | date:'shortTime' }} - {{ sub.endTime |
+                                                            date:'shortTime' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </ng-template>
+                </app-table>
+            </div>
+            }
+        </p-tabPanel>
+        <p-tabPanel>
+            <ng-template pTemplate="header">
+                <span class="font-bold mr-2">Cancelled</span>
+                <p-badge [value]="canceledAppointmentsCount" severity="danger"></p-badge>
+            </ng-template>
+            @for (group of groupedCancelledAppointments; track group) {
+            <div>
+                <h3 class="text-xl font-semibold mb-3 mt-5">
+                    {{ group.date | date: 'fullDate' }}
+                </h3>
+
+                <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="group.appointments"
+                    [actions]="tableActions" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+                    [rowsPerPageOptions]="[10, 20, 30]" [globalFilterFields]="globalFilterFields"
+                    [globalFilterPlaceholder]="'Search appointments...'" [showActions]="true" [isShowDetails]="true"
+                    (edit)="openStatusDialog($event)" (onPageChange)="onPageChange($event)">
+                    <ng-template #details let-row>
+                        <div class="p-4 bg-light rounded border">
+                            <div class="row g-4 align-items-stretch">
+
+                                <!-- Patient Profile -->
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="card p-0 h-100 border-0 shadow-sm d-flex flex-column">
+
+                                        <div class="card-header bg-light border-bottom p-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded-circle bg-white p-1 shadow-sm"
+                                                    style="width: 64px; height: 64px;">
+                                                    <div
+                                                        class="w-100 h-100 rounded-circle bg-primary-subtle d-flex align-items-center justify-content-center text-primary fw-bold fs-5 text-uppercase">
+                                                        {{ row.appointmentProfile?.firstName?.charAt(0) }}{{
+                                                        row.appointmentProfile?.lastName?.charAt(0) }}
+                                                    </div>
+                                                </div>
+
+                                                <div class="flex-grow-1 min-w-0">
+                                                    <h4 class="h5 fw-bold text-dark text-truncate mb-1"
+                                                        [title]="row.appointmentProfile?.firstName + ' ' + row.appointmentProfile?.lastName">
+                                                        {{ row.appointmentProfile?.firstName }} {{
+                                                        row.appointmentProfile?.lastName
+                                                        }}
+                                                    </h4>
+
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span *ngIf="row.appointmentProfile?.genderName"
+                                                            class="badge bg-light text-secondary border fw-normal">
+                                                            {{ row.appointmentProfile?.genderName }}
+                                                        </span>
+                                                        <span class="small text-muted">ID: #{{
+                                                            row.appointmentProfile?.id
+                                                            }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-body p-4 flex-grow-1">
+                                            <div class="d-flex flex-column gap-3">
+
+                                                <div class="d-flex align-items-start gap-3">
+                                                    <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                                        style="width: 32px; height: 32px;">
+                                                        <i class="pi pi-envelope"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="small text-muted fw-medium text-uppercase mb-0">Email
+                                                        </p>
+                                                        <p class="mb-0 text-dark text-break">{{
+                                                            row.appointmentProfile?.email ||
+                                                            'N/A' }}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex align-items-start gap-3">
+                                                    <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                                        style="width: 32px; height: 32px;">
+                                                        <i class="pi pi-phone"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="small text-muted fw-medium text-uppercase mb-0">Phone
+                                                        </p>
+                                                        <p class="mb-0 text-dark">{{ row.appointmentProfile?.phoneNumber
+                                                            ||
+                                                            'N/A' }}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex align-items-start gap-3"
+                                                    *ngIf="row.appointmentProfile?.emergencyPhoneNumber">
+                                                    <div class="rounded bg-danger-subtle d-flex align-items-center justify-content-center text-danger"
+                                                        style="width: 32px; height: 32px;">
+                                                        <i class="bi bi-asterisk"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="small text-muted fw-medium text-uppercase mb-0">
+                                                            Emergency</p>
+                                                        <p class="mb-0 text-danger fw-medium">{{
+                                                            row.appointmentProfile?.emergencyPhoneNumber }}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="d-flex align-items-start gap-3">
+                                                    <div class="rounded bg-light d-flex align-items-center justify-content-center text-secondary"
+                                                        style="width: 32px; height: 32px;">
+                                                        <i class="pi pi-calendar"></i>
+                                                    </div>
+                                                    <div>
+                                                        <p class="small text-muted fw-medium text-uppercase mb-0">Date
+                                                            of Birth
+                                                        </p>
+                                                        <p class="mb-0 text-dark">{{ row.appointmentProfile?.dateOfBirth
+                                                            |
+                                                            date:'mediumDate' }}</p>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Appointment Info -->
+                                <div class="col-12 col-md-6 col-lg-4">
+                                    <div class="card border-0 shadow-sm p-0 h-100 d-flex flex-column">
+
+                                        <div class="card-header bg-light border-bottom p-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded-circle bg-warning-subtle text-warning d-flex align-items-center justify-content-center"
+                                                    style="width: 40px; height: 40px;">
+                                                    <i class="pi pi-calendar-plus fs-5"></i>
+                                                </div>
+                                                <h4 class="h5 fw-semibold mb-0 text-dark">Appointment Info</h4>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-body p-4 flex-grow-1">
+                                            <div class="d-flex flex-column gap-3">
+
+                                                <div
+                                                    class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                                    <span class="text-secondary fw-medium">Service</span>
+                                                    <span class="fw-bold text-success">{{ row.serviceNameEn }}</span>
+                                                </div>
+
+                                                <div
+                                                    class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                                    <span class="text-secondary fw-medium">Location</span>
+                                                    <span class="small text-end">{{ row.locationNameEn }}</span>
+                                                </div>
+
+                                                <div
+                                                    class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                                    <span class="text-secondary fw-medium">Date</span>
+                                                    <span>{{ row.startTime | date:'mediumDate' }}</span>
+                                                </div>
+
+                                                <div
+                                                    class="d-flex justify-content-between align-items-center border-bottom pb-3">
+                                                    <span class="text-secondary fw-medium">Time</span>
+                                                    <span>{{ row.startTime | date:'shortTime' }} - {{ row.endTime |
+                                                        date:'shortTime'
+                                                        }}</span>
+                                                </div>
+
+                                                <div class="d-flex justify-content-between align-items-center pt-1">
+                                                    <span class="text-secondary fw-medium">Price</span>
+                                                    <span class="fw-bold text-success">{{ row.servicePrice |
+                                                        currency:'EGP':'symbol'
+                                                        }}</span>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Session Breakdown -->
+                                <div class="col-12 col-md-12 col-lg-4">
+                                    <div class="card border-0 shadow-sm p-0 h-100 d-flex flex-column">
+
+                                        <div class="card-header bg-light border-bottom p-4">
+                                            <div class="d-flex align-items-center gap-3">
+                                                <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center"
+                                                    style="width: 40px; height: 40px;">
+                                                    <i class="pi pi-list fs-5"></i>
+                                                </div>
+                                                <h4 class="h5 fw-semibold mb-0 text-dark">Session Breakdown</h4>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-body p-4 flex-grow-1 overflow-auto">
+                                            <div *ngIf="!row.subAppointment || row.subAppointment.length === 0"
+                                                class="text-center text-secondary py-4">
+                                                No sub-appointments
+                                            </div>
+
+                                            <div *ngFor="let sub of row.subAppointment"
+                                                class="position-relative ps-4 border-start pb-4">
+                                                <div class="position-absolute top-0 start-0 translate-middle rounded-circle bg-primary border border-white"
+                                                    style="width: 16px; height: 16px; left: -1px;"></div>
+
+                                                <div class="d-flex flex-column gap-1">
+                                                    <span class="fw-bold text-dark small">{{ sub.serviceNameEn }}</span>
+                                                    <span class="small text-secondary">{{ sub.doctorNameEn }}</span>
+
+                                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                                        <span class="badge bg-light text-secondary border fw-normal">
+                                                            {{ sub.startTime | date:'shortTime' }} - {{ sub.endTime |
+                                                            date:'shortTime' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </ng-template>
+                </app-table>
+            </div>
+            }
+        </p-tabPanel>
+        <p-tabPanel>
+            <ng-template pTemplate="header">
+                <span class="font-bold mr-2">Re-scheduled</span>
+                <p-badge [value]="rescheduledAppointmentsCount" severity="warn"></p-badge>
+            </ng-template>
+            <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="rescheduledAppointments"
+                [actions]="tableActions" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+                [rowsPerPageOptions]="[10, 20, 30]" [globalFilterFields]="globalFilterFields"
+                [globalFilterPlaceholder]="'Search rescheduled...'" [showActions]="true" [isShowDetails]="false"
+                (edit)="openStatusDialog($event)">
+            </app-table>
+        </p-tabPanel>
+        <p-tabPanel>
+            <ng-template pTemplate="header">
+                <span class="font-bold mr-2">Completed</span>
+                <p-badge [value]="completedAppointmentsCount" severity="info"></p-badge>
+            </ng-template>
+            <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="completedAppointments"
+                [actions]="tableActions" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+                [rowsPerPageOptions]="[10, 20, 30]" [globalFilterFields]="globalFilterFields"
+                [globalFilterPlaceholder]="'Search completed...'" [showActions]="true" [isShowDetails]="false"
+                (edit)="openStatusDialog($event)">
+            </app-table>
+        </p-tabPanel>
+    </p-tabView>
+</div>
 
 <!-- New Appointment Dialog -->
 <p-dialog header="New Appointment" [(visible)]="displayNewAppointmentDialog" [modal]="true" [style]="{ width: '50vw' }"

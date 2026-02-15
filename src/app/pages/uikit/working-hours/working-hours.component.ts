@@ -360,7 +360,7 @@ export class WorkingHoursComponent implements OnInit {
 
     //here is the function needed to delete the selected working hour
     deleteSelectedWorkingHour(workingHour: any, item: any): void {
-        debugger
+
         this.confirmationService.confirm({
             message: `Are you sure you want to delete all working hours for Dr. ${item.doctorNameEn} on ${workingHour.label}?`,
             header: 'Confirm Deletion',
