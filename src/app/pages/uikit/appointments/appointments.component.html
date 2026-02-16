@@ -38,7 +38,7 @@
 <!-- Pending Appointments Section -->
 <div *ngIf="selectedLocation" class="card border-0 shadow-sm mb-4">
     <div class="flex items-center justify-between mb-3">
-        <h3 class="text-xl font-semibold m-0">Pending Appointments</h3>
+        <h3 class="text-xl font-semibold m-0">Urgent Appointments</h3>
     </div>
     @for (group of groupedPendingAppointments; track group) {
     <div>
@@ -264,7 +264,31 @@
             [readonlyInput]="true" placeholder="Filter by date range" [showIcon]="false" styleClass="w-full sm:w-auto"
             [showClear]="true" (onClear)="onDateRangeSelect()" appendTo="body"></p-calendar>
     </div>
-    <p-tabView>
+    <p-tabView> 
+        <p-tabPanel>
+            <ng-template pTemplate="header">
+                <span class="font-bold mr-2">Pending</span>
+                <p-badge [value]="pendingAppointmentsCount" severity="warning"></p-badge>
+            </ng-template>
+            @for (group of groupedPendingAppointments; track group) {
+            <div>
+                <h3 class="text-xl font-semibold mb-3 mt-5">
+                    {{ group.date | date: 'fullDate' }}
+                </h3>
+
+                <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="group.appointments"
+                    [actions]="tableActions" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+                    [rowsPerPageOptions]="[10, 20, 30]" [globalFilterFields]="globalFilterFields"
+                    [globalFilterPlaceholder]="'Search appointments...'" [showActions]="true" [isShowDetails]="true"
+                    (edit)="openStatusDialog($event)" (onPageChange)="onPageChange($event)">
+                    <ng-template #details let-row>
+                        <!-- Details template same as above -->
+                    </ng-template>
+                </app-table>
+            </div>
+            } 
+        </p-tabPanel>
+        
         <p-tabPanel>
             <ng-template pTemplate="header">
                 <span class="font-bold mr-2">Confirmed</span>
@@ -493,6 +517,7 @@
             </div>
             }
         </p-tabPanel>
+
         <p-tabPanel>
             <ng-template pTemplate="header">
                 <span class="font-bold mr-2">Cancelled</span>
@@ -721,6 +746,7 @@
             </div>
             }
         </p-tabPanel>
+
         <p-tabPanel>
             <ng-template pTemplate="header">
                 <span class="font-bold mr-2">Re-scheduled</span>
@@ -733,6 +759,7 @@
                 (edit)="openStatusDialog($event)">
             </app-table>
         </p-tabPanel>
+
         <p-tabPanel>
             <ng-template pTemplate="header">
                 <span class="font-bold mr-2">Completed</span>
