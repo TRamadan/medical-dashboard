@@ -369,8 +369,8 @@ export class AddServiceComponent implements OnInit {
             serviceCategoryId: this.selectedCategoryForService.id,
             price: 0,
             locationIds: parentLocationIds,
-            idealtimeBefore: '00:00',
-            idealtimeAfter: '00:00'
+            idealtimeBefore: '00:00:00',
+            idealtimeAfter: '00:00:00'
         });
 
         // Disable price and location fields for sub-services
