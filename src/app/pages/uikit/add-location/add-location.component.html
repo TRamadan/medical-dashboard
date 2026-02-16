@@ -91,6 +91,21 @@
                     </div>
 
                 </div>
+                <div class="col-12 col-md-6">
+                    <label for="name">Location address url</label>
+                    <input type="text" id="phone" class="form-control" formControlName="locationURL"
+                        [ngClass]="{ 'is-invalid': addLocationForm.get('locationURL')?.invalid && addLocationForm.get('locationURL')?.touched }">
+                    <div *ngIf="addLocationForm.get('locationURL')?.errors && addLocationForm.get('locationURL')?.touched"
+                        class="invalid-feedback">
+                        <div *ngIf="addLocationForm.get('locationURL')?.errors?.['required']">location address url is
+                            required.
+                        </div>
+                        <div *ngIf="addLocationForm.get('locationURL')?.errors?.['locationURL']">Invalid location
+                            address url format.
+                        </div>
+                    </div>
+
+                </div>
             </div>
         </form>
     </ng-template>

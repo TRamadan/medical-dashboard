@@ -41,7 +41,7 @@ export class AddLocationComponent implements OnInit {
         private locationService: LocationService,
         private messageService: MessageService,
         private confirmationService: ConfirmationService
-    ) {}
+    ) { }
 
     ngOnInit() {
         this.initializeLocationForm();
@@ -78,7 +78,8 @@ export class AddLocationComponent implements OnInit {
             nameEN: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s\d\W]+$/)]],
             addressAr: ['', [Validators.required, Validators.pattern(/^[\u0600-\u06FF0-9\s,.-]+$/)]],
             addressEn: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9\s,.-]+$/)]],
-            phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]]
+            phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]],
+            locationURL: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9\s,.-]+$/)]]
         });
     }
 
@@ -170,7 +171,8 @@ export class AddLocationComponent implements OnInit {
             nameEN: location.nameEn,
             addressAr: location.addressAr,
             addressEn: location.addressEn,
-            phone: location.phone
+            phone: location.phone,
+            locationURL: location.locationURL
         });
     }
 

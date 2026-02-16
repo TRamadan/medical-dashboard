@@ -5,4 +5,5 @@ export interface Location {
     addressAr?: string;
     addressEn?: string;
     phone?: string;
+    locationURL?: string
 }
