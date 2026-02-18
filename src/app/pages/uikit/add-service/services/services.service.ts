@@ -38,4 +38,11 @@ export class ServicesService {
     deleteService(id: number): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
+
+    /**
+ * GET: Retrieves the remaining duration for a service by its ID.
+ */
+    getRestOfDuration(serviceId: number): Observable<any> {
+        return this.http.get<any>(`${this.apiUrl}/GetRemainingDuration/${serviceId}`);
+    }
 }

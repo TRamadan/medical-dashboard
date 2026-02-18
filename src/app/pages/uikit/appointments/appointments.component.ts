@@ -26,6 +26,7 @@ import { LocationService } from '../add-location/services/location.service';
 import { CalendarModule } from 'primeng/calendar';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { BadgeModule } from 'primeng/badge';
+import { AppointmentsDetailsComponent } from './appointments-details/appointments-details.component';
 
 @Component({
     selector: 'app-appointments',
@@ -52,7 +53,8 @@ import { BadgeModule } from 'primeng/badge';
         ConfirmDialogModule,
         TabViewModule,
         CalendarModule,
-        BadgeModule
+        BadgeModule,
+        AppointmentsDetailsComponent
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './appointments.component.html',

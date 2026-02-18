@@ -39,10 +39,5 @@ export class ServicecategoryService {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
 
-    /**
-     * GET: Retrieves the remaining duration for a service by its ID.
-     */
-    getRestOfDuration(serviceId: number): Observable<any> {
-        return this.http.get<any>(`${this.apiUrl}/GetRestOfDuration/${serviceId}`);
-    }
+
 }

@@ -6,12 +6,97 @@
 
 section {
     min-height: 100vh;
-} 
+    background-color: #f8f9fa;
+}
+
+/* Search Card Styles */
+.search-card {
+    border: 1px solid #e9ecef;
+}
+
+.search-card h5 {
+    font-size: 1.1rem;
+}
+
+/* Placeholder Styles */
+.placeholder-content {
+    max-width: 600px;
+    margin: 0 auto;
+    border: 1px solid #e9ecef;
+}
+
+.placeholder-icon-wrapper {
+    display: inline-block;
+}
+
+/* Coaches Section */
+.coaches-section {
+    border: 1px solid #e9ecef;
+}
+
+.coaches-section h5 {
+    font-size: 1.1rem;
+}
+
+.coaches-list {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e0 #f1f3f5;
+}
+
+.coaches-list::-webkit-scrollbar {
+    height: 8px;
+}
+
+.coaches-list::-webkit-scrollbar-track {
+    background: #f1f3f5;
+    border-radius: 10px;
+}
+
+.coaches-list::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 10px;
+}
+
+.coaches-list::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Coach Card Styles */
+.coach-card {
+    background-color: #f8f9fa;
+    border: 2px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.coach-card-default:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-color: #cbd5e0;
+}
+
+.coach-card-selected {
+    background-color: #d1f4e0;
+    border-color: #198754 !important;
+    box-shadow: 0 4px 12px rgba(25, 135, 84, 0.15);
+}
+
+.coach-avatar-wrapper {
+    position: relative;
+}
+
+.coach-card p {
+    color: #495057;
+}
+
+.coach-card-selected p {
+    color: #198754;
+    font-weight: 600;
+}
 
 .bg-warning {
     --bs-bg-opacity: 1;
     background-color: rgb(255 193 7 / 43%) !important;
-} 
+}
 
 .bg-success {
     --bs-bg-opacity: 1;
@@ -33,7 +118,7 @@ img {
     background-color: #13133775 !important;
 }
 
-::ng-deep .p-datatable-gridlines .p-datatable-thead > tr > th {
+::ng-deep .p-datatable-gridlines .p-datatable-thead>tr>th {
     border-width: 1px 0 1px 1px;
     font-size: 16px;
     font-weight: bold;
@@ -135,16 +220,9 @@ img {
     gap: 5px;
 }
 
+/* Stats Bar */
 .stats-bar {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    margin: 20px 0;
-    padding: clamp(15px, 3vw, 20px);
-    background: linear-gradient(135deg, #fff, #f8f9fa);
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    gap: 15px;
+    border: 1px solid #e9ecef;
 }
 
 .stat-item {
@@ -157,14 +235,67 @@ img {
 .stat-number {
     font-size: clamp(1.5rem, 4vw, 2rem);
     font-weight: 700;
-    color: #2196f3;
     display: block;
 }
 
 .stat-label {
-    color: #666;
-    font-size: clamp(1rem, 2.5vw, 1.2rem);
+    color: #6c757d;
+    font-size: clamp(0.85rem, 2.5vw, 0.95rem);
     margin-top: 5px;
+}
+
+/* Appointments Table Section */
+.appointments-table-section {
+    border: 1px solid #e9ecef;
+}
+
+.appointments-table-section h5 {
+    font-size: 1.1rem;
+}
+
+.table-wrapper {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* PrimeNG Dropdown & DatePicker Overrides */
+::ng-deep .p-dropdown,
+::ng-deep .p-datepicker {
+    width: 100%;
+}
+
+::ng-deep .p-dropdown .p-dropdown-trigger,
+::ng-deep .p-datepicker .p-datepicker-trigger {
+    color: #6c757d;
+}
+
+::ng-deep .p-dropdown:not(.p-disabled):hover,
+::ng-deep .p-datepicker:not(.p-disabled):hover {
+    border-color: #86b7fe;
+}
+
+::ng-deep .p-dropdown:not(.p-disabled).p-focus,
+::ng-deep .p-datepicker:not(.p-disabled).p-focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Table Styles */
+::ng-deep .p-datatable .p-datatable-thead>tr>th {
+    background-color: #198754;
+    color: white;
+    font-weight: 600;
+    padding: 1rem;
+    border: none;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody>tr>td {
+    padding: 0.75rem;
+    border-color: #dee2e6;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody>tr:hover {
+    background-color: #f8f9fa;
 }
 
 ::ng-deep .p-table td {
@@ -174,7 +305,7 @@ img {
 .badge {
     display: inline-block;
     padding: 0.35em 0.65em;
-    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    font-size: clamp(0.75rem, 2vw, 0.85rem);
     font-weight: 600;
     color: #fff;
 }
@@ -184,6 +315,26 @@ img {
     font-size: clamp(1rem, 2.5vw, 1.25rem);
     font-weight: bold;
 }
+
+/* Utility Classes */
+.bg-warning {
+    --bs-bg-opacity: 1;
+    background-color: rgb(255 193 7 / 43%) !important;
+}
+
+.bg-success {
+    --bs-bg-opacity: 1;
+    background-color: rgb(25 135 84 / 43%) !important;
+}
+
+.bg-success-subtle {
+    background-color: #d1f4e0 !important;
+}
+
+img {
+    border-radius: 50%;
+}
+
 
 .fab-btn {
     position: fixed !important;

@@ -3,28 +3,35 @@ import { CommonModule } from '@angular/common';
 import { TableModule } from 'primeng/table';
 import { CalendarService } from './services/calendar.service';
 import { UserManangementService } from '../add-user/services/user-manangement.service';
+import { LocationService } from '../add-location/services/location.service';
 import { signal, computed } from '@angular/core';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ToolbarModule } from 'primeng/toolbar';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
-import { BookingFormComponent } from '../appointments/booking-form/booking-form.component';
+import { DropdownModule } from 'primeng/dropdown';
+import { CardModule } from 'primeng/card';
 import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-calendar',
     standalone: true,
-    imports: [FormsModule, CommonModule, TableModule, DatePickerModule, ToolbarModule, DialogModule, ButtonModule, BookingFormComponent],
+    imports: [FormsModule, CommonModule, TableModule, DatePickerModule, ToolbarModule, DialogModule, ButtonModule, DropdownModule, CardModule],
     templateUrl: './calendar.component.html',
     styleUrls: ['./calendar.component.css']
 })
 export class CalendarComponent implements OnInit {
     allEmployees: any[] = [];
+    allLocations: any[] = [];
+    filteredEmployees: any[] = [];
     originalAppointments = signal<any[]>([]);
     allAppointments = signal<any[]>([]);
     timeSlots = signal<string[]>([]);
     selectedEmployeeId = signal<number | null>(null);
+    selectedLocation: any = null;
     displayNewAppointmentDialog: boolean = false;
+    showPlaceholder: boolean = true;
+    showNoResults: boolean = false;
 
     date: Date = new Date(); // Initialize with today's date
 
@@ -35,12 +42,13 @@ export class CalendarComponent implements OnInit {
 
     constructor(
         private _calendarService: CalendarService,
-        private _userService: UserManangementService
-    ) {}
+        private _userService: UserManangementService,
+        private _locationService: LocationService // Added LocationService
+    ) { }
 
     ngOnInit(): void {
+        this.getAllLocations();
         this.getAllEmployees();
-        this.getAllScheduels(this.formatDate(this.date));
     }
 
     getAllEmployees(): void {
@@ -89,22 +97,22 @@ export class CalendarComponent implements OnInit {
 
                     acc[key] = appointment
                         ? {
-                              patient: appointment.patientNameAr?.trim() || appointment.patientNameEn?.trim() || 'Unknown Patient',
-                              time: { from, to },
-                              service: appointment.serviceNameAr || 'Unknown Service',
-                              serviceEn: appointment.serviceNameEn,
-                              status: appointment.status,
-                              price: `${appointment?.servicePrice} EGP`
-                          }
+                            patient: appointment.patientNameAr?.trim() || appointment.patientNameEn?.trim() || 'Unknown Patient',
+                            time: { from, to },
+                            service: appointment.serviceNameAr || 'Unknown Service',
+                            serviceEn: appointment.serviceNameEn,
+                            status: appointment.status,
+                            price: `${appointment?.servicePrice} EGP`
+                        }
                         : {
-                              patient: null,
-                              time: { from, to },
-                              service: null,
-                              locationAr: doctorLocationAr,
-                              locationEn: doctorLocationEn,
-                              price: null,
-                              status: 'Available'
-                          };
+                            patient: null,
+                            time: { from, to },
+                            service: null,
+                            locationAr: doctorLocationAr,
+                            locationEn: doctorLocationEn,
+                            price: null,
+                            status: 'Available'
+                        };
 
                     return acc;
                 },
@@ -172,9 +180,11 @@ export class CalendarComponent implements OnInit {
                 const slots = this.extractTimeSlots(mapped);
                 this.timeSlots.set(slots);
                 this.fillMissingSlots(this.allAppointments(), this.timeSlots());
+                this.updateNoResultsState();
             },
             error: (err) => {
                 console.error('Error loading employee calendar:', err);
+                this.updateNoResultsState();
             }
         });
     }
@@ -266,5 +276,62 @@ export class CalendarComponent implements OnInit {
     onBookingSuccess() {
         this.displayNewAppointmentDialog = false;
         this.getAllScheduels(this.formatDate(this.date));
+    }
+
+    getAllLocations(): void {
+        this._locationService.getLocations().subscribe({
+            next: (res: any) => {
+                this.allLocations = res.data || res;
+            },
+            error: (err) => {
+                console.error('Error fetching locations:', err);
+            }
+        });
+    }
+
+    onLocationSelect(): void {
+        if (this.selectedLocation) {
+            this.showPlaceholder = false;
+            this.filterEmployeesByLocation();
+        } else {
+            this.showPlaceholder = true;
+            this.filteredEmployees = [];
+            this.allAppointments.set([]);
+            this.selectedEmployeeId.set(null);
+        }
+    }
+
+    filterEmployeesByLocation(): void {
+        if (!this.selectedLocation) {
+            this.filteredEmployees = [];
+            return;
+        }
+
+        // Filter employees who work at the selected location
+        this.filteredEmployees = this.allEmployees.filter((emp: any) => {
+            return emp.locations?.some((loc: any) => loc.id === this.selectedLocation.id);
+        });
+
+        // Reset selection
+        this.selectedEmployeeId.set(null);
+        this.allAppointments.set([]);
+        this.showNoResults = false;
+    }
+
+    onCoachSelect(coach: any): void {
+        if (this.selectedEmployeeId() === coach.id) {
+            // Deselect if clicking the same coach
+            this.selectedEmployeeId.set(null);
+            this.allAppointments.set([]);
+            this.showNoResults = false;
+        } else {
+            // Select new coach and fetch appointments
+            this.selectedEmployeeId.set(coach.id);
+            this.fetchEmployeeData(this.formatDate(this.date), coach.id);
+        }
+    }
+
+    updateNoResultsState(): void {
+        this.showNoResults = this.selectedEmployeeId() !== null && this.allAppointments().length === 0;
     }
 }

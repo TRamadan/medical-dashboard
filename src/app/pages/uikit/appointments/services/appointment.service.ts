@@ -9,7 +9,7 @@ import { environment } from '../../../../../environments/environment';
 export class AppointmentService {
     apiUrl = environment.apiUrl;
     baseUrl = 'Appointments';
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     //here is the function needed to get all added apointments
     getAddedApointments() {
@@ -20,5 +20,10 @@ export class AppointmentService {
     updateAppointmentStatus(appointmentId: number, newStatus: number) {
         const params = new HttpParams().set('appointmentId', appointmentId).set('newStatus', newStatus);
         return this.http.put(`${this.apiUrl}Appointments/ChangeAppointmentStatus`, {}, { params });
+    }
+
+    //here is the funtion needed to filter appointments 
+    getFilteredAppointments(LocationId: number, FromDate: string, ToDate: string): Observable<any> {
+        return this.http.get(this.apiUrl + this.baseUrl + '/GetAppointmentsPaginated');
     }
 }

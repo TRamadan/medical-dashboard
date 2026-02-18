@@ -21,6 +21,7 @@ import { ServicesService } from './services/services.service';
 import { SelectModule } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { LocationService } from '../add-location/services/location.service';
+import { firstValueFrom } from 'rxjs';
 @Component({
     selector: 'app-add-service',
     standalone: true,
@@ -354,7 +355,7 @@ export class AddServiceComponent implements OnInit {
      * @param parentService
      * @param category
      */
-    addServiceSubService(parentService: any, category: Servicecategory): void {
+    async addServiceSubService(parentService: any, category: Servicecategory): Promise<void> {
         this.selectedCategoryForService = { ...category };
         this.isServiceDialog = true;
         this.isNewServiceSubCategory = true;
@@ -363,7 +364,7 @@ export class AddServiceComponent implements OnInit {
 
         // Get parent service location IDs
         const parentLocationIds = parentService.locations?.map((loc: any) => loc.id) || [];
-
+        await this.getDurationRest(parentService.id);
         this.serviceCategoryForm.patchValue({
             parentServiceId: parentService.id,
             serviceCategoryId: this.selectedCategoryForService.id,
@@ -376,6 +377,28 @@ export class AddServiceComponent implements OnInit {
         // Disable price and location fields for sub-services
         this.serviceCategoryForm.get('price')?.disable();
         this.serviceCategoryForm.get('locationIds')?.disable();
+    }
+
+    //here is the funtion needed that fetch how many minutes for the duration from the parent service,
+    //when the user need to add sub-service 
+    async getDurationRest(parentServiceId: number): Promise<any> {
+        try {
+            const response: any = await firstValueFrom(
+                this.servicesService.getRestOfDuration(parentServiceId)
+            );
+
+            this.serviceCategoryForm.patchValue({
+                durationTime: response
+            });
+            return response
+
+        } catch (error) {
+            this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Failed to fetch duration rest'
+            });
+        }
     }
     /**
      * Developer: Eng/Tarek Ahmed Ramadan
