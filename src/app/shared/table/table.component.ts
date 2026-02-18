@@ -13,7 +13,7 @@ import { Input, Output, EventEmitter, ContentChild, TemplateRef, Component } fro
 export interface TableColumn {
     label: string;
     field: string;
-    type?: 'text' | 'image' | 'date' | 'boolean' | 'custom' | 'number' | 'link' | 'time' | 'status';
+    type?: 'text' | 'image' | 'date' | 'boolean' | 'custom' | 'number' | 'link' | 'time' | 'status' | 'address';
     sortable?: boolean;
     filterable?: boolean;
     filterType?: 'text' | 'date' | 'numeric' | 'boolean';
@@ -162,6 +162,12 @@ export class TableComponent {
     // ---------- FILE ----------
     openFile(link: string): void {
         window.open(this.imgUrl + link, '_blank', 'noopener,noreferrer');
+    }
+
+    //open address
+    openAddress(address: string): void {
+        debugger
+        window.open(address, '_blank', 'noopener,noreferrer');
     }
 
     getStatusLabel(status: number): string {

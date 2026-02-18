@@ -51,7 +51,8 @@ export class AddLocationComponent implements OnInit {
             { label: 'Name (EN)', field: 'nameEn', type: 'text', sortable: true },
             { label: 'Address', field: 'addressAr', type: 'text', sortable: true },
             { label: 'Address', field: 'addressEn', type: 'text', sortable: true },
-            { label: 'Phone', field: 'phoneNumber', type: 'text', sortable: true }
+            { label: 'Phone', field: 'phoneNumber', type: 'text', sortable: true },
+            { label: 'Location URL', field: 'locationURL', type: 'address' }
         ];
     }
 
@@ -79,7 +80,7 @@ export class AddLocationComponent implements OnInit {
             addressAr: ['', [Validators.required, Validators.pattern(/^[\u0600-\u06FF0-9\s,.-]+$/)]],
             addressEn: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9\s,.-]+$/)]],
             phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]],
-            locationURL: ['', [Validators.required, Validators.pattern(/^[a-zA-Z0-9\s,.-]+$/)]]
+            locationURL: ['', [Validators.required]]
         });
     }
 
@@ -93,7 +94,6 @@ export class AddLocationComponent implements OnInit {
             this.addLocationForm.markAllAsTouched();
             return;
         }
-
         const locationData = this.addLocationForm.value;
 
         if (this.isEditService) {
