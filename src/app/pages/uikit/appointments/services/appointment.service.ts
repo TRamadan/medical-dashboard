@@ -23,7 +23,55 @@ export class AppointmentService {
     }
 
     //here is the funtion needed to filter appointments 
-    getFilteredAppointments(LocationId: number, FromDate: string, ToDate: string): Observable<any> {
-        return this.http.get(this.apiUrl + this.baseUrl + '/GetAppointmentsPaginated');
+    getFilteredAppointments(
+        filters: {
+            locationId?: number;
+            doctorId?: number;
+            fromDate?: string;
+            toDate?: string;
+            status?: string;
+            isUrgent?: boolean;
+        },
+        pageNumber: number = 1,
+        pageSize: number = 10
+    ): Observable<any> {
+
+        let params = new HttpParams()
+            .set('PageNumber', pageNumber.toString())
+            .set('PageSize', pageSize.toString());
+
+        if (filters.locationId !== undefined) {
+            params = params.set('LocationId', filters.locationId.toString());
+        }
+
+        if (filters.doctorId !== undefined) {
+            params = params.set('DoctorId', filters.doctorId.toString());
+        }
+
+        if (filters.fromDate) {
+            params = params.set('FromDate', filters.fromDate);
+        }
+
+        if (filters.toDate) {
+            params = params.set('ToDate', filters.toDate);
+        }
+
+        if (filters.status) {
+            params = params.set('Status', filters.status);
+        }
+
+        if (filters.isUrgent !== undefined) {
+            params = params.set('IsUrgent', filters.isUrgent.toString());
+        }
+
+        return this.http.get(
+            `${this.apiUrl}${this.baseUrl}/GetAppointmentsPaginated`,
+            { params }
+        );
+    }
+
+    //here is the function needed to get the appointments count based on each status 
+    getAppointmentsCountByStatus(locationId: number): Observable<any> {
+        return this.http.get(this.apiUrl + this.baseUrl + '/dashboard/status-summary', { params: { locationId } });
     }
 }

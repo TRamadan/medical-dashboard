@@ -35,29 +35,46 @@
     </ng-template>
 </p-toolbar>
 
+@if (loading()) {
+<div class="flex justify-center items-center h-64">
+    <p-progressSpinner strokeWidth="4" animationDuration=".8s" styleClass="w-12 h-12">
+    </p-progressSpinner>
+</div>
+}
+
 <!-- Pending Appointments Section -->
-<div *ngIf="selectedLocation" class="card border-0 shadow-sm mb-4">
+@if(!loading() && selectedLocation){
+
+<div class="card border-0 shadow-sm mb-4">
     <div class="flex items-center justify-between mb-3">
         <h3 class="text-xl font-semibold m-0">Urgent Appointments</h3>
     </div>
-    @for (group of groupedPendingAppointments; track group) {
+    @for (group of groupedUrgentAppointments; track group;) {
     <div>
         <h3 class="text-xl font-semibold mb-3 mt-5">
             {{ group.date | date: 'fullDate' }}
         </h3>
 
         <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="group.appointments"
-            [actions]="tableActions" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
-            [rowsPerPageOptions]="[10, 20, 30]" [globalFilterFields]="globalFilterFields"
-            [globalFilterPlaceholder]="'Search appointments...'" [showActions]="true" [isShowDetails]="true"
-            (edit)="openStatusDialog($event)" (onPageChange)="onPageChange($event)">
+            [actions]="tableActions" [paginator]="false" [showCurrentPageReport]="false" [lazyLoadOnInit]="false"
+            [globalFilterFields]="globalFilterFields" [globalFilterPlaceholder]="'Search appointments...'"
+            [showActions]="true" [isShowDetails]="true" (edit)="openStatusDialog($event)">
             <ng-template #details let-row>
                 <app-appointments-details [appointment]="row"></app-appointments-details>
             </ng-template>
         </app-table>
     </div>
     }
+    <p-paginator (onPageChange)="onPageChangeForUrgent($event)"
+        [first]="(urgentSection.pageNumber - 1) * urgentSection.pageSize" [rows]="urgentSection.pageSize"
+        [totalRecords]="urgentSection.totalRecords" [rowsPerPageOptions]="rowsPerPageOptions"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"></p-paginator>
+    @if (groupedUrgentAppointments.length === 0) {
+    <p class="text-center mt-6 h4">No urgent appointments found.</p>
+    }
 </div>
+}
 
 <!-- Other Statuses Tabs -->
 <div *ngIf="selectedLocation" class="card border-0 shadow-sm">
@@ -67,29 +84,34 @@
             [readonlyInput]="true" placeholder="Filter by date range" [showIcon]="false" styleClass="w-full sm:w-auto"
             [showClear]="true" (onClear)="onDateRangeSelect()" appendTo="body"></p-calendar>
     </div>
-    <p-tabView>
+    <p-tabView [(activeIndex)]="activeTabIndex" (activeIndexChange)="onTabChange($event)">
         <p-tabPanel>
             <ng-template pTemplate="header">
                 <span class="font-bold mr-2">Pending</span>
                 <p-badge [value]="pendingAppointmentsCount" severity="warn"></p-badge>
             </ng-template>
-            @for (group of groupedPendingAppointments; track group) {
+            @for (group of appointmentsMap[0].grouped; track group) {
             <div>
                 <h3 class="text-xl font-semibold mb-3 mt-5">
                     {{ group.date | date: 'fullDate' }}
                 </h3>
 
                 <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="group.appointments"
-                    [actions]="tableActions" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
-                    [rowsPerPageOptions]="[10, 20, 30]" [globalFilterFields]="globalFilterFields"
+                    [actions]="tableActions" [paginator]="false" [showCurrentPageReport]="false"
+                    [lazyLoadOnInit]="false" [globalFilterFields]="globalFilterFields"
                     [globalFilterPlaceholder]="'Search appointments...'" [showActions]="true" [isShowDetails]="true"
-                    (edit)="openStatusDialog($event)" (onPageChange)="onPageChange($event)">
+                    (edit)="openStatusDialog($event)">
                     <ng-template #details let-row>
                         <app-appointments-details [appointment]="row"></app-appointments-details>
                     </ng-template>
                 </app-table>
             </div>
             }
+            <p-paginator (onPageChange)="onPageChangeForTab(0, $event)"
+                [first]="(appointmentsMap[0].pageNumber - 1) * appointmentsMap[0].pageSize"
+                [rows]="appointmentsMap[0].pageSize" [totalRecords]="appointmentsMap[0].totalRecords"
+                [rowsPerPageOptions]="[10, 20, 30]" [showCurrentPageReport]="true"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"></p-paginator>
         </p-tabPanel>
 
         <p-tabPanel>
@@ -97,23 +119,28 @@
                 <span class="font-bold mr-2">Confirmed</span>
                 <p-badge [value]="approvedAppointmentsCount" severity="success"></p-badge>
             </ng-template>
-            @for (group of groupedConfirmedAppointments; track group) {
+            @for (group of appointmentsMap[1].grouped; track group) {
             <div>
                 <h3 class="text-xl font-semibold mb-3 mt-5">
                     {{ group.date | date: 'fullDate' }}
                 </h3>
 
                 <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="group.appointments"
-                    [actions]="tableActions" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
-                    [rowsPerPageOptions]="[10, 20, 30]" [globalFilterFields]="globalFilterFields"
+                    [actions]="tableActions" [paginator]="false" [showCurrentPageReport]="false"
+                    [lazyLoadOnInit]="false" [globalFilterFields]="globalFilterFields"
                     [globalFilterPlaceholder]="'Search appointments...'" [showActions]="true" [isShowDetails]="true"
-                    (edit)="openStatusDialog($event)" (onPageChange)="onPageChange($event)">
+                    (edit)="openStatusDialog($event)">
                     <ng-template #details let-row>
                         <app-appointments-details [appointment]="row"></app-appointments-details>
                     </ng-template>
                 </app-table>
             </div>
             }
+            <p-paginator (onPageChange)="onPageChangeForTab(1, $event)"
+                [first]="(appointmentsMap[1].pageNumber - 1) * appointmentsMap[1].pageSize"
+                [rows]="appointmentsMap[1].pageSize" [totalRecords]="appointmentsMap[1].totalRecords"
+                [rowsPerPageOptions]="[10, 20, 30]" [showCurrentPageReport]="true"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"></p-paginator>
         </p-tabPanel>
 
         <p-tabPanel>
@@ -121,23 +148,28 @@
                 <span class="font-bold mr-2">Cancelled</span>
                 <p-badge [value]="canceledAppointmentsCount" severity="danger"></p-badge>
             </ng-template>
-            @for (group of groupedCancelledAppointments; track group) {
+            @for (group of appointmentsMap[3].grouped; track group) {
             <div>
                 <h3 class="text-xl font-semibold mb-3 mt-5">
                     {{ group.date | date: 'fullDate' }}
                 </h3>
 
                 <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="group.appointments"
-                    [actions]="tableActions" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
-                    [rowsPerPageOptions]="[10, 20, 30]" [globalFilterFields]="globalFilterFields"
+                    [actions]="tableActions" [paginator]="false" [showCurrentPageReport]="false"
+                    [lazyLoadOnInit]="false" [globalFilterFields]="globalFilterFields"
                     [globalFilterPlaceholder]="'Search appointments...'" [showActions]="true" [isShowDetails]="true"
-                    (edit)="openStatusDialog($event)" (onPageChange)="onPageChange($event)">
+                    (edit)="openStatusDialog($event)">
                     <ng-template #details let-row>
                         <app-appointments-details [appointment]="row"></app-appointments-details>
                     </ng-template>
                 </app-table>
             </div>
             }
+            <p-paginator (onPageChange)="onPageChangeForTab(3, $event)"
+                [first]="(appointmentsMap[3].pageNumber - 1) * appointmentsMap[3].pageSize"
+                [rows]="appointmentsMap[3].pageSize" [totalRecords]="appointmentsMap[3].totalRecords"
+                [rowsPerPageOptions]="[10, 20, 30]" [showCurrentPageReport]="true"
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"></p-paginator>
         </p-tabPanel>
 
         <p-tabPanel>
@@ -145,11 +177,13 @@
                 <span class="font-bold mr-2">Re-scheduled</span>
                 <p-badge [value]="rescheduledAppointmentsCount" severity="warn"></p-badge>
             </ng-template>
-            <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="rescheduledAppointments"
-                [actions]="tableActions" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
-                [rowsPerPageOptions]="[10, 20, 30]" [globalFilterFields]="globalFilterFields"
-                [globalFilterPlaceholder]="'Search rescheduled...'" [showActions]="true" [isShowDetails]="false"
-                (edit)="openStatusDialog($event)">
+            <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="appointmentsMap[4].list"
+                [actions]="tableActions" [paginator]="true" [lazy]="true" [lazyLoadOnInit]="false"
+                [rows]="appointmentsMap[4].pageSize" [totalRecords]="appointmentsMap[4].totalRecords"
+                [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]"
+                [globalFilterFields]="globalFilterFields" [globalFilterPlaceholder]="'Search rescheduled...'"
+                [showActions]="true" [isShowDetails]="false" (edit)="openStatusDialog($event)"
+                (onPageChange)="onPageChangeForTab(4, $event)">
             </app-table>
         </p-tabPanel>
 
@@ -158,11 +192,13 @@
                 <span class="font-bold mr-2">Completed</span>
                 <p-badge [value]="completedAppointmentsCount" severity="info"></p-badge>
             </ng-template>
-            <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="completedAppointments"
-                [actions]="tableActions" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
-                [rowsPerPageOptions]="[10, 20, 30]" [globalFilterFields]="globalFilterFields"
-                [globalFilterPlaceholder]="'Search completed...'" [showActions]="true" [isShowDetails]="false"
-                (edit)="openStatusDialog($event)">
+            <app-table dataKey="id" [showDeleteButton]='false' [headers]="tableHeaders" [data]="appointmentsMap[2].list"
+                [actions]="tableActions" [paginator]="true" [lazy]="true" [lazyLoadOnInit]="false"
+                [rows]="appointmentsMap[2].pageSize" [totalRecords]="appointmentsMap[2].totalRecords"
+                [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]"
+                [globalFilterFields]="globalFilterFields" [globalFilterPlaceholder]="'Search completed...'"
+                [showActions]="true" [isShowDetails]="false" (edit)="openStatusDialog($event)"
+                (onPageChange)="onPageChangeForTab(2, $event)">
             </app-table>
         </p-tabPanel>
     </p-tabView>

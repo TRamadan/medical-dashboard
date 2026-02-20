@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { TableModule } from 'primeng/table';
+import { TableModule, TableLazyLoadEvent } from 'primeng/table';
 import { PaginatorState } from 'primeng/paginator';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -63,6 +63,8 @@ export class TableComponent {
     @Input() isShowDetails: boolean = false;
     @Input() showEditButton: boolean = true;
     @Input() showDeleteButton: boolean = true;
+    @Input() lazy: boolean = false;
+    @Input() lazyLoadOnInit: boolean = true;
     @Input() showCheckbox: boolean = false;
     @Input() showSpotsColumn: boolean = false;
     @Input() spotsPerRow: number = 2;
@@ -116,11 +118,11 @@ export class TableComponent {
      * Triggered when user changes page or rows per page.
      * Emits event so parent component can handle server-side data fetching if needed.
      */
-    onPage(event: PaginatorState) {
+    onPage(event: PaginatorState | TableLazyLoadEvent) {
         this.first = event.first ?? 0;
-        this.rows = event.rows ?? this.rows;
-        this.currentPage = event.page ?? 0;
-        this.onPageChange.emit(event);
+        this.rows = (event.rows ?? this.rows) as number;
+        this.currentPage = ('page' in event ? event.page : (this.first / this.rows)) ?? 0;
+        this.onPageChange.emit(event as PaginatorState);
     }
 
     // ---------- SELECTION ----------
@@ -166,9 +168,10 @@ export class TableComponent {
 
     //open address
     openAddress(address: string): void {
-        debugger
         window.open(address, '_blank', 'noopener,noreferrer');
     }
+
+
 
     getStatusLabel(status: number): string {
         switch (status) {

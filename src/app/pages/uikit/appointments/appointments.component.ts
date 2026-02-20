@@ -13,6 +13,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
+import { PaginatorModule } from 'primeng/paginator';
 import { TabViewModule } from 'primeng/tabview';
 import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
@@ -27,11 +28,12 @@ import { CalendarModule } from 'primeng/calendar';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { BadgeModule } from 'primeng/badge';
 import { AppointmentsDetailsComponent } from './appointments-details/appointments-details.component';
-
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 @Component({
     selector: 'app-appointments',
     standalone: true,
     imports: [
+        ProgressSpinnerModule,
         ConfirmPopupModule,
         CommonModule,
         TableComponent,
@@ -54,7 +56,8 @@ import { AppointmentsDetailsComponent } from './appointments-details/appointment
         TabViewModule,
         CalendarModule,
         BadgeModule,
-        AppointmentsDetailsComponent
+        AppointmentsDetailsComponent,
+        PaginatorModule
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './appointments.component.html',
@@ -66,7 +69,8 @@ export class AppointmentsComponent implements OnInit {
     groupedPendingAppointments: { date: string; appointments: Appointment[] }[] = [];
     groupedConfirmedAppointments: { date: string; appointments: Appointment[] }[] = [];
     groupedCancelledAppointments: { date: string; appointments: Appointment[] }[] = [];
-
+    groupedUrgentAppointments: { date: string; appointments: Appointment[] }[] = [];
+    loading = signal(true);
     // New lists for tabs
     pendingAppointments: Appointment[] = [];
     confirmedAppointments: Appointment[] = [];
@@ -74,10 +78,28 @@ export class AppointmentsComponent implements OnInit {
     rescheduledAppointments: Appointment[] = [];
     completedAppointments: Appointment[] = [];
 
+    appointmentsMap: Record<number, {
+        list: any[];
+        grouped: any[];
+        pageNumber: number;
+        pageSize: number;
+        totalRecords: number;
+    }> = {
+            0: { list: [], grouped: [], pageNumber: 1, pageSize: 10, totalRecords: 0 }, // Pending
+            1: { list: [], grouped: [], pageNumber: 1, pageSize: 10, totalRecords: 0 }, // Confirmed
+            3: { list: [], grouped: [], pageNumber: 1, pageSize: 10, totalRecords: 0 }, // Cancelled
+            4: { list: [], grouped: [], pageNumber: 1, pageSize: 10, totalRecords: 0 }, // Re-scheduled
+            2: { list: [], grouped: [], pageNumber: 1, pageSize: 10, totalRecords: 0 }  // Completed
+        };
+
+    urgentSection = { pageNumber: 1, pageSize: 10, totalRecords: 0 };
+
     dateRange: Date[] | undefined;
 
     locations: any[] = [];
     selectedLocation: any | null = null;
+    activeTabIndex = 0;
+
 
     pendingAppointmentsCount: number = 0;
     approvedAppointmentsCount: number = 0;
@@ -90,6 +112,7 @@ export class AppointmentsComponent implements OnInit {
     tableActions: any[] = [];
     globalFilterFields: string[] = [];
     displayNewAppointmentDialog: boolean = false;
+    rowsPerPageOptions: number[] = [10, 20, 30];
     totalRecords: number = 0;
 
     constructor(
@@ -101,8 +124,7 @@ export class AppointmentsComponent implements OnInit {
 
     ngOnInit() {
         this.initializeTable();
-        this.getAllLocations(); // Fetch locations
-        this.getAllAppointments();
+        this.getAllLocations();
     }
 
     initializeTable() {
@@ -130,108 +152,101 @@ export class AppointmentsComponent implements OnInit {
         });
     }
 
-    getAllAppointments() {
-        this._appointmentService.getAddedApointments().subscribe((response: any) => {
-            const appointments = response.data || [];
-            this.allAppointments.set(appointments);
-            this.filterAppointments(); // Initial filter (might be empty if no location selected)
-        });
-    }
+
 
     onLocationChange() {
         this.filterAppointments();
+        this.onTabChange(this.activeTabIndex);
     }
 
     filterAppointments() {
-        const all = this.allAppointments();
-
         if (!this.selectedLocation) {
             this.filteredAppointments = [];
-
-            this.groupedPendingAppointments = []; // Clear specific groups
+            this.groupedUrgentAppointments = [];
+            this.groupedPendingAppointments = [];
             this.groupedConfirmedAppointments = [];
             this.groupedCancelledAppointments = [];
-            this.resetCounts();
             return;
+        } else {
+            // Reset pages when location changes
+            this.urgentSection.pageNumber = 1;
+            Object.values(this.appointmentsMap).forEach(tab => tab.pageNumber = 1);
+            this.loadUrgentAppointments();
         }
+    }
 
-        this.filteredAppointments = all.filter(a => a.locationNameEn === this.selectedLocation.nameEn); // Assuming location name match or ID if available. 
-        // Better to match by ID if possible, but Appointment interface has locationNameEn. 
-        // Let's check if Location object has ID and Appointment has locationId. 
-        // Appointment interface doesn't show locationId, only locationNameEn/Ar.
-        // Location service returns Location[], need to see Location interface.
-        // Assuming matching by Name for now as that's what is in Appointment.
-        // Wait, let's look at Appointment interface again.
-        // It has locationNameEn.
-        // Let's assume Location object has nameEn. 
-
-        // Actually, let's refine this matching. 
-        // If I can't match by ID, I will match by name.
-
-        // Filter by date range if selected
-        if (this.dateRange && this.dateRange.length === 2 && this.dateRange[0] && this.dateRange[1]) {
-            const startDate = this.dateRange[0];
-            const endDate = this.dateRange[1];
-            // Set endDate to end of day to include all appointments on that day
-            const endDateEndOfDay = new Date(endDate);
-            endDateEndOfDay.setHours(23, 59, 59, 999);
-
-            this.filteredAppointments = this.filteredAppointments.filter(a => {
-                const appDate = new Date(a.startTime);
-                return appDate >= startDate && appDate <= endDateEndOfDay;
-            });
-        }
-
-        this.updateCounts();
-        this.updateCounts();
-
-        // Populate specific lists
-        this.pendingAppointments = this.filteredAppointments.filter(a => a.status === 0);
-        this.confirmedAppointments = this.filteredAppointments.filter(a => a.status === 1);
-        this.cancelledAppointments = this.filteredAppointments.filter(a => a.status === 3);
-        this.rescheduledAppointments = this.filteredAppointments.filter(a => a.status === 4);
-        this.completedAppointments = this.filteredAppointments.filter(a => a.status === 2);
-
-        this.groupedPendingAppointments = this.groupAppointmentsByDate(this.pendingAppointments);
-        this.groupedConfirmedAppointments = this.groupAppointmentsByDate(this.confirmedAppointments);
-        this.groupedCancelledAppointments = this.groupAppointmentsByDate(this.cancelledAppointments);
+    loadUrgentAppointments(): void {
+        this.loading.set(true);
+        this._appointmentService.getFilteredAppointments(
+            { locationId: this.selectedLocation.id, isUrgent: true },
+            this.urgentSection.pageNumber,
+            this.urgentSection.pageSize
+        ).subscribe((response: any) => {
+            this.loading.set(false);
+            const appointments = response.items || [];
+            this.allAppointments.set(appointments);
+            this.groupedUrgentAppointments = this.groupAppointmentsByDate(appointments);
+            this.urgentSection.totalRecords = response.totalCount ?? 0;
+        });
     }
 
     onDateRangeSelect() {
         this.filterAppointments();
     }
 
-    resetCounts() {
-        this.pendingAppointmentsCount = 0;
-        this.approvedAppointmentsCount = 0;
-        this.canceledAppointmentsCount = 0;
-        this.rescheduledAppointmentsCount = 0;
-        this.completedAppointmentsCount = 0;
-        this.totalRecords = 0;
+    onTabChange(index: number): void {
+        this.activeTabIndex = index;
+        const status = this.statuses[index];
+        this.loadAppointments(status.id);
     }
 
+    loadAppointments(statusId: number, pageNumber?: number, pageSize?: number): void {
+        const target = this.appointmentsMap[statusId];
+        if (!target) return;
+
+        if (pageNumber !== undefined) target.pageNumber = pageNumber;
+        if (pageSize !== undefined) target.pageSize = pageSize;
+
+        this._appointmentService.getFilteredAppointments({
+            locationId: this.selectedLocation?.id,
+            status: statusId.toString(),
+        }, target.pageNumber, target.pageSize).subscribe({
+            next: (response) => {
+                target.list = response.items;
+                target.grouped = this.groupAppointmentsByDate(response.items);
+                target.totalRecords = response.totalCount ?? 0;
+            },
+            error: (err) => console.error('Failed to load appointments', err)
+        });
+    }
+
+    onPageChangeForTab(statusId: number, event: any): void {
+        if (!this.selectedLocation) return;
+        const page = Math.floor((event.first ?? 0) / (event.rows ?? 10)) + 1;
+        const size = event.rows ?? 10;
+        this.loadAppointments(statusId, page, size);
+    }
+
+    onPageChangeForUrgent(event: any): void {
+        if (!this.selectedLocation) return;
+        this.urgentSection.pageNumber = Math.floor((event.first ?? 0) / (event.rows ?? 10)) + 1;
+        this.urgentSection.pageSize = event.rows ?? 10;
+        this.loadUrgentAppointments();
+    }
+
+
+
+
+
     updateCounts() {
-        const apps = this.filteredAppointments;
-        this.totalRecords = apps.length;
-        this.pendingAppointmentsCount = apps.filter((a: any) => a.status === 0).length;
-        this.approvedAppointmentsCount = apps.filter((a: any) => a.status === 1).length;
-        this.completedAppointmentsCount = apps.filter((a: any) => a.status === 2).length;
-        this.canceledAppointmentsCount = apps.filter((a: any) => a.status === 3).length;
-        // Assuming 4 is Re-scheduled based on typical enum values found in other projects usually
-        // or derived from statuses array below.
-        // statuses array only has 0, 1, 2, 3. 
-        // I will add 4 for Re-scheduled to statuses array too.
-        this.rescheduledAppointmentsCount = apps.filter((a: any) => a.status === 12).length; // Wait, Re-scheduled is 12 in the image? No, image status is 12. 
-        // Actually the image shows "12 Re-scheduled". That's the count. 
-        // Let's check status definitions again.
-        // The user didn't give me the status enum.
-        // I'll check the 'statuses' array I have.
-        // id: 0 -> Scheduled (Pending?)
-        // id: 1 -> Confirmed
-        // id: 2 -> Completed
-        // id: 3 -> Cancelled
-        // I need to add Re-scheduled. Let's assume it is 4 for now.
-        this.rescheduledAppointmentsCount = apps.filter((a: any) => a.status === 4).length;
+        this._appointmentService.getAppointmentsCountByStatus(this.selectedLocation.id).subscribe((response: any) => {
+            const counts = response;
+            this.pendingAppointmentsCount = counts.pending;
+            this.approvedAppointmentsCount = counts.confirmed;
+            this.canceledAppointmentsCount = counts.cancelled;
+            this.rescheduledAppointmentsCount = counts.rescheduled ? counts.rescheduled : 0;
+            this.completedAppointmentsCount = counts.completed;
+        });
     }
 
     /**
@@ -240,7 +255,7 @@ export class AppointmentsComponent implements OnInit {
     private groupAppointmentsByDate(appointments: Appointment[]): { date: string; appointments: Appointment[] }[] {
         const grouped: { [key: string]: Appointment[] } = {};
 
-        appointments.forEach((item: any) => {
+        appointments?.forEach((item: any) => {
             // Extract only the date part (assuming item.starttime is ISO string or has date info)
             const dateKey = new Date(item.startTime).toISOString().split('T')[0];
             if (!grouped[dateKey]) grouped[dateKey] = [];
@@ -280,7 +295,6 @@ export class AppointmentsComponent implements OnInit {
 
     onBookingSuccess(): void {
         this.hideDialog();
-        this.getAllAppointments();
     }
 
     onPageChange(event: PaginatorState) {
@@ -293,17 +307,11 @@ export class AppointmentsComponent implements OnInit {
     selectedStatusId: any;
 
     statuses = [
-        { id: 0, label: 'Pending', color: 'warn' }, // Changed Scheduled to Pending to match image
+        { id: 0, label: 'Pending', color: 'warn' },
         { id: 1, label: 'Confirmed', color: 'success' },
         { id: 3, label: 'Cancelled', color: 'danger' },
-        { id: 4, label: 'Re-scheduled', color: 'help' }, // Added Re-scheduled
-        { id: 2, label: 'Completed', color: 'info' } // Changed color to match image blueish
-        // Image colors:
-        // Pending: Orange/Yellow (warn)
-        // Confirmed: Green (success)
-        // Cancelled: Red (danger)
-        // Re-scheduled: Purple (help)
-        // Completed: Blue (info or primary)
+        { id: 4, label: 'Re-scheduled', color: 'help' },
+        { id: 2, label: 'Completed', color: 'info' }
     ];
 
     openStatusDialog(appointment: any) {
@@ -329,7 +337,6 @@ export class AppointmentsComponent implements OnInit {
                     summary: 'Status Updated',
                     detail: `Appointment status changed to ${this.getStatusLabel(this.selectedStatusId)}`
                 });
-                this.getAllAppointments(); // Refresh to update counts/lists
             },
             error: (error: any) => {
                 //error handle goes here

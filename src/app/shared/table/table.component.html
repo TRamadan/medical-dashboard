@@ -1,9 +1,10 @@
 <!-- Main Table -->
 <p-card>
-    <p-table #dt [value]="data" [columns]="headers" [loading]="loading" [rows]="10" [paginator]="true"
-        [rowsPerPageOptions]="[5, 10, 20, 50]" [scrollable]="scrollable" [scrollHeight]="scrollHeight"
+    <p-table #dt [value]="data" [columns]="headers" [loading]="loading" [rows]="rows" [paginator]="paginator"
+        [rowsPerPageOptions]="rowsPerPageOptions" [scrollable]="scrollable" [scrollHeight]="scrollHeight"
         [responsive]="responsive" [selectionMode]="showCheckbox ? 'multiple' : null" [(selection)]="selectedItems"
-        (selectionChange)="onSelectionChange($event)"
+        (selectionChange)="onSelectionChange($event)" [lazy]="lazy" [totalRecords]="totalRecords"
+        [lazyLoadOnInit]="lazyLoadOnInit" (onLazyLoad)="onPage($event)"
         [currentPageReportTemplate]="'Showing {first} to {last} of {totalRecords} entries'"
         [showCurrentPageReport]="true">
         <!-- Table Header -->
