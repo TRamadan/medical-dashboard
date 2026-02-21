@@ -24,7 +24,7 @@ import { Appointment } from './models/appointment';
 import { BookingFormComponent } from './booking-form/booking-form.component';
 import { AppointmentService } from './services/appointment.service';
 import { LocationService } from '../add-location/services/location.service';
-import { CalendarModule } from 'primeng/calendar';
+import { DatePickerModule } from 'primeng/datepicker';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { BadgeModule } from 'primeng/badge';
 import { AppointmentsDetailsComponent } from './appointments-details/appointments-details.component';
@@ -54,7 +54,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
         IconFieldModule,
         ConfirmDialogModule,
         TabViewModule,
-        CalendarModule,
+        DatePickerModule,
         BadgeModule,
         AppointmentsDetailsComponent,
         PaginatorModule
@@ -66,9 +66,6 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 export class AppointmentsComponent implements OnInit {
     allAppointments = signal<Appointment[]>([]);
     filteredAppointments: Appointment[] = []; // Store filtered appointments
-    groupedPendingAppointments: { date: string; appointments: Appointment[] }[] = [];
-    groupedConfirmedAppointments: { date: string; appointments: Appointment[] }[] = [];
-    groupedCancelledAppointments: { date: string; appointments: Appointment[] }[] = [];
     groupedUrgentAppointments: { date: string; appointments: Appointment[] }[] = [];
     loading = signal(true);
     // New lists for tabs
@@ -94,7 +91,7 @@ export class AppointmentsComponent implements OnInit {
 
     urgentSection = { pageNumber: 1, pageSize: 10, totalRecords: 0 };
 
-    dateRange: Date[] | undefined;
+    dateRange: Date[] = [];
 
     locations: any[] = [];
     selectedLocation: any | null = null;
@@ -157,15 +154,14 @@ export class AppointmentsComponent implements OnInit {
     onLocationChange() {
         this.filterAppointments();
         this.onTabChange(this.activeTabIndex);
+        this.updateCounts();
+
     }
 
     filterAppointments() {
         if (!this.selectedLocation) {
             this.filteredAppointments = [];
             this.groupedUrgentAppointments = [];
-            this.groupedPendingAppointments = [];
-            this.groupedConfirmedAppointments = [];
-            this.groupedCancelledAppointments = [];
             return;
         } else {
             // Reset pages when location changes
@@ -190,11 +186,37 @@ export class AppointmentsComponent implements OnInit {
         });
     }
 
+    parsedDates: any = {}
     onDateRangeSelect() {
-        this.filterAppointments();
+
+        if (this.dateRange != null) {
+            const [startDate, endDate] = this.dateRange;
+
+            if (startDate && endDate) {
+                this.parsedDates = {
+                    startDate: this.formatLocalDate(startDate),
+                    endDate: this.formatLocalDate(endDate),
+                };
+                this.onTabChange(0);
+            }
+        }
+        else {
+            this.parsedDates.startDate = null;
+            this.parsedDates.endDate = null;
+            this.onTabChange(0);
+        }
+
+    }
+
+    private formatLocalDate(date: Date): string {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
     onTabChange(index: number): void {
+
         this.activeTabIndex = index;
         const status = this.statuses[index];
         this.loadAppointments(status.id);
@@ -207,9 +229,14 @@ export class AppointmentsComponent implements OnInit {
         if (pageNumber !== undefined) target.pageNumber = pageNumber;
         if (pageSize !== undefined) target.pageSize = pageSize;
 
+        const fromDate = this.parsedDates?.startDate;
+        const toDate = this.parsedDates?.endDate;
+
         this._appointmentService.getFilteredAppointments({
             locationId: this.selectedLocation?.id,
             status: statusId.toString(),
+            fromDate,
+            toDate,
         }, target.pageNumber, target.pageSize).subscribe({
             next: (response) => {
                 target.list = response.items;

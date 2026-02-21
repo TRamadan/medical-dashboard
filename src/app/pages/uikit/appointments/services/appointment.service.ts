@@ -72,6 +72,6 @@ export class AppointmentService {
 
     //here is the function needed to get the appointments count based on each status 
     getAppointmentsCountByStatus(locationId: number): Observable<any> {
-        return this.http.get(this.apiUrl + this.baseUrl + '/dashboard/status-summary', { params: { locationId } });
+        return this.http.get(this.apiUrl + this.baseUrl + '/dashboard/status-summary/' + locationId);
     }
 }
