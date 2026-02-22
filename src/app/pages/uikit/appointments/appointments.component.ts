@@ -324,9 +324,7 @@ export class AppointmentsComponent implements OnInit {
         this.hideDialog();
     }
 
-    onPageChange(event: PaginatorState) {
-        // You can handle lazy loading here if needed in the future
-    }
+
 
     selectedAppointment: any;
     appointmentToEdit: any = null;
@@ -364,6 +362,8 @@ export class AppointmentsComponent implements OnInit {
                     summary: 'Status Updated',
                     detail: `Appointment status changed to ${this.getStatusLabel(this.selectedStatusId)}`
                 });
+                this.loadUrgentAppointments();
+                this.onTabChange(0)
             },
             error: (error: any) => {
                 //error handle goes here
