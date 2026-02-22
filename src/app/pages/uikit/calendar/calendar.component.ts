@@ -12,18 +12,20 @@ import { ButtonModule } from 'primeng/button';
 import { DropdownModule } from 'primeng/dropdown';
 import { CardModule } from 'primeng/card';
 import { FormsModule } from '@angular/forms';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
     selector: 'app-calendar',
     standalone: true,
-    imports: [FormsModule, CommonModule, TableModule, DatePickerModule, ToolbarModule, DialogModule, ButtonModule, DropdownModule, CardModule],
+    imports: [FormsModule, CommonModule, TableModule, DatePickerModule, ToolbarModule, DialogModule, ButtonModule, DropdownModule, CardModule, SelectButtonModule, ProgressSpinnerModule],
     templateUrl: './calendar.component.html',
     styleUrls: ['./calendar.component.css']
 })
 export class CalendarComponent implements OnInit {
-    allEmployees: any[] = [];
     allLocations: any[] = [];
     filteredEmployees: any[] = [];
+    dateRange: Date[] = [];
     originalAppointments = signal<any[]>([]);
     allAppointments = signal<any[]>([]);
     timeSlots = signal<string[]>([]);
@@ -32,8 +34,26 @@ export class CalendarComponent implements OnInit {
     displayNewAppointmentDialog: boolean = false;
     showPlaceholder: boolean = true;
     showNoResults: boolean = false;
+    allEmployees: any[] = []
+
+    // Filter states
+    selectedLocationId = signal<number | null>(null);
+    selectedView = signal<string>('daily');
+    /** Writable value for SelectButton two-way binding; kept in sync with selectedView signal */
+    viewValue: string = 'daily';
+    viewOptions: any[] = [
+        { label: 'Daily', value: 'daily' },
+        { label: 'Weekly', value: 'weekly' },
+        { label: 'Monthly', value: 'monthly' }
+    ];
 
     date: Date = new Date(); // Initialize with today's date
+
+    // Loading states for spinners
+    loadingLocations = signal<boolean>(false);
+    loadingSchedules = signal<boolean>(false);
+    loadingEmployeeAppointments = signal<boolean>(false);
+    loadingEmployees = signal<boolean>(false);
 
     totalSlots = computed(() => this.allAppointments().length);
     bookedSlots = computed(() => this.allAppointments().filter((a) => a.status?.toLowerCase() === 'booked').length);
@@ -52,30 +72,54 @@ export class CalendarComponent implements OnInit {
     }
 
     getAllEmployees(): void {
+        this.loadingEmployees.set(true);
         this._userService.getAllUsers().subscribe({
             next: (res: any) => {
                 this.allEmployees = res.data;
+                this.filteredEmployees = [...this.allEmployees];
+                this.loadingEmployees.set(false);
             },
             error: (err) => {
                 console.error('Error fetching employees:', err);
+                this.loadingEmployees.set(false);
             }
         });
     }
 
-    getAllScheduels(date: string): void {
-        this._calendarService.getAllCalenderData(date).subscribe({
+    /** Map UI view value to API period (daily = single day, weekly = +6 days, monthly = +1 month) */
+    private getViewToDate(): string | undefined {
+        const view = this.selectedView();
+        if (view === 'weekly') {
+            const end = new Date(this.date);
+            end.setDate(end.getDate() + 6);
+            return this.formatDate(end);
+        }
+        if (view === 'monthly') {
+            const end = new Date(this.date);
+            end.setMonth(end.getMonth() + 1);
+            return this.formatDate(end);
+        }
+        return undefined; // daily = single day, no toDate
+    }
+
+    getAllScheduels(): void {
+        const fromDate = this.formatDate(this.date);
+        const toDate = this.getViewToDate();
+
+        this.loadingSchedules.set(true);
+        this._calendarService.getAllCalenderData(fromDate, 30, this.selectedEmployeeId() || undefined, this.selectedLocationId() || undefined, toDate).subscribe({
             next: (res: any) => {
                 const mapped = this.mapAppointments(res);
-                console.log(mapped);
                 this.originalAppointments.set(mapped);
                 this.allAppointments.set([...mapped]);
                 const slots = this.extractTimeSlots(mapped);
                 this.timeSlots.set(slots);
                 this.fillMissingSlots(this.allAppointments(), this.timeSlots());
+                this.loadingSchedules.set(false);
             },
-
             error: (err) => {
                 console.error('Error fetching calendar data:', err);
+                this.loadingSchedules.set(false);
             }
         });
     }
@@ -162,18 +206,14 @@ export class CalendarComponent implements OnInit {
 
     onDateSelect(): void {
         if (this.date) {
-            const formattedDate = this.formatDate(this.date);
-
-            if (this.selectedEmployeeId()) {
-                this.fetchEmployeeData(formattedDate, this.selectedEmployeeId()!);
-            } else {
-                this.getAllScheduels(formattedDate);
-            }
+            this.getAllScheduels();
         }
     }
 
     fetchEmployeeData(date: string, employeeId: number): void {
-        this._calendarService.getAllCalenderData(date, 30, employeeId).subscribe({
+        const toDate = this.getViewToDate();
+        this.loadingEmployeeAppointments.set(true);
+        this._calendarService.getAllCalenderData(date, 30, employeeId, this.selectedLocationId() || undefined, toDate).subscribe({
             next: (res: any) => {
                 const mapped = this.mapAppointments(res);
                 this.allAppointments.set([...mapped]);
@@ -181,10 +221,12 @@ export class CalendarComponent implements OnInit {
                 this.timeSlots.set(slots);
                 this.fillMissingSlots(this.allAppointments(), this.timeSlots());
                 this.updateNoResultsState();
+                this.loadingEmployeeAppointments.set(false);
             },
             error: (err) => {
                 console.error('Error loading employee calendar:', err);
                 this.updateNoResultsState();
+                this.loadingEmployeeAppointments.set(false);
             }
         });
     }
@@ -262,7 +304,7 @@ export class CalendarComponent implements OnInit {
      */
     resetFilter(): void {
         this.selectedEmployeeId.set(null);
-        this.getAllScheduels(this.formatDate(this.date));
+        this.getAllScheduels();
     }
 
     openNewAppointmentDialog() {
@@ -275,35 +317,50 @@ export class CalendarComponent implements OnInit {
 
     onBookingSuccess() {
         this.displayNewAppointmentDialog = false;
-        this.getAllScheduels(this.formatDate(this.date));
+        this.getAllScheduels();
     }
 
     getAllLocations(): void {
+        this.loadingLocations.set(true);
         this._locationService.getLocations().subscribe({
             next: (res: any) => {
                 this.allLocations = res.data || res;
+                this.loadingLocations.set(false);
             },
             error: (err) => {
                 console.error('Error fetching locations:', err);
+                this.loadingLocations.set(false);
             }
         });
     }
 
-    onLocationSelect(): void {
+    /** Called when user changes location, date, or view. Fetches appointments and filters employees. */
+    applyFilters(): void {
         if (this.selectedLocation) {
-            this.showPlaceholder = false;
+            this.selectedLocationId.set(this.selectedLocation.id);
             this.filterEmployeesByLocation();
         } else {
-            this.showPlaceholder = true;
-            this.filteredEmployees = [];
-            this.allAppointments.set([]);
-            this.selectedEmployeeId.set(null);
+            this.selectedLocationId.set(null);
+            this.filteredEmployees = [...this.allEmployees];
+        }
+        this.getAllScheduels();
+    }
+
+    onLocationSelect(): void {
+        if (this.selectedLocation) {
+            this.selectedLocationId.set(this.selectedLocation.id);
+            this.filterEmployeesByLocation();
+            this.getAllScheduels();
+        } else {
+            this.selectedLocationId.set(null);
+            this.filteredEmployees = [...this.allEmployees];
+            this.getAllScheduels();
         }
     }
 
     filterEmployeesByLocation(): void {
         if (!this.selectedLocation) {
-            this.filteredEmployees = [];
+            this.filteredEmployees = [...this.allEmployees];
             return;
         }
 
@@ -312,10 +369,13 @@ export class CalendarComponent implements OnInit {
             return emp.locations?.some((loc: any) => loc.id === this.selectedLocation.id);
         });
 
-        // Reset selection
-        this.selectedEmployeeId.set(null);
-        this.allAppointments.set([]);
-        this.showNoResults = false;
+        // If currently selected coach is not in the filtered list, reset coach selection
+        if (this.selectedEmployeeId()) {
+            const isSelectedCoachInLocation = this.filteredEmployees.some(e => e.id === this.selectedEmployeeId());
+            if (!isSelectedCoachInLocation) {
+                this.selectedEmployeeId.set(null);
+            }
+        }
     }
 
     onCoachSelect(coach: any): void {
@@ -334,4 +394,41 @@ export class CalendarComponent implements OnInit {
     updateNoResultsState(): void {
         this.showNoResults = this.selectedEmployeeId() !== null && this.allAppointments().length === 0;
     }
+    parsedDates: any = {}
+    onDateRangeSelect() {
+        if (this.dateRange && this.dateRange.length === 2 && this.dateRange[0] && this.dateRange[1]) {
+            const [startDate, endDate] = this.dateRange;
+            this.date = startDate;
+            const fromDateStr = this.formatDate(startDate);
+            const toDateStr = this.formatDate(endDate);
+            this.loadingSchedules.set(true);
+            this._calendarService.getAllCalenderData(fromDateStr, 30, this.selectedEmployeeId() || undefined, this.selectedLocationId() || undefined, toDateStr).subscribe({
+                next: (res: any) => {
+                    const mapped = this.mapAppointments(res);
+                    this.allAppointments.set([...mapped]);
+                    const slots = this.extractTimeSlots(mapped);
+                    this.timeSlots.set(slots);
+                    this.fillMissingSlots(this.allAppointments(), this.timeSlots());
+                    this.loadingSchedules.set(false);
+                },
+                error: (err) => {
+                    console.error('Error fetching calendar data for range:', err);
+                    this.loadingSchedules.set(false);
+                }
+            });
+        }
+    }
+
+    onViewChange(): void {
+        this.selectedView.set(this.viewValue);
+        this.getAllScheduels();
+    }
+
+    private formatLocalDate(date: Date): string {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
 }

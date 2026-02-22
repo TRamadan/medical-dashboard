@@ -1,95 +1,108 @@
 <section class="calendar-section container-fluid py-4">
-    <!-- Search Card -->
-    <div class="search-card bg-white rounded-3 shadow-sm mb-4 p-4">
-        <div class="d-flex align-items-center mb-3">
-            <i class="pi pi-search text-primary me-2" style="font-size: 1.2rem;"></i>
-            <h5 class="mb-0 fw-bold text-dark">Search <span class="text-primary">Appointments</span></h5>
-        </div>
 
-        <div class="row g-3">
-            <!-- Location Dropdown -->
-            <div class="col-md-6">
-                <label for="location" class="form-label text-secondary mb-2" style="font-size: 0.9rem;">Branch
-                    Location</label>
-                <p-dropdown [(ngModel)]="selectedLocation" [options]="allLocations" optionLabel="nameEn"
-                    placeholder="Select a location" (onChange)="onLocationSelect()" [showClear]="true"
-                    styleClass="w-100" inputId="location">
-                </p-dropdown>
-            </div>
-
-            <!-- Date Picker -->
-            <div class="col-md-6">
-                <label for="date" class="form-label text-secondary mb-2" style="font-size: 0.9rem;">Date</label>
-                <p-datepicker [(ngModel)]="date" (onSelect)="onDateSelect()" dateFormat="yy-mm-dd"
-                    placeholder="Select date" [iconDisplay]="'input'" [showIcon]="true" inputId="date"
-                    styleClass="w-100">
-                </p-datepicker>
-            </div>
-        </div>
-    </div>
-
-    <!-- Initial Placeholder: No location selected -->
-    <div *ngIf="showPlaceholder" class="text-center py-5 my-4">
-        <div class="placeholder-content bg-white rounded-3 shadow-sm p-5">
-            <div class="placeholder-icon-wrapper mb-3">
-                <i class="pi pi-map-marker text-primary" style="font-size: 3rem; opacity: 0.7;"></i>
-            </div>
-            <h5 class="text-dark mb-2 fw-semibold">Select a Location to Get Started</h5>
-            <p class="text-secondary mb-0" style="font-size: 0.95rem;">
-                Please select a branch location and date above to view available coaches and their appointments.
-            </p>
-        </div>
-    </div>
-
-    <!-- Coaches Section: Show when location is selected -->
-    <div *ngIf="!showPlaceholder && filteredEmployees.length > 0">
-        <div class="coaches-section bg-white rounded-3 shadow-sm mb-4 p-4">
-            <div class="d-flex align-items-center mb-3">
-                <i class="pi pi-users text-success me-2" style="font-size: 1.2rem;"></i>
-                <h5 class="mb-0 fw-bold text-dark">Available Coaches <span class="text-muted"
-                        style="font-size: 0.9rem; font-weight: normal;">at {{ selectedLocation?.nameEn }}</span></h5>
-            </div>
-
-            <div class="coaches-list d-flex overflow-auto gap-3 py-2">
-                @for (coach of filteredEmployees; track coach.id) {
-                <div class="coach-card d-flex flex-column align-items-center text-center p-3 rounded-3"
-                    style="min-width: 110px; flex-shrink: 0; cursor: pointer;" [ngClass]="{
-                        'coach-card-selected': selectedEmployeeId() === coach.id,
-                        'coach-card-default': selectedEmployeeId() !== coach.id
-                    }" (click)="onCoachSelect(coach)">
-
-                    <div class="coach-avatar-wrapper mb-2">
-                        <img class="rounded-circle" src="../../../../assets/person-placeholder.jpg"
-                            style="width: 70px; height: 70px; object-fit: cover; border: 3px solid #fff;"
-                            [style.border-color]="selectedEmployeeId() === coach.id ? '#198754' : '#e9ecef'" />
+    <!-- Filter Cards -->
+    <div class="calendar-container mb-4">
+        <p-card styleClass="search-card shadow-sm">
+            <h5 class="mb-3"><i class="pi pi-filter me-2"></i>Filters</h5>
+            <div class="row g-3 align-items-end">
+                <div class="col-12 col-md-4">
+                    <label class="form-label small text-muted">Location</label>
+                    <div class="position-relative">
+                        <p-dropdown [options]="allLocations" [(ngModel)]="selectedLocation"
+                            optionLabel="nameEn" placeholder="Select location" [showClear]="true"
+                            (onChange)="onLocationSelect()" styleClass="w-100">
+                        </p-dropdown>
+                        @if (loadingLocations()) {
+                            <div class="filter-spinner">
+                                <p-progressSpinner strokeWidth="4" [style]="{ width: '28px', height: '28px' }"></p-progressSpinner>
+                            </div>
+                        }
                     </div>
-
-                    <p class="mb-0 text-nowrap fw-semibold" style="font-size: 0.85rem;">
-                        {{ coach.nameEn }}
-                    </p>
                 </div>
-                }
+                <div class="col-12 col-md-4">
+                    <label class="form-label small text-muted">Date</label>
+                    <div class="position-relative">
+                        <p-datepicker [(ngModel)]="date" [showIcon]="true" dateFormat="yy-mm-dd"
+                            (onSelect)="onDateSelect()" styleClass="w-100" inputId="calendarDate">
+                        </p-datepicker>
+                        @if (loadingSchedules() && !selectedEmployeeId()) {
+                            <div class="filter-spinner">
+                                <p-progressSpinner strokeWidth="4" [style]="{ width: '28px', height: '28px' }"></p-progressSpinner>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="col-12 col-md-4">
+                    <label class="form-label small text-muted">View</label>
+                    <div class="position-relative">
+                        <p-selectButton [options]="viewOptions" [(ngModel)]="viewValue"
+                            (onChange)="onViewChange()" optionLabel="label" optionValue="value">
+                        </p-selectButton>
+                        @if (loadingSchedules() && !selectedEmployeeId()) {
+                            <div class="filter-spinner filter-spinner-selectbtn">
+                                <p-progressSpinner strokeWidth="4" [style]="{ width: '28px', height: '28px' }"></p-progressSpinner>
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
-        </div>
+        </p-card>
+    </div>
 
-        <!-- Stats Bar -->
-        <div *ngIf="selectedEmployeeId()"
-            class="stats-bar d-flex flex-wrap justify-content-around align-items-center bg-white rounded-3 shadow-sm py-3 mb-4 text-center">
+    <!-- Coaches / Employees (filtered by location) -->
+    @if (selectedLocation) {
+        <div class="calendar-container mb-3">
+            <p-card styleClass="coaches-section shadow-sm">
+                <h5 class="mb-3"><i class="pi pi-users me-2"></i>Coaches</h5>
+                @if (loadingEmployees()) {
+                    <div class="d-flex justify-content-center py-4">
+                        <p-progressSpinner strokeWidth="4" [style]="{ width: '40px', height: '40px' }"></p-progressSpinner>
+                    </div>
+                } @else {
+                    <div class="coaches-list d-flex flex-nowrap gap-2 overflow-auto pb-2">
+                        @for (coach of filteredEmployees; track coach.id) {
+                            <div class="coach-card rounded-3 p-3 text-center cursor-pointer flex-shrink-0"
+                                [ngClass]="selectedEmployeeId() === coach.id ? 'coach-card-selected' : 'coach-card-default'"
+                                (click)="onCoachSelect(coach)">
+                                <div class="coach-avatar-wrapper mb-2">
+                                    @if (coach.profileImageUrl) {
+                                        <img [src]="coach.profileImageUrl" [alt]="coach.nameEn" class="rounded-circle" style="width: 56px; height: 56px; object-fit: cover;" />
+                                    } @else {
+                                        <div class="rounded-circle bg-secondary text-white d-inline-flex align-items-center justify-content-center" style="width: 56px; height: 56px;">
+                                            <i class="pi pi-user" style="font-size: 1.5rem;"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <p class="mb-0 small fw-semibold">{{ coach.nameEn || coach.userName || 'Coach' }}</p>
+                            </div>
+                        }
+                    </div>
+                    @if (loadingEmployeeAppointments()) {
+                        <div class="d-flex justify-content-center py-2">
+                            <p-progressSpinner strokeWidth="4" [style]="{ width: '32px', height: '32px' }"></p-progressSpinner>
+                            <span class="ms-2 align-self-center small text-muted">Loading appointments...</span>
+                        </div>
+                    }
+                }
+            </p-card>
+        </div>
+    }
+
+    <!-- Stats Bar -->
+    <div class="calendar-container mb-3">
+        <div class="stats-bar bg-white rounded-3 shadow-sm p-3 d-flex flex-wrap gap-2 justify-content-around">
             <div class="stat-item px-3">
-                <span class="stat-number text-success fw-bold fs-4 d-block">{{ totalSlots() }}</span>
+                <span class="stat-number text-primary fw-bold fs-4 d-block">{{ totalSlots() }}</span>
                 <div class="stat-label text-muted">Total Slots</div>
             </div>
-
             <div class="stat-item px-3">
                 <span class="stat-number text-primary fw-bold fs-4 d-block">{{ bookedSlots() }}</span>
                 <div class="stat-label text-muted">Booked</div>
             </div>
-
             <div class="stat-item px-3">
                 <span class="stat-number text-warning fw-bold fs-4 d-block">{{ availableSlots() }}</span>
                 <div class="stat-label text-muted">Available</div>
             </div>
-
             <div class="stat-item px-3">
                 <span class="stat-number text-danger fw-bold fs-4 d-block">{{ pendingSlots() }}</span>
                 <div class="stat-label text-muted">Pending</div>

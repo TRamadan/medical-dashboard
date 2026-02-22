@@ -9,6 +9,19 @@ section {
     background-color: #f8f9fa;
 }
 
+/* Filter spinner overlay on dropdown/datepicker */
+.filter-spinner {
+    position: absolute;
+    top: 50%;
+    right: 2.5rem;
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.filter-spinner-selectbtn {
+    right: 0.5rem;
+}
+
 /* Search Card Styles */
 .search-card {
     border: 1px solid #e9ecef;
