@@ -17,7 +17,10 @@
                 "build": {
                     "builder": "@angular-devkit/build-angular:application",
                     "options": {
-                        "outputPath": "dist/sports-dr-control",
+                        "outputPath": {
+                            "base": "dist/sports-dr-control",
+                            "browser": ""
+                        },
                         "index": "src/index.html",
                         "browser": "src/main.ts",
                         "polyfills": [
