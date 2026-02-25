@@ -206,6 +206,7 @@ export class CalendarComponent implements OnInit {
 
     onDateSelect(): void {
         if (this.date) {
+            this.getAvailableDoctors();
             this.getAllScheduels();
         }
     }
@@ -320,6 +321,28 @@ export class CalendarComponent implements OnInit {
         this.getAllScheduels();
     }
 
+    getAvailableDoctors(): void {
+        if (!this.selectedLocationId()) {
+            this.filteredEmployees = [...this.allEmployees];
+            return;
+        }
+
+        const fromDate = this.formatDate(this.date);
+        const toDate = this.getViewToDate() || fromDate;
+
+        this.loadingEmployees.set(true);
+        this._calendarService.getAvailableDoctors(this.selectedLocationId()!, fromDate, toDate).subscribe({
+            next: (res: any) => {
+                this.filteredEmployees = res.data || res;
+                this.loadingEmployees.set(false);
+            },
+            error: (err) => {
+                console.error('Error fetching available doctors:', err);
+                this.loadingEmployees.set(false);
+            }
+        });
+    }
+
     getAllLocations(): void {
         this.loadingLocations.set(true);
         this._locationService.getLocations().subscribe({
@@ -349,7 +372,7 @@ export class CalendarComponent implements OnInit {
     onLocationSelect(): void {
         if (this.selectedLocation) {
             this.selectedLocationId.set(this.selectedLocation.id);
-            this.filterEmployeesByLocation();
+            this.getAvailableDoctors();
             this.getAllScheduels();
         } else {
             this.selectedLocationId.set(null);
@@ -401,6 +424,7 @@ export class CalendarComponent implements OnInit {
             this.date = startDate;
             const fromDateStr = this.formatDate(startDate);
             const toDateStr = this.formatDate(endDate);
+            this.getAvailableDoctors();
             this.loadingSchedules.set(true);
             this._calendarService.getAllCalenderData(fromDateStr, 30, this.selectedEmployeeId() || undefined, this.selectedLocationId() || undefined, toDateStr).subscribe({
                 next: (res: any) => {
@@ -421,6 +445,7 @@ export class CalendarComponent implements OnInit {
 
     onViewChange(): void {
         this.selectedView.set(this.viewValue);
+        this.getAvailableDoctors();
         this.getAllScheduels();
     }
 

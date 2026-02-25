@@ -2,7 +2,6 @@ import { Component, ElementRef, EventEmitter, OnInit, ViewChild, Output, OnDestr
 import { LocationServiceFormComponent } from './location-service-form/location-service-form.component';
 import { ChooseTimeSlotComponent } from './choose-time-slot/choose-time-slot.component';
 import { PatientFormComponent } from './patient-form/patient-form.component';
-import { ConfirmationComponent } from './confirmation/confirmation.component';
 import { from, Subscription } from 'rxjs';
 import { BookingService } from './patient-form/services/booking.service';
 import Swal from 'sweetalert2';
@@ -39,7 +38,7 @@ export interface BookingData {
 
 @Component({
     standalone: true,
-    imports: [LocationServiceFormComponent, ChooseTimeSlotComponent, PatientFormComponent, ConfirmationComponent],
+    imports: [LocationServiceFormComponent, ChooseTimeSlotComponent, PatientFormComponent],
     selector: 'app-booking-form',
     templateUrl: './booking-form.component.html',
     styleUrls: ['./booking-form.component.css']
