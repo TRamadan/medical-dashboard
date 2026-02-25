@@ -199,6 +199,7 @@ export class AddPermissionComponent implements OnInit {
         if (this.isEdit) {
             this.updatePermission();
         } else if (this.isDelete) {
+            this.confirmDelete()
             //delete record function will go here
         } else {
             this.addPermission();
@@ -247,12 +248,8 @@ export class AddPermissionComponent implements OnInit {
 
     }
 
-    /**
-     * Deletes the selected permission using an API call.
-     * @param permissionId The ID of the permission to delete.
-     */
-    private confirmDelete(permissionId: string) {
-        this.rolesService.deleteRole(permissionId).subscribe({
+    private confirmDelete() {
+        this.rolesService.deleteRole(this.addPermissionForm.controls['id'].value).subscribe({
             next: () => {
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Role deleted successfully.' });
                 this.getAllPermissions();

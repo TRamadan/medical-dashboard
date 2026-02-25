@@ -170,6 +170,13 @@ export class AddUserComponent implements OnInit {
 
     //here is the function needed to open a dialog for add a new user
     openAddUserDialog(): void {
+        this.isEdit = false;
+        this.isDelete = false;
+        this.selectedUser = null;
+        this.addNewUserForm.reset();
+        // Ensure password is required when adding new user
+        this.personalData.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
+        this.personalData.get('password')?.updateValueAndValidity();
         this.userDialog = true;
     }
 
@@ -221,6 +228,7 @@ export class AddUserComponent implements OnInit {
      */
 
     submitUser(): void {
+        debugger
         if (this.isEdit) {
             this.updateSelectedUser();
         } else if (this.isDelete) {
@@ -232,11 +240,13 @@ export class AddUserComponent implements OnInit {
 
     //here is the function needed to update the selected user
     updateSelectedUser(): void {
-        if (this.addNewUserForm.invalid || !this.selectedUser) {
-            return;
+
+        const personal = { ...this.addNewUserForm.value.personalData };
+        if (!personal.password || personal.password === '') {
+            delete (personal as any).password; // don't send empty password; backend keeps current
         }
         const userPayload = {
-            ...this.addNewUserForm.value.personalData,
+            ...personal,
             ...this.addNewUserForm.value.employeeData
         };
 
@@ -277,14 +287,77 @@ export class AddUserComponent implements OnInit {
     //here is the function needed to open a dialog responsible for edit the selected user
     editSelectedUser(user: any): void {
         this.userService.getUserById(user.id).subscribe({
-            next: (fullUser) => {
-                this.selectedUser = fullUser;
-                this.addNewUserForm.patchValue(fullUser);
+            next: (res: any) => {
+                debugger
+                const data = res?.data ?? res;
+                this.selectedUser = { ...data, id: data.id ?? user.id };
+                this.patchFormForEdit(data);
                 this.isEdit = true;
                 this.userDialog = true;
             },
             error: (err) => this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message })
         });
+    }
+
+    /**
+     * Maps API user response (GetById) to the add/edit form structure and patches the form.
+     */
+    private patchFormForEdit(data: any): void {
+        if (!data) return;
+
+        const rolesId = Array.isArray(data.roles) ? data.roles.map((r: any) => r.id) : [];
+        const groupesId = Array.isArray(data.groupes) ? data.groupes.map((g: any) => g.id) : [];
+
+        const personalData = {
+            userName: data.userName ?? '',
+            nameAr: data.nameAr ?? '',
+            nameEn: data.nameEn ?? '',
+            email: data.email ?? '',
+            phoneNumber: data.phoneNumber ?? '',
+            password: '', // leave empty on edit; backend keeps current if not sent
+            rolesId,
+            groupesId,
+            genderId: data.genderId ?? null,
+            employeeType: data.userType ?? null
+        };
+
+        this.addNewUserForm.patchValue({
+            personalData
+        });
+
+        // Password optional when editing (leave empty to keep current)
+        this.personalData.get('password')?.clearValidators();
+        this.personalData.get('password')?.updateValueAndValidity();
+
+        // Employee data: patch if present in API (some users may have profile)
+        const emp = data.employeeProfile ?? data.employeeData ?? data;
+        if (emp.fullNameAr != null || emp.fullNameEn != null || emp.whatsappNumber != null ||
+            emp.address != null || emp.argentNumber1 != null || emp.argentNumber2 != null) {
+            this.employeeData.patchValue({
+                fullNameAr: emp.fullNameAr ?? '',
+                fullNameEn: emp.fullNameEn ?? '',
+                whatsappNumber: emp.whatsappNumber ?? '',
+                argentNumber1: emp.argentNumber1 ?? null,
+                argentNumber2: emp.argentNumber2 ?? null,
+                address: emp.address ?? '',
+                nationalIDImage: emp.nationalIDImage ?? null,
+                birthstatementImage: emp.birthstatementImage ?? null,
+                civilStatusStatemntImage: emp.civilStatusStatemntImage ?? null,
+                educationalqualificationImage: emp.educationalqualificationImage ?? null,
+                malitaryStatusImage: emp.malitaryStatusImage ?? null
+            });
+        }
+
+        // Optional: patch otherAttachments if API returns them
+        if (Array.isArray(emp?.attachments) && emp.attachments.length > 0) {
+            this.otherAttachments.clear();
+            emp.attachments.forEach((att: any) => {
+                this.otherAttachments.push(this.fb.group({
+                    description: [att.description ?? '', Validators.required],
+                    file: [att.filePath ?? att.file ?? null, Validators.required]
+                }));
+            });
+        }
     }
 
     //here is the function needed to open a dialog responsible for confirm deactive the selected user
@@ -336,8 +409,9 @@ export class AddUserComponent implements OnInit {
 
     showUserDetails(user: any) {
         this.userService.getUserById(user.id).subscribe({
-            next: (fullUser) => {
-                this.selectedUser = fullUser;
+            next: (res: any) => {
+                const data = res?.data ?? res;
+                this.selectedUser = { ...data, id: data.id ?? user.id };
                 this.detailsDialog = true;
             },
             error: (err) => {
@@ -365,7 +439,7 @@ export class AddUserComponent implements OnInit {
         const file = event.target.files[0];
 
         if (file) {
-            this._uploadFileService.uploadFileService(file, 'Users').subscribe({
+            this._uploadFileService.uploadFileServicePortal(file, 'Users').subscribe({
                 next: (res: any) => {
                     let formGroup: AbstractControl | null;
                     if (index !== undefined) {

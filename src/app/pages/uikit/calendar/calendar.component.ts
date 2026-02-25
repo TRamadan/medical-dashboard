@@ -25,7 +25,6 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 export class CalendarComponent implements OnInit {
     allLocations: any[] = [];
     filteredEmployees: any[] = [];
-    dateRange: Date[] = [];
     originalAppointments = signal<any[]>([]);
     allAppointments = signal<any[]>([]);
     timeSlots = signal<string[]>([]);
@@ -47,7 +46,9 @@ export class CalendarComponent implements OnInit {
         { label: 'Monthly', value: 'monthly' }
     ];
 
-    date: Date = new Date(); // Initialize with today's date
+    date: Date = new Date(); // Used when view preset (Daily/Weekly/Monthly) is applied
+    /** Date range from picker; when set with location, triggers loading employees and appointments */
+    dateRange: Date[] = [new Date(), new Date()];
 
     // Loading states for spinners
     loadingLocations = signal<boolean>(false);
@@ -75,12 +76,18 @@ export class CalendarComponent implements OnInit {
         this.loadingEmployees.set(true);
         this._userService.getAllUsers().subscribe({
             next: (res: any) => {
-                this.allEmployees = res.data;
+                const apiEmployees = res?.data ?? (Array.isArray(res) ? res : []);
+                const fake = this.getFakeEmployees();
+                this.allEmployees = Array.isArray(apiEmployees) && apiEmployees.length > 0
+                    ? [...apiEmployees, ...fake]
+                    : fake;
                 this.filteredEmployees = [...this.allEmployees];
                 this.loadingEmployees.set(false);
             },
             error: (err) => {
                 console.error('Error fetching employees:', err);
+                this.allEmployees = this.getFakeEmployees();
+                this.filteredEmployees = [...this.allEmployees];
                 this.loadingEmployees.set(false);
             }
         });
@@ -102,14 +109,90 @@ export class CalendarComponent implements OnInit {
         return undefined; // daily = single day, no toDate
     }
 
-    getAllScheduels(): void {
-        const fromDate = this.formatDate(this.date);
-        const toDate = this.getViewToDate();
+    /** Start date for API: from dateRange if set, else from single date */
+    private getFromDate(): string {
+        if (this.dateRange?.length >= 1 && this.dateRange[0]) {
+            return this.formatDate(this.dateRange[0]);
+        }
+        return this.formatDate(this.date);
+    }
+
+    /** End date for API: from dateRange if two dates, else single date or view-based */
+    private getToDate(): string | undefined {
+        if (this.dateRange?.length === 2 && this.dateRange[0] && this.dateRange[1]) {
+            return this.formatDate(this.dateRange[1]);
+        }
+        if (this.dateRange?.length === 1 && this.dateRange[0]) {
+            return this.formatDate(this.dateRange[0]);
+        }
+        return this.getViewToDate();
+    }
+
+    /** True when we have both location and a date range to load appointments */
+    hasLocationAndDateRange(): boolean {
+        return !!this.selectedLocation && !!this.dateRange?.length && !!this.dateRange[0];
+    }
+
+    /** Display label for the selected date range (e.g. "2026-02-22" or "2026-02-22 to 2026-02-28") */
+    getDateRangeLabel(): string {
+        if (!this.dateRange?.length || !this.dateRange[0]) return this.date ? this.formatDate(this.date) : '';
+        const from = this.dateRange[0];
+        const to = this.dateRange.length === 2 && this.dateRange[1] ? this.dateRange[1] : from;
+        const fromStr = this.formatDate(from);
+        const toStr = this.formatDate(to);
+        return fromStr === toStr ? fromStr : `${fromStr} to ${toStr}`;
+    }
+
+    /**
+     * Load appointments (and optionally filter by employee). Call only when location + date range are set.
+     */
+    loadAppointmentsByLocationAndRange(doctorId?: number): void {
+        if (!this.hasLocationAndDateRange()) return;
+        const fromDate = this.getFromDate();
+        const toDate = this.getToDate();
+        const locationId = this.selectedLocationId() || undefined;
 
         this.loadingSchedules.set(true);
-        this._calendarService.getAllCalenderData(fromDate, 30, this.selectedEmployeeId() || undefined, this.selectedLocationId() || undefined, toDate).subscribe({
+        if (doctorId) this.loadingEmployeeAppointments.set(true);
+
+        this._calendarService.getAllCalenderData(fromDate, 30, doctorId, locationId, toDate).subscribe({
             next: (res: any) => {
-                const mapped = this.mapAppointments(res);
+                const data = Array.isArray(res) && res.length > 0 ? res : this.getFakeCalendarApiResponse(fromDate, toDate, doctorId, locationId);
+                const mapped = this.mapAppointments(data);
+                this.originalAppointments.set(mapped);
+                this.allAppointments.set([...mapped]);
+                const slots = this.extractTimeSlots(mapped);
+                this.timeSlots.set(slots);
+                this.fillMissingSlots(this.allAppointments(), this.timeSlots());
+                this.loadingSchedules.set(false);
+                if (doctorId) this.loadingEmployeeAppointments.set(false);
+                this.updateNoResultsState();
+            },
+            error: (_err) => {
+                const data = this.getFakeCalendarApiResponse(fromDate, toDate, doctorId, locationId);
+                const mapped = this.mapAppointments(data);
+                this.allAppointments.set([...mapped]);
+                const slots = this.extractTimeSlots(mapped);
+                this.timeSlots.set(slots);
+                this.fillMissingSlots(this.allAppointments(), this.timeSlots());
+                this.loadingSchedules.set(false);
+                if (doctorId) this.loadingEmployeeAppointments.set(false);
+                this.updateNoResultsState();
+            }
+        });
+    }
+
+    getAllScheduels(): void {
+        const fromDate = this.getFromDate();
+        const toDate = this.getToDate();
+        const doctorId = this.selectedEmployeeId() || undefined;
+        const locationId = this.selectedLocationId() || undefined;
+
+        this.loadingSchedules.set(true);
+        this._calendarService.getAllCalenderData(fromDate, 30, doctorId, locationId, toDate).subscribe({
+            next: (res: any) => {
+                const data = Array.isArray(res) && res.length > 0 ? res : this.getFakeCalendarApiResponse(fromDate, toDate, doctorId, locationId);
+                const mapped = this.mapAppointments(data);
                 this.originalAppointments.set(mapped);
                 this.allAppointments.set([...mapped]);
                 const slots = this.extractTimeSlots(mapped);
@@ -117,8 +200,14 @@ export class CalendarComponent implements OnInit {
                 this.fillMissingSlots(this.allAppointments(), this.timeSlots());
                 this.loadingSchedules.set(false);
             },
-            error: (err) => {
-                console.error('Error fetching calendar data:', err);
+            error: (_err) => {
+                const data = this.getFakeCalendarApiResponse(fromDate, toDate, doctorId, locationId);
+                const mapped = this.mapAppointments(data);
+                this.originalAppointments.set(mapped);
+                this.allAppointments.set([...mapped]);
+                const slots = this.extractTimeSlots(mapped);
+                this.timeSlots.set(slots);
+                this.fillMissingSlots(this.allAppointments(), this.timeSlots());
                 this.loadingSchedules.set(false);
             }
         });
@@ -205,17 +294,19 @@ export class CalendarComponent implements OnInit {
     }
 
     onDateSelect(): void {
-        if (this.date) {
-            this.getAllScheduels();
+        if (this.date && this.hasLocationAndDateRange()) {
+            this.loadAppointmentsByLocationAndRange(this.selectedEmployeeId() || undefined);
         }
     }
 
     fetchEmployeeData(date: string, employeeId: number): void {
-        const toDate = this.getViewToDate();
+        const toDate = this.getToDate();
+        const locationId = this.selectedLocationId() || undefined;
         this.loadingEmployeeAppointments.set(true);
-        this._calendarService.getAllCalenderData(date, 30, employeeId, this.selectedLocationId() || undefined, toDate).subscribe({
+        this._calendarService.getAllCalenderData(date, 30, employeeId, locationId, toDate).subscribe({
             next: (res: any) => {
-                const mapped = this.mapAppointments(res);
+                const data = Array.isArray(res) && res.length > 0 ? res : this.getFakeCalendarApiResponse(date, toDate, employeeId, locationId);
+                const mapped = this.mapAppointments(data);
                 this.allAppointments.set([...mapped]);
                 const slots = this.extractTimeSlots(mapped);
                 this.timeSlots.set(slots);
@@ -223,8 +314,13 @@ export class CalendarComponent implements OnInit {
                 this.updateNoResultsState();
                 this.loadingEmployeeAppointments.set(false);
             },
-            error: (err) => {
-                console.error('Error loading employee calendar:', err);
+            error: (_err) => {
+                const data = this.getFakeCalendarApiResponse(date, toDate, employeeId, locationId);
+                const mapped = this.mapAppointments(data);
+                this.allAppointments.set([...mapped]);
+                const slots = this.extractTimeSlots(mapped);
+                this.timeSlots.set(slots);
+                this.fillMissingSlots(this.allAppointments(), this.timeSlots());
                 this.updateNoResultsState();
                 this.loadingEmployeeAppointments.set(false);
             }
@@ -300,11 +396,16 @@ export class CalendarComponent implements OnInit {
     }
 
     /**
-     * Reset filter to show all appointments
+     * Reset filter to show all appointments for current location and date range
      */
     resetFilter(): void {
         this.selectedEmployeeId.set(null);
-        this.getAllScheduels();
+        if (this.hasLocationAndDateRange()) {
+            this.loadAppointmentsByLocationAndRange();
+        } else {
+            this.allAppointments.set([]);
+            this.timeSlots.set([]);
+        }
     }
 
     openNewAppointmentDialog() {
@@ -320,15 +421,81 @@ export class CalendarComponent implements OnInit {
         this.getAllScheduels();
     }
 
+    /** Fake locations for POC/demo when API is empty or for customer demo */
+    private getFakeLocations(): any[] {
+        return [
+            { id: 9001, nameEn: 'Pegasus Dream Land', nameAr: 'أرض حلم بيغاسوس' },
+            { id: 9002, nameEn: 'Downtown Medical Center', nameAr: 'المركز الطبي وسط البلد' },
+            { id: 9003, nameEn: 'North Branch Clinic', nameAr: 'عيادة الفرع الشمالي' },
+            { id: 9004, nameEn: 'Sports Lab HQ', nameAr: 'مقر المختبر الرياضي' }
+        ];
+    }
+
+    /** Fake employees for POC/demo so coaches list is never empty for selected location */
+    private getFakeEmployees(): any[] {
+        const fakeLocations = this.getFakeLocations();
+        return [
+            { id: 8001, nameEn: 'Dr. Sarah Ahmed', userName: 'sarah.ahmed', locations: fakeLocations },
+            { id: 8002, nameEn: 'Dr. Omar Hassan', userName: 'omar.hassan', locations: fakeLocations },
+            { id: 8003, nameEn: 'Coach Layla Mahmoud', userName: 'layla.m', locations: fakeLocations },
+            { id: 8004, nameEn: 'Dr. Karim Fathy', userName: 'karim.fathy', locations: fakeLocations }
+        ];
+    }
+
+    /** Fake calendar API response for POC – same shape as Appointments/Calendar API */
+    private getFakeCalendarApiResponse(fromDate: string, toDate: string | undefined, doctorId?: number, _locationId?: number): any[] {
+        const fakeDoctors = [
+            { doctorId: 8001, doctorNameEn: 'Dr. Sarah Ahmed', doctorNameAr: 'د. سارة أحمد' },
+            { doctorId: 8002, doctorNameEn: 'Dr. Omar Hassan', doctorNameAr: 'د. عمر حسن' },
+            { doctorId: 8003, doctorNameEn: 'Coach Layla Mahmoud', doctorNameAr: 'المدربة ليلى محمود' },
+            { doctorId: 8004, doctorNameEn: 'Dr. Karim Fathy', doctorNameAr: 'د. كريم فتحي' }
+        ];
+        const doctors = doctorId ? fakeDoctors.filter(d => d.doctorId === doctorId) : fakeDoctors;
+        if (doctors.length === 0) return [];
+
+        const slotStarts = ['08:00:00', '08:30:00', '09:00:00', '09:30:00', '10:00:00', '10:30:00', '11:00:00', '11:30:00', '12:00:00', '12:30:00', '13:00:00', '13:30:00', '14:00:00', '14:30:00', '15:00:00', '15:30:00', '16:00:00', '16:30:00', '17:00:00', '17:30:00'];
+        const fakePatients = ['Ahmed Ali', 'Mona Ibrahim', 'Youssef Hassan', 'Nadia Salem', 'Khaled Mahmoud', 'Lina Fathy'];
+        const fakeServices = [{ ar: 'فحص عام', en: 'General Checkup' }, { ar: 'جلسة علاج طبيعي', en: 'Physiotherapy Session' }, { ar: 'استشارة تغذية', en: 'Nutrition Consultation' }];
+        const statuses = ['Confirmed', 'Scheduled', 'pending', 'Available'];
+
+        return doctors.map(doctor => {
+            const slotTime = slotStarts.map((from, i) => {
+                const next = slotStarts[i + 1] || '18:00:00';
+                const to = next;
+                const hasAppointment = (doctor.doctorId + i) % 3 !== 0;
+                const appointment = hasAppointment ? {
+                    patientNameEn: fakePatients[i % fakePatients.length],
+                    patientNameAr: `مريض ${i + 1}`,
+                    serviceNameAr: fakeServices[i % fakeServices.length].ar,
+                    serviceNameEn: fakeServices[i % fakeServices.length].en,
+                    status: statuses[i % statuses.length],
+                    servicePrice: 150 + (i % 5) * 50
+                } : null;
+                return {
+                    from,
+                    to,
+                    appointment,
+                    locationNameAr: this.selectedLocation?.nameEn || 'Pegasus Dream Land'
+                };
+            });
+            return { ...doctor, slotTime };
+        });
+    }
+
     getAllLocations(): void {
         this.loadingLocations.set(true);
         this._locationService.getLocations().subscribe({
             next: (res: any) => {
-                this.allLocations = res.data || res;
+                const apiLocations = res?.data ?? (Array.isArray(res) ? res : []);
+                const fake = this.getFakeLocations();
+                this.allLocations = Array.isArray(apiLocations) && apiLocations.length > 0
+                    ? [...apiLocations, ...fake]
+                    : fake;
                 this.loadingLocations.set(false);
             },
             error: (err) => {
                 console.error('Error fetching locations:', err);
+                this.allLocations = this.getFakeLocations();
                 this.loadingLocations.set(false);
             }
         });
@@ -350,11 +517,15 @@ export class CalendarComponent implements OnInit {
         if (this.selectedLocation) {
             this.selectedLocationId.set(this.selectedLocation.id);
             this.filterEmployeesByLocation();
-            this.getAllScheduels();
+            if (this.hasLocationAndDateRange()) {
+                this.selectedEmployeeId.set(null);
+                this.loadAppointmentsByLocationAndRange();
+            }
         } else {
             this.selectedLocationId.set(null);
             this.filteredEmployees = [...this.allEmployees];
-            this.getAllScheduels();
+            this.allAppointments.set([]);
+            this.timeSlots.set([]);
         }
     }
 
@@ -380,14 +551,21 @@ export class CalendarComponent implements OnInit {
 
     onCoachSelect(coach: any): void {
         if (this.selectedEmployeeId() === coach.id) {
-            // Deselect if clicking the same coach
             this.selectedEmployeeId.set(null);
-            this.allAppointments.set([]);
+            if (this.hasLocationAndDateRange()) {
+                this.loadAppointmentsByLocationAndRange();
+            } else {
+                this.allAppointments.set([]);
+                this.timeSlots.set([]);
+            }
             this.showNoResults = false;
         } else {
-            // Select new coach and fetch appointments
             this.selectedEmployeeId.set(coach.id);
-            this.fetchEmployeeData(this.formatDate(this.date), coach.id);
+            if (this.hasLocationAndDateRange()) {
+                this.loadAppointmentsByLocationAndRange(coach.id);
+            } else {
+                this.fetchEmployeeData(this.getFromDate(), coach.id);
+            }
         }
     }
 
@@ -395,33 +573,33 @@ export class CalendarComponent implements OnInit {
         this.showNoResults = this.selectedEmployeeId() !== null && this.allAppointments().length === 0;
     }
     parsedDates: any = {}
-    onDateRangeSelect() {
-        if (this.dateRange && this.dateRange.length === 2 && this.dateRange[0] && this.dateRange[1]) {
-            const [startDate, endDate] = this.dateRange;
-            this.date = startDate;
-            const fromDateStr = this.formatDate(startDate);
-            const toDateStr = this.formatDate(endDate);
-            this.loadingSchedules.set(true);
-            this._calendarService.getAllCalenderData(fromDateStr, 30, this.selectedEmployeeId() || undefined, this.selectedLocationId() || undefined, toDateStr).subscribe({
-                next: (res: any) => {
-                    const mapped = this.mapAppointments(res);
-                    this.allAppointments.set([...mapped]);
-                    const slots = this.extractTimeSlots(mapped);
-                    this.timeSlots.set(slots);
-                    this.fillMissingSlots(this.allAppointments(), this.timeSlots());
-                    this.loadingSchedules.set(false);
-                },
-                error: (err) => {
-                    console.error('Error fetching calendar data for range:', err);
-                    this.loadingSchedules.set(false);
-                }
-            });
+    onDateRangeSelect(): void {
+        if (!this.dateRange?.length || !this.dateRange[0]) return;
+        if (this.hasLocationAndDateRange()) {
+            this.selectedEmployeeId.set(null);
+            this.loadAppointmentsByLocationAndRange();
         }
     }
 
     onViewChange(): void {
         this.selectedView.set(this.viewValue);
-        this.getAllScheduels();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (this.viewValue === 'daily') {
+            this.dateRange = [new Date(today), new Date(today)];
+        } else if (this.viewValue === 'weekly') {
+            const end = new Date(today);
+            end.setDate(end.getDate() + 6);
+            this.dateRange = [new Date(today), end];
+        } else {
+            const start = new Date(today.getFullYear(), today.getMonth(), 1);
+            const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            this.dateRange = [start, end];
+        }
+        if (this.hasLocationAndDateRange()) {
+            this.selectedEmployeeId.set(null);
+            this.loadAppointmentsByLocationAndRange();
+        }
     }
 
     private formatLocalDate(date: Date): string {

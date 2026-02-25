@@ -53,7 +53,7 @@ export class FileUploadInputComponent {
         if (!file) return;
 
         this.isUploading = true;
-        this._uploadFileService.uploadFileService(file, this.folderName).subscribe({
+        this._uploadFileService.uploadFileServicePortal(file, this.folderName).subscribe({
             next: (res: any) => {
                 this.isUploading = false;
                 this.innerValue = res.filePath;

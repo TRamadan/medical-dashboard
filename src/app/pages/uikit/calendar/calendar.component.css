@@ -25,10 +25,90 @@ section {
 /* Search Card Styles */
 .search-card {
     border: 1px solid #e9ecef;
+    border-radius: 12px;
+    overflow: visible;
 }
 
 .search-card h5 {
     font-size: 1.1rem;
+    color: #495057;
+    font-weight: 600;
+}
+
+/* Enhanced Filter Inputs: Dropdown & Date */
+.search-card .filter-input-wrap {
+    border-radius: 10px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+::ng-deep .search-card .p-dropdown,
+::ng-deep .search-card .p-datepicker .p-inputwrapper {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    background: #fff;
+}
+
+::ng-deep .search-card .p-dropdown:hover,
+::ng-deep .search-card .p-datepicker .p-inputwrapper:hover {
+    border-color: #adb5bd;
+}
+
+::ng-deep .search-card .p-dropdown.p-focus,
+::ng-deep .search-card .p-dropdown.p-inputwrapper-focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.18);
+    outline: none;
+}
+
+::ng-deep .search-card .p-datepicker .p-inputwrapper.p-focus,
+::ng-deep .search-card .p-datepicker .p-inputwrapper.p-inputwrapper-focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.18);
+    outline: none;
+}
+
+::ng-deep .search-card .p-datepicker input {
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    padding: 0.6rem 0.75rem 0.6rem 2.5rem;
+}
+
+::ng-deep .search-card .p-datepicker input:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.18);
+    outline: none;
+}
+
+::ng-deep .search-card .p-dropdown .p-dropdown-label {
+    padding: 0.6rem 0.75rem;
+}
+
+/* Dropdown overlay panel: make options list take full width of panel */
+::ng-deep .filter-dropdown-panel .p-dropdown-list,
+::ng-deep .filter-dropdown-panel .p-dropdown-items-wrapper,
+::ng-deep .filter-dropdown-panel .p-dropdown-items,
+::ng-deep .filter-dropdown-panel .p-dropdown-item {
+    width: 100% !important;
+    box-sizing: border-box;
+}
+
+/* Spacing between SelectButton options (Daily | Weekly | Monthly) */
+::ng-deep .search-card .p-selectbutton {
+    display: flex;
+    gap: 10px;
+}
+
+::ng-deep .search-card .p-selectbutton .p-button {
+    margin: 0;
+    border-radius: 10px !important;
+    padding: 0.6rem 1.25rem;
+    font-weight: 500;
+}
+
+::ng-deep .search-card .p-selectbutton .p-button.p-highlight {
+    background: #0d6efd;
+    border-color: #0d6efd;
 }
 
 /* Placeholder Styles */

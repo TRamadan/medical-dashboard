@@ -51,12 +51,34 @@ export class Login {
     login() {
         const loginData = { value: this.email, password: this.password };
         this.authService.login(1, loginData).subscribe({
-            next: () => {
-                this.router.navigate(['/']);
+            next: (response: any) => {
+                const firstPageUrl = this.getFirstPageUrlFromSideRouts(response?.user?.sideRouts);
+                if (firstPageUrl) {
+                    this.router.navigateByUrl(firstPageUrl);
+                } else {
+                    this.router.navigate(['/']);
+                }
             },
             error: (err) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Login failed. Please check your credentials.' });
             }
         });
+    }
+
+    /**
+     * Returns the first page URL found in the user's sideRouts (recursively checks item.pageUrl then item.children).
+     */
+    private getFirstPageUrlFromSideRouts(sideRouts: any[] | undefined): string | null {
+        if (!Array.isArray(sideRouts) || sideRouts.length === 0) return null;
+        for (const item of sideRouts) {
+            if (item?.pageUrl && typeof item.pageUrl === 'string' && item.pageUrl.trim() !== '') {
+                return item.pageUrl.trim();
+            }
+            if (Array.isArray(item?.children) && item.children.length > 0) {
+                const found = this.getFirstPageUrlFromSideRouts(item.children);
+                if (found) return found;
+            }
+        }
+        return null;
     }
 }

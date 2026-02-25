@@ -6,9 +6,9 @@ export const environment = {
     production: false,
     apiUrl: 'https://portalapi.thesportsdoctorlab.com/api/',
     imgUrl: 'https://portalapi.thesportsdoctorlab.com/',
-
-    apiUrlWebsite: 'http://websiteapi.thesportsdoctorlab.com/api/',
-    imgUrlWebsite: 'http://websiteapi.thesportsdoctorlab.com/'
+    uploadUrl: 'https://portalapi.thesportsdoctorlab.com/api/UploadFiles',
+    apiUrlWebsite: 'https://websiteapi.thesportsdoctorlab.com/api/',
+    imgUrlWebsite: 'https://websiteapi.thesportsdoctorlab.com/'
 };
 
 /*

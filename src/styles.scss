@@ -27,3 +27,12 @@
 * {
     font-family: 'DINNextW1G';
 }
+
+/* PrimeNG dropdown panel: make options list take full width of panel (for overlays appended to body) */
+.filter-dropdown-panel .p-dropdown-list,
+.filter-dropdown-panel .p-dropdown-items-wrapper,
+.filter-dropdown-panel .p-dropdown-items,
+.filter-dropdown-panel .p-dropdown-item {
+    width: 100% !important;
+    box-sizing: border-box;
+}

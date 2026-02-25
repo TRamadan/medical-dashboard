@@ -19,21 +19,22 @@ export class AppMenu {
     model: MenuItem[] = [];
 
     ngOnInit() {
-        // const sideRoutesString = localStorage.getItem('sideRoutes');
+        const sideRoutesString = localStorage.getItem('sideRoutes');
         // if (sideRoutesString) {
         //     const sideRouts = JSON.parse(sideRoutesString);
 
-        //     this.model = sideRouts.map((route: any) => {
-        //         return {
-        //             label: route.name, // مثلاً "website control"
-        //             items: route.children.map((child: any) => ({
-        //                 label: child.name,
-        //                 icon: '',
-        //                 routerLink: [child.pageUrl]
-        //             }))
-        //         };
-        //     });
+        //     this.model = sideRouts
+        //     ?.filter((route: any) => route.children?.length)
+        //     .map((route: any) => ({
+        //         label: route.name,
+        //         items: route.children.map((child: any) => ({
+        //             label: child.name,
+        //             icon: '',
+        //             routerLink: [child.pageUrl]
+        //         }))
+        //     }));
         // }
+
         this.model = [
             {
                 label: 'Home',
