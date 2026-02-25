@@ -1,5 +1,5 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
@@ -9,9 +9,9 @@ describe('AddPermissionComponent', () => {
   let component: AddPermissionComponent;
   let fixture: ComponentFixture<AddPermissionComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ AddPermissionComponent ]
+      imports: [ AddPermissionComponent ]
     })
     .compileComponents();
   }));

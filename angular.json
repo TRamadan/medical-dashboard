@@ -17,7 +17,10 @@
                 "build": {
                     "builder": "@angular-devkit/build-angular:application",
                     "options": {
-                        "outputPath": "dist/sports-dr-control",
+                        "outputPath": {
+                            "base": "dist/sports-dr-control",
+                            "browser": ""
+                        },
                         "index": "src/index.html",
                         "browser": "src/main.ts",
                         "polyfills": [
@@ -26,10 +29,8 @@
                         "tsConfig": "tsconfig.app.json",
                         "inlineStyleLanguage": "scss",
                         "assets": [
-                            {
-                                "glob": "**/*",
-                                "input": "src/public"
-                            },
+                            "src/_redirects",
+                            "src/_headers",
                             {
                                 "glob": "**/*",
                                 "input": "src/assets",
@@ -90,10 +91,6 @@
                         "tsConfig": "tsconfig.spec.json",
                         "inlineStyleLanguage": "scss",
                         "assets": [
-                            {
-                                "glob": "**/*",
-                                "input": "src/public"
-                            },
                             {
                                 "glob": "**/*",
                                 "input": "src/assets",

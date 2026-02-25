@@ -1,5 +1,5 @@
 /* tslint:disable:no-unused-variable */
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 
@@ -9,9 +9,9 @@ describe('LocationServiceFormComponent', () => {
   let component: LocationServiceFormComponent;
   let fixture: ComponentFixture<LocationServiceFormComponent>;
 
-  beforeEach(async(() => {
+  beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ LocationServiceFormComponent ]
+      imports: [ LocationServiceFormComponent ]
     })
     .compileComponents();
   }));
