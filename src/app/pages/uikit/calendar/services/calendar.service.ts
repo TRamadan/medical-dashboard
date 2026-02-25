@@ -30,4 +30,13 @@ export class CalendarService {
 
         return this.http.get(`${this.apiUrl}Appointments/Calendar`, { params });
     }
+
+    getAvailableDoctors(locationId: number, fromDate: string, toDate: string) {
+        let params = new HttpParams()
+            .set('locationId', locationId)
+            .set('fromDate', fromDate)
+            .set('toDate', toDate);
+
+        return this.http.get(`${this.apiUrl}WorkingHours/available-doctors`, { params });
+    }
 }
