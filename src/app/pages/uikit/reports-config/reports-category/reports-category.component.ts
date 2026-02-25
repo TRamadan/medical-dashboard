@@ -14,7 +14,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
     styleUrls: ['./reports-category.component.css'],
     standalone: true,
     providers: [ConfirmationService, MessageService],
-    imports: [Toast, ConfirmDialog, TableComponent, Card]
+    imports: []
 })
 export class ReportsCategoryComponent implements OnInit {
     categories: Category[] = [];
