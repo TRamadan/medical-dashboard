@@ -228,7 +228,7 @@ export class AddUserComponent implements OnInit {
      */
 
     submitUser(): void {
-        debugger
+
         if (this.isEdit) {
             this.updateSelectedUser();
         } else if (this.isDelete) {
@@ -288,7 +288,7 @@ export class AddUserComponent implements OnInit {
     editSelectedUser(user: any): void {
         this.userService.getUserById(user.id).subscribe({
             next: (res: any) => {
-                debugger
+
                 const data = res?.data ?? res;
                 this.selectedUser = { ...data, id: data.id ?? user.id };
                 this.patchFormForEdit(data);

@@ -69,29 +69,9 @@ export class CalendarComponent implements OnInit {
 
     ngOnInit(): void {
         this.getAllLocations();
-        this.getAllEmployees();
     }
 
-    getAllEmployees(): void {
-        this.loadingEmployees.set(true);
-        this._userService.getAllUsers().subscribe({
-            next: (res: any) => {
-                const apiEmployees = res?.data ?? (Array.isArray(res) ? res : []);
-                const fake = this.getFakeEmployees();
-                this.allEmployees = Array.isArray(apiEmployees) && apiEmployees.length > 0
-                    ? [...apiEmployees, ...fake]
-                    : fake;
-                this.filteredEmployees = [...this.allEmployees];
-                this.loadingEmployees.set(false);
-            },
-            error: (err) => {
-                console.error('Error fetching employees:', err);
-                this.allEmployees = this.getFakeEmployees();
-                this.filteredEmployees = [...this.allEmployees];
-                this.loadingEmployees.set(false);
-            }
-        });
-    }
+
 
     /** Map UI view value to API period (daily = single day, weekly = +6 days, monthly = +1 month) */
     private getViewToDate(): string | undefined {
@@ -130,6 +110,7 @@ export class CalendarComponent implements OnInit {
 
     /** True when we have both location and a date range to load appointments */
     hasLocationAndDateRange(): boolean {
+        debugger
         return !!this.selectedLocation && !!this.dateRange?.length && !!this.dateRange[0];
     }
 
@@ -155,9 +136,9 @@ export class CalendarComponent implements OnInit {
         this.loadingSchedules.set(true);
         if (doctorId) this.loadingEmployeeAppointments.set(true);
 
-        this._calendarService.getAllCalenderData(fromDate, 30, doctorId, locationId, toDate).subscribe({
+        this._calendarService.getAllCalenderData(fromDate, 10, doctorId, locationId, toDate).subscribe({
             next: (res: any) => {
-                const data = Array.isArray(res) && res.length > 0 ? res : this.getFakeCalendarApiResponse(fromDate, toDate, doctorId, locationId);
+                const data = Array.isArray(res) ? res : [];
                 const mapped = this.mapAppointments(data);
                 this.originalAppointments.set(mapped);
                 this.allAppointments.set([...mapped]);
@@ -169,12 +150,10 @@ export class CalendarComponent implements OnInit {
                 this.updateNoResultsState();
             },
             error: (_err) => {
-                const data = this.getFakeCalendarApiResponse(fromDate, toDate, doctorId, locationId);
-                const mapped = this.mapAppointments(data);
-                this.allAppointments.set([...mapped]);
-                const slots = this.extractTimeSlots(mapped);
-                this.timeSlots.set(slots);
-                this.fillMissingSlots(this.allAppointments(), this.timeSlots());
+                console.error('Error fetching calendar data:', _err);
+                this.originalAppointments.set([]);
+                this.allAppointments.set([]);
+                this.timeSlots.set([]);
                 this.loadingSchedules.set(false);
                 if (doctorId) this.loadingEmployeeAppointments.set(false);
                 this.updateNoResultsState();
@@ -191,7 +170,7 @@ export class CalendarComponent implements OnInit {
         this.loadingSchedules.set(true);
         this._calendarService.getAllCalenderData(fromDate, 30, doctorId, locationId, toDate).subscribe({
             next: (res: any) => {
-                const data = Array.isArray(res) && res.length > 0 ? res : this.getFakeCalendarApiResponse(fromDate, toDate, doctorId, locationId);
+                const data = Array.isArray(res) ? res : [];
                 const mapped = this.mapAppointments(data);
                 this.originalAppointments.set(mapped);
                 this.allAppointments.set([...mapped]);
@@ -201,13 +180,10 @@ export class CalendarComponent implements OnInit {
                 this.loadingSchedules.set(false);
             },
             error: (_err) => {
-                const data = this.getFakeCalendarApiResponse(fromDate, toDate, doctorId, locationId);
-                const mapped = this.mapAppointments(data);
-                this.originalAppointments.set(mapped);
-                this.allAppointments.set([...mapped]);
-                const slots = this.extractTimeSlots(mapped);
-                this.timeSlots.set(slots);
-                this.fillMissingSlots(this.allAppointments(), this.timeSlots());
+                console.error('Error fetching schedules:', _err);
+                this.originalAppointments.set([]);
+                this.allAppointments.set([]);
+                this.timeSlots.set([]);
                 this.loadingSchedules.set(false);
             }
         });
@@ -305,7 +281,7 @@ export class CalendarComponent implements OnInit {
         this.loadingEmployeeAppointments.set(true);
         this._calendarService.getAllCalenderData(date, 30, employeeId, locationId, toDate).subscribe({
             next: (res: any) => {
-                const data = Array.isArray(res) && res.length > 0 ? res : this.getFakeCalendarApiResponse(date, toDate, employeeId, locationId);
+                const data = Array.isArray(res) ? res : [];
                 const mapped = this.mapAppointments(data);
                 this.allAppointments.set([...mapped]);
                 const slots = this.extractTimeSlots(mapped);
@@ -315,12 +291,9 @@ export class CalendarComponent implements OnInit {
                 this.loadingEmployeeAppointments.set(false);
             },
             error: (_err) => {
-                const data = this.getFakeCalendarApiResponse(date, toDate, employeeId, locationId);
-                const mapped = this.mapAppointments(data);
-                this.allAppointments.set([...mapped]);
-                const slots = this.extractTimeSlots(mapped);
-                this.timeSlots.set(slots);
-                this.fillMissingSlots(this.allAppointments(), this.timeSlots());
+                console.error('Error fetching employee appointments:', _err);
+                this.allAppointments.set([]);
+                this.timeSlots.set([]);
                 this.updateNoResultsState();
                 this.loadingEmployeeAppointments.set(false);
             }
@@ -385,14 +358,14 @@ export class CalendarComponent implements OnInit {
 
     getCoachTimeSlots(selectedEmployee: any): void {
         // If clicking the same employee -> reset filter
-        if (this.selectedEmployeeId() === selectedEmployee.id) {
+        if (this.selectedEmployeeId() === selectedEmployee.doctorId) {
             this.resetFilter();
             return;
         }
 
         // Select new employee
-        this.selectedEmployeeId.set(selectedEmployee.id);
-        this.fetchEmployeeData(this.formatDate(this.date), selectedEmployee.id);
+        this.selectedEmployeeId.set(selectedEmployee.doctorId);
+        this.fetchEmployeeData(this.formatDate(this.date), selectedEmployee.doctorId);
     }
 
     /**
@@ -421,81 +394,17 @@ export class CalendarComponent implements OnInit {
         this.getAllScheduels();
     }
 
-    /** Fake locations for POC/demo when API is empty or for customer demo */
-    private getFakeLocations(): any[] {
-        return [
-            { id: 9001, nameEn: 'Pegasus Dream Land', nameAr: 'أرض حلم بيغاسوس' },
-            { id: 9002, nameEn: 'Downtown Medical Center', nameAr: 'المركز الطبي وسط البلد' },
-            { id: 9003, nameEn: 'North Branch Clinic', nameAr: 'عيادة الفرع الشمالي' },
-            { id: 9004, nameEn: 'Sports Lab HQ', nameAr: 'مقر المختبر الرياضي' }
-        ];
-    }
-
-    /** Fake employees for POC/demo so coaches list is never empty for selected location */
-    private getFakeEmployees(): any[] {
-        const fakeLocations = this.getFakeLocations();
-        return [
-            { id: 8001, nameEn: 'Dr. Sarah Ahmed', userName: 'sarah.ahmed', locations: fakeLocations },
-            { id: 8002, nameEn: 'Dr. Omar Hassan', userName: 'omar.hassan', locations: fakeLocations },
-            { id: 8003, nameEn: 'Coach Layla Mahmoud', userName: 'layla.m', locations: fakeLocations },
-            { id: 8004, nameEn: 'Dr. Karim Fathy', userName: 'karim.fathy', locations: fakeLocations }
-        ];
-    }
-
-    /** Fake calendar API response for POC – same shape as Appointments/Calendar API */
-    private getFakeCalendarApiResponse(fromDate: string, toDate: string | undefined, doctorId?: number, _locationId?: number): any[] {
-        const fakeDoctors = [
-            { doctorId: 8001, doctorNameEn: 'Dr. Sarah Ahmed', doctorNameAr: 'د. سارة أحمد' },
-            { doctorId: 8002, doctorNameEn: 'Dr. Omar Hassan', doctorNameAr: 'د. عمر حسن' },
-            { doctorId: 8003, doctorNameEn: 'Coach Layla Mahmoud', doctorNameAr: 'المدربة ليلى محمود' },
-            { doctorId: 8004, doctorNameEn: 'Dr. Karim Fathy', doctorNameAr: 'د. كريم فتحي' }
-        ];
-        const doctors = doctorId ? fakeDoctors.filter(d => d.doctorId === doctorId) : fakeDoctors;
-        if (doctors.length === 0) return [];
-
-        const slotStarts = ['08:00:00', '08:30:00', '09:00:00', '09:30:00', '10:00:00', '10:30:00', '11:00:00', '11:30:00', '12:00:00', '12:30:00', '13:00:00', '13:30:00', '14:00:00', '14:30:00', '15:00:00', '15:30:00', '16:00:00', '16:30:00', '17:00:00', '17:30:00'];
-        const fakePatients = ['Ahmed Ali', 'Mona Ibrahim', 'Youssef Hassan', 'Nadia Salem', 'Khaled Mahmoud', 'Lina Fathy'];
-        const fakeServices = [{ ar: 'فحص عام', en: 'General Checkup' }, { ar: 'جلسة علاج طبيعي', en: 'Physiotherapy Session' }, { ar: 'استشارة تغذية', en: 'Nutrition Consultation' }];
-        const statuses = ['Confirmed', 'Scheduled', 'pending', 'Available'];
-
-        return doctors.map(doctor => {
-            const slotTime = slotStarts.map((from, i) => {
-                const next = slotStarts[i + 1] || '18:00:00';
-                const to = next;
-                const hasAppointment = (doctor.doctorId + i) % 3 !== 0;
-                const appointment = hasAppointment ? {
-                    patientNameEn: fakePatients[i % fakePatients.length],
-                    patientNameAr: `مريض ${i + 1}`,
-                    serviceNameAr: fakeServices[i % fakeServices.length].ar,
-                    serviceNameEn: fakeServices[i % fakeServices.length].en,
-                    status: statuses[i % statuses.length],
-                    servicePrice: 150 + (i % 5) * 50
-                } : null;
-                return {
-                    from,
-                    to,
-                    appointment,
-                    locationNameAr: this.selectedLocation?.nameEn || 'Pegasus Dream Land'
-                };
-            });
-            return { ...doctor, slotTime };
-        });
-    }
-
     getAllLocations(): void {
         this.loadingLocations.set(true);
         this._locationService.getLocations().subscribe({
             next: (res: any) => {
                 const apiLocations = res?.data ?? (Array.isArray(res) ? res : []);
-                const fake = this.getFakeLocations();
-                this.allLocations = Array.isArray(apiLocations) && apiLocations.length > 0
-                    ? [...apiLocations, ...fake]
-                    : fake;
+                this.allLocations = Array.isArray(apiLocations) ? apiLocations : [];
                 this.loadingLocations.set(false);
             },
             error: (err) => {
                 console.error('Error fetching locations:', err);
-                this.allLocations = this.getFakeLocations();
+                this.allLocations = [];
                 this.loadingLocations.set(false);
             }
         });
@@ -516,10 +425,15 @@ export class CalendarComponent implements OnInit {
     onLocationSelect(): void {
         if (this.selectedLocation) {
             this.selectedLocationId.set(this.selectedLocation.id);
-            this.filterEmployeesByLocation();
             if (this.hasLocationAndDateRange()) {
                 this.selectedEmployeeId.set(null);
-                this.loadAppointmentsByLocationAndRange();
+                this.fetchDoctorsByLocation(
+                    this.selectedLocation.id,
+                    this.getFromDate(),
+                    this.getToDate() || this.getFromDate()
+                );
+            } else {
+                this.filterEmployeesByLocation();
             }
         } else {
             this.selectedLocationId.set(null);
@@ -550,7 +464,7 @@ export class CalendarComponent implements OnInit {
     }
 
     onCoachSelect(coach: any): void {
-        if (this.selectedEmployeeId() === coach.id) {
+        if (this.selectedEmployeeId() === coach.doctorId) {
             this.selectedEmployeeId.set(null);
             if (this.hasLocationAndDateRange()) {
                 this.loadAppointmentsByLocationAndRange();
@@ -560,11 +474,11 @@ export class CalendarComponent implements OnInit {
             }
             this.showNoResults = false;
         } else {
-            this.selectedEmployeeId.set(coach.id);
+            this.selectedEmployeeId.set(coach.doctorId);
             if (this.hasLocationAndDateRange()) {
-                this.loadAppointmentsByLocationAndRange(coach.id);
+                this.loadAppointmentsByLocationAndRange(coach.doctorId);
             } else {
-                this.fetchEmployeeData(this.getFromDate(), coach.id);
+                this.fetchEmployeeData(this.getFromDate(), coach.doctorId);
             }
         }
     }
@@ -577,8 +491,41 @@ export class CalendarComponent implements OnInit {
         if (!this.dateRange?.length || !this.dateRange[0]) return;
         if (this.hasLocationAndDateRange()) {
             this.selectedEmployeeId.set(null);
-            this.loadAppointmentsByLocationAndRange();
+            this.fetchDoctorsByLocation(
+                this.selectedLocationId()!,
+                this.getFromDate(),
+                this.getToDate() || this.getFromDate()
+            );
         }
+    }
+
+    /**
+     * Fetch doctors for the given location and date range.
+     * On success, updates filteredEmployees and then loads all calendar appointments.
+     */
+    fetchDoctorsByLocation(locationId: number, fromDate: string, toDate: string): void {
+        this.loadingEmployees.set(true);
+        this._calendarService.getDoctorsByLocation(locationId, fromDate, toDate).subscribe({
+            next: (res: any) => {
+                const apiDoctors = res?.data ?? (Array.isArray(res) ? res : []);
+                if (Array.isArray(apiDoctors) && apiDoctors.length > 0) {
+                    this.filteredEmployees = apiDoctors;
+                } else {
+                    // Fall back to client-side filter if API returns empty
+                    this.filterEmployeesByLocation();
+                }
+                this.loadingEmployees.set(false);
+                // After the doctors list is ready, load calendar appointments
+                this.loadAppointmentsByLocationAndRange();
+            },
+            error: (_err) => {
+                console.error('Error fetching doctors by location:', _err);
+                // Fall back to client-side filter and still load appointments
+                this.filterEmployeesByLocation();
+                this.loadingEmployees.set(false);
+                this.loadAppointmentsByLocationAndRange();
+            }
+        });
     }
 
     onViewChange(): void {
@@ -607,6 +554,14 @@ export class CalendarComponent implements OnInit {
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
+    }
+
+    /** Returns up to two uppercase initials from a name string (first + last word). */
+    getInitials(name: string): string {
+        if (!name?.trim()) return 'DR';
+        const words = name.trim().split(/\s+/).filter(w => w.length > 0);
+        if (words.length === 1) return words[0][0].toUpperCase();
+        return (words[0][0] + words[words.length - 1][0]).toUpperCase();
     }
 
 }
