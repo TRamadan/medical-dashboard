@@ -638,3 +638,368 @@ img {
         min-width: 120px;
     }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   SEARCH / FILTER PANEL
+═══════════════════════════════════════════════════════════════ */
+.search-panel {
+    border-radius: 16px !important;
+    border: 1px solid #e9ecef !important;
+}
+
+.panel-icon-wrapper {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4f74e3, #7b5ea7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.panel-icon-wrapper i {
+    font-size: 1.1rem;
+    color: #fff;
+}
+
+.filter-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.4rem;
+}
+
+::ng-deep .filter-dropdown .p-dropdown,
+::ng-deep .filter-datepicker .p-inputtext {
+    border-radius: 10px !important;
+    border: 1.5px solid #dee2e6 !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+::ng-deep .filter-dropdown .p-dropdown:hover,
+::ng-deep .filter-datepicker .p-inputtext:hover {
+    border-color: #6c8ebf !important;
+}
+
+::ng-deep .filter-dropdown .p-dropdown.p-focus,
+::ng-deep .filter-datepicker .p-inputwrapper-focus .p-inputtext {
+    border-color: #4f74e3 !important;
+    box-shadow: 0 0 0 3px rgba(79, 116, 227, 0.15) !important;
+}
+
+::ng-deep .view-select-btn .p-selectbutton {
+    display: flex;
+    gap: 6px;
+}
+
+::ng-deep .view-select-btn .p-selectbutton .p-button {
+    flex: 1;
+    border-radius: 10px !important;
+    border: 1.5px solid #dee2e6 !important;
+    font-weight: 500;
+    font-size: 0.85rem;
+    padding: 0.55rem 0.5rem !important;
+    transition: all 0.2s !important;
+}
+
+::ng-deep .view-select-btn .p-selectbutton .p-button.p-highlight {
+    background: linear-gradient(135deg, #4f74e3, #7b5ea7) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+}
+
+.range-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.85rem;
+    background: linear-gradient(135deg, #e8eefc, #ede8fb);
+    color: #4f74e3;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    border: 1px solid #c9d5f7;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   STAT CARDS
+═══════════════════════════════════════════════════════════════ */
+.stat-card {
+    border-radius: 14px;
+    padding: 1.2rem 1rem;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.stat-icon {
+    font-size: 1.4rem;
+    margin-bottom: 0.4rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stat-lbl {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 0.3rem;
+    opacity: 0.75;
+}
+
+.stat-total {
+    background: linear-gradient(135deg, #e8f4fd, #cce5ff);
+    color: #0d6efd;
+}
+
+.stat-booked {
+    background: linear-gradient(135deg, #e8f9f0, #c3f0d8);
+    color: #198754;
+}
+
+.stat-available {
+    background: linear-gradient(135deg, #fff8e1, #ffe082);
+    color: #b8860b;
+}
+
+.stat-pending {
+    background: linear-gradient(135deg, #fdecea, #f9c3c3);
+    color: #dc3545;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DOCTORS PANEL
+═══════════════════════════════════════════════════════════════ */
+.doctors-panel {
+    border-radius: 16px !important;
+    border: 1px solid #e9ecef !important;
+}
+
+.count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #4f74e3;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+/* Doctor chips */
+.doctor-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.5rem 0.85rem;
+    border-radius: 40px;
+    border: 1.5px solid #dee2e6;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+    position: relative;
+}
+
+.doctor-chip:hover {
+    border-color: #4f74e3;
+    background: #f0f4ff;
+    box-shadow: 0 4px 12px rgba(79, 116, 227, 0.12);
+    transform: translateY(-2px);
+}
+
+.doctor-chip.active {
+    border-color: #223a84;
+    background: #131337;
+    box-shadow: 0 4px 14px rgba(79, 116, 227, 0.2);
+}
+
+.doctors-chips {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scroll-behavior: smooth;
+}
+
+/* Hide scrollbar (optional, looks cleaner) */
+.doctors-chips::-webkit-scrollbar {
+    height: 6px;
+}
+
+.doctors-chips::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+}
+
+/* Prevent chips from shrinking */
+.doctor-chip {
+    white-space: nowrap;
+}
+
+.doctor-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #70f4c3;
+    color: #131337;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.doctor-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.doctor-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #131337;
+    white-space: nowrap;
+}
+
+.doctor-name.active {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.doctor-sub {
+    font-size: 0.72rem;
+    color: #6c757d;
+}
+
+.doctor-check {
+    font-size: 1rem;
+    color: #70f4c3;
+    margin-left: 4px;
+}
+
+/* Skeleton loaders */
+.doctor-skeleton {
+    width: 160px;
+    height: 52px;
+    border-radius: 40px;
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.4s infinite;
+}
+
+@keyframes skeleton-shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   PLACEHOLDER CARD
+═══════════════════════════════════════════════════════════════ */
+.placeholder-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1.5px dashed #dee2e6;
+    padding: 3rem 2rem;
+}
+
+.placeholder-icon {
+    font-size: 3rem;
+    opacity: 0.4;
+    color: #6c757d;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   APPOINTMENTS TABLE WRAPPER
+═══════════════════════════════════════════════════════════════ */
+.appointments-table-wrapper {
+    border-radius: 16px !important;
+    overflow: hidden;
+}
+
+::ng-deep .appointments-table-wrapper .p-datatable .p-datatable-thead>tr>th {
+    background: linear-gradient(135deg, #4f74e3, #7b5ea7) !important;
+    color: #fff !important;
+    font-weight: 600 !important;
+    padding: 1rem !important;
+    border: none !important;
+    white-space: nowrap;
+}
+
+.table-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.time-col {
+    min-width: 110px;
+    white-space: nowrap;
+    background: #f8f9fa !important;
+    font-size: 0.85rem;
+}
+
+.doctor-col {
+    min-width: 140px;
+}
+
+.slot-patient {
+    font-size: 0.87rem;
+    color: #1a1a2e;
+}
+
+.empty-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    color: #adb5bd;
+    font-style: italic;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    background: #f8f9fa;
+    border: 1px dashed #dee2e6;
+}
+
+::ng-deep .appointments-table-wrapper .p-datatable .p-datatable-tbody>tr>td {
+    padding: 0.65rem 0.75rem !important;
+    border-color: #f0f2f5 !important;
+}
+
+::ng-deep .appointments-table-wrapper .p-datatable .p-datatable-tbody>tr:hover>td {
+    background: #f8faff !important;
+}
+
+/* Calendar spinner */
+::ng-deep .calendar-spinner {
+    width: 50px !important;
+    height: 50px !important;
+}

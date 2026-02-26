@@ -1,87 +1,248 @@
 <section class="calendar-section container-fluid py-4">
 
-    <div class="stat-label text-muted">Total Slots</div>
+    <!-- ═══════════════════════════════════════════════════════════════
+         SEARCH & FILTER PANEL
+    ═══════════════════════════════════════════════════════════════ -->
+    <div class="search-panel card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
 
-    <div class="stat-item px-3">
-        <span class="stat-number text-primary fw-bold fs-4 d-block">{{ bookedSlots() }}</span>
-        <div class="stat-label text-muted">Booked</div>
-    </div>
-
-    <div class="stat-item px-3">
-        <span class="stat-number text-warning fw-bold fs-4 d-block">{{ availableSlots() }}</span>
-        <div class="stat-label text-muted">Available</div>
-    </div>
-
-    <div class="stat-item px-3">
-        <span class="stat-number text-danger fw-bold fs-4 d-block">{{ pendingSlots() }}</span>
-        <div class="stat-label text-muted">Pending</div>
-    </div>
-
-    <!-- No Coaches Found at Location -->
-    <div *ngIf="!showPlaceholder && selectedLocation && filteredEmployees.length === 0" class="text-center py-5 my-4">
-        <div class="placeholder-content bg-white rounded-3 shadow-sm p-5">
-            <div class="placeholder-icon-wrapper mb-3">
-                <i class="pi pi-user-minus text-warning" style="font-size: 3rem; opacity: 0.7;"></i>
+            <!-- Panel header -->
+            <div class="d-flex align-items-center mb-4">
+                <div class="panel-icon-wrapper me-3">
+                    <i class="pi pi-sliders-h"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold text-dark">Calendar Filters</h5>
+                    <p class="mb-0 text-muted small">Select a location and date range to load the schedule</p>
+                </div>
             </div>
-            <h5 class="text-dark mb-2 fw-semibold">No Coaches Available</h5>
-            <p class="text-secondary mb-0" style="font-size: 0.95rem;">
-                There are no coaches working at <strong>{{ selectedLocation?.nameEn }}</strong> location.
-            </p>
+
+            <!-- Filter Row -->
+            <div class="row g-3 align-items-end">
+
+                <!-- Location -->
+                <div class="col-12 col-md-4">
+                    <label class="filter-label">
+                        <i class="pi pi-map-marker me-1 text-primary"></i> Location
+                    </label>
+                    <p-dropdown [options]="allLocations" [(ngModel)]="selectedLocation" optionLabel="nameEn"
+                        placeholder="Select a location…" [showClear]="true" [filter]="true"
+                        filterPlaceholder="Search locations" styleClass="w-100 filter-dropdown"
+                        (onChange)="onLocationSelect()">
+                        <ng-template pTemplate="selectedItem" let-item>
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="pi pi-map-marker text-primary small"></i>
+                                <span>{{ item.nameEn }}</span>
+                            </div>
+                        </ng-template>
+                        <ng-template pTemplate="item" let-item>
+                            <div class="d-flex align-items-center gap-2 py-1">
+                                <i class="pi pi-map-marker text-primary small"></i>
+                                <span>{{ item.nameEn }}</span>
+                                <span class="text-muted small ms-auto">{{ item.nameAr }}</span>
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+
+                <!-- Date Range -->
+                <div class="col-12 col-md-4">
+                    <label class="filter-label">
+                        <i class="pi pi-calendar me-1 text-primary"></i> Date Range
+                    </label>
+                    <p-datepicker [(ngModel)]="dateRange" selectionMode="range" [readonlyInput]="true"
+                        placeholder="Select date range…" dateFormat="yy-mm-dd" styleClass="w-100 filter-datepicker"
+                        [showButtonBar]="true" (onSelect)="onDateRangeSelect()">
+                    </p-datepicker>
+                </div>
+
+                <!-- View Toggle -->
+                <div class="col-12 col-md-4">
+                    <label class="filter-label">
+                        <i class="pi pi-eye me-1 text-primary"></i> View
+                    </label>
+                    <p-selectButton [options]="viewOptions" [(ngModel)]="viewValue" optionLabel="label"
+                        optionValue="value" styleClass="w-100 view-select-btn" (onChange)="onViewChange()">
+                    </p-selectButton>
+                </div>
+
+            </div>
+
+            <!-- Active Range Badge -->
+            <div class="mt-3" *ngIf="selectedLocation && dateRange?.length">
+                <span class="range-badge">
+                    <i class="pi pi-calendar-clock me-1"></i>
+                    {{ getDateRangeLabel() }}
+                    &nbsp;·&nbsp;
+                    <span class="fw-semibold">{{ selectedLocation?.nameEn }}</span>
+                </span>
+            </div>
         </div>
     </div>
 
-    <!-- No Results Placeholder: Coach selected but no appointments -->
-    <div *ngIf="showNoResults" class="text-center py-5 my-4">
-        <div class="placeholder-content bg-white rounded-3 shadow-sm p-5">
-            <div class="placeholder-icon-wrapper mb-3">
-                <i class="pi pi-calendar-times text-info" style="font-size: 3rem; opacity: 0.7;"></i>
+    <!-- ═══════════════════════════════════════════════════════════════
+         STATS ROW
+    ═══════════════════════════════════════════════════════════════ -->
+    <div class="row g-3 mb-4" *ngIf="allAppointments().length > 0">
+        <div class="col-6 col-md-3">
+            <div class="stat-card stat-total">
+                <div class="stat-icon"><i class="pi pi-th-large"></i></div>
+                <div class="stat-value">{{ totalSlots() }}</div>
+                <div class="stat-lbl">Total Slots</div>
             </div>
-            <h5 class="text-dark mb-2 fw-semibold">No Appointments Found</h5>
-            <p class="text-secondary mb-0" style="font-size: 0.95rem;">
-                No appointments found for the selected coach on {{ date | date:'yyyy-MM-dd' }}.
-            </p>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card stat-booked">
+                <div class="stat-icon"><i class="pi pi-user-plus"></i></div>
+                <div class="stat-value">{{ bookedSlots() }}</div>
+                <div class="stat-lbl">Booked</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card stat-available">
+                <div class="stat-icon"><i class="pi pi-check-circle"></i></div>
+                <div class="stat-value">{{ availableSlots() }}</div>
+                <div class="stat-lbl">Available</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card stat-pending">
+                <div class="stat-icon"><i class="pi pi-clock"></i></div>
+                <div class="stat-value">{{ pendingSlots() }}</div>
+                <div class="stat-lbl">Pending</div>
+            </div>
         </div>
     </div>
 
-    <!-- Appointments Table -->
-    <div *ngIf="allAppointments().length > 0 && !showNoResults">
-        <div class="appointments-table-section bg-white rounded-3 shadow-sm p-4">
-            <div class="d-flex align-items-center mb-3">
-                <i class="pi pi-calendar text-info me-2" style="font-size: 1.2rem;"></i>
-                <h5 class="mb-0 fw-bold text-dark">Appointments <span class="text-muted"
-                        style="font-size: 0.9rem; font-weight: normal;">for {{ date | date:'yyyy-MM-dd' }}</span></h5>
+    <!-- ═══════════════════════════════════════════════════════════════
+         DOCTORS PANEL
+    ═══════════════════════════════════════════════════════════════ -->
+    <div class="doctors-panel card border-0 shadow-sm mb-4" *ngIf="selectedLocation">
+
+        <!-- Loading spinner -->
+        <div class="card-body p-4 text-center" *ngIf="loadingEmployees()">
+            <p-progressSpinner styleClass="calendar-spinner" strokeWidth="4"></p-progressSpinner>
+            <p class="text-muted mt-3 small">Loading doctors…</p>
+        </div>
+
+        <!-- Doctors list -->
+        <div class="card-body p-4" *ngIf="!loadingEmployees()">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h6 class="fw-bold text-dark mb-0">
+                    <i class="pi pi-users me-2 text-primary"></i>
+                    Doctors
+                </h6>
+                <span class="text-muted small" *ngIf="selectedEmployeeId()">
+                    <button class="btn btn-sm btn-outline-secondary py-0 px-2" (click)="resetFilter()">
+                        <i class="pi pi-times me-1"></i> Clear selection
+                    </button>
+                </span>
             </div>
 
-            <div class="table-wrapper">
+            <!-- No doctors message -->
+            <div *ngIf="filteredEmployees.length === 0" class="text-center py-4">
+                <i class="pi pi-user-minus text-warning" style="font-size:2rem; opacity:.6;"></i>
+                <p class="text-muted mt-2 mb-0">No doctors found for <strong>{{ selectedLocation?.nameEn }}</strong></p>
+            </div>
+
+            <!-- Doctor chips - horizontal slider -->
+            <div class="doctors-chips d-flex gap-3" *ngIf="filteredEmployees.length > 0">
+                <div *ngFor="let emp of filteredEmployees" class="doctor-chip flex-shrink-0"
+                    [class.active]="selectedEmployeeId() === emp.doctorId" (click)="onCoachSelect(emp)">
+                    <div class="doctor-avatar">
+                        {{ getInitials(emp.doctorNameEn || '') }}
+                    </div>
+
+                    <div class="doctor-info">
+                        <span class="doctor-name" [class.active]="selectedEmployeeId() === emp.doctorId">
+                            {{ emp.doctorNameAr || emp.doctorNameEn }}
+                        </span>
+                    </div>
+
+                    <i class="pi pi-check-circle doctor-check" *ngIf="selectedEmployeeId() === emp.doctorId"></i>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         PLACEHOLDER: No location selected yet
+    ═══════════════════════════════════════════════════════════════ -->
+    <div *ngIf="!selectedLocation" class="placeholder-card text-center py-5">
+        <i class="pi pi-map-marker placeholder-icon"></i>
+        <h5 class="fw-semibold mt-3 text-dark">Start by selecting a location</h5>
+        <p class="text-muted mb-0">Choose a location and date range above to load the schedule and available doctors.
+        </p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         PLACEHOLDER: No results for selected coach
+    ═══════════════════════════════════════════════════════════════ -->
+    <div *ngIf="showNoResults" class="placeholder-card text-center py-5">
+        <i class="pi pi-calendar-times placeholder-icon text-info"></i>
+        <h5 class="fw-semibold mt-3 text-dark">No Appointments Found</h5>
+        <p class="text-muted mb-0">No appointments found for the selected doctor on {{ date | date:'yyyy-MM-dd' }}.</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         LOADING SPINNER for schedule
+    ═══════════════════════════════════════════════════════════════ -->
+    <div *ngIf="loadingSchedules()" class="text-center py-5">
+        <p-progressSpinner styleClass="calendar-spinner" strokeWidth="4"></p-progressSpinner>
+        <p class="text-muted mt-3 small">Loading schedule…</p>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         APPOINTMENTS TABLE
+    ═══════════════════════════════════════════════════════════════ -->
+    <div *ngIf="allAppointments().length > 0 && !showNoResults && !loadingSchedules()">
+        <div class="appointments-table-wrapper card border-0 shadow-sm">
+            <div class="card-header d-flex align-items-center gap-2 border-0 bg-white py-3 px-4">
+                <i class="pi pi-calendar text-primary" style="font-size:1.2rem;"></i>
+                <h5 class="mb-0 fw-bold text-dark">
+                    Appointments
+                    <span class="text-muted fw-normal" style="font-size:0.88rem;">
+                        — {{ getDateRangeLabel() }}
+                    </span>
+                </h5>
+            </div>
+
+            <div class="card-body p-0">
                 <p-table [value]="timeSlots()" class="p-datatable-sm p-datatable-gridlines" [scrollable]="true"
                     scrollHeight="600px">
 
                     <!-- Header -->
                     <ng-template pTemplate="header">
-                        <tr class="bg-success text-white">
-                            <th class="text-center">Time</th>
-                            <th *ngFor="let emp of allAppointments()" class="text-center">
-                                {{ emp.name }}
+                        <tr class="table-header-row">
+                            <th class="time-col text-center">Time Slot</th>
+                            <th *ngFor="let emp of allAppointments()" class="text-center doctor-col">
+                                <div class="d-flex flex-column align-items-center gap-1">
+                                    <div class="table-avatar">{{ (emp.name || 'D')[0].toUpperCase() }}</div>
+                                    <span class="small">{{ emp.name }}</span>
+                                </div>
                             </th>
                         </tr>
                     </ng-template>
 
                     <!-- Body -->
                     <ng-template pTemplate="body" let-time>
-                        <tr>
-                            <td class="fw-bold text-center text-secondary">{{ time }}</td>
+                        <tr class="table-body-row">
+                            <td class="fw-semibold text-center text-secondary time-col">
+                                <i class="pi pi-clock me-1 small"></i>{{ time }}
+                            </td>
 
                             @for (emp of allAppointments(); track emp) {
-                            <td class="text-center align-middle position-relative slot-cell"
+                            <td class="text-center align-middle slot-cell position-relative"
                                 [ngClass]="getStatusColor(getAppointment(emp, time)?.status)">
 
                                 <ng-container *ngIf="getAppointment(emp, time) as appt; else emptySlot">
-                                    <div class="text-dark fw-bold">{{ appt.patient }}</div>
-                                    <div class="small text-dark my-2 fw-bold">{{ appt.serviceEn }}</div>
-                                    <div class="small text-dark my-2 fw-bold">{{ appt.service }}</div>
-                                    <div class="small text-dark my-2 fw-bold">{{ appt.location }}</div>
-                                    <div class="small text-dark my-2 fw-bold">{{ appt.price }}</div>
-                                    <span class="badge mt-1 rounded-pill px-2 py-1"
+                                    <div class="slot-patient fw-bold">{{ appt.patient }}</div>
+                                    <div class="small text-dark opacity-75 my-1">{{ appt.serviceEn || appt.service }}
+                                    </div>
+                                    <div class="small text-dark opacity-75 my-1" *ngIf="appt.price">{{ appt.price }}
+                                    </div>
+                                    <span class="badge mt-1 status-pill rounded-pill px-2 py-1"
                                         [ngClass]="getStatusColor(appt.status)">
                                         {{ appt.status | titlecase }}
                                     </span>
@@ -89,8 +250,9 @@
 
                                 <!-- Empty slot -->
                                 <ng-template #emptySlot>
-                                    <div class="text-muted small fst-italic bg-light border rounded-2 py-1 px-2">
-                                        Available
+                                    <div class="empty-slot">
+                                        <i class="pi pi-circle small opacity-50"></i>
+                                        <span class="ms-1">Available</span>
                                     </div>
                                 </ng-template>
                             </td>
@@ -101,4 +263,5 @@
             </div>
         </div>
     </div>
+
 </section>
