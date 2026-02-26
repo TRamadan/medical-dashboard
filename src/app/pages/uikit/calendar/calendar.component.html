@@ -66,6 +66,17 @@
                     </p-selectButton>
                 </div>
 
+                <!-- Slot length (time in minutes) -->
+                <div class="col-12 col-md-4">
+                    <label class="filter-label">
+                        <i class="pi pi-clock me-1 text-primary"></i> Slot time
+                    </label>
+                    <p-dropdown [options]="timeOptions" [(ngModel)]="selectedSlotMinutes" optionLabel="label"
+                        optionValue="value" placeholder="Select time…" styleClass="w-100 filter-dropdown"
+                        [showClear]="true" (onChange)="onSlotMinutesChange()">
+                    </p-dropdown>
+                </div>
+
             </div>
 
             <!-- Active Range Badge -->
@@ -248,11 +259,11 @@
                                     </span>
                                 </ng-container>
 
-                                <!-- Empty slot -->
+                                <!-- Empty slot: clickable to create appointment -->
                                 <ng-template #emptySlot>
-                                    <div class="empty-slot">
-                                        <i class="pi pi-circle small opacity-50"></i>
-                                        <span class="ms-1">Available</span>
+                                    <div class="empty-slot" (click)="onEmptySlotClick(emp, time)">
+                                        <i class="pi pi-plus-circle small opacity-75 me-1"></i>
+                                        <span>Book</span>
                                     </div>
                                 </ng-template>
                             </td>
@@ -263,5 +274,17 @@
             </div>
         </div>
     </div>
+
+    <!-- New Appointment Dialog (same logic as appointments page) -->
+    <p-dialog header="New Appointment" [(visible)]="displayNewAppointmentDialog" [modal]="true"
+        [style]="{ width: '50vw' }" [draggable]="false" [resizable]="false">
+        <ng-template pTemplate="content">
+            <app-booking-form (bookingSuccess)="onBookingSuccess()"></app-booking-form>
+        </ng-template>
+        <ng-template pTemplate="footer">
+            <p-button icon="pi pi-times" (click)="hideDialog()" label="Cancel"
+                styleClass="p-button-text"></p-button>
+        </ng-template>
+    </p-dialog>
 
 </section>

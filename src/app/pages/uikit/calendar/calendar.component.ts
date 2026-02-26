@@ -14,11 +14,12 @@ import { CardModule } from 'primeng/card';
 import { FormsModule } from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { BookingFormComponent } from '../appointments/booking-form/booking-form.component';
 
 @Component({
     selector: 'app-calendar',
     standalone: true,
-    imports: [FormsModule, CommonModule, TableModule, DatePickerModule, ToolbarModule, DialogModule, ButtonModule, DropdownModule, CardModule, SelectButtonModule, ProgressSpinnerModule],
+    imports: [FormsModule, CommonModule, TableModule, DatePickerModule, ToolbarModule, DialogModule, ButtonModule, DropdownModule, CardModule, SelectButtonModule, ProgressSpinnerModule, BookingFormComponent],
     templateUrl: './calendar.component.html',
     styleUrls: ['./calendar.component.css']
 })
@@ -46,6 +47,10 @@ export class CalendarComponent implements OnInit {
         { label: 'Monthly', value: 'monthly' }
     ];
 
+    /** Time-slot length options in minutes (shown as HH:mm from 00:05 to 24:00) */
+    timeOptions: { label: string; value: number }[] = [];
+    selectedSlotMinutes: number = 30; // default 30 minutes
+
     date: Date = new Date(); // Used when view preset (Daily/Weekly/Monthly) is applied
     /** Date range from picker; when set with location, triggers loading employees and appointments */
     dateRange: Date[] = [new Date(), new Date()];
@@ -68,10 +73,21 @@ export class CalendarComponent implements OnInit {
     ) { }
 
     ngOnInit(): void {
+        this.buildTimeOptions();
         this.getAllLocations();
     }
 
-
+    /** Build time options from 00:05 to 24:00 in 5-minute steps */
+    private buildTimeOptions(): void {
+        const options: { label: string; value: number }[] = [];
+        for (let minutes = 5; minutes <= 1440; minutes += 5) {
+            const hoursPart = Math.floor(minutes / 60);
+            const minsPart = minutes % 60;
+            const label = `${hoursPart.toString().padStart(2, '0')}:${minsPart.toString().padStart(2, '0')}`;
+            options.push({ label, value: minutes });
+        }
+        this.timeOptions = options;
+    }
 
     /** Map UI view value to API period (daily = single day, weekly = +6 days, monthly = +1 month) */
     private getViewToDate(): string | undefined {
@@ -136,7 +152,7 @@ export class CalendarComponent implements OnInit {
         this.loadingSchedules.set(true);
         if (doctorId) this.loadingEmployeeAppointments.set(true);
 
-        this._calendarService.getAllCalenderData(fromDate, 10, doctorId, locationId, toDate).subscribe({
+        this._calendarService.getAllCalenderData(fromDate, this.selectedSlotMinutes, doctorId, locationId, toDate).subscribe({
             next: (res: any) => {
                 const data = Array.isArray(res) ? res : [];
                 const mapped = this.mapAppointments(data);
@@ -168,7 +184,7 @@ export class CalendarComponent implements OnInit {
         const locationId = this.selectedLocationId() || undefined;
 
         this.loadingSchedules.set(true);
-        this._calendarService.getAllCalenderData(fromDate, 30, doctorId, locationId, toDate).subscribe({
+        this._calendarService.getAllCalenderData(fromDate, this.selectedSlotMinutes, doctorId, locationId, toDate).subscribe({
             next: (res: any) => {
                 const data = Array.isArray(res) ? res : [];
                 const mapped = this.mapAppointments(data);
@@ -275,11 +291,21 @@ export class CalendarComponent implements OnInit {
         }
     }
 
+    /** Called when user changes the slot length (time filter dropdown). */
+    onSlotMinutesChange(): void {
+        if (this.hasLocationAndDateRange()) {
+            const selectedDoctor = this.selectedEmployeeId();
+            this.loadAppointmentsByLocationAndRange(selectedDoctor || undefined);
+        } else {
+            this.getAllScheduels();
+        }
+    }
+
     fetchEmployeeData(date: string, employeeId: number): void {
         const toDate = this.getToDate();
         const locationId = this.selectedLocationId() || undefined;
         this.loadingEmployeeAppointments.set(true);
-        this._calendarService.getAllCalenderData(date, 30, employeeId, locationId, toDate).subscribe({
+        this._calendarService.getAllCalenderData(date, this.selectedSlotMinutes, employeeId, locationId, toDate).subscribe({
             next: (res: any) => {
                 const data = Array.isArray(res) ? res : [];
                 const mapped = this.mapAppointments(data);
@@ -330,6 +356,15 @@ export class CalendarComponent implements OnInit {
      */
     getAppointment(employee: any, time: string) {
         return employee.schedule[time] || null;
+    }
+
+    /** Called when user clicks an available slot cell to create a new appointment */
+    onEmptySlotClick(doctor: any, time: string): void {
+        const appointment = this.getAppointment(doctor, time);
+        if (appointment && appointment.patient) {
+            return; // not available
+        }
+        this.openNewAppointmentDialog();
     }
 
     /**
