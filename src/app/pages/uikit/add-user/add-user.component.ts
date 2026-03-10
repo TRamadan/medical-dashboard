@@ -6,13 +6,13 @@ import { TableColumn, TableComponent } from '../../../shared/table/table.compone
 import { DialogModule } from 'primeng/dialog';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { AbstractControl, FormArray, FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { NgClass } from '@angular/common';
+import { NgClass, DatePipe } from '@angular/common';
 import { InputTextModule } from 'primeng/inputtext';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { StepperModule } from 'primeng/stepper';
 import { FileUploadModule } from 'primeng/fileupload';
 import { UserManangementService } from './services/user-manangement.service';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { environment } from '../../../../environments/environment';
 import { SharedService } from '../../../shared/services/shared.service';
@@ -23,10 +23,15 @@ import { RolesService } from '../add-permission/services/roles.service';
 import { SelectModule } from 'primeng/select';
 import { FileUploadInputComponent } from '../../../shared/file-upload-input/file-upload-input.component';
 import { TabViewModule } from 'primeng/tabview';
+import { DaysOffComponent } from './days-off/days-off.component';
+import { DaysOffService } from './days-off/services/days-off.service';
+import { TooltipModule } from 'primeng/tooltip';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
 
 @Component({
     selector: 'app-add-user',
     imports: [
+        DaysOffComponent,
         FileUploadInputComponent,
         SelectModule,
         InputTextModule,
@@ -39,14 +44,17 @@ import { TabViewModule } from 'primeng/tabview';
         ButtonModule,
         CardModule,
         NgClass,
+        DatePipe,
         MultiSelectModule,
         StepperModule,
         FileUploadModule,
         ToastModule,
-        TabViewModule
+        TabViewModule,
+        TooltipModule,
+        ConfirmDialogModule
     ],
     standalone: true,
-    providers: [MessageService],
+    providers: [MessageService, ConfirmationService],
     templateUrl: './add-user.component.html',
     styleUrls: ['./add-user.component.css']
 })
@@ -66,14 +74,79 @@ export class AddUserComponent implements OnInit {
     allUserTypes: any[] = [];
     public readonly imgUrl = environment.imgUrl;
 
+    daysOffDialog: boolean = false;
+    selectedUserForDaysOff: any = null;
+    selectedDayOffToEdit: any = null;
+
     constructor(
         private fb: FormBuilder,
         private userService: UserManangementService,
         private _messageService: MessageService,
         private _uploadFileService: SharedService,
         private _groupsService: GroupsService,
-        private _rolesService: RolesService
+        private _rolesService: RolesService,
+        private daysOffService: DaysOffService,
+        private confirmationService: ConfirmationService
     ) { }
+
+    openAddDayOffDialog(user: any) {
+        this.selectedUserForDaysOff = user;
+        this.selectedDayOffToEdit = null;
+        this.daysOffDialog = true;
+    }
+
+    editDayOff(user: any, dayOff: any) {
+        this.selectedUserForDaysOff = user;
+        this.selectedDayOffToEdit = dayOff;
+        this.daysOffDialog = true;
+    }
+
+    onDaysOffSaved() {
+        this.daysOffDialog = false;
+        this.onViewUserDaysOff(this.selectedUserForDaysOff);
+    }
+
+    confirmDeleteDayOff(user: any, dayOff: any) {
+        this.confirmationService.confirm({
+            message: 'Are you sure you want to delete this day off?',
+            header: 'Confirm Deletion',
+            icon: 'pi pi-exclamation-triangle',
+            accept: () => {
+                this.deleteDayOffAction(user, dayOff);
+            }
+        });
+    }
+
+    private deleteDayOffAction(user: any, dayOff: any) {
+        this.daysOffService.deleteDaysOff(dayOff.id).subscribe({
+            next: () => {
+                this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Day off deleted successfully.' });
+                this.onViewUserDaysOff(user);
+            },
+            error: (err) => {
+                this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete day off' });
+            }
+        });
+    }
+
+    onViewUserDaysOff(user: any) {
+        if (user.showDetails) {
+            this.daysOffService.getDayOffsByUserId(user.id).subscribe({
+                next: (res: any) => {
+                    user.daysOffList = res.data ?? res;
+                },
+                error: (err: any) => {
+                    if (err.status === 400 || err.error?.status === 400) {
+                        user.daysOffList = [];
+                        this._messageService.add({ severity: 'info', summary: 'Info', detail: 'No days off added for the selected doctor' });
+                    } else {
+                        user.daysOffList = [];
+                        this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch days off' });
+                    }
+                }
+            });
+        }
+    }
 
     coachsHeader: TableColumn[] = [
         { label: 'Username', field: 'userName', type: 'text', sortable: true },

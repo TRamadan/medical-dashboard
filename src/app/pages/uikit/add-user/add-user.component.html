@@ -10,6 +10,18 @@
     </ng-template>
 </p-toolbar>
 
+<p-dialog [(visible)]="daysOffDialog"
+    [header]="(selectedDayOffToEdit ? 'Edit ' : 'Manage ') + 'Days Off for ' + (selectedUserForDaysOff?.nameEn || selectedUserForDaysOff?.userName)"
+    [modal]="true" [style]="{ width: '70vw', maxWidth: '800px' }">
+    @if (selectedUserForDaysOff) {
+    <app-days-off [doctorId]="selectedUserForDaysOff.id" [dayOff]="selectedDayOffToEdit"
+        (saved)="onDaysOffSaved()"></app-days-off>
+    }
+</p-dialog>
+
+<p-confirmDialog [style]="{width: '450px'}" acceptButtonStyleClass="p-button-danger"
+    rejectButtonStyleClass="p-button-text"></p-confirmDialog>
+
 <p-card>
     <div class="flex items-center justify-between mb-2">
         <h5 class="m-0">Manage users</h5>
@@ -17,10 +29,97 @@
 
     <app-table [headers]="coachsHeader" [data]="allUsers" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
         [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true" [globalFilterPlaceholder]="'Search...'"
-        [showActions]="true" (edit)="editSelectedUser($event)" (delete)="deleteSelectedUser($event)">
+        [showActions]="true" (edit)="editSelectedUser($event)" (delete)="deleteSelectedUser($event)"
+        [isAddDetails]="true" (addDetails)="openAddDayOffDialog($event)" [isShowDetails]="true"
+        (details)="onViewUserDaysOff($event)">
+
         <ng-template pTemplate="actions" let-rowData>
-            <button pButton pRipple icon="pi pi-eye" class="p-button-rounded p-button-info mr-2"
-                (click)="showUserDetails(rowData)"></button>
+            <button pButton pRipple icon="pi pi-user" class="p-button-rounded p-button-info mr-2"
+                (click)="showUserDetails(rowData)" pTooltip="User Details" tooltipPosition="top"></button>
+        </ng-template>
+
+        <ng-template #details let-user>
+            <div class="p-3">
+                <h5 class="mb-3">Days Off for {{ user.nameEn || user.userName }}</h5>
+                @if (user.daysOffList && user.daysOffList.length > 0) {
+                <div class="row">
+                    @for (day of user.daysOffList; track day; let i = $index) {
+
+                    <div class="col-12 col-md-6 col-md-3  mb-3">
+                        <p-card [style]="{ 'background-color': '#f8f9fa' }">
+
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="fw-bold fs-5 cursor-pointer" (click)="editDayOff(user, day)">
+                                    {{ 'Day Off #' + (i + 1) }}
+                                </span>
+
+                                <div class="d-flex align-items-center gap-2">
+
+                                    @if (day.isCancelled) {
+                                    <span class="badge bg-danger-subtle text-danger">
+                                        <i class="pi pi-times-circle me-1"></i>
+                                        Cancelled
+                                    </span>
+                                    } @else {
+                                    <span class="badge bg-success-subtle text-success">
+                                        <i class="pi pi-check-circle me-1"></i>
+                                        Active
+                                    </span>
+                                    }
+
+                                    <button pButton icon="pi pi-pencil"
+                                        class="p-button-rounded p-button-text p-button-secondary p-0"
+                                        style="width: 2rem; height: 2rem;" pTooltip="Edit Day Off" tooltipPosition="top"
+                                        (click)="editDayOff(user, day)">
+                                    </button>
+
+                                    <button pButton icon="pi pi-trash"
+                                        class="p-button-rounded p-button-text p-button-danger p-0"
+                                        style="width: 2rem; height: 2rem;" pTooltip="Delete Day Off"
+                                        tooltipPosition="top" (click)="confirmDeleteDayOff(user, day)">
+                                    </button>
+
+                                </div>
+                            </div>
+
+                            <div class="text-muted small mb-1">
+                                <i class="pi pi-calendar me-2"></i>
+                                <strong>From:</strong>
+                                {{day.fromDate | date:'mediumDate'}}
+                            </div>
+
+                            <div class="text-muted small mb-2">
+                                <i class="pi pi-calendar me-2"></i>
+                                <strong>To:</strong>
+                                {{day.toDate | date:'mediumDate'}}
+                            </div>
+
+                            @if (day.reason) {
+                            <div class="small border-top pt-2 mt-2">
+                                <i class="pi pi-info-circle me-2 text-primary"></i>
+                                <span>{{day.reason}}</span>
+                            </div>
+                            }
+
+                        </p-card>
+                    </div>
+
+                    }
+                </div>
+                } @else if (user.daysOffList) {
+                <div
+                    class="flex flex-col items-center justify-center p-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                    <i class="pi pi-calendar-times text-gray-400 mb-3 text-4xl"></i>
+                    <span class="text-gray-600 font-medium text-lg">No days off added for this doctor</span>
+                    <p class="text-gray-500 mt-2 text-sm">You can add days off using the actions menu.</p>
+                </div>
+                } @else {
+                <div class="flex items-center justify-center p-6 text-gray-500">
+                    <i class="pi pi-spin pi-spinner text-2xl mr-3"></i>
+                    <span class="italic">Loading days off...</span>
+                </div>
+                }
+            </div>
         </ng-template>
     </app-table>
 </p-card>
@@ -333,14 +432,7 @@
                                 <div class="col-6 mb-3">
                                     <app-file-upload-input formControlName="malitaryStatusImage" [folderName]="'Users'"
                                         label="Military Status Image"></app-file-upload-input>
-                                    <!-- <label for="malitaryStatusImage" class="form-label"> Military Status Image</label>
-                                        <input type="file" formControlName="malitaryStatusImage" class="form-control" accept="image/*" (change)="onImageUpload($event, 'malitaryStatusImage')" />
--
--                                        @if (employeeData.get('malitaryStatusImage')?.value) {
--                                            <div>
--                                                <img [src]="imgUrl + employeeData.get('malitaryStatusImage')?.value" alt="Preview" class="mt-2 img-thumbnail" style="width: 120px; height: 120px; object-fit: cover" />
--                                            </div>
--                                        } -->
+
                                 </div>
                             </div>
                         </div>
@@ -379,16 +471,7 @@
                                     <div class="col-md-12 mb-3">
                                         <app-file-upload-input formControlName="file" [folderName]="'Users'"
                                             label="File"></app-file-upload-input>
-                                        <!-- <label for="file-{{ i }}" class="form-label">File</label>
--                                                <input type="file" id="file-{{ i }}" formControlName="file" class="form-control" (change)="onImageUpload($event, 'file', i)" />
--                                                @if (attachment.get('file')?.invalid && attachment.get('file')?.touched) {
--                                                    <div class="text-danger mt-1 text-xs">
--                                                        <div>File is required.</div>
--                                                    </div>
--                                                }
--                                                @if (attachment.get('file')?.value) {
--                                                    <div class="mt-2">File selected: {{ attachment.get('file')?.value }}</div>
--                                                } -->
+
 
                                     </div>
                                     <div class="row">

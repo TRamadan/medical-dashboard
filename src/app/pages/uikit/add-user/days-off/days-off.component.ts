@@ -1,6 +1,6 @@
-import { Component, OnInit, signal, AfterViewInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CalendarModule } from 'primeng/calendar';
-import { ReactiveFormsModule, FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { ToggleButtonModule } from 'primeng/togglebutton';
@@ -8,11 +8,15 @@ import { CardModule } from 'primeng/card';
 import { DividerModule } from 'primeng/divider';
 import { DatePipe } from '@angular/common';
 import { DatePickerModule } from "primeng/datepicker";
+import { MessageService } from 'primeng/api';
+import { DaysOffService } from './services/days-off.service';
 
 interface DayOff {
-  dateRange: [Date | null, Date | null];
-  dayName: string;
-  isYearly: boolean;
+  id?: number;
+  doctorId: number;
+  fromDate: string | Date;
+  toDate: string | Date;
+  reason: string;
 }
 
 @Component({
@@ -29,108 +33,118 @@ interface DayOff {
     DatePipe
   ],
   standalone: true,
+  providers: [DatePipe],
   templateUrl: './days-off.component.html',
   styleUrl: './days-off.component.scss'
 })
-export class DaysOffComponent implements OnInit, AfterViewInit {
-  daysOffForm: FormGroup;
-  selectedYear: Date = new Date();
-  isFormReady = false;
+export class DaysOffComponent implements OnInit {
+  @Input() doctorId!: number;
+  @Input() dayOff: any = null;
+  @Output() saved = new EventEmitter<void>();
 
-  // Information about day types
-  yearlyDayColor = '#10B981'; // Green
-  onceOffDayColor = '#F59E0B'; // Amber
+  daysOffForm: FormGroup;
+  isSubmitting = false;
+  isDeleting = false;
+  minDate: Date = new Date();
 
   constructor(
     private fb: FormBuilder,
-    private cdr: ChangeDetectorRef
+    private daysOffService: DaysOffService,
+    private messageService: MessageService,
+    private datePipe: DatePipe
   ) {
-    // Initialize with current year
-    const currentYear = new Date();
-    currentYear.setMonth(0, 1); // Set to January 1st of current year
-
     this.daysOffForm = this.fb.group({
-      year: [currentYear, Validators.required],
-      daysOff: this.fb.array([])
+      dateRange: [null, Validators.required],
+      reason: ['', Validators.required],
+      isCancelled: [false]
     });
   }
 
   ngOnInit(): void {
-    // Add initial day off entry
-    this.addDayOff();
-  }
-
-  ngAfterViewInit(): void {
-    // Ensure form is ready after view initialization
-    setTimeout(() => {
-      this.isFormReady = true;
-      this.cdr.detectChanges();
-    }, 100);
-  }
-
-  get daysOffArray(): FormArray {
-    return this.daysOffForm.get('daysOff') as FormArray;
-  }
-
-  createDayOffFormGroup(): FormGroup {
-    return this.fb.group({
-      dateRange: [null, Validators.required], // Initialize as null instead of [null, null]
-      dayName: ['', Validators.required],
-      isYearly: [false]
-    });
-  }
-
-  addDayOff(): void {
-    this.daysOffArray.push(this.createDayOffFormGroup());
-  }
-
-  removeDayOff(index: number): void {
-    if (this.daysOffArray.length > 1) {
-      this.daysOffArray.removeAt(index);
-    }
-  }
-
-  getDayOffFormGroup(index: number): FormGroup {
-    return this.daysOffArray.at(index) as FormGroup;
-  }
-
-  onYearChange(event: any): void {
-    if (event && event instanceof Date) {
-      this.selectedYear = event;
+    if (this.dayOff) {
+      const fromDate = new Date(this.dayOff.fromDate);
+      const toDate = new Date(this.dayOff.toDate);
+      this.daysOffForm.patchValue({
+        dateRange: [fromDate, toDate],
+        reason: this.dayOff.reason,
+        isCancelled: this.dayOff.isCancelled || false
+      });
     }
   }
 
   onSubmit(): void {
-    if (this.daysOffForm.valid) {
-      // Handle form submission here
-    } else {
+    if (this.daysOffForm.invalid) {
       this.daysOffForm.markAllAsTouched();
+      return;
+    }
+
+    const formValue = this.daysOffForm.value;
+    const dateRange = formValue.dateRange;
+
+    let fromDateStr = '';
+    let toDateStr = '';
+
+    if (dateRange && dateRange[0]) {
+      fromDateStr = this.datePipe.transform(dateRange[0], 'yyyy-MM-dd') || '';
+      toDateStr = dateRange[1] ? (this.datePipe.transform(dateRange[1], 'yyyy-MM-dd') || '') : fromDateStr;
+    }
+
+    const payload = {
+      doctorId: this.doctorId,
+      fromDate: fromDateStr,
+      toDate: toDateStr,
+      reason: formValue.reason,
+      isCancelled: formValue.isCancelled || false
+    };
+
+    this.isSubmitting = true;
+
+    if (this.dayOff && this.dayOff.id) {
+      const updatePayload = {
+        ...payload,
+        id: this.dayOff.id
+      };
+      this.daysOffService.updateDaysOff(updatePayload).subscribe({
+        next: (res) => {
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Day off updated successfully' });
+          this.daysOffForm.reset();
+          this.isSubmitting = false;
+          this.saved.emit();
+        },
+        error: (err) => {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update day off' });
+          this.isSubmitting = false;
+        }
+      });
+    } else {
+      this.daysOffService.addDaysOff(payload as any).subscribe({
+        next: (res) => {
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Day off added successfully' });
+          this.daysOffForm.reset();
+          this.isSubmitting = false;
+          this.saved.emit();
+        },
+        error: (err) => {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to add day off' });
+          this.isSubmitting = false;
+        }
+      });
     }
   }
 
-  getDayTypeColor(isYearly: boolean): string {
-    return isYearly ? this.yearlyDayColor : this.onceOffDayColor;
-  }
-
-  getDayTypeText(isYearly: boolean): string {
-    return isYearly ? 'Repeats Yearly' : 'Once Off';
-  }
-
-  getDayTypeIcon(isYearly: boolean): string {
-    return isYearly ? 'pi pi-refresh' : 'pi pi-calendar-times';
-  }
-
-  // Helper method to safely get date range values
-  getDateRangeValue(dayOffIndex: number): any {
-    const formGroup = this.getDayOffFormGroup(dayOffIndex);
-    const dateRange = formGroup.get('dateRange')?.value;
-    return dateRange || null;
-  }
-
-  // Helper method to check if date range has valid dates
-  hasValidDateRange(dayOffIndex: number): boolean {
-    const dateRange = this.getDateRangeValue(dayOffIndex);
-    return dateRange && Array.isArray(dateRange) && dateRange.length === 2 &&
-      dateRange[0] instanceof Date && dateRange[1] instanceof Date;
+  deleteDayOff(): void {
+    if (!this.dayOff?.id) return;
+    this.isDeleting = true;
+    this.daysOffService.deleteDaysOff(this.dayOff.id).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Day off deleted successfully' });
+        this.isDeleting = false;
+        this.saved.emit();
+      },
+      error: (err) => {
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete day off' });
+        this.isDeleting = false;
+      }
+    });
   }
 }

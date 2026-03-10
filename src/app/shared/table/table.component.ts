@@ -103,6 +103,7 @@ export class TableComponent {
         const wasOpen = row.showDetails;
         this.data.forEach((item) => (item.showDetails = false)); // Close all other detail rows
         row.showDetails = !wasOpen; // Toggle current
+        this.details.emit(row);
     }
 
     onAddDetails(row: any) {

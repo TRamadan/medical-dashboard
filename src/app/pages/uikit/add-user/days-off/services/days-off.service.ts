@@ -8,7 +8,7 @@ import { DaysOff } from '../models/days-off';
 })
 export class DaysOffService {
     // Note: Update this API URL to match your actual backend endpoint routing for Days Off
-    private apiUrl = 'https://portalapi.thesportsdoctorlab.com/api/DaysOff';
+    private apiUrl = 'https://portalapi.thesportsdoctorlab.com/api/DoctorDayOffs';
 
     constructor(private http: HttpClient) { }
 
@@ -30,22 +30,22 @@ export class DaysOffService {
     }
 
     /**
-     * READ ONE: Retrieves a specific Days Off record by its ID.
-     * @param id The unique identifier of the Days Off record.
-     * @returns An observable containing the requested Days Off record.
+     * READ BY USER ID: Retrieves all Days Off records for a specific user.
+     * @param userId The unique identifier of the user.
+     * @returns An observable containing an array of Days Off records.
      */
-    getDaysOffById(id: number | string): Observable<DaysOff> {
-        return this.http.get<DaysOff>(`${this.apiUrl}/${id}`);
+    getDayOffsByUserId(userId: number | string): Observable<any> {
+        return this.http.get<any>(`https://portalapi.thesportsdoctorlab.com/api/DoctorDayOffs/GetDayOffsByUserID/${userId}`);
     }
 
+
     /**
-     * UPDATE: Updates an existing Days Off record by its ID.
-     * @param id The unique identifier of the Days Off record to update.
+     * UPDATE: Updates an existing Days Off record.
      * @param daysOff The updated days off object data.
      * @returns An observable containing the updated Days Off record.
      */
-    updateDaysOff(id: number | string, daysOff: Partial<DaysOff>): Observable<DaysOff> {
-        return this.http.put<DaysOff>(`${this.apiUrl}/${id}`, daysOff);
+    updateDaysOff(daysOff: any): Observable<DaysOff> {
+        return this.http.put<DaysOff>(`${this.apiUrl}`, daysOff);
     }
 
     /**
