@@ -1,5 +1,7 @@
 <p-toast></p-toast>
 
+<div class="measurement-templates-page">
+
 <p-tabs [(value)]="activeTabValue">
     <p-tablist>
         <p-tab value="0">Added Templates</p-tab>
@@ -8,27 +10,27 @@
     <p-tabpanels>
         <p-tabpanel value="0">
             <p-card>
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <div class="d-flex align-items-center gap-2">
+                <div class="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between mb-4 gap-3 templates-header">
+                    <div class="flex align-items-center gap-2">
                         <i class="pi pi-file text-xl text-primary"></i>
                         <h5 class="m-0 font-bold text-xl">Saved Templates</h5>
                     </div>
-                    <span class="bg-gray-100 text-gray-600 px-3 py-1 border-round font-medium text-sm">
+                    <span class="bg-gray-100 text-gray-600 px-3 py-1 border-round font-medium text-sm align-self-start md:align-self-center">
                         {{ templates.length }} templates
                     </span>
                 </div>
 
-                <div class="d-flex flex-column gap-3">
+                <div class="flex flex-column gap-3">
                     <div *ngFor="let template of templates"
                         class="surface-card p-4 border-round shadow-1  surface-border">
                         <p-card>
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div class="flex-grow-1 pr-3">
+                            <div class="flex flex-column lg:flex-row justify-content-between align-items-start mb-3 gap-3">
+                                <div class="flex-grow-1 pr-0 lg:pr-3 w-full lg:w-auto">
                                     <h2 class="text-xl font-bold text-900 mb-2">{{ template.name }}</h2>
                                     <p class="text-600 line-height-3 m-0 mb-3">{{ template.description }}</p>
 
-                                    <div class="d-flex align-items-center gap-4 text-sm text-500 mb-3">
-                                        <span class="d-flex align-items-center gap-1">
+                                    <div class="flex flex-wrap align-items-center gap-4 text-sm text-500 mb-3">
+                                        <span class="flex align-items-center gap-1">
                                             <i class="pi pi-list"></i>
                                             <span>{{ template.itemsCount || (template.measurements?.length || 0) }}
                                                 items</span>
@@ -36,7 +38,7 @@
 
                                     </div>
 
-                                    <div class="d-flex flex-wrap gap-2">
+                                    <div class="flex flex-wrap gap-2">
                                         <ng-container *ngFor="let item of template.previewItems; let i = index">
                                             <span *ngIf="i < 4"
                                                 class="surface-100 text-700 px-3 py-1 border-round font-medium text-sm border-1 surface-border">
@@ -50,16 +52,16 @@
                                     </div>
                                 </div>
 
-                                <div class="d-flex align-items-center gap-2">
+                                <div class="flex flex-wrap align-items-center gap-2 mt-3 lg:mt-0 w-full lg:w-auto justify-content-end lg:justify-content-start">
                                     <button pTooltip="Edit template" tooltipPosition="top" pButton icon="pi pi-pencil"
                                         [rounded]="true" [text]="true" [raised]="true" severity="secondary"
-                                        (click)="editTemplate(template)"></button>
+                                        (click)="editTemplate(template)" class="flex-auto md:flex-none"></button>
                                     <button pTooltip="Delete template" tooltipPosition="top" pButton icon="pi pi-trash"
                                         [rounded]="true" [text]="true" [raised]="true" severity="danger"
-                                        (click)="deleteTemplate(template.id)"></button>
+                                        (click)="deleteTemplate(template.id)" class="flex-auto md:flex-none"></button>
                                     <button pTooltip="View template entries" tooltipPosition="top" pButton
                                         icon="pi pi-eye" [rounded]="true" [text]="true" [raised]="true" severity="info"
-                                        (click)="viewTemplateDataEntry(template)"></button>
+                                        (click)="viewTemplateDataEntry(template)" class="flex-auto md:flex-none"></button>
 
                                 </div>
                             </div>
@@ -78,8 +80,8 @@
         </p-tabpanel>
         <p-tabpanel value="1">
             <p-card>
-                <div class="p-4">
-                    <div class="d-flex align-items-center gap-2 mb-4">
+                <div class="p-2 md:p-4">
+                    <div class="flex align-items-center gap-2 mb-4 templates-header">
                         <i class="pi pi-file-plus text-xl text-primary"></i>
                         <h5 class="m-0 font-bold text-xl">Create New Template</h5>
                     </div>
@@ -102,7 +104,7 @@
                     </div>
 
                     <div class="mb-4">
-                        <div class="d-flex align-items-center gap-2 mb-4">
+                        <div class="flex align-items-center gap-2 mb-4">
                             <i class="pi pi-search text-xl text-primary"></i>
                             <h5 class="m-0 font-bold text-xl">Search for measurement</h5>
                         </div>
@@ -121,22 +123,22 @@
                         <div class="mb-4">
                             <p-card>
                                 <ng-template #content>
-                                    <div class="d-flex gap-2">
+                                    <div class="flex flex-column md:flex-row gap-2">
                                         <button pButton label="All Categories"
                                             [class]="selectedCategoryFilter === 'all' ? 'p-button-outlined' : 'p-button-text'"
                                             [style.background-color]="selectedCategoryFilter === 'all' ? '#f3f4f6' : 'transparent'"
                                             [style.color]="selectedCategoryFilter === 'all' ? '#374151' : '#6b7280'"
-                                            (click)="filterByCategory('all')" class="flex-1"></button>
+                                            (click)="filterByCategory('all')" class="w-full md:flex-1"></button>
                                         <button pButton label="Objective"
                                             [class]="selectedCategoryFilter === 'objective' ? 'p-button-outlined' : 'p-button-text'"
                                             [style.background-color]="selectedCategoryFilter === 'objective' ? '#f3f4f6' : 'transparent'"
                                             [style.color]="selectedCategoryFilter === 'objective' ? '#374151' : '#6b7280'"
-                                            (click)="filterByCategory('objective')" class="flex-1"></button>
+                                            (click)="filterByCategory('objective')" class="w-full md:flex-1"></button>
                                         <button pButton label="Subjective"
                                             [class]="selectedCategoryFilter === 'subjective' ? 'p-button-outlined' : 'p-button-text'"
                                             [style.background-color]="selectedCategoryFilter === 'subjective' ? '#a855f7' : 'transparent'"
                                             [style.color]="selectedCategoryFilter === 'subjective' ? '#ffffff' : '#6b7280'"
-                                            (click)="filterByCategory('subjective')" class="flex-1"></button>
+                                            (click)="filterByCategory('subjective')" class="w-full md:flex-1"></button>
                                     </div>
                                 </ng-template>
                             </p-card>
@@ -150,11 +152,11 @@
                                     [class.expanded]="expandedCategories.includes(category.id)"
                                     [style.background-color]="getCategoryBackgroundColor(category)"
                                     (click)="toggleCategory(category.id)">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="d-flex align-items-center gap-3">
+                                    <div class="flex flex-column md:flex-row align-items-start md:align-items-center justify-content-between gap-3">
+                                        <div class="flex align-items-start md:align-items-center gap-3">
                                             <i [class]="getCategoryIcon(category)"
                                                 [style.color]="getCategoryIconColor(category)"
-                                                style="font-size: 1.5rem;"></i>
+                                                style="font-size: 1.5rem; margin-top: 2px; md:margin-top-0"></i>
                                             <div>
                                                 <div class="font-bold text-900" style="font-size: 1.1rem;">{{
                                                     category.name }}</div>
@@ -162,7 +164,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="d-flex align-items-center gap-3">
+                                        <div class="flex align-items-center justify-content-between w-full md:w-auto gap-3">
                                             <span *ngIf="getCategoryBadge(category)"
                                                 class="badge px-3 py-1 border-round font-medium text-sm"
                                                 [style.background-color]="getCategoryBadgeColor(category)"
@@ -172,7 +174,7 @@
                                             <i class="pi"
                                                 [class.pi-chevron-right]="!expandedCategories.includes(category.id)"
                                                 [class.pi-chevron-down]="expandedCategories.includes(category.id)"
-                                                style="color: #6b7280;"></i>
+                                                style="color: #6b7280; margin-left: auto;"></i>
                                         </div>
                                     </div>
                                 </div>
@@ -185,15 +187,15 @@
                                                 style="background-color: #f3f4f6; border-radius: 15px;"
                                                 [class.expanded]="expandedSubCategories.includes(sub.id)"
                                                 (click)="toggleSubCategory(sub.id)">
-                                                <div class="d-flex align-items-center justify-content-between">
-                                                    <div class="d-flex align-items-center gap-2">
+                                                <div class="flex flex-wrap align-items-center justify-content-between gap-2">
+                                                    <div class="flex align-items-center gap-2">
                                                         <i class="pi pi-chevron-right"
                                                             [class.pi-chevron-down]="expandedSubCategories.includes(sub.id)"
                                                             style="font-size: 0.8rem; color: #6b7280;"></i>
                                                         <span class="font-semibold text-900">{{ sub.name }}</span>
                                                     </div>
                                                     @if(sub.measurements?.length){
-                                                    <span class="text-xs px-2 py-1 border-round"
+                                                    <span class="text-xs px-2 py-1 border-round block"
                                                         style="background-color: #ffffff; color: #6b7280;">
                                                         {{ sub.measurements?.length || 0 }} items
                                                     </span>
@@ -251,11 +253,11 @@
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <button pButton label="Cancel" class="p-button-text p-button-secondary"
+                    <div class="flex flex-column md:flex-row justify-content-end gap-2 mt-4">
+                        <button pButton label="Cancel" class="p-button-text p-button-secondary w-full md:w-auto"
                             (click)="resetForm()"></button>
                         <button pButton label="Save Template" icon="pi pi-check" (click)=" saveTemplate()"
-                            [disabled]="loading"></button>
+                            [disabled]="loading" class="w-full md:w-auto"></button>
                     </div>
                 </div>
             </p-card>
@@ -281,3 +283,5 @@
     <app-view-measurement-template [templateMeasurements] = templateMeasurementDetails></app-view-measurement-template>
     }
 </p-dialog>
+
+</div>

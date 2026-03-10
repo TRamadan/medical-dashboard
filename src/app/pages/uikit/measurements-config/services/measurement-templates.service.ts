@@ -9,7 +9,7 @@ import { environment } from '../../../../../environments/environment';
 export class MeasurementTemplatesService {
     private apiUrl = environment.apiUrl;
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     /**
      * Get all measurement templates
@@ -33,8 +33,8 @@ export class MeasurementTemplatesService {
      * @param template The updated template data.
      * @returns An observable with the response.
      */
-    updateTemplate(template: any, templateId : number): Observable<any> {
-        return this.http.put<any>(this.apiUrl + 'MeasurementTemplates/'+ templateId, template);
+    updateTemplate(template: any, templateId: number): Observable<any> {
+        return this.http.put<any>(this.apiUrl + 'MeasurementTemplates/' + templateId, template);
     }
 
     /**
@@ -44,13 +44,13 @@ export class MeasurementTemplatesService {
      */
     deleteTemplate(id: string | number): Observable<any> {
         return this.http.delete<any>(`${this.apiUrl}MeasurementTemplates/${id}`);
-    } 
+    }
 
-       /**
-     * Get all measurement templates
-     * @returns An observable with the list of templates.
-     */
-    getSpecificTemplateData(templateId : number): Observable<any[]> {
+    /**
+  * Get all measurement templates
+  * @returns An observable with the list of templates.
+  */
+    getSpecificTemplateData(templateId: number): Observable<any[]> {
         return this.http.get<any[]>(this.apiUrl + 'MeasurementTemplates/' + templateId);
     }
 }

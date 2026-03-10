@@ -15,22 +15,22 @@ export class WorkinghoursService {
      * CREATE: Adds a new working hours to the backend.
      * @param workingHours An array of working hour objects.
      */
-    addWorkingHours(workingHours: Workinghours[]): Observable<Workinghours[]> {
-        return this.http.post<Workinghours[]>(this.apiUrl + '/AddList', workingHours);
+    addWorkingHours(workingHours: Workinghours): Observable<any> {
+        return this.http.post<any>(this.apiUrl + '/AddBulkWorkingHoursAsync', workingHours);
     }
 
     /**
      * READ: Retrieves all working hours from the backend.
      */
-    getWorkingHours(): Observable<Workinghours[]> {
-        return this.http.get<Workinghours[]>(this.apiUrl);
+    getWorkingHours(): Observable<any[]> {
+        return this.http.get<any[]>(this.apiUrl);
     }
 
     /**
      * UPDATE: Updates an existing working hour by its ID.
      */
-    updateWorkingHour(workingHour: Partial<Workinghours>): Observable<Workinghours> {
-        return this.http.put<Workinghours>(`${this.apiUrl}`, workingHour);
+    updateWorkingHour(workingHour: any): Observable<any> {
+        return this.http.put<any>(`${this.apiUrl}`, workingHour);
     }
 
     /**

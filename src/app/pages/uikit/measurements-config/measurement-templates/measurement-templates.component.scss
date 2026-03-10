@@ -56,6 +56,47 @@
     font-weight: 500;
 }
 
+/* Responsive layout adjustments */
+.measurement-templates-page {
+    padding: 1rem;
+}
+
+@media (max-width: 768px) {
+    .measurement-templates-page {
+        padding: 0.75rem;
+    }
+
+    /* Stack header content on small screens */
+    .measurement-templates-page .templates-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.75rem;
+    }
+
+    /* Allow categories list to grow and scroll with page */
+    .measurement-templates-page .categories-container {
+        max-height: none;
+        padding-right: 0;
+    }
+
+    /* Make action buttons full-width for easier tapping */
+    .measurement-templates-page .p-button.w-full,
+    .measurement-templates-page .p-button.w-full.md\:w-auto {
+        width: 100% !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .measurement-templates-page {
+        padding: 1rem 1.5rem;
+    }
+
+    /* Slightly more compact categories list on tablets */
+    .measurement-templates-page .categories-container {
+        max-height: 500px;
+    }
+}
+
 // Custom button styling for filter tabs
 ::ng-deep {
     .p-button.flex-1 {

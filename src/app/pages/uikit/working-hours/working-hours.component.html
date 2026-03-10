@@ -94,7 +94,8 @@
             <div class="col-12 col-md-4">
                 <label for="serviceId" class="block font-semibold mb-2">Service</label>
                 <p-treeSelect inputId="serviceId" [filter]="true" appendTo="body" [options]="serviceCategories"
-                    formControlName="serviceId" styleClass="w-full" containerStyleClass="w-full" />
+                    formControlName="serviceId" selectionMode="checkbox" display="chip" styleClass="w-full"
+                    containerStyleClass="w-full" />
                 @if (workingHoursForm.get('serviceId')?.invalid && workingHoursForm.get('serviceId')?.touched) {
                 <small class="text-red-500 mt-1 block">Service is required.</small>
                 }

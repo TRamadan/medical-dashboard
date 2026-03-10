@@ -194,11 +194,15 @@ export class WorkingHoursComponent implements OnInit {
     getAllServicesCategory(): void {
         this.serviceCategoryService.getServices().subscribe({
             next: (response: any) => {
-                this.serviceCategories = response.data.map((category: any) => ({
-                    key: `cat-${category.id}`,
-                    label: category.nameEn,
-                    children: category.subServices.map((service: any) => this.mapServiceToTreeNode(service))
-                }));
+                this.serviceCategories = response.data.map((category: any) => {
+                    const hasChildren = category.subServices && category.subServices.length > 0;
+                    return {
+                        key: `srv-${category.id}`,
+                        label: category.nameEn,
+                        selectable: !hasChildren,
+                        children: (category.subServices || []).map((service: any) => this.mapServiceToTreeNode(service))
+                    };
+                });
                 console.log(this.serviceCategories);
             },
             error: () => {
@@ -212,26 +216,18 @@ export class WorkingHoursComponent implements OnInit {
     }
 
     mapServiceToTreeNode(service: any): any {
+        const hasChildren = service.subServices && service.subServices.length > 0;
         return {
             key: `srv-${service.id}`,
             label: service.nameEn, // or nameAr if you want Arabic
+            selectable: !hasChildren,
             children: (service.subServices || []).map((sub: any) => this.mapServiceToTreeNode(sub))
         };
     }
 
     //here is the function needed to get all added working hours from the child component
     onWorkingHoursChanged(event: any): void {
-        let formValues = this.workingHoursForm.value;
-        const serviceId = formValues.serviceId?.key ? +formValues.serviceId.key.split('-')[1] : 0;
-        const result = event.map((e: any) => ({
-            startTime: e.startTime,
-            endTime: e.endTime,
-            dayOfWeek: e.dayOfWeek,
-            doctorId: formValues.doctorId ?? 0,
-            locationId: formValues.locationId ?? 0,
-            serviceId: serviceId
-        }));
-        this.workingHoursToBeSent = result;
+        this.workingHoursToBeSent = event;
     }
 
     //here is the function needed to get all added working hours
@@ -310,9 +306,50 @@ export class WorkingHoursComponent implements OnInit {
 
     //here is the function needed to add a new working hour
     addNewWorkingHour(): void {
+        debugger
         this.isSaving = true;
-        const body = this.workingHoursToBeSent;
-        console.log(body);
+        let formValues = this.workingHoursForm.value;
+        console.log('RAW FORM VALUES:', formValues);
+        console.log('RAW SERVICE ID:', formValues.serviceId);
+
+        let serviceIds: number[] = [];
+
+        if (Array.isArray(formValues.serviceId)) {
+            serviceIds = formValues.serviceId
+                .filter((node: any) => node.key && node.key.toString().startsWith('srv-'))
+                .map((node: any) => parseInt(node.key.toString().split('-')[1], 10));
+        }
+        else if (typeof formValues.serviceId === 'object' && formValues.serviceId !== null) {
+            if (formValues.serviceId.key && formValues.serviceId.key.toString().startsWith('srv-')) {
+                serviceIds = [parseInt(formValues.serviceId.key.toString().split('-')[1], 10)];
+            } else {
+                for (const key of Object.keys(formValues.serviceId)) {
+                    if (key.toString().startsWith('srv-')) {
+                        const val = formValues.serviceId[key];
+                        // In primeNG tree select with checkbox, the value might be 'true' or an object {checked: true, partialChecked: ...}
+                        if (val === true || (val && val.checked === true)) {
+                            serviceIds.push(parseInt(key.toString().split('-')[1], 10));
+                        }
+                    } else if (formValues.serviceId[key] && formValues.serviceId[key].key && formValues.serviceId[key].key.toString().startsWith('srv-')) {
+                        serviceIds.push(parseInt(formValues.serviceId[key].key.toString().split('-')[1], 10));
+                    }
+                }
+            }
+        }
+
+        const slots = this.workingHoursToBeSent.map((e: any) => ({
+            dayOfWeek: Number(e.dayOfWeek),
+            startTime: e.startTime,
+            endTime: e.endTime
+        }));
+
+        const body: any = {
+            doctorId: formValues.doctorId ?? 0,
+            locationId: formValues.locationId ?? 0,
+            serviceIds: serviceIds,
+            slots: slots
+        };
+        console.log("Submitting Request Body: ", JSON.stringify(body));
         this._workingHoursService.addWorkingHours(body).subscribe({
             next: (res: any) => {
                 this.isSaving = false;
@@ -338,10 +375,43 @@ export class WorkingHoursComponent implements OnInit {
     //here is the function needed to update the selected working hour
     updateTheSelectedWorkingHour(): void {
         this.isSaving = true;
-        const updateRequests = this.workingHoursToBeSent.map((slot) => {
-            const existingSlot = this.workingHoursToEdit.find((s) => s.dayOfWeek === slot.dayOfWeek);
+        let formValues = this.workingHoursForm.value;
+        let serviceId = 0;
+
+        if (Array.isArray(formValues.serviceId)) {
+            const firstSrv = formValues.serviceId.find((n: any) => n.key && n.key.toString().startsWith('srv-'));
+            if (firstSrv) serviceId = parseInt(firstSrv.key.toString().split('-')[1], 10);
+        } else if (typeof formValues.serviceId === 'object' && formValues.serviceId !== null) {
+            if (formValues.serviceId.key && formValues.serviceId.key.toString().startsWith('srv-')) {
+                serviceId = parseInt(formValues.serviceId.key.toString().split('-')[1], 10);
+            } else {
+                for (const key of Object.keys(formValues.serviceId)) {
+                    if (key.toString().startsWith('srv-')) {
+                        const val = formValues.serviceId[key];
+                        if (val === true || (val && val.checked === true)) {
+                            serviceId = parseInt(key.toString().split('-')[1], 10);
+                            break;
+                        }
+                    } else if (formValues.serviceId[key] && formValues.serviceId[key].key && formValues.serviceId[key].key.toString().startsWith('srv-')) {
+                        serviceId = parseInt(formValues.serviceId[key].key.toString().split('-')[1], 10);
+                        break;
+                    }
+                }
+            }
+        }
+
+        const updateRequests = this.workingHoursToBeSent.map((slot: any) => {
+            const existingSlot = this.workingHoursToEdit.find((s: any) => s.dayOfWeek === slot.dayOfWeek);
             const slotId = existingSlot ? existingSlot.id : null;
-            return this._workingHoursService.updateWorkingHour(slot);
+            return this._workingHoursService.updateWorkingHour({
+                id: slotId,
+                startTime: slot.startTime,
+                endTime: slot.endTime,
+                dayOfWeek: slot.dayOfWeek,
+                doctorId: formValues.doctorId ?? 0,
+                locationId: formValues.locationId ?? 0,
+                serviceId: serviceId
+            });
         });
 
         forkJoin(updateRequests).subscribe({
@@ -424,7 +494,7 @@ export class WorkingHoursComponent implements OnInit {
         const serviceNode = this.findServiceNodeByKey(this.serviceCategories, targetKey);
 
         this.workingHoursForm.patchValue({
-            serviceId: serviceNode,
+            serviceId: serviceNode ? [serviceNode] : [],
             doctorId: item.doctorId,
             locationId: location.locationId
         });

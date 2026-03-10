@@ -98,7 +98,7 @@ export class MeasurementTemplatesComponent implements OnInit {
         private measurementTemplatesService: MeasurementTemplatesService,
         private measurementCategoriesService: MeasurementCategoriesService,
         private messageService: MessageService
-    ) {}
+    ) { }
 
     ngOnInit() {
         this.loadTemplates();
@@ -112,7 +112,7 @@ export class MeasurementTemplatesComponent implements OnInit {
                 this.templates = data;
                 // Mock tags for design if needed, or assume backend sends them
             },
-            error: (err) => {}
+            error: (err) => { }
         });
     }
 
@@ -223,7 +223,7 @@ export class MeasurementTemplatesComponent implements OnInit {
     }
 
     saveTemplate() {
-        
+
         if (!this.newTemplate.name) {
             this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please enter a template name' });
             return;
@@ -233,7 +233,7 @@ export class MeasurementTemplatesComponent implements OnInit {
             this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please select at least one measurement' });
             return;
         }
-
+        debugger
         const payload = {
             ...(this.editingTemplateId !== null && { id: this.editingTemplateId }),
             name: this.newTemplate.name,
@@ -243,30 +243,32 @@ export class MeasurementTemplatesComponent implements OnInit {
                 order: index + 1
             }))
         };
+        if (this.editingTemplateId) {
+            this.measurementTemplatesService.updateTemplate(payload, this.editingTemplateId).subscribe({
+                next: () => {
+                    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Template updated successfully' });
+                    this.resetForm();
+                    this.loadTemplates();
+                },
+                error: (err) => {
+                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update template' });
+                }
+            });
+        } else {
+            delete payload.id;
+            this.measurementTemplatesService.addTemplate(payload).subscribe({
+                next: () => {
+                    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Template created successfully' });
+                    this.resetForm();
+                    this.loadTemplates();
+                },
+                error: (err) => {
+                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to create template' });
+                }
+            });
+        }
 
-        const isEditing = this.editingTemplateId !== null;
 
-        const action$ = isEditing ? this.measurementTemplatesService.updateTemplate(payload , this.editingTemplateId) : this.measurementTemplatesService.addTemplate(payload);
-
-        action$.subscribe({
-            next: () => {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Success',
-                    detail: isEditing ? 'Template updated successfully' : 'Template created successfully'
-                });
-                this.resetForm();
-                this.loadTemplates();
-            },
-            error: (err) => {
-                this.messageService.add({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: isEditing ? 'Failed to update template' : 'Failed to create template'
-                });
-                console.error(err);
-            }
-        });
     }
 
     getInputTypeIcon(inputType: InputType): string {
@@ -306,7 +308,7 @@ export class MeasurementTemplatesComponent implements OnInit {
         this.selectedMeasurementIds = [];
     }
 
-    editItems(template: any) {}
+    editItems(template: any) { }
 
     editTemplate(template: any) {
         this.isEditTemplate = true;

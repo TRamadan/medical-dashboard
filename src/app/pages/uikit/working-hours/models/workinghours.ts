@@ -1,9 +1,10 @@
 export interface Workinghours {
-    id?: number | string;
-    dayOfWeek?: string;
-    startTime?: string;
-    endTime?: string;
-    doctorId?: number;
-    locationId?: number;
-    serviceId?: number;
+    doctorId: number;
+    locationId: number;
+    serviceIds: number[];
+    slots: {
+        dayOfWeek: number;
+        startTime: string;
+        endTime: string;
+    }[];
 }
