@@ -67,7 +67,7 @@ export class AppointmentsComponent implements OnInit {
     allAppointments = signal<Appointment[]>([]);
     filteredAppointments: Appointment[] = []; // Store filtered appointments
     groupedUrgentAppointments: { date: string; appointments: Appointment[] }[] = [];
-    loading = signal(true);
+    loading = signal(false);
     // New lists for tabs
     pendingAppointments: Appointment[] = [];
     confirmedAppointments: Appointment[] = [];
@@ -95,8 +95,7 @@ export class AppointmentsComponent implements OnInit {
 
     locations: any[] = [];
     selectedLocation: any | null = null;
-    activeTabIndex = 0;
-
+    selectedCard: string | number = 'urgent';
 
     pendingAppointmentsCount: number = 0;
     approvedAppointmentsCount: number = 0;
@@ -153,7 +152,7 @@ export class AppointmentsComponent implements OnInit {
 
     onLocationChange() {
         this.filterAppointments();
-        this.onTabChange(this.activeTabIndex);
+        this.selectCard(this.selectedCard);
         this.updateCounts();
 
     }
@@ -197,13 +196,17 @@ export class AppointmentsComponent implements OnInit {
                     startDate: this.formatLocalDate(startDate),
                     endDate: this.formatLocalDate(endDate),
                 };
-                this.onTabChange(0);
+                if (typeof this.selectedCard === 'number') {
+                    this.loadAppointments(this.selectedCard);
+                }
             }
         }
         else {
             this.parsedDates.startDate = null;
             this.parsedDates.endDate = null;
-            this.onTabChange(0);
+            if (typeof this.selectedCard === 'number') {
+                this.loadAppointments(this.selectedCard);
+            }
         }
 
     }
@@ -215,11 +218,13 @@ export class AppointmentsComponent implements OnInit {
         return `${year}-${month}-${day}`;
     }
 
-    onTabChange(index: number): void {
-
-        this.activeTabIndex = index;
-        const status = this.statuses[index];
-        this.loadAppointments(status.id);
+    selectCard(cardId: string | number): void {
+        this.selectedCard = cardId;
+        if (typeof cardId === 'number') {
+            this.loadAppointments(cardId);
+        } else if (cardId === 'urgent') {
+            this.loadUrgentAppointments();
+        }
     }
 
     loadAppointments(statusId: number, pageNumber?: number, pageSize?: number): void {
@@ -232,6 +237,8 @@ export class AppointmentsComponent implements OnInit {
         const fromDate = this.parsedDates?.startDate;
         const toDate = this.parsedDates?.endDate;
 
+        this.loading.set(true);
+
         this._appointmentService.getFilteredAppointments({
             locationId: this.selectedLocation?.id,
             status: statusId.toString(),
@@ -239,11 +246,15 @@ export class AppointmentsComponent implements OnInit {
             toDate,
         }, target.pageNumber, target.pageSize).subscribe({
             next: (response) => {
+                this.loading.set(false);
                 target.list = response.items;
                 target.grouped = this.groupAppointmentsByDate(response.items);
                 target.totalRecords = response.totalCount ?? 0;
             },
-            error: (err) => console.error('Failed to load appointments', err)
+            error: (err) => {
+                this.loading.set(false);
+                console.error('Failed to load appointments', err);
+            }
         });
     }
 
@@ -363,7 +374,10 @@ export class AppointmentsComponent implements OnInit {
                     detail: `Appointment status changed to ${this.getStatusLabel(this.selectedStatusId)}`
                 });
                 this.loadUrgentAppointments();
-                this.onTabChange(0)
+                if (typeof this.selectedCard === 'number') {
+                    this.loadAppointments(this.selectedCard);
+                }
+                this.updateCounts();
             },
             error: (error: any) => {
                 //error handle goes here
@@ -380,7 +394,8 @@ export class AppointmentsComponent implements OnInit {
         this.displayStatusDialog = false;
     }
 
-    getStatusLabel(status: number): string {
+    getStatusLabel(status: number | string): string {
+        if (status === 'urgent') return 'Urgent';
         const s = this.statuses.find((st) => st.id === status);
         return s ? s.label : 'Unknown';
     }

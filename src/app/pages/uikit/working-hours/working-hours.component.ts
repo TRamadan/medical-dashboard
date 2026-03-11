@@ -78,6 +78,7 @@ export class WorkingHoursComponent implements OnInit {
     workingHoursToBeSent: any[] = [];
     expandedRows: any = {};
     workingHoursToEdit: any[] = [];
+    selectedUserId: any = null;
 
     constructor(
         private _fb: FormBuilder,
@@ -233,7 +234,13 @@ export class WorkingHoursComponent implements OnInit {
     //here is the function needed to get all added working hours
     getAllAddedWorkingHours(): void {
         this.allWorkingHours = [];
-        this._workingHoursService.getWorkingHours().subscribe({
+        this.expandedRows = {};
+        
+        const fetchObservable = this.selectedUserId 
+            ? this._workingHoursService.getWorkingHoursByUserId(this.selectedUserId) 
+            : this._workingHoursService.getWorkingHours();
+
+        fetchObservable.subscribe({
             next: (res: any[]) => {
                 this.groupWorkingHours(res);
             },
@@ -241,6 +248,10 @@ export class WorkingHoursComponent implements OnInit {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch Working hours' });
             }
         });
+    }
+
+    onUserChange(): void {
+        this.getAllAddedWorkingHours();
     }
 
     groupWorkingHours(data: any[]) {

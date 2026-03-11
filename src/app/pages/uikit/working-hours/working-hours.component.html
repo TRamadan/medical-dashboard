@@ -12,10 +12,26 @@
 </p-toolbar>
 
 <p-card>
-    <div class="flex items-center justify-between mb-2">
-        <h5 class="m-0">Manage Working hours</h5>
+    <div class="flex items-center justify-between mb-4">
+        <h5 class="m-0 text-xl font-semibold">Manage Working hours</h5>
+        <div class="w-64">
+            <p-dropdown [options]="allUsers" [(ngModel)]="selectedUserId" optionLabel="name" optionValue="id"
+                placeholder="Filter by User" (onChange)="onUserChange()" [showClear]="true" styleClass="w-full">
+            </p-dropdown>
+        </div>
     </div>
 
+    @if (selectedUserId && allWorkingHours.length === 0) {
+    <div class="flex flex-col items-center justify-center p-8 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 mt-4 min-h-[400px]">
+        <div class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-4">
+            <i class="pi pi-calendar-times text-3xl text-blue-500"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">No Working Hours</h3>
+        <p class="text-gray-500">
+            There are no working hours assigned for this selected user.
+        </p>
+    </div>
+    } @else {
     <app-table [headers]="workingHoursHeader" [data]="allWorkingHours" [paginator]="true" [rows]="10"
         [showCurrentPageReport]="true" [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true"
         [globalFilterPlaceholder]="'Search...'" [showActions]="true" [isShowDetails]="true">
@@ -72,6 +88,7 @@
             </div>
         </ng-template>
     </app-table>
+    }
 </p-card>
 
 <!-- here is the dialog needed to add a new or edit the selected working hour-->
