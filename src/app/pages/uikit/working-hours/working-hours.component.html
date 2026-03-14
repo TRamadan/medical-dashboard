@@ -14,15 +14,12 @@
 <p-card>
     <div class="flex items-center justify-between mb-4">
         <h5 class="m-0 text-xl font-semibold">Manage Working hours</h5>
-        <div class="w-64">
-            <p-dropdown [options]="allUsers" [(ngModel)]="selectedUserId" optionLabel="name" optionValue="id"
-                placeholder="Filter by User" (onChange)="onUserChange()" [showClear]="true" styleClass="w-full">
-            </p-dropdown>
-        </div>
+
     </div>
 
     @if (selectedUserId && allWorkingHours.length === 0) {
-    <div class="flex flex-col items-center justify-center p-8 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 mt-4 min-h-[400px]">
+    <div
+        class="flex flex-col items-center justify-center p-8 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 mt-4 min-h-[400px]">
         <div class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mb-4">
             <i class="pi pi-calendar-times text-3xl text-blue-500"></i>
         </div>
@@ -96,37 +93,14 @@
     [modal]="true" [dismissableMask]="true" styleClass="p-fluid" [style]="{ width: '100vh', maxWidth: '60rem' }">
     @if (!isDelete) {
     <form [formGroup]="workingHoursForm">
-        <div class="row g-3">
-            <!-- 1. Users -->
-            <div class="col-12 col-md-4">
-                <label for="doctorId" class="block font-semibold mb-2">Users</label>
-                <p-select inputId="doctorId" [filter]="true" appendTo="body" [options]="allUsers" optionLabel="name"
-                    optionValue="id" formControlName="doctorId" styleClass="w-full" />
-                @if (workingHoursForm.get('doctorId')?.invalid && workingHoursForm.get('doctorId')?.touched) {
-                <small class="text-red-500 mt-1 block">Doctor or coach is required.</small>
-                }
-            </div>
-
-            <!-- 2. Services -->
-            <div class="col-12 col-md-4">
-                <label for="serviceId" class="block font-semibold mb-2">Service</label>
-                <p-treeSelect inputId="serviceId" [filter]="true" appendTo="body" [options]="serviceCategories"
-                    formControlName="serviceId" selectionMode="checkbox" display="chip" styleClass="w-full"
-                    containerStyleClass="w-full" />
-                @if (workingHoursForm.get('serviceId')?.invalid && workingHoursForm.get('serviceId')?.touched) {
-                <small class="text-red-500 mt-1 block">Service is required.</small>
-                }
-            </div>
-
-            <!-- 3. Locations -->
-            <div class="col-12 col-md-4">
-                <label for="locationId" class="block font-semibold mb-2">Locations</label>
-                <p-select inputId="locationId" [filter]="true" appendTo="body" [options]="locations" optionLabel="name"
-                    optionValue="id" formControlName="locationId" styleClass="w-full" />
-                @if (workingHoursForm.get('locationId')?.invalid && workingHoursForm.get('locationId')?.touched) {
-                <small class="text-red-500 mt-1 block">Location is required.</small>
-                }
-            </div>
+        <!-- 1. Users -->
+        <div class="col-12 col-md-4">
+            <label for="doctorId" class="block font-semibold mb-2">Users</label>
+            <p-select inputId="doctorId" [filter]="true" appendTo="body" [options]="allUsers" optionLabel="name"
+                optionValue="id" formControlName="doctorId" styleClass="w-full" />
+            @if (workingHoursForm.get('doctorId')?.invalid && workingHoursForm.get('doctorId')?.touched) {
+            <small class="text-red-500 mt-1 block">Doctor or coach is required.</small>
+            }
         </div>
 
         @if (!isEdit) {
@@ -137,9 +111,32 @@
         </div>
         }
 
-        <div class="row g-3">
+        <div class="row g-3 mb-4">
             <app-assing-hours [selectedDayOfWeek]="selectedDayOfWeek" [workingHoursToEdit]="workingHoursToEdit"
                 [isEdit]="isEdit" (workingHoursChanged)="onWorkingHoursChanged($event)"></app-assing-hours>
+        </div>
+
+        <div class="row g-3">
+            <!-- 3. Locations -->
+            <div class="col-12 col-md-6">
+                <label for="locationId" class="block font-semibold mb-2">Locations</label>
+                <p-select inputId="locationId" [filter]="true" appendTo="body" [options]="locations" optionLabel="name"
+                    optionValue="id" formControlName="locationId" styleClass="w-full" />
+                @if (workingHoursForm.get('locationId')?.invalid && workingHoursForm.get('locationId')?.touched) {
+                <small class="text-red-500 mt-1 block">Location is required.</small>
+                }
+            </div>
+
+            <!-- 2. Services -->
+            <div class="col-12 col-md-6">
+                <label for="serviceId" class="block font-semibold mb-2">Service</label>
+                <p-treeSelect inputId="serviceId" [filter]="true" appendTo="body" [options]="serviceCategories"
+                    formControlName="serviceId" selectionMode="checkbox" display="chip" styleClass="w-full"
+                    containerStyleClass="w-full" />
+                @if (workingHoursForm.get('serviceId')?.invalid && workingHoursForm.get('serviceId')?.touched) {
+                <small class="text-red-500 mt-1 block">Service is required.</small>
+                }
+            </div>
         </div>
     </form>
     }

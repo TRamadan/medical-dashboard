@@ -233,11 +233,12 @@ export class WorkingHoursComponent implements OnInit {
 
     //here is the function needed to get all added working hours
     getAllAddedWorkingHours(): void {
+        debugger
         this.allWorkingHours = [];
         this.expandedRows = {};
-        
-        const fetchObservable = this.selectedUserId 
-            ? this._workingHoursService.getWorkingHoursByUserId(this.selectedUserId) 
+
+        const fetchObservable = this.selectedUserId
+            ? this._workingHoursService.getWorkingHoursByUserId(this.selectedUserId)
             : this._workingHoursService.getWorkingHours();
 
         fetchObservable.subscribe({
@@ -254,7 +255,37 @@ export class WorkingHoursComponent implements OnInit {
         this.getAllAddedWorkingHours();
     }
 
+    dialogUserWorkingHours: any[] = [];
+
+    onDialogUserChange(event: any): void {
+        const userId = event.value;
+        if (!userId) {
+            this.dialogUserWorkingHours = [];
+            return;
+        }
+
+        this._workingHoursService.getWorkingHoursByUserId(userId).subscribe({
+            next: (res: any[]) => {
+                this.dialogUserWorkingHours = this.groupWorkingHoursData(res);
+            },
+            error: (error: any) => {
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch Working hours for selected user' });
+            }
+        });
+    }
+
     groupWorkingHours(data: any[]) {
+        this.allWorkingHours = this.groupWorkingHoursData(data);
+        this.expandedRows = this.allWorkingHours.reduce((acc, curr) => {
+            if (curr.locations && curr.locations.length > 0) {
+                acc[curr.label] = true;
+            }
+            return acc;
+        }, {});
+        console.log(this.allWorkingHours);
+    }
+
+    groupWorkingHoursData(data: any[]): any[] {
         const grouped = data.reduce((acc: any[], item: any) => {
             const dayInfo = this.weekDays.find((d) => d.value == item.dayOfWeek);
 
@@ -305,14 +336,7 @@ export class WorkingHoursComponent implements OnInit {
             return acc;
         }, []);
 
-        this.allWorkingHours = grouped;
-        this.expandedRows = grouped.reduce((acc, curr) => {
-            if (curr.locations && curr.locations.length > 0) {
-                acc[curr.label] = true;
-            }
-            return acc;
-        }, {});
-        console.log(this.allWorkingHours);
+        return grouped;
     }
 
     //here is the function needed to add a new working hour

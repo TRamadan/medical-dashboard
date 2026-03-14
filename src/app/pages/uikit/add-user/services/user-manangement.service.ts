@@ -2,6 +2,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../../../environments/environment';
 
 @Injectable({
     providedIn: 'root'
@@ -9,6 +10,7 @@ import { catchError } from 'rxjs/operators';
 export class UserManangementService {
     // I'll use a placeholder for your API URL.
     private apiUrl = 'https://portalapi.thesportsdoctorlab.com/api/User/';
+    private userTypeApiUrl = environment.apiUrl
 
     constructor(private http: HttpClient) { }
 
@@ -86,7 +88,7 @@ export class UserManangementService {
      * @returns An observable with the list of users.
      */
     getAllUserTypes(): Observable<any[]> {
-        return this.http.get<any[]>(this.apiUrl + 'GetAllEmployeeTypes').pipe(catchError(this.handleError));
+        return this.http.get<any[]>(this.userTypeApiUrl + 'EmployeeTypes').pipe(catchError(this.handleError));
     }
 
     /**

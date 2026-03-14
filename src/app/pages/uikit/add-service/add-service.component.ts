@@ -22,6 +22,9 @@ import { SelectModule } from 'primeng/select';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { LocationService } from '../add-location/services/location.service';
 import { firstValueFrom } from 'rxjs';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { UserManangementService } from '../add-user/services/user-manangement.service';
+
 @Component({
     selector: 'app-add-service',
     standalone: true,
@@ -43,7 +46,8 @@ import { firstValueFrom } from 'rxjs';
         IconFieldModule,
         CardModule,
         ReactiveFormsModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        ToggleSwitchModule
     ],
     templateUrl: './add-service.component.html',
     styleUrls: ['./add-service.component.css'],
@@ -62,6 +66,7 @@ export class AddServiceComponent implements OnInit {
     addServiceForm!: FormGroup;
     serviceCategoryForm!: FormGroup;
     locations: Location[] = [];
+    employeeTypes: any[] = [];
 
     headers: TableColumn[] = [
         { label: 'Category Name (AR)', field: 'nameAr', type: 'text' },
@@ -80,7 +85,8 @@ export class AddServiceComponent implements OnInit {
         private messageService: MessageService,
         private confirmationService: ConfirmationService,
         private servicesService: ServicesService,
-        private locationService: LocationService
+        private locationService: LocationService,
+        private userManangementService: UserManangementService
     ) { }
 
     ngOnInit() {
@@ -88,6 +94,7 @@ export class AddServiceComponent implements OnInit {
         this.initialiseServiceForm();
         this.generateDurationOptions();
         this.getAllLocations();
+        this.getAllUserTypes();
     }
 
     /**
@@ -124,6 +131,8 @@ export class AddServiceComponent implements OnInit {
             idealtimeAfter: [null, Validators.required], // for service
             serviceCategoryId: [null], // for service
             locationIds: [[], Validators.required], // for service
+            employeeTypeIds: [[], Validators.required], // for service
+            isShownInWeb: [true], // for service
             parentServiceId: [null],
             orderInParent: [null, Validators.pattern(/^[0-9]*$/)]
         });
@@ -179,6 +188,21 @@ export class AddServiceComponent implements OnInit {
         });
     }
 
+    getAllUserTypes(): void {
+        this.userManangementService.getAllUserTypes().subscribe({
+            next: (res: any) => {
+                this.employeeTypes = res.data || res;
+            },
+            error: (error: any) => {
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to fetch employee types'
+                });
+            }
+        });
+    }
+
     /**
      *
      * @param chosenService
@@ -220,7 +244,7 @@ export class AddServiceComponent implements OnInit {
             this.serviceCategoryForm.markAllAsTouched();
             return;
         }
-        const serviceData = this.serviceCategoryForm.value;
+        const serviceData = this.serviceCategoryForm.getRawValue();
         if (serviceData.orderInParent) {
             serviceData.orderInParent = Number(serviceData.orderInParent);
         }
@@ -362,21 +386,27 @@ export class AddServiceComponent implements OnInit {
         this.isEditServiceMode = false;
         this.serviceCategoryForm.reset();
 
-        // Get parent service location IDs
+        // Get parent service location IDs and employee types
         const parentLocationIds = parentService.locations?.map((loc: any) => loc.id) || [];
+        const parentEmployeeTypeIds = parentService.employeeTypes?.map((emp: any) => emp.id) || [];
         await this.getDurationRest(parentService.id);
+        
         this.serviceCategoryForm.patchValue({
             parentServiceId: parentService.id,
             serviceCategoryId: this.selectedCategoryForService.id,
             price: 0,
             locationIds: parentLocationIds,
+            employeeTypeIds: parentEmployeeTypeIds,
+            isShownInWeb: parentService.isShownInWeb !== undefined ? parentService.isShownInWeb : true,
             idealtimeBefore: '00:00:00',
             idealtimeAfter: '00:00:00'
         });
 
-        // Disable price and location fields for sub-services
+        // Disable price, location, employee types, and web visibility fields for sub-services
         this.serviceCategoryForm.get('price')?.disable();
         this.serviceCategoryForm.get('locationIds')?.disable();
+        this.serviceCategoryForm.get('employeeTypeIds')?.disable();
+        this.serviceCategoryForm.get('isShownInWeb')?.disable();
     }
 
     //here is the funtion needed that fetch how many minutes for the duration from the parent service,
@@ -493,14 +523,18 @@ export class AddServiceComponent implements OnInit {
         this.selectedCategoryForService = category;
         this.serviceCategoryForm.reset();
 
-        // Enable price and location fields for regular services
+        // Enable restricted fields for regular services
         this.serviceCategoryForm.get('price')?.enable();
         this.serviceCategoryForm.get('locationIds')?.enable();
+        this.serviceCategoryForm.get('employeeTypeIds')?.enable();
+        this.serviceCategoryForm.get('isShownInWeb')?.enable();
 
         const formValues = {
             ...service,
             id: service.id,
             locationIds: service.locations?.map((loc: any) => loc.id) || [],
+            employeeTypeIds: service.employeeTypes?.map((emp: any) => emp.id) || [],
+            isShownInWeb: service.isShownInWeb !== undefined ? service.isShownInWeb : true,
             duration: service.duration,
             idealtimeBefore: service.idealtimeBefore,
             idealtimeAfter: service.idealtimeAfter
@@ -520,6 +554,8 @@ export class AddServiceComponent implements OnInit {
             ...service,
             id: service.id,
             locationIds: service.locations?.map((loc: any) => loc.id) || [],
+            employeeTypeIds: service.employeeTypes?.map((emp: any) => emp.id) || [],
+            isShownInWeb: service.isShownInWeb !== undefined ? service.isShownInWeb : true,
             durationTime: service.duration,
             idealtimeBefore: service.idealtimeBefore,
             idealtimeAfter: service.idealtimeAfter,
@@ -528,9 +564,11 @@ export class AddServiceComponent implements OnInit {
 
         this.serviceCategoryForm.patchValue(formValues);
 
-        // Disable price and location fields for sub-services
+        // Disable price, location, employee types, and web visibility fields for sub-services
         this.serviceCategoryForm.get('price')?.disable();
         this.serviceCategoryForm.get('locationIds')?.disable();
+        this.serviceCategoryForm.get('employeeTypeIds')?.disable();
+        this.serviceCategoryForm.get('isShownInWeb')?.disable();
 
         this.isServiceDialog = true;
     }

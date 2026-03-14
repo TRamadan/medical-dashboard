@@ -20,20 +20,22 @@ import { Group } from '../add-group/models/group';
 import { Roles } from '../add-permission/models/permission';
 import { GroupsService } from '../add-group/services/groups.service';
 import { RolesService } from '../add-permission/services/roles.service';
-import { SelectModule } from 'primeng/select';
+import { DropdownModule } from 'primeng/dropdown';
 import { FileUploadInputComponent } from '../../../shared/file-upload-input/file-upload-input.component';
 import { TabViewModule } from 'primeng/tabview';
 import { DaysOffComponent } from './days-off/days-off.component';
 import { DaysOffService } from './days-off/services/days-off.service';
 import { TooltipModule } from 'primeng/tooltip';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { CheckboxModule } from 'primeng/checkbox';
+import { RippleModule } from 'primeng/ripple';
 
 @Component({
     selector: 'app-add-user',
     imports: [
         DaysOffComponent,
         FileUploadInputComponent,
-        SelectModule,
+        DropdownModule,
         InputTextModule,
         FormsModule,
         ReactiveFormsModule,
@@ -51,7 +53,9 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
         ToastModule,
         TabViewModule,
         TooltipModule,
-        ConfirmDialogModule
+        ConfirmDialogModule,
+        CheckboxModule,
+        RippleModule
     ],
     standalone: true,
     providers: [MessageService, ConfirmationService],
@@ -82,7 +86,6 @@ export class AddUserComponent implements OnInit {
         private fb: FormBuilder,
         private userService: UserManangementService,
         private _messageService: MessageService,
-        private _uploadFileService: SharedService,
         private _groupsService: GroupsService,
         private _rolesService: RolesService,
         private daysOffService: DaysOffService,
@@ -157,10 +160,7 @@ export class AddUserComponent implements OnInit {
     ];
     genders: any[] = [
         { id: 1, name: 'Male' },
-        {
-            id: 2,
-            name: 'Female'
-        }
+        { id: 2, name: 'Female' }
     ];
 
     ngOnInit() {
@@ -171,11 +171,10 @@ export class AddUserComponent implements OnInit {
         this.initialiseUserForm();
     }
 
-    //here is the function needed to get all user types
     getAllUserTypes(): void {
         this.userService.getAllUserTypes().subscribe({
-            next: (users: any) => {
-                this.allUserTypes = users.data;
+            next: (userTypesResponse: any) => {
+                this.allUserTypes = userTypesResponse;
             },
             error: (err) => {
                 this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
@@ -183,77 +182,91 @@ export class AddUserComponent implements OnInit {
         });
     }
 
-    //here is the function needed to initialise the form related for add a new user
     initialiseUserForm(): void {
         this.addNewUserForm = this.fb.group({
-            personalData: this.fb.group({
+            registerDTO: this.fb.group({
                 userName: ['', [Validators.required, Validators.pattern('^[a-zA-Z0-9_]{3,20}$')]],
                 nameAr: ['', [Validators.required, Validators.pattern('^[\u0621-\u064A\u0660-\u0669\\s]{3,}$')]],
                 nameEn: ['', [Validators.required, Validators.pattern('^[a-zA-Z\\s]{3,}$')]],
                 email: ['', [Validators.required, Validators.email]],
-                phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$'), Validators.maxLength(11)]],
                 password: ['', [Validators.required, Validators.minLength(8)]],
-                rolesId: [[], Validators.required],
-                groupesId: [[], Validators.required],
                 genderId: [null, Validators.required],
-                employeeType: [null, Validators.required]
+                rolesId: [[], Validators.required],
+                groupesId: [[], Validators.required]
             }),
-            employeeData: this.fb.group({
-                fullNameAr: ['', [Validators.required, Validators.pattern('^[\u0621-\u064A\u0660-\u0669\\s]{3,}$')]],
-                fullNameEn: ['', [Validators.required, Validators.pattern('^[a-zA-Z\\s]{3,}$')]],
-                whatsappNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]],
-                argentNumber1: [null, Validators.pattern('^\\+?[0-9]{10,15}$')],
-                argentNumber2: [null, Validators.pattern('^\\+?[0-9]{10,15}$')],
+            employeeProfileDTO: this.fb.group({
                 address: ['', Validators.required],
-                nationalIDImage: [null],
-                birthstatementImage: [null],
-                civilStatusStatemntImage: [null],
-                educationalqualificationImage: [null],
-                malitaryStatusImage: [null]
+                employeeTypeId: [null, Validators.required],
+                attachments: this.fb.array([])
             }),
-            otherAttachments: this.fb.array([])
+            phones: this.fb.array([
+                this.createPhoneGroup(true)
+            ]),
+            emergencyContacts: this.fb.array([
+                this.createEmergencyContactGroup()
+            ])
         });
     }
 
-    get personalData(): AbstractControl {
-        return this.addNewUserForm.get('personalData')!;
+    createPhoneGroup(isPrimary: boolean = false): FormGroup {
+        return this.fb.group({
+            phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]],
+            isPrimary: [isPrimary],
+            isWhatsApp: [false]
+        });
     }
 
-    get employeeData(): AbstractControl {
-        return this.addNewUserForm.get('employeeData')!;
+    createEmergencyContactGroup(): FormGroup {
+        return this.fb.group({
+            name: ['', Validators.required],
+            phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]]
+        });
     }
 
-    get otherAttachments(): FormArray {
-        return this.addNewUserForm.get('otherAttachments') as FormArray;
-    }
-
-    addAttachment(): void {
-        const attachmentForm = this.fb.group({
+    createAttachmentGroup(): FormGroup {
+        return this.fb.group({
             description: ['', Validators.required],
-            file: [null, Validators.required]
+            filePath: [null, Validators.required]
         });
-        this.otherAttachments.push(attachmentForm);
     }
 
-    removeAttachment(index: number): void {
-        if (this.otherAttachments.length > 0) {
-            this.otherAttachments.removeAt(index);
-        }
+    get registerDTOGroup(): FormGroup {
+        return this.addNewUserForm.get('registerDTO') as FormGroup;
     }
 
-    //here is the function needed to open a dialog for add a new user
+    get employeeProfileDTOGroup(): FormGroup {
+        return this.addNewUserForm.get('employeeProfileDTO') as FormGroup;
+    }
+
+    get phonesArray(): FormArray {
+        return this.addNewUserForm.get('phones') as FormArray;
+    }
+
+    get emergencyContactsArray(): FormArray {
+        return this.addNewUserForm.get('emergencyContacts') as FormArray;
+    }
+
+    get attachmentsArray(): FormArray {
+        return this.addNewUserForm.get('employeeProfileDTO.attachments') as FormArray;
+    }
+
+    addPhone(): void { this.phonesArray.push(this.createPhoneGroup()); }
+    removePhone(index: number): void { this.phonesArray.removeAt(index); }
+
+    addEmergencyContact(): void { this.emergencyContactsArray.push(this.createEmergencyContactGroup()); }
+    removeEmergencyContact(index: number): void { this.emergencyContactsArray.removeAt(index); }
+
+    addAttachment(): void { this.attachmentsArray.push(this.createAttachmentGroup()); }
+    removeAttachment(index: number): void { this.attachmentsArray.removeAt(index); }
+
     openAddUserDialog(): void {
         this.isEdit = false;
         this.isDelete = false;
         this.selectedUser = null;
-        this.addNewUserForm.reset();
-        // Ensure password is required when adding new user
-        this.personalData.get('password')?.setValidators([Validators.required, Validators.minLength(8)]);
-        this.personalData.get('password')?.updateValueAndValidity();
+        this.initialiseUserForm();
         this.userDialog = true;
     }
 
-    //here is the function needed to get all added users
     getAllUsers(): void {
         this.userService.getAllUsers().subscribe({
             next: (users: any) => {
@@ -265,22 +278,14 @@ export class AddUserComponent implements OnInit {
         });
     }
 
-    //here is the function needed to add a new user
     addNewUser(): void {
+        if (this.addNewUserForm.invalid) {
+            this.addNewUserForm.markAllAsTouched();
+            return;
+        }
+
         this.isSaving = true;
-        // Combine form data from both steps
-        const userPayload = {
-            registerDTO: {
-                ...this.addNewUserForm.value.personalData
-            },
-            employeeProfileDTO: {
-                ...this.addNewUserForm.value.employeeData,
-                attachments: this.addNewUserForm.value.otherAttachments.map((att: any) => ({
-                    filePath: att.file,
-                    description: att.description
-                }))
-            }
-        };
+        const userPayload = this.addNewUserForm.value;
 
         this.userService.addUser(userPayload).subscribe({
             next: () => {
@@ -296,12 +301,7 @@ export class AddUserComponent implements OnInit {
         });
     }
 
-    /**
-     * here is the function needed that control the add,edit and delete for the user
-     */
-
     submitUser(): void {
-
         if (this.isEdit) {
             this.updateSelectedUser();
         } else if (this.isDelete) {
@@ -311,20 +311,19 @@ export class AddUserComponent implements OnInit {
         }
     }
 
-    //here is the function needed to update the selected user
     updateSelectedUser(): void {
-
-        const personal = { ...this.addNewUserForm.value.personalData };
-        if (!personal.password || personal.password === '') {
-            delete (personal as any).password; // don't send empty password; backend keeps current
+        if (this.addNewUserForm.invalid) {
+            this.addNewUserForm.markAllAsTouched();
+            return;
         }
-        const userPayload = {
-            ...personal,
-            ...this.addNewUserForm.value.employeeData
-        };
+
+        const payload = this.addNewUserForm.value;
+        if (!payload.registerDTO.password) {
+            delete payload.registerDTO.password;
+        }
 
         this.isSaving = true;
-        this.userService.updateUser(this.selectedUser.id, userPayload).subscribe({
+        this.userService.updateUser(this.selectedUser.id, payload).subscribe({
             next: () => {
                 this.isSaving = false;
                 this.hideDialog();
@@ -338,7 +337,6 @@ export class AddUserComponent implements OnInit {
         });
     }
 
-    //here is the fucntion needed to delete or deactive the selected user
     confirmDeleteSelectedUser(): void {
         if (!this.selectedUser) return;
 
@@ -357,11 +355,9 @@ export class AddUserComponent implements OnInit {
         });
     }
 
-    //here is the function needed to open a dialog responsible for edit the selected user
     editSelectedUser(user: any): void {
         this.userService.getUserById(user.id).subscribe({
             next: (res: any) => {
-
                 const data = res?.data ?? res;
                 this.selectedUser = { ...data, id: data.id ?? user.id };
                 this.patchFormForEdit(data);
@@ -372,75 +368,75 @@ export class AddUserComponent implements OnInit {
         });
     }
 
-    /**
-     * Maps API user response (GetById) to the add/edit form structure and patches the form.
-     */
     private patchFormForEdit(data: any): void {
         if (!data) return;
+
+        this.initialiseUserForm();
 
         const rolesId = Array.isArray(data.roles) ? data.roles.map((r: any) => r.id) : [];
         const groupesId = Array.isArray(data.groupes) ? data.groupes.map((g: any) => g.id) : [];
 
-        const personalData = {
+        this.registerDTOGroup.patchValue({
             userName: data.userName ?? '',
             nameAr: data.nameAr ?? '',
             nameEn: data.nameEn ?? '',
             email: data.email ?? '',
-            phoneNumber: data.phoneNumber ?? '',
-            password: '', // leave empty on edit; backend keeps current if not sent
-            rolesId,
-            groupesId,
+            password: '', 
             genderId: data.genderId ?? null,
-            employeeType: data.userType ?? null
-        };
-
-        this.addNewUserForm.patchValue({
-            personalData
+            rolesId,
+            groupesId
         });
 
-        // Password optional when editing (leave empty to keep current)
-        this.personalData.get('password')?.clearValidators();
-        this.personalData.get('password')?.updateValueAndValidity();
+        this.registerDTOGroup.get('password')?.clearValidators();
+        this.registerDTOGroup.get('password')?.updateValueAndValidity();
 
-        // Employee data: patch if present in API (some users may have profile)
-        const emp = data.employeeProfile ?? data.employeeData ?? data;
-        if (emp.fullNameAr != null || emp.fullNameEn != null || emp.whatsappNumber != null ||
-            emp.address != null || emp.argentNumber1 != null || emp.argentNumber2 != null) {
-            this.employeeData.patchValue({
-                fullNameAr: emp.fullNameAr ?? '',
-                fullNameEn: emp.fullNameEn ?? '',
-                whatsappNumber: emp.whatsappNumber ?? '',
-                argentNumber1: emp.argentNumber1 ?? null,
-                argentNumber2: emp.argentNumber2 ?? null,
-                address: emp.address ?? '',
-                nationalIDImage: emp.nationalIDImage ?? null,
-                birthstatementImage: emp.birthstatementImage ?? null,
-                civilStatusStatemntImage: emp.civilStatusStatemntImage ?? null,
-                educationalqualificationImage: emp.educationalqualificationImage ?? null,
-                malitaryStatusImage: emp.malitaryStatusImage ?? null
+        const emp = data.employeeProfileDTO ?? data.employeeProfile ?? data.employeeData ?? {};
+        this.employeeProfileDTOGroup.patchValue({
+            address: emp.address ?? '',
+            employeeTypeId: emp.employeeTypeId ?? data.employeeTypeId ?? emp.userType ?? null
+        });
+
+        const phones = data.phones ?? [];
+        if (phones.length > 0) {
+            this.phonesArray.clear();
+            phones.forEach((p: any) => {
+                this.phonesArray.push(this.fb.group({
+                    phoneNumber: [p.phoneNumber ?? '', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]],
+                    isPrimary: [p.isPrimary ?? false],
+                    isWhatsApp: [p.isWhatsApp ?? false]
+                }));
             });
         }
 
-        // Optional: patch otherAttachments if API returns them
-        if (Array.isArray(emp?.attachments) && emp.attachments.length > 0) {
-            this.otherAttachments.clear();
-            emp.attachments.forEach((att: any) => {
-                this.otherAttachments.push(this.fb.group({
+        const emergencyContacts = data.emergencyContacts ?? [];
+        if (emergencyContacts.length > 0) {
+            this.emergencyContactsArray.clear();
+            emergencyContacts.forEach((e: any) => {
+                this.emergencyContactsArray.push(this.fb.group({
+                    name: [e.name ?? '', Validators.required],
+                    phoneNumber: [e.phoneNumber ?? '', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]]
+                }));
+            });
+        }
+
+        const attachments = emp.attachments ?? data.attachments ?? [];
+        if (attachments.length > 0) {
+            this.attachmentsArray.clear();
+            attachments.forEach((att: any) => {
+                this.attachmentsArray.push(this.fb.group({
                     description: [att.description ?? '', Validators.required],
-                    file: [att.filePath ?? att.file ?? null, Validators.required]
+                    filePath: [att.filePath ?? att.file ?? null, Validators.required]
                 }));
             });
         }
     }
 
-    //here is the function needed to open a dialog responsible for confirm deactive the selected user
     deleteSelectedUser(user: any): void {
         this.selectedUser = user;
         this.isDelete = true;
-        this.userDialog = true; // Open the same dialog, but it will show the delete confirmation
+        this.userDialog = true;
     }
 
-    //here is the function needed to fetch all added roles
     getAllRoles(): void {
         this._rolesService.getAllRoles().subscribe({
             next: (res: any) => {
@@ -460,7 +456,6 @@ export class AddUserComponent implements OnInit {
         });
     }
 
-    //here is the function needed to fetch all added groups
     getAllGroups(): void {
         this._groupsService.getAllGroups().subscribe({
             next: (res: any) => {
@@ -493,57 +488,11 @@ export class AddUserComponent implements OnInit {
         });
     }
 
-    //here is the function needed to close the modal and rese all flags
     hideDialog(): void {
         this.isEdit = false;
         this.isEmployee = false;
         this.isDelete = false;
         this.addNewUserForm.reset();
         this.userDialog = false;
-    }
-
-    /**
-     * Developer : Eng/Tarek Ahmed Ramadan
-     * Created Date : 10/6/2025
-     * Purpose : Handle image upload and preview
-     * @param event The file upload event
-     */
-    onImageUpload(event: any, controlName: string, index?: number): void {
-        const file = event.target.files[0];
-
-        if (file) {
-            this._uploadFileService.uploadFileServicePortal(file, 'Users').subscribe({
-                next: (res: any) => {
-                    let formGroup: AbstractControl | null;
-                    if (index !== undefined) {
-                        formGroup = this.otherAttachments.at(index);
-                    } else {
-                        formGroup = this.addNewUserForm.get('employeeData');
-                    }
-
-                    if (formGroup) {
-                        formGroup.get(controlName)?.patchValue(res.filePath);
-                    }
-
-                    // preview اختياري
-                    const reader = new FileReader();
-                    reader.onload = (e: any) => {
-                        // This part seems to be for local preview, which might not be what you want when you get a filePath from the service.
-                        // If you want to store the file path, the line below should be removed or adjusted.
-                        // formGroup?.get(controlName)?.patchValue(e.target.result);
-                    };
-                    reader.readAsDataURL(file);
-                    this._messageService.add({ severity: 'success', summary: 'Success', detail: 'Image uploaded successfully.' });
-                },
-                error: (err: any) => {
-                    this._messageService.add({
-                        severity: 'error',
-                        summary: 'Upload Failed',
-                        detail: `Could not upload ${controlName}. Please try again.`
-                    });
-                    console.error(`❌ Error uploading ${controlName}:`, err);
-                }
-            });
-        }
     }
 }

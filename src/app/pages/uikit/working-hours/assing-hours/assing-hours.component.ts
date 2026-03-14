@@ -140,9 +140,21 @@ export class AssingHoursComponent implements OnInit {
         return start >= end ? { startAfterEnd: true } : null;
     }
 
-    onTimeChanged(dayIndex: number, workingHourIndex: number): void {
+    onTimeChanged(dayIndex: number, workingHourIndex: number, isStartChange: boolean = false): void {
+        const group = this.getWorkingHourFormGroup(dayIndex, workingHourIndex);
+        const wh = group.value;
+
+        // If the user changed the start time, we need to ensure the end time is still valid
+        if (isStartChange && wh.startTime && wh.endTime) {
+            if (wh.endTime <= wh.startTime) {
+                // The current end time is no longer valid, so we clear it out to force them to pick a new one
+                group.patchValue({ endTime: null }, { emitEvent: false });
+                wh.endTime = null;
+            }
+        }
+
         if (!this.applyToAllDays) return;
-        const wh = this.getWorkingHourFormGroup(dayIndex, workingHourIndex).value;
+        
         if (wh.startTime && wh.endTime) {
             this.copyWorkingHoursToAllDays(wh.startTime, wh.endTime);
         }
@@ -197,6 +209,11 @@ export class AssingHoursComponent implements OnInit {
 
         const updatedData = this.buildPayload();
         this.workingHoursChanged.emit(updatedData);
+    }
+
+    getEndTimeOptions(startTime: string | null | undefined): { label: string; value: string }[] {
+        if (!startTime) return this.durationOptions;
+        return this.durationOptions.filter(opt => opt.value > startTime);
     }
 
     private buildPayload(): any[] {

@@ -29,7 +29,7 @@
                                         [inputId]="'start-' + dayIndex + '-' + workingHourIndex"
                                         [options]="durationOptions" optionLabel="label" optionValue="value"
                                         placeholder="Select start time" styleClass="w-full"
-                                        (onChange)="onTimeChanged(dayIndex, workingHourIndex)">
+                                        (onChange)="onTimeChanged(dayIndex, workingHourIndex, true)">
                                     </p-select>
 
                                     @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.invalid
@@ -44,9 +44,9 @@
                                         class="block font-medium mb-1"> End time </label>
                                     <p-select appendTo="body" formControlName="endTime"
                                         [inputId]="'end-' + dayIndex + '-' + workingHourIndex"
-                                        [options]="durationOptions" optionLabel="label" optionValue="value"
-                                        placeholder="Select end time" styleClass="w-full"
-                                        (onChange)="onTimeChanged(dayIndex, workingHourIndex)">
+                                        [options]="getEndTimeOptions(getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.value)"
+                                        optionLabel="label" optionValue="value" placeholder="Select end time"
+                                        styleClass="w-full" (onChange)="onTimeChanged(dayIndex, workingHourIndex)">
                                     </p-select>
 
                                     @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.invalid &&

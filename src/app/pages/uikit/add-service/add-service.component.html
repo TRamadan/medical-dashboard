@@ -167,11 +167,31 @@
                                 <p-multiSelect id="locations" appendTo="body" formControlName="locationIds"
                                     [options]="locations" optionLabel="name" optionValue="id"
                                     placeholder="Select Locations" styleClass="w-full" [filter]="true"
-                                    [disabled]="serviceCategoryForm.get('parentServiceId')?.value" />
+                                    [disabled]="serviceCategoryForm.get('parentServiceId')?.value ? true : false" />
                                 <div *ngIf="serviceCategoryForm.get('locationIds')?.invalid && serviceCategoryForm.get('configurationForm.locations')?.touched"
                                     class="text-danger small mt-1">At least one location is required.</div>
                                 <small *ngIf="serviceCategoryForm.get('parentServiceId')?.value"
                                     class="text-muted">Locations are inherited from parent service</small>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <label for="employeeTypeIds">Employee Types</label>
+                                <p-multiSelect id="employeeTypeIds" appendTo="body" formControlName="employeeTypeIds"
+                                    [options]="employeeTypes" optionLabel="name" optionValue="id"
+                                    placeholder="Select Employee Types" styleClass="w-full" [filter]="true"
+                                    [disabled]="serviceCategoryForm.get('parentServiceId')?.value ? true : false" />
+                                <div *ngIf="serviceCategoryForm.get('employeeTypeIds')?.invalid && serviceCategoryForm.get('employeeTypeIds')?.touched"
+                                    class="text-danger small mt-1">At least one employee type is required.</div>
+                                <small *ngIf="serviceCategoryForm.get('parentServiceId')?.value"
+                                    class="text-muted">Employee types are inherited from parent service</small>
+                            </div>
+                            <div class="col-12 col-md-6 flex items-center mt-4">
+                                <div class="flex flex-column gap-2">
+                                    <label for="isShownInWeb" class="font-bold">Show in Web</label>
+                                    <p-toggleswitch id="isShownInWeb" formControlName="isShownInWeb" [disabled]="serviceCategoryForm.get('parentServiceId')?.value ? true : false" />
+                                </div>
+                                <div class="ml-3 mt-4">
+                                    <small *ngIf="serviceCategoryForm.get('parentServiceId')?.value" class="text-muted block">Visibility is inherited from parent service</small>
+                                </div>
                             </div>
                             <div class="col-12 col-md-6" *ngIf="serviceCategoryForm.get('parentServiceId')?.value">
                                 <label for="orderInParent">Order In Parent</label>

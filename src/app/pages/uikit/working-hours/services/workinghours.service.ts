@@ -30,7 +30,7 @@ export class WorkinghoursService {
      * READ BY USER ID: Retrieves all working hours for a specific user.
      */
     getWorkingHoursByUserId(userId: string | number): Observable<any[]> {
-        return this.http.get<any[]>(`${this.apiUrl}/GetWorkingHoursByUserId/${userId}`);
+        return this.http.get<any[]>(`${this.apiUrl}/GetDoctorWorkingHours/${userId}`);
     }
 
     /**
