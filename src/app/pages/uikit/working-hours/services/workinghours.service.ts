@@ -46,4 +46,11 @@ export class WorkinghoursService {
     deleteWorkingHour(id: number | string): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
+
+    /**
+     * READ BY USER ID: Retrieves all assigned services for a specific user.
+     */
+    getAssignedServicesForUser(userId: string | number): Observable<any[]> {
+        return this.http.get<any[]>(`https://portalapi.thesportsdoctorlab.com/api/Serivces/user/${userId}/services`);
+    }
 }

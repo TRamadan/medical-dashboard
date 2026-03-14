@@ -190,6 +190,16 @@ export class AssingHoursComponent implements OnInit {
                     this.applyToAllDays = false;
                 });
             }
+        } else {
+            // If unchecked, reset all working hours back to empty arrays across all days
+            (this.daysArray.controls as FormGroup[]).forEach((dayCtrl: FormGroup) => {
+                const workingHours = dayCtrl.get('workingHours') as FormArray;
+                workingHours.clear();
+            });
+
+            // Emit the reset data
+            const updatedData = this.buildPayload();
+            this.workingHoursChanged.emit(updatedData);
         }
     }
 

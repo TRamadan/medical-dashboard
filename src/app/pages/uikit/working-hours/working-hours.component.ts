@@ -24,12 +24,14 @@ import { TreeSelectModule } from 'primeng/treeselect';
 import { ButtonModule } from 'primeng/button';
 import { MenuItem } from 'primeng/api';
 import { TooltipModule } from 'primeng/tooltip';
+import { CarouselModule } from 'primeng/carousel';
 @Component({
     selector: 'app-working-hours',
     templateUrl: './working-hours.component.html',
     styleUrls: ['./working-hours.component.css'],
     providers: [MessageService, ConfirmationService],
     imports: [
+        CarouselModule,
         TooltipModule,
         ButtonModule,
         AccordionModule,
@@ -79,6 +81,8 @@ export class WorkingHoursComponent implements OnInit {
     expandedRows: any = {};
     workingHoursToEdit: any[] = [];
     selectedUserId: any = null;
+    flatDialogUserWorkingHours: any[] = [];
+    carouselResponsiveOptions: any[] | undefined;
 
     constructor(
         private _fb: FormBuilder,
@@ -123,8 +127,26 @@ export class WorkingHoursComponent implements OnInit {
             locationId: [null, Validators.required],
             doctorId: [null, Validators.required]
         });
+
+        this.carouselResponsiveOptions = [
+            {
+                breakpoint: '1024px',
+                numVisible: 3,
+                numScroll: 1
+            },
+            {
+                breakpoint: '768px',
+                numVisible: 2,
+                numScroll: 1
+            },
+            {
+                breakpoint: '560px',
+                numVisible: 1,
+                numScroll: 1
+            }
+        ];
+
         this.getAllLocations();
-        this.getAllServicesCategory();
         this.getAllUsers();
         this.getAllAddedWorkingHours();
 
@@ -147,6 +169,12 @@ export class WorkingHoursComponent implements OnInit {
         this.isEdit = false;
         this.showWorkingHoursDialog = false;
         this.workingHoursToEdit = [];
+
+        // Reset the assigned hours UI in the dialog
+        this.dialogUserWorkingHours = [];
+        this.flatDialogUserWorkingHours = [];
+        this.serviceCategories = [];
+        this.workingHoursForm.get('doctorId')?.setValue(null);
     }
 
     //here is the function needed to control working hours
@@ -197,12 +225,15 @@ export class WorkingHoursComponent implements OnInit {
             next: (response: any) => {
                 this.serviceCategories = response.data.map((category: any) => {
                     const hasChildren = category.subServices && category.subServices.length > 0;
-                    return {
+                    const node: any = {
                         key: `srv-${category.id}`,
                         label: category.nameEn,
-                        selectable: !hasChildren,
-                        children: (category.subServices || []).map((service: any) => this.mapServiceToTreeNode(service))
+                        selectable: !hasChildren
                     };
+                    if (hasChildren) {
+                        node.children = category.subServices.map((service: any) => this.mapServiceToTreeNode(service));
+                    }
+                    return node;
                 });
                 console.log(this.serviceCategories);
             },
@@ -218,12 +249,15 @@ export class WorkingHoursComponent implements OnInit {
 
     mapServiceToTreeNode(service: any): any {
         const hasChildren = service.subServices && service.subServices.length > 0;
-        return {
+        const node: any = {
             key: `srv-${service.id}`,
             label: service.nameEn, // or nameAr if you want Arabic
-            selectable: !hasChildren,
-            children: (service.subServices || []).map((sub: any) => this.mapServiceToTreeNode(sub))
+            selectable: !hasChildren
         };
+        if (hasChildren) {
+            node.children = service.subServices.map((sub: any) => this.mapServiceToTreeNode(sub));
+        }
+        return node;
     }
 
     //here is the function needed to get all added working hours from the child component
@@ -243,6 +277,7 @@ export class WorkingHoursComponent implements OnInit {
 
         fetchObservable.subscribe({
             next: (res: any[]) => {
+                debugger
                 this.groupWorkingHours(res);
             },
             error: (error: any) => {
@@ -261,15 +296,68 @@ export class WorkingHoursComponent implements OnInit {
         const userId = event.value;
         if (!userId) {
             this.dialogUserWorkingHours = [];
+            this.flatDialogUserWorkingHours = [];
+            this.serviceCategories = [];
             return;
         }
 
+        // 1. Fetch Working Hours
         this._workingHoursService.getWorkingHoursByUserId(userId).subscribe({
             next: (res: any[]) => {
                 this.dialogUserWorkingHours = this.groupWorkingHoursData(res);
+                this.flatDialogUserWorkingHours = res.map(item => {
+                    const dayInfo = this.weekDays.find((d) => d.value == item.dayOfWeek);
+                    return {
+                        ...item,
+                        dayLabel: dayInfo ? dayInfo.label : ''
+                    };
+                });
             },
             error: (error: any) => {
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch Working hours for selected user' });
+                // If it's a 404 block, it simply means no hours assigned yet per requirements
+                if (error.status === 404) {
+                    this.dialogUserWorkingHours = [];
+                    this.flatDialogUserWorkingHours = [];
+                } else {
+                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch Working hours for selected user' });
+                }
+            }
+        });
+
+        // 2. Fetch Assigned Services
+        this._workingHoursService.getAssignedServicesForUser(userId).subscribe({
+            next: (response: any) => {
+                const servicesData = response.data || response;
+                if (!servicesData || servicesData.length === 0) {
+                    this.serviceCategories = [];
+                    this.messageService.add({
+                        severity: 'warn',
+                        summary: 'No Services',
+                        detail: 'There are no services assigned for the selected user. Please assign services first.'
+                    });
+                    return;
+                }
+
+                this.serviceCategories = servicesData.map((category: any) => {
+                    const hasChildren = category.subServices && category.subServices.length > 0;
+                    const node: any = {
+                        key: `srv-${category.id}`,
+                        label: category.nameEn,
+                        selectable: !hasChildren
+                    };
+                    if (hasChildren) {
+                        node.children = category.subServices.map((service: any) => this.mapServiceToTreeNode(service));
+                    }
+                    return node;
+                });
+            },
+            error: (error: any) => {
+                if (error.status !== 404) {
+                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch assigned services for user' });
+                } else {
+                    this.serviceCategories = [];
+                    this.messageService.add({ severity: 'warn', summary: 'No Services', detail: 'There are no services assigned for the selected user.' });
+                }
             }
         });
     }
@@ -287,6 +375,7 @@ export class WorkingHoursComponent implements OnInit {
 
     groupWorkingHoursData(data: any[]): any[] {
         const grouped = data.reduce((acc: any[], item: any) => {
+            debugger
             const dayInfo = this.weekDays.find((d) => d.value == item.dayOfWeek);
 
             let dayGroup = acc.find((g) => g.dayOfWeek === item.dayOfWeek);
@@ -302,25 +391,26 @@ export class WorkingHoursComponent implements OnInit {
 
             let locGroup = dayGroup.locations.find((l: any) => l.locationId === item.locationId);
             if (!locGroup) {
+                debugger
                 locGroup = {
                     locationId: item.locationId,
-                    locationNameEn: item.location.nameEn,
-                    locationNameAr: item.location.nameAr,
+                    locationNameEn: item.locationNameEn,
+                    locationNameAr: item.locationNameAr,
                     items: [] // This will contain doctor + service groups
                 };
                 dayGroup.locations.push(locGroup);
             }
 
-            let dsGroup = locGroup.items.find((i: any) => i.doctorNameEn === item.doctor.nameEn && i.serviceNameEn === item.service.nameEn);
+            let dsGroup = locGroup.items.find((i: any) => i.doctorNameEn === item.doctorNameEn && i.serviceNameEn === item.serviceNameEn);
 
             if (!dsGroup) {
                 dsGroup = {
-                    doctorNameEn: item.doctor.nameEn,
+                    doctorNameEn: item.doctorNameEn,
                     doctorId: item.doctorId,
                     serviceId: item.serviceId,
-                    doctorNameAr: item.doctor.nameAr,
-                    serviceNameEn: item.service.nameEn,
-                    serviceNameAr: item.service.nameAr,
+                    doctorNameAr: item.doctorNameAr,
+                    serviceNameEn: item.serviceNameEn,
+                    serviceNameAr: item.serviceNameAr,
                     timeSlots: []
                 };
                 locGroup.items.push(dsGroup);
@@ -344,8 +434,6 @@ export class WorkingHoursComponent implements OnInit {
         debugger
         this.isSaving = true;
         let formValues = this.workingHoursForm.value;
-        console.log('RAW FORM VALUES:', formValues);
-        console.log('RAW SERVICE ID:', formValues.serviceId);
 
         let serviceIds: number[] = [];
 
@@ -523,19 +611,68 @@ export class WorkingHoursComponent implements OnInit {
         this.showWorkingHoursDialog = true;
         this.isEdit = true;
 
-        // Find the correct serviceId format for TreeSelect
-        // The ServiceId is 12, so we look for 'srv-12'
-        const targetKey = `srv-${item.serviceId}`;
-        const serviceNode = this.findServiceNodeByKey(this.serviceCategories, targetKey);
+        this.selectedDayOfWeek = Number(workingHour.value);
+        this.workingHoursToEdit = item.timeSlots.map((slot: any) => ({ ...slot, dayOfWeek: Number(workingHour.value) }));
 
         this.workingHoursForm.patchValue({
-            serviceId: serviceNode ? [serviceNode] : [],
             doctorId: item.doctorId,
-            locationId: location.locationId
+            locationId: location.locationId,
+            serviceId: [] // Clear initially until loaded
         });
-        this.selectedDayOfWeek = Number(workingHour.value);
 
-        this.workingHoursToEdit = item.timeSlots.map((slot: any) => ({ ...slot, dayOfWeek: Number(workingHour.value) }));
+        // 1. Fetch Working Hours for display
+        this._workingHoursService.getWorkingHoursByUserId(item.doctorId).subscribe({
+            next: (res: any[]) => {
+                this.dialogUserWorkingHours = this.groupWorkingHoursData(res);
+                this.flatDialogUserWorkingHours = res.map(i => {
+                    const dayInfo = this.weekDays.find((d) => d.value == i.dayOfWeek);
+                    return { ...i, dayLabel: dayInfo ? dayInfo.label : '' };
+                });
+            },
+            error: () => {
+                this.dialogUserWorkingHours = [];
+                this.flatDialogUserWorkingHours = [];
+            }
+        });
+
+        // 2. Fetch Assigned Services to select the node
+        this._workingHoursService.getAssignedServicesForUser(item.doctorId).subscribe({
+            next: (response: any) => {
+                const servicesData = response.data || response;
+                if (!servicesData || servicesData.length === 0) {
+                    this.serviceCategories = [];
+                    this.messageService.add({
+                        severity: 'warn',
+                        summary: 'No Services',
+                        detail: 'There are no services assigned for the selected user. Please assign services first.'
+                    });
+                } else {
+                    this.serviceCategories = servicesData.map((category: any) => {
+                        const hasChildren = category.subServices && category.subServices.length > 0;
+                        const node: any = {
+                            key: `srv-${category.id}`,
+                            label: category.nameEn,
+                            selectable: !hasChildren
+                        };
+                        if (hasChildren) {
+                            node.children = category.subServices.map((service: any) => this.mapServiceToTreeNode(service));
+                        }
+                        return node;
+                    });
+                }
+
+                // Find the correct serviceId format for TreeSelect
+                const targetKey = `srv-${item.serviceId}`;
+                const serviceNode = this.findServiceNodeByKey(this.serviceCategories, targetKey);
+
+                this.workingHoursForm.patchValue({
+                    serviceId: serviceNode ? [serviceNode] : []
+                });
+            },
+            error: () => {
+                this.serviceCategories = [];
+            }
+        });
     }
 
     findServiceNodeByKey(nodes: any[], targetKey: string): any {
