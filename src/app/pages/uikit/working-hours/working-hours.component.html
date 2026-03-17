@@ -102,47 +102,6 @@
             }
         </div>
 
-        <!-- Assigned Working Hours Display (Inside Dialog) -->
-        <div class="col-12 mt-4 mb-4">
-            <h5 class="text-lg font-bold text-gray-700 mb-3 border-b pb-2">Currently Assigned Working Hours</h5>
-
-            @if (!workingHoursForm.get('doctorId')?.value) {
-            <div
-                class="flex flex-col items-center justify-center p-6 text-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 min-h-[150px]">
-                <i class="pi pi-user text-3xl text-gray-400 mb-2"></i>
-                <p class="text-gray-500 font-medium">Please choose a user to show their working hours.</p>
-            </div>
-            } @else if (dialogUserWorkingHours.length === 0) {
-            <div
-                class="flex flex-col items-center justify-center p-6 text-center bg-orange-50 rounded-xl border-2 border-dashed border-orange-200 min-h-[150px]">
-                <i class="pi pi-info-circle text-3xl text-orange-400 mb-2"></i>
-                <p class="text-orange-600 font-medium">No working hours are currently assigned for the selected user.
-                </p>
-            </div>
-            } @else {
-            <p-carousel [value]="flatDialogUserWorkingHours" [numVisible]="3" [numScroll]="1" [circular]="false"
-                [responsiveOptions]="carouselResponsiveOptions">
-                <ng-template let-slot pTemplate="item">
-                    <div class="bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow m-2">
-                        <div class="flex flex-col mb-2">
-                            <span class="text-sm font-semibold text-blue-600">{{ slot.dayLabel }}</span>
-                            <span class="text-lg font-bold text-gray-800">{{ slot.startTime.substring(0, 5) }} - {{
-                                slot.endTime.substring(0, 5) }}</span>
-                        </div>
-                        <div class="text-sm text-gray-600 space-y-1">
-                            <p class="flex items-center gap-2" [title]="slot.serviceNameEn"><i
-                                    class="pi pi-briefcase text-gray-400"></i> <span class="truncate">{{
-                                    slot.serviceNameEn }}</span></p>
-                            <p class="flex items-center gap-2" [title]="slot.locationNameEn"><i
-                                    class="pi pi-map-marker text-gray-400"></i> <span class="truncate">{{
-                                    slot.locationNameEn }}</span></p>
-                        </div>
-                    </div>
-                </ng-template>
-            </p-carousel>
-            }
-        </div>
-
         @if (!isEdit) {
         <div class="row my-4">
             <div class="col-12 text-center">
@@ -153,7 +112,7 @@
 
         <div class="row g-3 mb-4">
             <app-assing-hours [selectedDayOfWeek]="selectedDayOfWeek" [workingHoursToEdit]="workingHoursToEdit"
-                [isEdit]="isEdit" (workingHoursChanged)="onWorkingHoursChanged($event)"></app-assing-hours>
+                [isEdit]="isEdit" [assignedWorkingHours]="flatDialogUserWorkingHours" [hasDoctorSelected]="!!workingHoursForm.get('doctorId')?.value" (workingHoursChanged)="onWorkingHoursChanged($event)"></app-assing-hours>
         </div>
 
         <div class="row g-3">

@@ -318,12 +318,13 @@ export class AddUserComponent implements OnInit {
         }
 
         const payload = this.addNewUserForm.value;
+        payload.id = this.selectedUser.id;
         if (!payload.registerDTO.password) {
             delete payload.registerDTO.password;
         }
 
         this.isSaving = true;
-        this.userService.updateUser(this.selectedUser.id, payload).subscribe({
+        this.userService.updateUser(payload).subscribe({
             next: () => {
                 this.isSaving = false;
                 this.hideDialog();

@@ -18,23 +18,19 @@
             </div>
 
             <!-- Filter Row -->
-            <div class="row g-3 align-items-end">
+            <div class="row g-3">
 
                 <!-- Location -->
-                <div class="col-12 col-md-4">
-                    <label class="filter-label">
-                        <i class="pi pi-map-marker me-1 text-primary"></i> Location
+                <div class="col-md-3 p-2">
+                    <label class="filter-label mb-2 d-block text-uppercase text-muted"
+                        style="font-size: 0.70rem; font-weight: 500; letter-spacing: 0.5px;">
+                        Location
                     </label>
                     <p-dropdown [options]="allLocations" [(ngModel)]="selectedLocation" optionLabel="nameEn"
                         placeholder="Select a location…" [showClear]="true" [filter]="true"
-                        filterPlaceholder="Search locations" styleClass="w-100 filter-dropdown"
+                        filterPlaceholder="Search locations" styleClass="filter-dropdown"
                         (onChange)="onLocationSelect()">
-                        <ng-template pTemplate="selectedItem" let-item>
-                            <div class="d-flex align-items-center gap-2">
-                                <i class="pi pi-map-marker text-primary small"></i>
-                                <span>{{ item.nameEn }}</span>
-                            </div>
-                        </ng-template>
+
                         <ng-template pTemplate="item" let-item>
                             <div class="d-flex align-items-center gap-2 py-1">
                                 <i class="pi pi-map-marker text-primary small"></i>
@@ -46,35 +42,40 @@
                 </div>
 
                 <!-- Date Range -->
-                <div class="col-12 col-md-4">
-                    <label class="filter-label">
-                        <i class="pi pi-calendar me-1 text-primary"></i> Date Range
+                <div class="col-md-3 p-2">
+                    <label class="filter-label mb-2 d-block text-uppercase text-muted"
+                        style="font-size: 0.70rem; font-weight: 500; letter-spacing: 0.5px;">
+                        Date Range
                     </label>
                     <p-datepicker [(ngModel)]="dateRange" selectionMode="range" [readonlyInput]="true"
-                        placeholder="Select date range…" dateFormat="yy-mm-dd" styleClass="w-100 filter-datepicker"
+                        placeholder="Select date range…" dateFormat="yy-mm-dd" styleClass="filter-datepicker"
                         [showButtonBar]="true" (onSelect)="onDateRangeSelect()">
                     </p-datepicker>
                 </div>
 
-                <!-- View Toggle -->
-                <div class="col-12 col-md-4">
-                    <label class="filter-label">
-                        <i class="pi pi-eye me-1 text-primary"></i> View
-                    </label>
-                    <p-selectButton [options]="viewOptions" [(ngModel)]="viewValue" optionLabel="label"
-                        optionValue="value" styleClass="w-100 view-select-btn" (onChange)="onViewChange()">
-                    </p-selectButton>
-                </div>
+
 
                 <!-- Slot length (time in minutes) -->
-                <div class="col-12 col-md-4">
-                    <label class="filter-label">
-                        <i class="pi pi-clock me-1 text-primary"></i> Slot time
+                <div class="col-md-3 p-2">
+                    <label class="filter-label mb-2 d-block text-uppercase text-muted"
+                        style="font-size: 0.70rem; font-weight: 500; letter-spacing: 0.5px;">
+                        Slot time
                     </label>
                     <p-dropdown [options]="timeOptions" [(ngModel)]="selectedSlotMinutes" optionLabel="label"
                         optionValue="value" placeholder="Select time…" styleClass="w-100 filter-dropdown"
                         [showClear]="true" (onChange)="onSlotMinutesChange()">
                     </p-dropdown>
+                </div>
+
+                <!-- View Toggle -->
+                <div class="col-md-3 p-2">
+                    <label class="filter-label mb-2 d-block text-uppercase text-muted"
+                        style="font-size: 0.70rem; font-weight: 500; letter-spacing: 0.5px;">
+                        View
+                    </label>
+                    <p-selectButton [options]="viewOptions" [(ngModel)]="viewValue" optionLabel="label"
+                        optionValue="value" styleClass="view-select-btn" (onChange)="onViewChange()">
+                    </p-selectButton>
                 </div>
 
             </div>
@@ -282,8 +283,7 @@
             <app-booking-form (bookingSuccess)="onBookingSuccess()"></app-booking-form>
         </ng-template>
         <ng-template pTemplate="footer">
-            <p-button icon="pi pi-times" (click)="hideDialog()" label="Cancel"
-                styleClass="p-button-text"></p-button>
+            <p-button icon="pi pi-times" (click)="hideDialog()" label="Cancel" styleClass="p-button-text"></p-button>
         </ng-template>
     </p-dialog>
 

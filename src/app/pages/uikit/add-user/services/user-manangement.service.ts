@@ -66,12 +66,11 @@ export class UserManangementService {
 
     /**
      * A function to update the selected user
-     * @param id The ID of the user to update.
      * @param user The updated user data.
      * @returns An observable with the response.
      */
-    updateUser(id: string, user: any): Observable<any> {
-        return this.http.put<any>(`${this.apiUrl}${'Update/Update'}/${id}`, user).pipe(catchError(this.handleError));
+    updateUser(user: any): Observable<any> {
+        return this.http.put<any>(`${this.apiUrl}${'Update/Update'}`, user).pipe(catchError(this.handleError));
     }
 
     /**

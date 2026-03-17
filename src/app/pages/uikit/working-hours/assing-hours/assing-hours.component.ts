@@ -19,6 +19,8 @@ export class AssingHoursComponent implements OnInit {
     workingHoursForm!: FormGroup;
     @Input() selectedDayOfWeek!: number;
     @Input() workingHoursToEdit: any[] = [];
+    @Input() assignedWorkingHours: any[] = [];
+    @Input() hasDoctorSelected: boolean = false;
     @Input() isEdit: boolean = false;
     @Output() workingHoursChanged = new EventEmitter<any[]>();
 
@@ -238,5 +240,10 @@ export class AssingHoursComponent implements OnInit {
             });
         });
         return payload;
+    }
+
+    getAssignedHoursForDay(dayValue: string): any[] {
+        if (!this.assignedWorkingHours || this.assignedWorkingHours.length === 0) return [];
+        return this.assignedWorkingHours.filter(wh => wh.dayOfWeek.toString() === dayValue);
     }
 }
