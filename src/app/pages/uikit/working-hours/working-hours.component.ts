@@ -267,7 +267,7 @@ export class WorkingHoursComponent implements OnInit {
 
     //here is the function needed to get all added working hours
     getAllAddedWorkingHours(): void {
-        debugger
+
         this.allWorkingHours = [];
         this.expandedRows = {};
 
@@ -277,7 +277,7 @@ export class WorkingHoursComponent implements OnInit {
 
         fetchObservable.subscribe({
             next: (res: any[]) => {
-                debugger
+
                 this.groupWorkingHours(res);
             },
             error: (error: any) => {
@@ -375,7 +375,7 @@ export class WorkingHoursComponent implements OnInit {
 
     groupWorkingHoursData(data: any[]): any[] {
         const grouped = data.reduce((acc: any[], item: any) => {
-            debugger
+
             const dayInfo = this.weekDays.find((d) => d.value == item.dayOfWeek);
 
             let dayGroup = acc.find((g) => g.dayOfWeek === item.dayOfWeek);
@@ -391,7 +391,7 @@ export class WorkingHoursComponent implements OnInit {
 
             let locGroup = dayGroup.locations.find((l: any) => l.locationId === item.locationId);
             if (!locGroup) {
-                debugger
+
                 locGroup = {
                     locationId: item.locationId,
                     locationNameEn: item.locationNameEn,
@@ -431,7 +431,7 @@ export class WorkingHoursComponent implements OnInit {
 
     //here is the function needed to add a new working hour
     addNewWorkingHour(): void {
-        debugger
+
         this.isSaving = true;
         let formValues = this.workingHoursForm.value;
 

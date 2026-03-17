@@ -126,7 +126,7 @@ export class CalendarComponent implements OnInit {
 
     /** True when we have both location and a date range to load appointments */
     hasLocationAndDateRange(): boolean {
-        debugger
+
         return !!this.selectedLocation && !!this.dateRange?.length && !!this.dateRange[0];
     }
 

@@ -233,7 +233,7 @@ export class MeasurementTemplatesComponent implements OnInit {
             this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please select at least one measurement' });
             return;
         }
-        debugger
+
         const payload = {
             ...(this.editingTemplateId !== null && { id: this.editingTemplateId }),
             name: this.newTemplate.name,

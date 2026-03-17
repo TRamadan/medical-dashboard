@@ -246,4 +246,35 @@ export class AssingHoursComponent implements OnInit {
         if (!this.assignedWorkingHours || this.assignedWorkingHours.length === 0) return [];
         return this.assignedWorkingHours.filter(wh => wh.dayOfWeek.toString() === dayValue);
     }
+
+    getGroupedAssignedHoursForDay(dayValue: string): any[] {
+        if (!this.assignedWorkingHours || this.assignedWorkingHours.length === 0) return [];
+        const dayHours = this.assignedWorkingHours.filter(wh => wh.dayOfWeek.toString() === dayValue);
+        
+        const grouped = new Map<string, any>();
+        
+        dayHours.forEach(wh => {
+            const key = `${wh.startTime}-${wh.endTime}`;
+            if (!grouped.has(key)) {
+                grouped.set(key, {
+                    id: key,
+                    dayLabel: wh.dayLabel,
+                    startTime: wh.startTime,
+                    endTime: wh.endTime,
+                    services: wh.serviceNameEn ? [wh.serviceNameEn] : [],
+                    locations: wh.locationNameEn ? [wh.locationNameEn] : []
+                });
+            } else {
+                const existing = grouped.get(key);
+                if (wh.serviceNameEn && !existing.services.includes(wh.serviceNameEn)) {
+                    existing.services.push(wh.serviceNameEn);
+                }
+                if (wh.locationNameEn && !existing.locations.includes(wh.locationNameEn)) {
+                    existing.locations.push(wh.locationNameEn);
+                }
+            }
+        });
+        
+        return Array.from(grouped.values()).sort((a, b) => a.startTime.localeCompare(b.startTime));
+    }
 }
