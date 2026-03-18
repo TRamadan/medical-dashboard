@@ -78,6 +78,14 @@ export class AddUserComponent implements OnInit {
     allUserTypes: any[] = [];
     public readonly imgUrl = environment.imgUrl;
 
+    // Pagination
+    currentPage: number = 1;
+    pageSize: number = 10;
+    totalUsers: number = 0;
+
+    // Stepper
+    activeStep: number = 1;
+
     daysOffDialog: boolean = false;
     selectedUserForDaysOff: any = null;
     selectedDayOffToEdit: any = null;
@@ -191,8 +199,8 @@ export class AddUserComponent implements OnInit {
                 email: ['', [Validators.required, Validators.email]],
                 password: ['', [Validators.required, Validators.minLength(8)]],
                 genderId: [null, Validators.required],
-                rolesId: [[], Validators.required],
-                groupesId: [[], Validators.required]
+                rolesId: [[]],
+                groupesId: [[]]
             }),
             employeeProfileDTO: this.fb.group({
                 address: ['', Validators.required],
@@ -210,6 +218,7 @@ export class AddUserComponent implements OnInit {
 
     createPhoneGroup(isPrimary: boolean = false): FormGroup {
         return this.fb.group({
+            id: [null],
             phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]],
             isPrimary: [isPrimary],
             isWhatsApp: [false]
@@ -218,6 +227,7 @@ export class AddUserComponent implements OnInit {
 
     createEmergencyContactGroup(): FormGroup {
         return this.fb.group({
+            id: [null],
             name: ['', Validators.required],
             phoneNumber: ['', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]]
         });
@@ -263,14 +273,16 @@ export class AddUserComponent implements OnInit {
         this.isEdit = false;
         this.isDelete = false;
         this.selectedUser = null;
+        this.activeStep = 1;
         this.initialiseUserForm();
         this.userDialog = true;
     }
 
     getAllUsers(): void {
-        this.userService.getAllUsers().subscribe({
+        this.userService.getAppUsers(this.currentPage, this.pageSize).subscribe({
             next: (users: any) => {
-                this.allUsers = users.data;
+                this.allUsers = users?.items ?? users?.data ?? users;
+                this.totalUsers = users?.totalCount ?? users?.total ?? this.allUsers.length;
             },
             error: (err) => {
                 this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message });
@@ -278,9 +290,23 @@ export class AddUserComponent implements OnInit {
         });
     }
 
+    onPageChange(event: any): void {
+        // In lazy mode PrimeNG emits TableLazyLoadEvent with `first` & `rows`.
+        // PaginatorState has a zero-based `page` property.
+        const rows = event.rows ?? this.pageSize;
+        const newPage = event.page != null
+            ? event.page + 1                      // PaginatorState (0-based)
+            : Math.floor((event.first ?? 0) / rows) + 1; // LazyLoadEvent
+
+        this.currentPage = newPage;
+        this.pageSize = rows;
+        this.getAllUsers();
+    }
+
     addNewUser(): void {
         if (this.addNewUserForm.invalid) {
             this.addNewUserForm.markAllAsTouched();
+            this.goToFirstErrorStep();
             return;
         }
 
@@ -314,14 +340,38 @@ export class AddUserComponent implements OnInit {
     updateSelectedUser(): void {
         if (this.addNewUserForm.invalid) {
             this.addNewUserForm.markAllAsTouched();
+            this.goToFirstErrorStep();
             return;
         }
 
-        const payload = this.addNewUserForm.value;
-        payload.id = this.selectedUser.id;
-        if (!payload.registerDTO.password) {
-            delete payload.registerDTO.password;
-        }
+        const formValue = this.addNewUserForm.value;
+        const registerDTO = formValue.registerDTO;
+        const empDTO = formValue.employeeProfileDTO;
+
+        const payload = {
+            id: this.selectedUser.id,
+            updateDTO: {
+                userName: registerDTO.userName,
+                nameAr: registerDTO.nameAr,
+                nameEn: registerDTO.nameEn,
+                email: registerDTO.email,
+                genderId: registerDTO.genderId,
+                rolesId: registerDTO.rolesId,
+                groupesId: registerDTO.groupesId
+            },
+            employeeProfileDTO: {
+                address: empDTO.address,
+                employeeTypeId: empDTO.employeeTypeId
+            },
+            phones: formValue.phones.map((p: any) => {
+                const { id, ...rest } = p;
+                return id != null ? { id, ...rest } : rest;
+            }),
+            emergencyContacts: formValue.emergencyContacts.map((e: any) => {
+                const { id, ...rest } = e;
+                return id != null ? { id, ...rest } : rest;
+            })
+        };
 
         this.isSaving = true;
         this.userService.updateUser(payload).subscribe({
@@ -357,16 +407,12 @@ export class AddUserComponent implements OnInit {
     }
 
     editSelectedUser(user: any): void {
-        this.userService.getUserById(user.id).subscribe({
-            next: (res: any) => {
-                const data = res?.data ?? res;
-                this.selectedUser = { ...data, id: data.id ?? user.id };
-                this.patchFormForEdit(data);
-                this.isEdit = true;
-                this.userDialog = true;
-            },
-            error: (err) => this._messageService.add({ severity: 'error', summary: 'Error', detail: err.message })
-        });
+        const foundUser = this.allUsers.find((u: any) => u.id === user.id) ?? user;
+        const data = foundUser;
+        this.selectedUser = { ...data, id: data.id ?? user.id };
+        this.patchFormForEdit(data);
+        this.isEdit = true;
+        this.userDialog = true;
     }
 
     private patchFormForEdit(data: any): void {
@@ -382,7 +428,7 @@ export class AddUserComponent implements OnInit {
             nameAr: data.nameAr ?? '',
             nameEn: data.nameEn ?? '',
             email: data.email ?? '',
-            password: '', 
+            password: '',
             genderId: data.genderId ?? null,
             rolesId,
             groupesId
@@ -402,6 +448,7 @@ export class AddUserComponent implements OnInit {
             this.phonesArray.clear();
             phones.forEach((p: any) => {
                 this.phonesArray.push(this.fb.group({
+                    id: [p.id ?? null],
                     phoneNumber: [p.phoneNumber ?? '', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]],
                     isPrimary: [p.isPrimary ?? false],
                     isWhatsApp: [p.isWhatsApp ?? false]
@@ -414,6 +461,7 @@ export class AddUserComponent implements OnInit {
             this.emergencyContactsArray.clear();
             emergencyContacts.forEach((e: any) => {
                 this.emergencyContactsArray.push(this.fb.group({
+                    id: [e.id ?? null],
                     name: [e.name ?? '', Validators.required],
                     phoneNumber: [e.phoneNumber ?? '', [Validators.required, Validators.pattern('^\\+?[0-9]{10,15}$')]]
                 }));
@@ -493,7 +541,44 @@ export class AddUserComponent implements OnInit {
         this.isEdit = false;
         this.isEmployee = false;
         this.isDelete = false;
+        this.activeStep = 1;
         this.addNewUserForm.reset();
         this.userDialog = false;
+    }
+
+    /**
+     * Checks each step's fields in order and navigates to the first step
+     * that contains a validation error.
+     *
+     * Step 1 – Account  : userName, email, password, employeeTypeId
+     * Step 2 – Personal : nameEn, nameAr, genderId, address
+     * Step 3 – Contacts : phones FormArray, emergencyContacts FormArray
+     */
+    private goToFirstErrorStep(): void {
+        const reg = this.registerDTOGroup;
+        const emp = this.employeeProfileDTOGroup;
+
+        const step1Fields = ['userName', 'email', 'password'];
+        const step1EmpFields = ['employeeTypeId'];
+        if (step1Fields.some(f => reg.get(f)?.invalid) ||
+            step1EmpFields.some(f => emp.get(f)?.invalid)) {
+            this.activeStep = 1;
+            return;
+        }
+
+        const step2Fields = ['nameEn', 'nameAr', 'genderId'];
+        const step2EmpFields = ['address'];
+        if (step2Fields.some(f => reg.get(f)?.invalid) ||
+            step2EmpFields.some(f => emp.get(f)?.invalid)) {
+            this.activeStep = 2;
+            return;
+        }
+
+        if (this.phonesArray.invalid || this.emergencyContactsArray.invalid) {
+            this.activeStep = 3;
+            return;
+        }
+
+        this.activeStep = 4;
     }
 }

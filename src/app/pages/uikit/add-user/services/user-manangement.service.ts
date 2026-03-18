@@ -47,6 +47,18 @@ export class UserManangementService {
     }
 
     /**
+     * A function that gets all app users
+     * @param pageNumber The page number to fetch (default: 1).
+     * @param pageSize The number of items per page (default: 1000).
+     * @returns An observable with the list of app users.
+     */
+    getAppUsers(pageNumber: number = 1, pageSize: number = 1000): Observable<any[]> {
+        return this.http.get<any[]>(this.apiUrl + 'GetAppUsers', {
+            params: { PageNumber: pageNumber, PageSize: pageSize }
+        }).pipe(catchError(this.handleError));
+    }
+
+    /**
      * A function that gets the data for a specific user
      * @param id The ID of the user to fetch.
      * @returns An observable with the user data.
@@ -70,7 +82,7 @@ export class UserManangementService {
      * @returns An observable with the response.
      */
     updateUser(user: any): Observable<any> {
-        return this.http.put<any>(`${this.apiUrl}${'Update/Update'}`, user).pipe(catchError(this.handleError));
+        return this.http.put<any>(`${this.apiUrl}UpdateAppUser/UpdateAppUser/${user.id}`, user).pipe(catchError(this.handleError));
     }
 
     /**

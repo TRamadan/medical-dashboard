@@ -27,11 +27,12 @@
         <h5 class="m-0">Manage users</h5>
     </div>
 
-    <app-table [headers]="coachsHeader" [data]="allUsers" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+    <app-table [headers]="coachsHeader" [data]="allUsers" [paginator]="true" [rows]="pageSize"
+        [totalRecords]="totalUsers" [showCurrentPageReport]="true" [lazy]="true" [lazyLoadOnInit]="false"
         [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true" [globalFilterPlaceholder]="'Search...'"
         [showActions]="true" (edit)="editSelectedUser($event)" (delete)="deleteSelectedUser($event)"
         [isAddDetails]="true" (addDetails)="openAddDayOffDialog($event)" [isShowDetails]="true"
-        (details)="onViewUserDaysOff($event)">
+        (details)="onViewUserDaysOff($event)" (onPageChange)="onPageChange($event)">
 
         <ng-template pTemplate="actions" let-rowData>
             <button pButton pRipple icon="pi pi-user" class="p-button-rounded p-button-info mr-2"
@@ -129,7 +130,7 @@
     [dismissableMask]="true" styleClass="p-fluid" [style]="{ width: '70vw', maxWidth: '1000px' }">
     @if (!isDelete) {
     <form [formGroup]="addNewUserForm">
-        <p-stepper [value]="1">
+        <p-stepper [(value)]="activeStep">
             <p-step-list>
                 <p-step [value]="1">Account</p-step>
                 <p-step [value]="2">Personal</p-step>
@@ -168,9 +169,10 @@
                                     </div>
 
                                     <!-- Password -->
+                                    @if (!isEdit) {
                                     <div>
                                         <label class="block text-sm font-medium mb-2 text-gray-700">
-                                            Password <span *ngIf="!isEdit">*</span>
+                                            Password *
                                         </label>
                                         <div class="p-inputgroup">
                                             <input [type]="showPassword ? 'text' : 'password'" pInputText
@@ -186,6 +188,7 @@
                                             characters</small>
                                         }
                                     </div>
+                                    }
 
                                     </ng-container>
 
