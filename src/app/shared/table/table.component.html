@@ -101,20 +101,24 @@
                 <td class="text-center" *ngIf="showActions || actions.length > 0">
                     <div class="flex justify-center gap-2">
                         <ng-container *ngIf="showActions">
-                            <button *ngIf="showEditButton" pButton icon="pi pi-pencil"
+                            <button *ngIf="showEditButton" pButton icon="pi pi-pencil" [pTooltip]="editTooltip" tooltipPosition="top"
                                 class="p-button-rounded p-button-warning p-button-sm" (click)="onEdit(row)"></button>
-                            <button *ngIf="showDeleteButton" pButton icon="pi pi-trash"
+                            <button *ngIf="showDeleteButton" pButton icon="pi pi-trash" [pTooltip]="deleteTooltip" tooltipPosition="top"
                                 class="p-button-rounded p-button-danger p-button-sm" (click)="onDelete(row)"></button>
 
                             @if (isAddDetails) {
-                            <button pButton icon="pi pi-plus" class="p-button-rounded p-button-info p-button-sm"
+                            <button pButton icon="pi pi-plus" [pTooltip]="addDetailsTooltip" tooltipPosition="top" class="p-button-rounded p-button-info p-button-sm"
                                 (click)="onAddDetails(row)"></button>
                             }
 
                             @if (isShowDetails) {
-                            <button pButton icon="pi pi-eye" class="p-button-rounded p-button-secondary p-button-sm"
+                            <button pButton icon="pi pi-eye" [pTooltip]="showDetailsTooltip" tooltipPosition="top" class="p-button-rounded p-button-secondary p-button-sm"
                                 (click)="onViewDetails(row)"></button>
                             }
+                        </ng-container>
+                        <ng-container *ngFor="let action of actions">
+                            <button *ngIf="!action.show || action.show(row)" pButton [icon]="action.icon" [pTooltip]="action.tooltip || action.label" tooltipPosition="top"
+                                class="p-button-rounded p-button-sm p-button-{{action.type}}" (click)="action.onClick(row)"></button>
                         </ng-container>
                     </div>
                 </td>

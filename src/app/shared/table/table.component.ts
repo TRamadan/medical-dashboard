@@ -24,7 +24,7 @@ export interface TableColumn {
 export interface TableAction {
     label: string;
     icon: string;
-    type: 'primary' | 'secondary' | 'success' | 'warning' | 'danger';
+    type: 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'info';
     onClick: (row: any) => void;
     tooltip?: string;
     show?: (row: any) => boolean;
@@ -69,6 +69,10 @@ export class TableComponent {
     @Input() showSpotsColumn: boolean = false;
     @Input() spotsPerRow: number = 2;
     @Input() selectedItems: any[] = [];
+    @Input() editTooltip: string = 'Edit';
+    @Input() deleteTooltip: string = 'Delete';
+    @Input() addDetailsTooltip: string = 'Add Details';
+    @Input() showDetailsTooltip: string = 'View Details';
 
     // Outputs
     @Output() edit = new EventEmitter<any>();

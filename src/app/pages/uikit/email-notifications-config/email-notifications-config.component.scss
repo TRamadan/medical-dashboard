@@ -1,0 +1,29 @@
+::ng-deep .config-select-btn .p-selectbutton {
+    display: flex;
+    gap: 12px;
+}
+
+::ng-deep .config-select-btn .p-selectbutton .p-button {
+    flex: 1;
+    border-radius: 12px !important;
+    border: 1.5px solid #dee2e6 !important;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.75rem 2.5rem !important;
+    transition: all 0.2s !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    background-color: #fff;
+    color: #495057;
+}
+
+::ng-deep .config-select-btn .p-selectbutton .p-button:not(.p-highlight):hover {
+    border-color: #adb5bd !important;
+    background-color: #f8f9fa !important;
+}
+
+::ng-deep .config-select-btn .p-selectbutton .p-button.p-highlight {
+    background: linear-gradient(135deg, #4f74e3, #7b5ea7) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(79, 116, 227, 0.3) !important;
+}

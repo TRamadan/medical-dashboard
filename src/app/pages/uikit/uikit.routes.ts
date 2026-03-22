@@ -26,7 +26,14 @@ import { OurSolutionsComponent } from './our-solutions/our-solutions.component';
 import { PatientreportComponent } from './patientreport/patientreport.component';
 import { PhasesSessionsComponent } from './phases-sessions/phases-sessions.component';
 import { MeasurementsConfigComponent } from './measurements-config/measurements-config.component';
+import { EmailNotificationsConfigComponent } from './email-notifications-config/email-notifications-config.component';
+
 export default [
+    {
+        path: 'email-notifications-config',
+        data: { breadcrumb: 'Email & Notifications Config' },
+        component: EmailNotificationsConfigComponent
+    },
     {
         path: 'adduser',
         data: { breadcrumb: 'Add user' },

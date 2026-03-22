@@ -197,6 +197,16 @@ export class AppMenu {
         //                 routerLink: ['/uikit/measurements-config']
         //             }
         //         ]
+        //     },
+        //     {
+        //         label: 'Communications',
+        //         items: [
+        //             {
+        //                 label: 'Email & Notifications Config',
+        //                 icon: '',
+        //                 routerLink: ['/uikit/email-notifications-config']
+        //             }
+        //         ]
         //     }
         //     // {
         //     //     label: 'Reports and forms configuration',
@@ -209,5 +219,16 @@ export class AppMenu {
         //     //     ]
         //     // }
         // ];
+
+        this.model.push({
+            label: 'Communications',
+            items: [
+                {
+                    label: 'Email & Notifications Config',
+                    icon: 'pi pi-fw pi-envelope',
+                    routerLink: ['/uikit/email-notifications-config']
+                }
+            ]
+        });
     }
 }

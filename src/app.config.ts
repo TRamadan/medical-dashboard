@@ -9,7 +9,7 @@ import {
 } from '@angular/router';
 import Aura from '@primeng/themes/aura';
 import { providePrimeNG } from 'primeng/config';
-import { MessageService } from 'primeng/api';
+import { MessageService, ConfirmationService } from 'primeng/api';
 import { appRoutes } from './app.routes';
 import { authInterceptor } from './app/pages/auth/auth.interceptor';
 
@@ -38,6 +38,7 @@ export const appConfig: ApplicationConfig = {
             }
         }),
 
-        MessageService
+        MessageService,
+        ConfirmationService
     ]
 };

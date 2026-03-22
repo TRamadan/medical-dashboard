@@ -71,7 +71,6 @@ export class AddUserComponent implements OnInit {
     isSaving: boolean = false;
     isEmployee: boolean = false;
     showPassword = false;
-    detailsDialog: boolean = false;
     selectedUser: any;
     allRoles: Roles[] = [];
     allGroups: Group[] = [];
@@ -166,6 +165,7 @@ export class AddUserComponent implements OnInit {
         { label: 'Email', field: 'email', type: 'text', sortable: true },
         { label: 'Phone Number', field: 'phoneNumber', type: 'text', sortable: true }
     ];
+
     genders: any[] = [
         { id: 1, name: 'Male' },
         { id: 2, name: 'Female' }
@@ -520,19 +520,6 @@ export class AddUserComponent implements OnInit {
                     severity: 'An error occured',
                     detail: 'Error on fetching added groups'
                 });
-            }
-        });
-    }
-
-    showUserDetails(user: any) {
-        this.userService.getUserById(user.id).subscribe({
-            next: (res: any) => {
-                const data = res?.data ?? res;
-                this.selectedUser = { ...data, id: data.id ?? user.id };
-                this.detailsDialog = true;
-            },
-            error: (err) => {
-                this._messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch user details' });
             }
         });
     }

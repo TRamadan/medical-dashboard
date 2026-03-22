@@ -1,0 +1,181 @@
+<p-toast></p-toast>
+<div class="card pt-5 p-0 md:p-4 md:pt-6 surface-ground border-none md:border-1 surface-border border-round flex flex-col gap-4">
+    <!-- Header Controls -->
+    <div class="flex justify-center md:justify-start">
+        <p-selectButton [options]="modeOptions" [ngModel]="configMode()" (ngModelChange)="configMode.set($event)"
+            optionLabel="label" optionValue="value" styleClass="config-select-btn">
+            <ng-template let-item pTemplate>
+                <div class="flex align-items-center gap-2">
+                    <i [class]="item.icon"></i>
+                    <span>{{ item.label }}</span>
+                </div>
+            </ng-template>
+        </p-selectButton>
+    </div>
+
+    <!-- Email Configuration View -->
+    <div *ngIf="configMode() === 'email'" class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <!-- Left Column: Edit Email -->
+        <div class="lg:col-span-6 xl:col-span-5 flex flex-col gap-4 w-full p-3">
+            <div class="card bg-white border-round-xl shadow-1 p-4 h-full flex flex-col border border-gray-100">
+                <h2 class="text-xl font-semibold text-gray-800 m-0 mb-4">Compose Email</h2>
+
+                <div class="flex flex-col gap-2 mb-3">
+                    <label class="text-sm font-semibold text-gray-700">To</label>
+                    <input pInputText type="text" [ngModel]="emailTo()" (ngModelChange)="emailTo.set($event)"
+                        placeholder="recipient@example.com" class="w-full bg-gray-50 border-gray-200" />
+                </div>
+
+                <div class="flex flex-col gap-2 mb-3">
+                    <label class="text-sm font-semibold text-gray-700">Subject</label>
+                    <input pInputText type="text" [ngModel]="emailSubject()" (ngModelChange)="emailSubject.set($event)"
+                        placeholder="Email subject" class="w-full bg-gray-50 border-gray-200" />
+                </div>
+
+                <div class="flex flex-col gap-2 mb-3 flex-grow">
+                    <label class="text-sm font-semibold text-gray-700">Body</label>
+                    <textarea #bodyTextarea pInputTextarea [ngModel]="emailBody()" (ngModelChange)="emailBody.set($event)" [rows]="10"
+                        style="resize: none; min-height: 250px;"
+                        class="w-full flex-grow bg-gray-50 border-gray-200 font-mono text-sm leading-relaxed"></textarea>
+                </div>
+
+                <div class="flex flex-wrap gap-2 mb-4">
+                    <button *ngFor="let p of placeholders()" pButton pRipple
+                        class="p-button-outlined p-button-secondary p-button-sm surface-100 border-none text-gray-600 border-round-3xl hover:surface-200 shadow-none px-3"
+                        (mousedown)="$event.preventDefault()"
+                        (click)="insertPlaceholderToBody(p.key)">
+                        <span class="text-xs font-semibold">{{ '{' + '{' + p.key + '}' + '}' }}</span>
+                    </button>
+                </div>
+
+                <button pButton pRipple label="Send Email" icon="pi pi-send"
+                    class="w-full p-button-primary border-round-lg mt-auto hover:bg-indigo-600 bg-indigo-500 border-none shadow-1 py-3"
+                    (click)="sendEmail()"></button>
+            </div>
+        </div>
+
+        <!-- Right Column: Settings and Preview -->
+        <div class="col-span-1 lg:col-span-6 xl:col-span-7 flex flex-col gap-5">
+            <!-- Dynamic Placeholders Card -->
+            <div class="card bg-white border-round-xl shadow-1 p-4 border border-gray-100">
+                <h3 class="text-lg font-semibold text-gray-800 m-0 mb-2">Dynamic Placeholders</h3>
+                <p class="text-sm text-gray-500 mb-4">Define placeholders like <code
+                        class="bg-gray-100 px-1 rounded text-gray-700">{{'{' + '{' + 'name' + '}' + '}'}}</code> and set
+                    their values below.</p>
+
+                <div class="flex flex-col gap-3 mb-4">
+                    <div *ngFor="let p of placeholders()" class="flex align-items-center gap-3">
+                        <div
+                            class="bg-gray-50 border border-gray-200 text-gray-700 text-sm px-3 py-2 border-round min-w-[max-content] font-mono font-medium shadow-none">
+                            {{ '{' + '{' + p.key + '}' + '}' }}
+                        </div>
+                        <input pInputText type="text" [ngModel]="p.value"
+                            (ngModelChange)="updatePlaceholderValue(p.key, $event)"
+                            class="w-full bg-gray-50 border-gray-200 shadow-none" />
+                        <button pButton pRipple icon="pi pi-times"
+                            class="p-button-text p-button-secondary p-button-rounded text-gray-400 hover:text-red-500 w-2rem h-2rem flex-shrink-0"
+                            (click)="removePlaceholder(p.key)"></button>
+                    </div>
+                </div>
+
+                <div class="flex align-items-center gap-3">
+                    <div
+                        class="p-inputgroup border-round-lg overflow-hidden border border-gray-200 w-full shadow-none bg-gray-50">
+                        <input pInputText type="text" [ngModel]="newPlaceholderName()"
+                            (ngModelChange)="newPlaceholderName.set($event)" placeholder="New placeholder name"
+                            class="border-none shadow-none flex-grow bg-transparent" (keyup.enter)="addPlaceholder()" />
+                        <button pButton label="Add" icon="pi pi-plus"
+                            class="p-button-secondary bg-gray-200 border-none text-gray-700 hover:bg-gray-300 font-medium px-4"
+                            (click)="addPlaceholder()"></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Preview Card -->
+            <div class="card bg-white border-round-xl shadow-1 p-4 border border-gray-100 overflow-hidden">
+                <h3 class="text-lg font-semibold text-gray-800 m-0 mb-4 flex align-items-center gap-2">
+                    <i class="pi pi-eye"></i> Live Preview
+                </h3>
+
+                <div class="border border-gray-200 border-round-lg overflow-hidden flex flex-col shadow-sm">
+                    <div class="bg-gray-100 p-3 flex flex-col gap-1 border-bottom-1 border-gray-200">
+                        <div class="text-sm"><span class="text-gray-500 min-w-4rem inline-block">To:</span> <span
+                                class="font-medium text-gray-800">{{ emailTo() || '—' }}</span></div>
+                        <div class="text-sm"><span class="text-gray-500 min-w-4rem inline-block">Subject:</span> <span
+                                class="font-medium text-gray-800">{{ previewSubject() || '—' }}</span></div>
+                    </div>
+                    <div class="p-4 bg-white text-gray-800 whitespace-pre-wrap font-sans text-sm leading-relaxed"
+                        style="min-height: 200px;">{{ previewBody() || 'Email body preview will appear here...' }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Configuration View -->
+    <div *ngIf="configMode() === 'notification'" class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        <div class="col-span-1 lg:col-span-8 xl:col-span-6 flex flex-col gap-4">
+            <div class="card bg-white border-round-xl shadow-1 p-4 h-full flex flex-col border border-gray-100">
+                <h2 class="text-xl font-semibold text-gray-800 m-0 mb-4 flex align-items-center gap-2">
+                    <i class="pi pi-bell text-indigo-500"></i> Send Notification
+                </h2>
+
+                <div class="flex flex-col gap-2 mb-4">
+                    <label class="text-sm font-semibold text-gray-700">Title</label>
+                    <input pInputText type="text" [ngModel]="notificationTitle()"
+                        (ngModelChange)="notificationTitle.set($event)" placeholder="Notification title"
+                        class="w-full bg-gray-50 border-gray-200" />
+                </div>
+
+                <div class="flex flex-col gap-2 mb-4 flex-grow">
+                    <label class="text-sm font-semibold text-gray-700">Message</label>
+                    <textarea pInputTextarea [ngModel]="notificationMessage()"
+                        (ngModelChange)="notificationMessage.set($event)" [rows]="5" style="resize: none;"
+                        class="w-full flex-grow bg-gray-50 border-gray-200 text-sm leading-relaxed"
+                        placeholder="Write your notification message..."></textarea>
+                </div>
+
+                <div class="flex flex-col gap-2 mb-5">
+                    <label class="text-sm font-semibold text-gray-700">Type</label>
+                    <p-dropdown [options]="notificationTypeOptions" [ngModel]="notificationType()"
+                        (ngModelChange)="notificationType.set($event)" optionLabel="label" optionValue="value"
+                        styleClass="w-full bg-gray-50 border-gray-200 shadow-none">
+                        <ng-template pTemplate="selectedItem">
+                            <div class="flex align-items-center gap-2" *ngIf="selectedNotificationOption() as selected">
+                                <i [class]="selected.icon"></i>
+                                <span>{{ selected.label }}</span>
+                            </div>
+                        </ng-template>
+                        <ng-template let-option pTemplate="item">
+                            <div class="flex align-items-center gap-2">
+                                <i [class]="option.icon"></i>
+                                <span>{{ option.label }}</span>
+                            </div>
+                        </ng-template>
+                    </p-dropdown>
+                </div>
+
+                <button pButton pRipple label="Send Notification" icon="pi pi-send"
+                    class="w-full p-button-primary border-round-lg mt-auto hover:bg-indigo-600 bg-indigo-500 border-none shadow-1 py-3"
+                    (click)="sendNotification()"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sent Emails View -->
+    <div *ngIf="configMode() === 'sent-emails'" class="flex flex-column align-items-center justify-content-center py-8 px-4 bg-white border-round-xl border-1 surface-border shadow-1" style="min-height: 400px;">
+        <div class="w-4rem h-4rem border-circle surface-100 flex align-items-center justify-content-center mb-4">
+            <i class="pi pi-envelope text-4xl text-indigo-400"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">No Sent Emails</h3>
+        <p class="text-gray-500 text-center" style="max-width: 24rem;">You haven't sent any emails yet. Once you send an email campaign, it will appear here with its status and history.</p>
+    </div>
+
+    <!-- Sent Notifications View -->
+    <div *ngIf="configMode() === 'sent-notifications'" class="flex flex-column align-items-center justify-content-center py-8 px-4 bg-white border-round-xl border-1 surface-border shadow-1" style="min-height: 400px;">
+        <div class="w-4rem h-4rem border-circle surface-100 flex align-items-center justify-content-center mb-4">
+            <i class="pi pi-bell text-4xl text-blue-400"></i>
+        </div>
+        <h3 class="text-xl font-semibold text-gray-800 mb-2">No Sent Notifications</h3>
+        <p class="text-gray-500 text-center" style="max-width: 24rem;">You haven't sent any system notifications yet. Push notifications to users will be logged here for tracking.</p>
+    </div>
+</div>

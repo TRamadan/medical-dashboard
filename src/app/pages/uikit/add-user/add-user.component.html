@@ -32,12 +32,8 @@
         [rowsPerPageOptions]="[10, 20, 30]" [showGlobalFilter]="true" [globalFilterPlaceholder]="'Search...'"
         [showActions]="true" (edit)="editSelectedUser($event)" (delete)="deleteSelectedUser($event)"
         [isAddDetails]="true" (addDetails)="openAddDayOffDialog($event)" [isShowDetails]="true"
-        (details)="onViewUserDaysOff($event)" (onPageChange)="onPageChange($event)">
-
-        <ng-template pTemplate="actions" let-rowData>
-            <button pButton pRipple icon="pi pi-user" class="p-button-rounded p-button-info mr-2"
-                (click)="showUserDetails(rowData)" pTooltip="User Details" tooltipPosition="top"></button>
-        </ng-template>
+        (details)="onViewUserDaysOff($event)" (onPageChange)="onPageChange($event)"
+        editTooltip="Edit User" deleteTooltip="Delete User" addDetailsTooltip="Add Days Off" showDetailsTooltip="View Days Off">
 
         <ng-template #details let-user>
             <div class="p-3">
@@ -477,18 +473,4 @@
             }
         </div>
     </ng-template>
-</p-dialog>
-
-<p-dialog [(visible)]="detailsDialog" [header]="'User Details'" [modal]="true" [style]="{ width: '50vw' }">
-    @if (selectedUser) {
-    <div>
-        <p><strong>Username:</strong> {{ selectedUser.username }}</p>
-        <p><strong>Name (AR):</strong> {{ selectedUser.nameAr }}</p>
-        <p><strong>Name (EN):</strong> {{ selectedUser.nameEn }}</p>
-        <p><strong>Email:</strong> {{ selectedUser.email }}</p>
-        <p><strong>Phone Number:</strong> {{ selectedUser.phoneNumber }}</p>
-        <!-- Add other details you want to show -->
-    </div>
-    }
-
 </p-dialog>

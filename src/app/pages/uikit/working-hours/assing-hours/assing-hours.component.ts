@@ -6,13 +6,14 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { Button } from 'primeng/button';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
     selector: 'app-assing-hours',
     standalone: true,
     templateUrl: './assing-hours.component.html',
     styleUrls: ['./assing-hours.component.css'],
-    imports: [AccordionModule, FormsModule, ReactiveFormsModule, SelectModule, Button, CheckboxModule, Toast],
+    imports: [AccordionModule, FormsModule, ReactiveFormsModule, SelectModule, Button, CheckboxModule, Toast, ProgressSpinnerModule],
     providers: [MessageService]
 })
 export class AssingHoursComponent implements OnInit {
@@ -22,6 +23,8 @@ export class AssingHoursComponent implements OnInit {
     @Input() assignedWorkingHours: any[] = [];
     @Input() hasDoctorSelected: boolean = false;
     @Input() isEdit: boolean = false;
+    @Input() isLoadingHours: boolean = false;
+    @Input() isLoadingServices: boolean = false;
     @Output() workingHoursChanged = new EventEmitter<any[]>();
 
     durationOptions: { label: string; value: string }[] = [];
