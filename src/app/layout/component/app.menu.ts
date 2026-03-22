@@ -230,5 +230,16 @@ export class AppMenu {
                 }
             ]
         });
+
+        this.model.push({
+            label: 'Consultation',
+            items: [
+                {
+                    label: 'Consultation Form Config',
+                    icon: 'pi pi-fw pi-file-edit',
+                    routerLink: ['/uikit/consultation-form-configuration']
+                }
+            ]
+        });
     }
 }

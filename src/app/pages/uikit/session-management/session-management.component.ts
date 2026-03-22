@@ -11,7 +11,6 @@ import { ToastModule } from 'primeng/toast';
 import { TagModule } from 'primeng/tag';
 import { TabsNavigationComponent } from './tabs-navigation/tabs-navigation.component';
 import { OverviewComponent } from './overview/overview.component';
-import { ExerciseProtocolComponent } from './exercise-protocol/exercise-protocol.component';
 import { SessionsComponent } from './sessions/sessions.component';
 export interface TreatmentPlan {
     phase: string;
@@ -44,7 +43,7 @@ export interface Coach {
 
 @Component({
     selector: 'app-session-management',
-    imports: [SessionsComponent, ExerciseProtocolComponent, OverviewComponent, TabsNavigationComponent, TagModule, ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
+    imports: [SessionsComponent, OverviewComponent, TabsNavigationComponent, TagModule, ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
     templateUrl: './session-management.component.html',
     styleUrls: ['./session-management.component.css']
 })
@@ -65,9 +64,7 @@ export class SessionManagementComponent implements OnInit {
 
     tabs = [
         { id: 'overview', label: 'Overview' },
-        { id: 'exercise', label: 'Exercise Protocol' },
-        { id: 'sessions', label: 'Sessions' },
-        { id: 'measurments', label: 'Measurments' }
+        { id: 'sessions', label: 'Sessions' }
     ];
 
     onTabChange(tabId: any): void {

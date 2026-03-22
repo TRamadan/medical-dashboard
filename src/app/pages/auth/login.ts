@@ -29,7 +29,7 @@ import { ToastModule } from 'primeng/toast';
                             <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
                             <p-password id="password1" [(ngModel)]="password" placeholder="Password" [toggleMask]="true" styleClass="mb-4" [fluid]="true" [feedback]="false"></p-password>
 
-                            <p-button label="Sign In" styleClass="w-full" (onClick)="login()"></p-button>
+                            <p-button label="Sign In" styleClass="w-full" [loading]="isLoading" (onClick)="login()"></p-button>
                         </div>
                     </div>
                 </div>
@@ -47,11 +47,15 @@ export class Login {
     password: string = '';
 
     checked: boolean = false;
+    
+    isLoading: boolean = false;
 
     login() {
+        this.isLoading = true;
         const loginData = { value: this.email, password: this.password };
         this.authService.login(1, loginData).subscribe({
             next: (response: any) => {
+                this.isLoading = false;
                 const firstPageUrl = this.getFirstPageUrlFromSideRouts(response?.user?.sideRouts);
                 if (firstPageUrl) {
                     this.router.navigateByUrl(firstPageUrl);
@@ -60,6 +64,7 @@ export class Login {
                 }
             },
             error: (err) => {
+                this.isLoading = false;
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Login failed. Please check your credentials.' });
             }
         });

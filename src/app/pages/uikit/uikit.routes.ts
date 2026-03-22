@@ -27,6 +27,7 @@ import { PatientreportComponent } from './patientreport/patientreport.component'
 import { PhasesSessionsComponent } from './phases-sessions/phases-sessions.component';
 import { MeasurementsConfigComponent } from './measurements-config/measurements-config.component';
 import { EmailNotificationsConfigComponent } from './email-notifications-config/email-notifications-config.component';
+import { ConsultationFormConfigurationComponent } from './consultation-form-configuration/consultation-form-configuration.component';
 
 export default [
     {
@@ -163,5 +164,10 @@ export default [
     {
         path: 'measurements-config',
         component: MeasurementsConfigComponent
+    },
+    {
+        path: 'consultation-form-configuration',
+        data: { breadcrumb: 'Consultation Form Config' },
+        component: ConsultationFormConfigurationComponent
     }
 ] as Routes;

@@ -1,87 +1,147 @@
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
+<section class="sessions-section container-fluid py-4">
 
-            <!-- Upcoming Sessions Section -->
-             <div class="my-3">
-                 <p-card>
-                     <div class="sessions-section mb-4">
-                         <h5 class="section-title mb-3">Upcoming Sessions</h5>
-     
-                         <div class="sessions-container">
-                             @for (session of upcomingSessions; track session.id) {
-                             <div class="session-card upcoming-session">
-                                 <div class="d-flex align-items-center w-100">
-     
-                                     <!-- Session Number Badge -->
-                                     <div class="session-badge upcoming-badge me-3">
-                                         <span>{{ session.sessionNumber }}</span>
-                                     </div>
-     
-                                     <!-- Session Details -->
-                                     <div class="flex-grow-1">
-                                         <div class="session-datetime">
-                                             {{ formatDate(session.date) }} at {{ session.time }}
-                                         </div>
-                                         <div class="session-phase">{{ session.phase }}</div>
-                                     </div>
-     
-                                     <!-- Status Badge -->
-                                     <div class="status-badge scheduled-badge">
-                                         Scheduled
-                                     </div>
-                                 </div>
-                             </div>
-                             }
-                         </div>
-                     </div>
-                 </p-card>
-             </div>
+    <!-- SEARCH & FILTER PANEL -->
+    <div class="search-panel card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-4">
+                <div class="panel-icon-wrapper me-3 bg-blue-50 text-blue-500 p-3 border-circle d-flex align-items-center justify-content-center">
+                    <i class="pi pi-sliders-h text-xl"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0 fw-bold text-dark text-xl">My Schedule Filters</h5>
+                    <p class="mb-0 text-muted mt-1 font-medium">Select a date range and view to load your schedule grid</p>
+                </div>
+            </div>
 
-            <!-- Completed Sessions Section -->
-             <div class="my-3">
-                 <p-card>
-                     <div class="sessions-section">
-                         <h5 class="section-title mb-3">Completed Sessions</h5>
-     
-                         <div class="sessions-container">
-                             @for (session of completedSessions; track session.id) {
-                             <div class="session-card completed-session">
-                                 <div class="d-flex align-items-start w-100">
-     
-                                     <!-- Completed Checkmark Badge -->
-                                     <div class="session-badge completed-badge me-3">
-                                         <i class="pi pi-check"></i>
-                                     </div>
-     
-                                     <!-- Session Details -->
-                                     <div class="flex-grow-1">
-                                         <div class="session-title">
-                                             Session #{{ session.sessionNumber }} - {{ formatDate(session.date) }}
-                                         </div>
-                                         <div class="session-info">
-                                             {{ session.phase }} • {{ session.time }}
-                                         </div>
-                                         @if (session.notes) {
-                                         <div class="session-notes">
-                                             "{{ session.notes }}"
-                                         </div>
-                                         }
-                                     </div>
-     
-                                     <!-- View Details Link -->
-                                     <div class="view-details-link">
-                                         <i class="pi pi-eye me-2"></i>
-                                         <span>View Details</span>
-                                     </div>
-                                 </div>
-                             </div>
-                             }
-                         </div>
-                     </div>
-                 </p-card>
-             </div>
+            <div class="row g-4 align-items-end">
+                <div class="col-md-4">
+                    <label class="filter-label mb-2 d-block text-uppercase text-gray-600 font-bold"
+                        style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                        Date Range
+                    </label>
+                    <p-datepicker [(ngModel)]="dateRange" selectionMode="range" [readonlyInput]="true"
+                        placeholder="Select date range…" dateFormat="yy-mm-dd" styleClass="w-100"
+                        [showButtonBar]="true" (onSelect)="onDateRangeSelect()">
+                    </p-datepicker>
+                </div>
 
+                <div class="col-md-4">
+                    <label class="filter-label mb-2 d-block text-uppercase text-gray-600 font-bold"
+                        style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                        Slot Time
+                    </label>
+                    <p-dropdown [options]="timeOptions" [(ngModel)]="selectedSlotMinutes" optionLabel="label"
+                        optionValue="value" placeholder="Select time…" styleClass="w-100"
+                        [showClear]="true" (onChange)="onSlotMinutesChange()">
+                    </p-dropdown>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="filter-label mb-2 d-block text-uppercase text-gray-600 font-bold"
+                        style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                        View Mode
+                    </label>
+                    <div class="w-100">
+                        <p-selectButton [options]="viewOptions" [(ngModel)]="viewValue" optionLabel="label"
+                            optionValue="value" (onChange)="onViewChange()">
+                        </p-selectButton>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4" *ngIf="dateRange?.length">
+                <span class="range-badge bg-blue-50 text-blue-800 px-3 py-2 border-round font-semibold text-sm border-1 border-blue-200">
+                    <i class="pi pi-calendar-clock me-2"></i>
+                    {{ getDateRangeLabel() }}
+                </span>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- STATS ROW -->
+    <div class="row g-3 mb-4">
+        <div class="col-6">
+            <div class="card shadow-sm border-none p-4 d-flex align-items-center gap-4 hover:shadow-md transition-all transition-duration-200 cursor-pointer">
+                <div class="bg-indigo-50 text-indigo-500 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
+                    <i class="pi pi-th-large text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-gray-900">{{ totalSlots() }}</div>
+                    <div class="text-sm font-semibold text-gray-500 uppercase tracking-widest mt-1">Total Slots</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card shadow-sm border-none p-4 d-flex align-items-center gap-4 hover:shadow-md transition-all transition-duration-200 cursor-pointer">
+                <div class="bg-blue-50 text-blue-500 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
+                    <i class="pi pi-calendar text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-3xl font-bold text-gray-900">{{ upcomingSlots() }}</div>
+                    <div class="text-sm font-semibold text-gray-500 uppercase tracking-widest mt-1">Next Sessions</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="appointments-table-wrapper card border-0 shadow-sm overflow-hidden">
+        <div class="card-header d-flex align-items-center gap-3 border-bottom-1 surface-border bg-white p-4">
+            <div class="bg-blue-50 text-blue-600 p-2 border-circle">
+                <i class="pi pi-table text-xl"></i>
+            </div>
+            <h5 class="mb-0 fw-bold text-gray-900 text-xl">
+                My Schedule
+                <span class="text-gray-500 font-medium text-base ml-2">
+                    — {{ getDateRangeLabel() }}
+                </span>
+            </h5>
+        </div>
+
+        <div class="card-body p-0">
+            <p-table [value]="timeSlots()" class="p-datatable-lg p-datatable-gridlines" [scrollable]="true" scrollHeight="500px">
+                <ng-template pTemplate="header">
+                    <tr class="table-header-row bg-gray-50">
+                        <th class="time-col text-center border-bottom-1 surface-border uppercase font-bold text-gray-600" style="width: 180px; font-size: 0.8rem;">Time Slot</th>
+                        <th class="text-center doctor-col border-bottom-1 surface-border">
+                            <div class="d-flex flex-column align-items-center gap-2 py-3">
+                                <div class="bg-blue-600 text-white border-circle w-3rem h-3rem d-flex align-items-center justify-content-center text-xl fw-bold shadow-1">
+                                    {{ getInitials(coachName) }}
+                                </div>
+                                <span class="font-bold text-gray-800">{{ coachName }}</span>
+                            </div>
+                        </th>
+                    </tr>
+                </ng-template>
+
+                <ng-template pTemplate="body" let-time>
+                    <tr class="table-body-row hover:surface-100 transition-colors transition-duration-150">
+                        <td class="fw-bold text-center text-gray-600 time-col bg-gray-50 border-right-1 surface-border py-4">
+                            <i class="pi pi-clock me-2 text-primary text-sm"></i>{{ time }}
+                        </td>
+                        <td class="text-center align-middle slot-cell position-relative p-0" [ngClass]="getStatusColor(getAppointmentStatus(time))">
+                            <ng-container *ngIf="getAppointment(time) as appt; else emptySlot">
+                                <div class="w-100 h-100 p-3 d-flex flex-column align-items-center justify-content-center">
+                                    <div class="slot-patient text-lg font-bold text-gray-900">{{ appt.patientName }}</div>
+                                    <div class="text-sm text-gray-700 my-2 font-semibold bg-white px-2 py-1 border-round border-1 surface-border shadow-sm">{{ appt.phase }}</div>
+                                    <div class="text-xs text-gray-500 font-medium">Session #{{ appt.sessionNumber }}</div>
+                                    <span class="badge mt-2 px-3 py-2 status-pill rounded-pill font-bold"
+                                        [ngClass]="getBadgeColor(appt.status)">
+                                        {{ appt.status | uppercase }}
+                                    </span>
+                                </div>
+                            </ng-container>
+                            
+                            <ng-template #emptySlot>
+                                <div class="empty-slot text-gray-400 d-flex flex-column align-items-center justify-content-center h-100 py-5 cursor-pointer hover:bg-gray-100 transition-colors transition-duration-200">
+                                    <i class="pi pi-plus text-2xl mb-2"></i>
+                                    <span class="text-sm font-bold uppercase tracking-widest">Available</span>
+                                </div>
+                            </ng-template>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+    </div>
+</section>

@@ -135,6 +135,16 @@ export class AppointmentsComponent implements OnInit {
             { field: 'status', label: 'Status', type: 'status' }
         ];
         this.tableHeaders.forEach((h) => this.globalFilterFields.push(h.field));
+        
+        this.tableActions = [
+            {
+                label: 'Complete Info',
+                icon: 'pi pi-user-edit',
+                type: 'primary',
+                tooltip: 'Complete Patient Info',
+                onClick: (row: any) => this.openCompletePatientInfo(row)
+            }
+        ];
     }
 
     getAllLocations() {
@@ -398,5 +408,23 @@ export class AppointmentsComponent implements OnInit {
         if (status === 'urgent') return 'Urgent';
         const s = this.statuses.find((st) => st.id === status);
         return s ? s.label : 'Unknown';
+    }
+
+    displayCompletePatientInfoDialog: boolean = false;
+    currentPatientRow: any = null;
+
+    openCompletePatientInfo(row: any) {
+        this.currentPatientRow = row;
+        this.displayCompletePatientInfoDialog = true;
+    }
+
+    closePatientInfoDialog() {
+        this.displayCompletePatientInfoDialog = false;
+        this.currentPatientRow = null;
+    }
+
+    savePatientInfo() {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Patient information has been completed successfully.' });
+        this.closePatientInfoDialog();
     }
 }
