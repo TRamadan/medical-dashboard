@@ -2,18 +2,20 @@ import { Component, EventEmitter, Input, OnInit, Output, SimpleChanges, signal }
 import { FormsModule, ReactiveFormsModule, FormGroup, FormBuilder, FormArray, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { AccordionModule } from 'primeng/accordion';
 import { SelectModule } from 'primeng/select';
+import { TreeSelectModule } from 'primeng/treeselect';
 import { CheckboxModule } from 'primeng/checkbox';
 import { Button } from 'primeng/button';
 import { MessageService } from 'primeng/api';
 import { Toast } from 'primeng/toast';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
     selector: 'app-assing-hours',
     standalone: true,
     templateUrl: './assing-hours.component.html',
     styleUrls: ['./assing-hours.component.css'],
-    imports: [AccordionModule, FormsModule, ReactiveFormsModule, SelectModule, Button, CheckboxModule, Toast, ProgressSpinnerModule],
+    imports: [AccordionModule, FormsModule, ReactiveFormsModule, SelectModule, TreeSelectModule, Button, CheckboxModule, Toast, ProgressSpinnerModule, TooltipModule],
     providers: [MessageService]
 })
 export class AssingHoursComponent implements OnInit {
@@ -23,9 +25,13 @@ export class AssingHoursComponent implements OnInit {
     @Input() assignedWorkingHours: any[] = [];
     @Input() hasDoctorSelected: boolean = false;
     @Input() isEdit: boolean = false;
+    @Input() isSaving: boolean = false;
     @Input() isLoadingHours: boolean = false;
     @Input() isLoadingServices: boolean = false;
+    @Input() locations: any[] = [];
+    @Input() serviceCategories: any[] = [];
     @Output() workingHoursChanged = new EventEmitter<any[]>();
+    @Output() saveClicked = new EventEmitter<void>();
 
     durationOptions: { label: string; value: string }[] = [];
     applyToAllDays: boolean = false;
@@ -66,7 +72,9 @@ export class AssingHoursComponent implements OnInit {
                 const group = this.createWorkingHourFormGroup(wh.dayOfWeek);
                 group.patchValue({
                     startTime: wh.startTime,
-                    endTime: wh.endTime
+                    endTime: wh.endTime,
+                    locationId: wh.locationId,
+                    serviceId: wh.serviceId
                 });
                 dayWorkingHoursArray.push(group);
             });
@@ -119,6 +127,8 @@ export class AssingHoursComponent implements OnInit {
             {
                 startTime: ['', Validators.required],
                 endTime: ['', Validators.required],
+                locationId: [null, Validators.required],
+                serviceId: [null, Validators.required],
                 dayOfWeek: [dayOfWeek]
             },
             { validators: this.startBeforeEndValidator }
@@ -132,6 +142,12 @@ export class AssingHoursComponent implements OnInit {
 
     removeWorkingHour(dayIndex: number, workingHourIndex: number) {
         this.getDayWorkingHoursArray(dayIndex).removeAt(workingHourIndex);
+    }
+
+    clearDay(dayIndex: number) {
+        const dayWorkingHoursArray = this.getDayWorkingHoursArray(dayIndex);
+        dayWorkingHoursArray.clear();
+        // valueChanges handles the emit automatically
     }
 
     getWorkingHourFormGroup(dayIndex: number, workingHourIndex: number): FormGroup {
@@ -161,7 +177,16 @@ export class AssingHoursComponent implements OnInit {
         if (!this.applyToAllDays) return;
         
         if (wh.startTime && wh.endTime) {
-            this.copyWorkingHoursToAllDays(wh.startTime, wh.endTime);
+            this.copyWorkingHoursToAllDays(wh.startTime, wh.endTime, wh.locationId, wh.serviceId);
+        }
+    }
+
+    onFieldChanged(dayIndex: number, workingHourIndex: number): void {
+        const group = this.getWorkingHourFormGroup(dayIndex, workingHourIndex);
+        const wh = group.value;
+
+        if (this.applyToAllDays && wh.startTime && wh.endTime) {
+            this.copyWorkingHoursToAllDays(wh.startTime, wh.endTime, wh.locationId, wh.serviceId);
         }
     }
 
@@ -176,7 +201,7 @@ export class AssingHoursComponent implements OnInit {
                 for (let j = 0; j < workingHours.length; j++) {
                     const wh = workingHours.at(j).value;
                     if (wh.startTime && wh.endTime) {
-                        this.copyWorkingHoursToAllDays(wh.startTime, wh.endTime);
+                        this.copyWorkingHoursToAllDays(wh.startTime, wh.endTime, wh.locationId, wh.serviceId);
                         found = true;
                         break;
                     }
@@ -208,7 +233,7 @@ export class AssingHoursComponent implements OnInit {
         }
     }
 
-    copyWorkingHoursToAllDays(start: string, end: string): void {
+    copyWorkingHoursToAllDays(start: string, end: string, locationId: any, serviceId: any): void {
         (this.daysArray.controls as FormGroup[]).forEach((dayCtrl: FormGroup) => {
             const workingHours = dayCtrl.get('workingHours') as FormArray;
 
@@ -218,7 +243,7 @@ export class AssingHoursComponent implements OnInit {
             }
 
             workingHours.controls.forEach((whCtrl) => {
-                whCtrl.patchValue({ startTime: start, endTime: end }, { emitEvent: false });
+                whCtrl.patchValue({ startTime: start, endTime: end, locationId: locationId, serviceId: serviceId }, { emitEvent: false });
             });
         });
 
@@ -238,7 +263,9 @@ export class AssingHoursComponent implements OnInit {
                 payload.push({
                     dayOfWeek: index + 1,
                     startTime: wh.startTime,
-                    endTime: wh.endTime
+                    endTime: wh.endTime,
+                    locationId: wh.locationId,
+                    serviceId: wh.serviceId
                 });
             });
         });

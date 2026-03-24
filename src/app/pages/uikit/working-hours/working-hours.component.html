@@ -112,45 +112,21 @@
 
         <div class="row g-3 mb-4">
             <app-assing-hours [selectedDayOfWeek]="selectedDayOfWeek" [workingHoursToEdit]="workingHoursToEdit"
-                [isEdit]="isEdit" [assignedWorkingHours]="flatDialogUserWorkingHours" [hasDoctorSelected]="!!workingHoursForm.get('doctorId')?.value" (workingHoursChanged)="onWorkingHoursChanged($event)"></app-assing-hours>
+                [isEdit]="isEdit" [assignedWorkingHours]="flatDialogUserWorkingHours" [hasDoctorSelected]="!!workingHoursForm.get('doctorId')?.value"
+                [locations]="locations"
+                [serviceCategories]="serviceCategories"
+                [isSaving]="isSaving"
+                (workingHoursChanged)="onWorkingHoursChanged($event)"
+                (saveClicked)="submitWorkingHours()"></app-assing-hours>
         </div>
 
-        <div class="row g-3">
-            <!-- 3. Locations -->
-            <div class="col-12 col-md-6">
-                <label for="locationId" class="block font-semibold mb-2">Locations</label>
-                <p-select inputId="locationId" [filter]="true" appendTo="body" [options]="locations" optionLabel="name"
-                    optionValue="id" formControlName="locationId" styleClass="w-full" />
-                @if (workingHoursForm.get('locationId')?.invalid && workingHoursForm.get('locationId')?.touched) {
-                <small class="text-red-500 mt-1 block">Location is required.</small>
-                }
-            </div>
 
-            <!-- 2. Services -->
-            <div class="col-12 col-md-6">
-                <label for="serviceId" class="block font-semibold mb-2">Service</label>
-                <p-treeSelect inputId="serviceId" [filter]="true" appendTo="body" [options]="serviceCategories"
-                    formControlName="serviceId" selectionMode="checkbox" display="chip" styleClass="w-full"
-                    containerStyleClass="w-full" [placeholder]="serviceCategories.length > 0 ? 'Select Services' : 'No services available'" />
-                @if (workingHoursForm.get('doctorId')?.value && serviceCategories.length === 0) {
-                <div class="flex items-center gap-2 mt-2 p-2 bg-orange-50 border border-orange-200 rounded text-orange-700 text-sm">
-                    <i class="pi pi-exclamation-triangle"></i>
-                    <span>There are no services assigned for this user. Please assign services first.</span>
-                </div>
-                }
-                @if (workingHoursForm.get('serviceId')?.invalid && workingHoursForm.get('serviceId')?.touched) {
-                <small class="text-red-500 mt-1 block">Service is required.</small>
-                }
-            </div>
-        </div>
     </form>
     }
 
     <ng-template pTemplate="footer">
         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-            <p-button label="Cancel" [text]="true" severity="danger" (click)="hideDialog()" />
-            <p-button label="Save" [outlined]="true" severity="success" (onClick)="submitWorkingHours()"
-                [loading]="isSaving" />
+            <p-button label="Close" [text]="true" severity="secondary" (click)="hideDialog()" />
         </div>
     </ng-template>
 </p-dialog>

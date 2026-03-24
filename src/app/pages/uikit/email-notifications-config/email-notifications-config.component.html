@@ -79,15 +79,13 @@
                 </div>
 
                 <div class="flex align-items-center gap-3">
-                    <div
-                        class="p-inputgroup border-round-lg overflow-hidden border border-gray-200 w-full shadow-none bg-gray-50">
-                        <input pInputText type="text" [ngModel]="newPlaceholderName()"
-                            (ngModelChange)="newPlaceholderName.set($event)" placeholder="New placeholder name"
-                            class="border-none shadow-none flex-grow bg-transparent" (keyup.enter)="addPlaceholder()" />
-                        <button pButton label="Add" icon="pi pi-plus"
-                            class="p-button-secondary bg-gray-200 border-none text-gray-700 hover:bg-gray-300 font-medium px-4"
-                            (click)="addPlaceholder()"></button>
-                    </div>
+                    <input pInputText type="text" [ngModel]="newPlaceholderName()"
+                        (ngModelChange)="newPlaceholderName.set($event)" placeholder="New placeholder name"
+                        class="w-full border-gray-200 shadow-none bg-gray-50" (keyup.enter)="addPlaceholder()" />
+                    <button pButton label="Add" icon="pi pi-plus"
+                        class="p-button-secondary bg-gray-200 border-none text-gray-700 hover:bg-gray-300 font-medium px-4 flex-shrink-0"
+                        [disabled]="!newPlaceholderName().trim()"
+                        (click)="addPlaceholder()"></button>
                 </div>
             </div>
 

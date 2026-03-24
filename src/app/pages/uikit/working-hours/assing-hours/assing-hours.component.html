@@ -71,49 +71,55 @@
                     <div formArrayName="workingHours">
                         @for (workingHour of getDayWorkingHoursArray(dayIndex).controls; track workingHour; let
                         workingHourIndex = $index) {
-                        <div class="card p-3 mb-3 border-0 shadow-sm surface-card border-round"
+                        <div class="card p-3 mb-3 border-0 shadow-sm surface-card border-round relative"
                             [formGroupName]="workingHourIndex">
-                            <div class="row g-3 align-items-end">
-                                <!-- Start Time -->
-                                <div class="col-12 col-md-5">
-                                    <label [for]="'start-' + dayIndex + '-' + workingHourIndex"
-                                        class="block font-medium mb-1"> Start time </label>
-                                    <p-select appendTo="body" formControlName="startTime"
-                                        [inputId]="'start-' + dayIndex + '-' + workingHourIndex"
-                                        [options]="durationOptions" optionLabel="label" optionValue="value"
-                                        placeholder="Select start time" styleClass="w-full"
-                                        (onChange)="onTimeChanged(dayIndex, workingHourIndex, true)">
-                                    </p-select>
+                            <!-- Remove Button at top corner -->
+                            @if (getDayWorkingHoursArray(dayIndex).length > 0) {
+                                <div class="absolute top-0 right-0 mt-2 mr-2 z-1">
+                                    <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" (onClick)="removeWorkingHour(dayIndex, workingHourIndex)" pTooltip="Remove slot" />
+                                </div>
+                            }
 
-                                    @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.invalid
-                                    && getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.touched) {
-                                    <small class="text-red-500 mt-1 block">Start time is required</small>
+                            <div class="row g-3 align-items-end mb-3 mt-1">
+                                <!-- Start Time -->
+                                <div class="col-12 col-md-6">
+                                    <label [for]="'start-' + dayIndex + '-' + workingHourIndex" class="block font-medium mb-1"> Start time </label>
+                                    <p-select appendTo="body" formControlName="startTime" [inputId]="'start-' + dayIndex + '-' + workingHourIndex" [options]="durationOptions" optionLabel="label" optionValue="value" placeholder="Start" styleClass="w-full" (onChange)="onTimeChanged(dayIndex, workingHourIndex, true)">
+                                    </p-select>
+                                    @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.invalid && getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.touched) {
+                                        <small class="text-red-500 mt-1 block">Required</small>
                                     }
                                 </div>
 
                                 <!-- End Time -->
-                                <div class="col-12 col-md-5">
-                                    <label [for]="'end-' + dayIndex + '-' + workingHourIndex"
-                                        class="block font-medium mb-1"> End time </label>
-                                    <p-select appendTo="body" formControlName="endTime"
-                                        [inputId]="'end-' + dayIndex + '-' + workingHourIndex"
-                                        [options]="getEndTimeOptions(getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.value)"
-                                        optionLabel="label" optionValue="value" placeholder="Select end time"
-                                        styleClass="w-full" (onChange)="onTimeChanged(dayIndex, workingHourIndex)">
+                                <div class="col-12 col-md-6">
+                                    <label [for]="'end-' + dayIndex + '-' + workingHourIndex" class="block font-medium mb-1"> End time </label>
+                                    <p-select appendTo="body" formControlName="endTime" [inputId]="'end-' + dayIndex + '-' + workingHourIndex" [options]="getEndTimeOptions(getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.value)" optionLabel="label" optionValue="value" placeholder="End" styleClass="w-full" (onChange)="onTimeChanged(dayIndex, workingHourIndex)">
                                     </p-select>
-
-                                    @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.invalid &&
-                                    getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.touched) {
-                                    <small class="text-red-500 mt-1 block">End time is required</small>
+                                    @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.invalid && getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.touched) {
+                                        <small class="text-red-500 mt-1 block">Required</small>
+                                    }
+                                </div>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <!-- Location -->
+                                <div class="col-12 col-md-6">
+                                    <label [for]="'loc-' + dayIndex + '-' + workingHourIndex" class="block font-medium mb-1"> Location </label>
+                                    <p-select appendTo="body" formControlName="locationId" [inputId]="'loc-' + dayIndex + '-' + workingHourIndex" [options]="locations" optionLabel="name" optionValue="id" placeholder="Location" styleClass="w-full" [filter]="true" filterBy="name" (onChange)="onFieldChanged(dayIndex, workingHourIndex)">
+                                    </p-select>
+                                    @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('locationId')?.invalid && getWorkingHourFormGroup(dayIndex, workingHourIndex).get('locationId')?.touched) {
+                                        <small class="text-red-500 mt-1 block">Required</small>
                                     }
                                 </div>
 
-                                <!-- Remove Button -->
-                                <div class="col-12 col-md-2 text-end">
-                                    @if (getDayWorkingHoursArray(dayIndex).length > 0) {
-                                    <p-button icon="pi pi-trash" [text]="true" severity="danger"
-                                        (onClick)="removeWorkingHour(dayIndex, workingHourIndex)"
-                                        pTooltip="Remove slot" />
+                                <!-- Service -->
+                                <div class="col-12 col-md-6">
+                                    <label [for]="'srv-' + dayIndex + '-' + workingHourIndex" class="block font-medium mb-1"> Service </label>
+                                    <p-treeSelect appendTo="body" formControlName="serviceId" [inputId]="'srv-' + dayIndex + '-' + workingHourIndex" [options]="serviceCategories" selectionMode="checkbox" display="chip" placeholder="Service" styleClass="w-full" containerStyleClass="w-full" [filter]="true" (onNodeSelect)="onFieldChanged(dayIndex, workingHourIndex)" (onNodeUnselect)="onFieldChanged(dayIndex, workingHourIndex)">
+                                    </p-treeSelect>
+                                    @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('serviceId')?.invalid && getWorkingHourFormGroup(dayIndex, workingHourIndex).get('serviceId')?.touched) {
+                                        <small class="text-red-500 mt-1 block">Required</small>
                                     }
                                 </div>
 
@@ -140,6 +146,16 @@
                     <!-- Add new working hour button for specific day -->
                     <p-button label="Add Working Hour" icon="pi pi-plus" [outlined]="true" severity="primary"
                         styleClass="w-full mt-2" (onClick)="addWorkingHour(dayIndex)" />
+
+                    <!-- Per-day Save / Cancel actions -->
+                    <div class="flex justify-end gap-2 mt-3">
+                        <p-button label="Cancel" [text]="true" severity="danger"
+                            pTooltip="This will clear all slots and cancel changes for this specific day"
+                            (onClick)="clearDay(dayIndex)" />
+                        <p-button label="Save" [outlined]="true" severity="success"
+                            [loading]="isSaving"
+                            (onClick)="saveClicked.emit()" />
+                    </div>
                 </p-accordion-content>
             </p-accordion-panel>
             }

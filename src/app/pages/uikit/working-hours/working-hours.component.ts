@@ -123,8 +123,8 @@ export class WorkingHoursComponent implements OnInit {
     ngOnInit(): void {
         this.workingHoursForm = this._fb.group({
             id: [null],
-            serviceId: [null, Validators.required],
-            locationId: [null, Validators.required],
+            serviceId: [null],
+            locationId: [null],
             doctorId: [null, Validators.required]
         });
 
@@ -436,25 +436,31 @@ export class WorkingHoursComponent implements OnInit {
         let formValues = this.workingHoursForm.value;
 
         let serviceIds: number[] = [];
+        let locationId = 0;
 
-        if (Array.isArray(formValues.serviceId)) {
-            serviceIds = formValues.serviceId
-                .filter((node: any) => node.key && node.key.toString().startsWith('srv-'))
-                .map((node: any) => parseInt(node.key.toString().split('-')[1], 10));
-        }
-        else if (typeof formValues.serviceId === 'object' && formValues.serviceId !== null) {
-            if (formValues.serviceId.key && formValues.serviceId.key.toString().startsWith('srv-')) {
-                serviceIds = [parseInt(formValues.serviceId.key.toString().split('-')[1], 10)];
-            } else {
-                for (const key of Object.keys(formValues.serviceId)) {
-                    if (key.toString().startsWith('srv-')) {
-                        const val = formValues.serviceId[key];
-                        // In primeNG tree select with checkbox, the value might be 'true' or an object {checked: true, partialChecked: ...}
-                        if (val === true || (val && val.checked === true)) {
-                            serviceIds.push(parseInt(key.toString().split('-')[1], 10));
+        const firstSlot = this.workingHoursToBeSent[0];
+        if (firstSlot) {
+            locationId = firstSlot.locationId ?? 0;
+            const slotServiceId = firstSlot.serviceId;
+            
+            if (Array.isArray(slotServiceId)) {
+                serviceIds = slotServiceId
+                    .filter((node: any) => node.key && node.key.toString().startsWith('srv-'))
+                    .map((node: any) => parseInt(node.key.toString().split('-')[1], 10));
+            }
+            else if (typeof slotServiceId === 'object' && slotServiceId !== null) {
+                if (slotServiceId.key && slotServiceId.key.toString().startsWith('srv-')) {
+                    serviceIds = [parseInt(slotServiceId.key.toString().split('-')[1], 10)];
+                } else {
+                    for (const key of Object.keys(slotServiceId)) {
+                        if (key.toString().startsWith('srv-')) {
+                            const val = slotServiceId[key];
+                            if (val === true || (val && val.checked === true)) {
+                                serviceIds.push(parseInt(key.toString().split('-')[1], 10));
+                            }
+                        } else if (slotServiceId[key] && slotServiceId[key].key && slotServiceId[key].key.toString().startsWith('srv-')) {
+                            serviceIds.push(parseInt(slotServiceId[key].key.toString().split('-')[1], 10));
                         }
-                    } else if (formValues.serviceId[key] && formValues.serviceId[key].key && formValues.serviceId[key].key.toString().startsWith('srv-')) {
-                        serviceIds.push(parseInt(formValues.serviceId[key].key.toString().split('-')[1], 10));
                     }
                 }
             }
@@ -468,7 +474,7 @@ export class WorkingHoursComponent implements OnInit {
 
         const body: any = {
             doctorId: formValues.doctorId ?? 0,
-            locationId: formValues.locationId ?? 0,
+            locationId: locationId,
             serviceIds: serviceIds,
             slots: slots
         };
@@ -499,40 +505,43 @@ export class WorkingHoursComponent implements OnInit {
     updateTheSelectedWorkingHour(): void {
         this.isSaving = true;
         let formValues = this.workingHoursForm.value;
-        let serviceId = 0;
-
-        if (Array.isArray(formValues.serviceId)) {
-            const firstSrv = formValues.serviceId.find((n: any) => n.key && n.key.toString().startsWith('srv-'));
-            if (firstSrv) serviceId = parseInt(firstSrv.key.toString().split('-')[1], 10);
-        } else if (typeof formValues.serviceId === 'object' && formValues.serviceId !== null) {
-            if (formValues.serviceId.key && formValues.serviceId.key.toString().startsWith('srv-')) {
-                serviceId = parseInt(formValues.serviceId.key.toString().split('-')[1], 10);
-            } else {
-                for (const key of Object.keys(formValues.serviceId)) {
-                    if (key.toString().startsWith('srv-')) {
-                        const val = formValues.serviceId[key];
-                        if (val === true || (val && val.checked === true)) {
-                            serviceId = parseInt(key.toString().split('-')[1], 10);
-                            break;
-                        }
-                    } else if (formValues.serviceId[key] && formValues.serviceId[key].key && formValues.serviceId[key].key.toString().startsWith('srv-')) {
-                        serviceId = parseInt(formValues.serviceId[key].key.toString().split('-')[1], 10);
-                        break;
-                    }
-                }
-            }
-        }
 
         const updateRequests = this.workingHoursToBeSent.map((slot: any) => {
             const existingSlot = this.workingHoursToEdit.find((s: any) => s.dayOfWeek === slot.dayOfWeek);
             const slotId = existingSlot ? existingSlot.id : null;
+
+            let serviceId = 0;
+            const slotServiceId = slot.serviceId;
+
+            if (Array.isArray(slotServiceId)) {
+                const firstSrv = slotServiceId.find((n: any) => n.key && n.key.toString().startsWith('srv-'));
+                if (firstSrv) serviceId = parseInt(firstSrv.key.toString().split('-')[1], 10);
+            } else if (typeof slotServiceId === 'object' && slotServiceId !== null) {
+                if (slotServiceId.key && slotServiceId.key.toString().startsWith('srv-')) {
+                    serviceId = parseInt(slotServiceId.key.toString().split('-')[1], 10);
+                } else {
+                    for (const key of Object.keys(slotServiceId)) {
+                        if (key.toString().startsWith('srv-')) {
+                            const val = slotServiceId[key];
+                            if (val === true || (val && val.checked === true)) {
+                                serviceId = parseInt(key.toString().split('-')[1], 10);
+                                break;
+                            }
+                        } else if (slotServiceId[key] && slotServiceId[key].key && slotServiceId[key].key.toString().startsWith('srv-')) {
+                            serviceId = parseInt(slotServiceId[key].key.toString().split('-')[1], 10);
+                            break;
+                        }
+                    }
+                }
+            }
+
             return this._workingHoursService.updateWorkingHour({
                 id: slotId,
                 startTime: slot.startTime,
                 endTime: slot.endTime,
                 dayOfWeek: slot.dayOfWeek,
                 doctorId: formValues.doctorId ?? 0,
-                locationId: formValues.locationId ?? 0,
+                locationId: slot.locationId ?? 0,
                 serviceId: serviceId
             });
         });
@@ -612,12 +621,10 @@ export class WorkingHoursComponent implements OnInit {
         this.isEdit = true;
 
         this.selectedDayOfWeek = Number(workingHour.value);
-        this.workingHoursToEdit = item.timeSlots.map((slot: any) => ({ ...slot, dayOfWeek: Number(workingHour.value) }));
+        this.workingHoursToEdit = item.timeSlots.map((slot: any) => ({ ...slot, dayOfWeek: Number(workingHour.value), locationId: location.locationId }));
 
         this.workingHoursForm.patchValue({
-            doctorId: item.doctorId,
-            locationId: location.locationId,
-            serviceId: [] // Clear initially until loaded
+            doctorId: item.doctorId
         });
 
         // 1. Fetch Working Hours for display
@@ -665,9 +672,10 @@ export class WorkingHoursComponent implements OnInit {
                 const targetKey = `srv-${item.serviceId}`;
                 const serviceNode = this.findServiceNodeByKey(this.serviceCategories, targetKey);
 
-                this.workingHoursForm.patchValue({
+                this.workingHoursToEdit = this.workingHoursToEdit.map(slot => ({
+                    ...slot,
                     serviceId: serviceNode ? [serviceNode] : []
-                });
+                }));
             },
             error: () => {
                 this.serviceCategories = [];
