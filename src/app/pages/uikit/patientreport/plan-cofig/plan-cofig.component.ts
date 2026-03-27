@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { CheckboxModule } from 'primeng/checkbox';
+import { ServicecategoryService } from '../../add-service/services/servicecategory.service';
 
 @Component({
     selector: 'app-plan-cofig',
@@ -18,20 +19,18 @@ export class PlanCofigComponent implements OnInit {
     @Input() phases: any[] = [];
     @Output() phasesChange = new EventEmitter<any[]>();
 
+    serviceCategoryService = inject(ServicecategoryService);
+    serviceCategories: any[] = [];
+
     isTemplateSelected: boolean = false;
 
     useTemplate: boolean = false;
     selectedTemplate: any = null;
 
-    specializationsOptions = [
-        { label: 'Physical Therapist', selected: false },
-        { label: 'Strength & Conditioning Coach', selected: false },
-        { label: 'Sports Massage Therapist', selected: false },
-        { label: 'Nutritionist', selected: false }
-    ];
-
-    createDefaultSpecializations() {
-        return this.specializationsOptions.map((s) => ({ ...s, selected: false }));
+    createDefaultPhaseSelections() {
+        return {
+            selectedSessions: []
+        };
     }
 
     templatePhases = [
@@ -41,8 +40,7 @@ export class PlanCofigComponent implements OnInit {
             weeks: 12,
             sessions: 12,
             objective: 'Reduce inflammation, protect healing tissue, gentle ROM exercises',
-            specializations: this.createDefaultSpecializations(),
-            ...this.createDefaultMeasurements()
+            ...this.createDefaultPhaseSelections()
         },
         {
             id: 2,
@@ -50,8 +48,7 @@ export class PlanCofigComponent implements OnInit {
             weeks: 12,
             sessions: 12,
             objective: 'Restore full range of motion, begin strengthening',
-            specializations: this.createDefaultSpecializations(),
-            ...this.createDefaultMeasurements()
+            ...this.createDefaultPhaseSelections()
         },
         {
             id: 3,
@@ -59,8 +56,7 @@ export class PlanCofigComponent implements OnInit {
             weeks: 12,
             sessions: 12,
             objective: 'Increase muscle strength, focus on functional movements',
-            specializations: this.createDefaultSpecializations(),
-            ...this.createDefaultMeasurements()
+            ...this.createDefaultPhaseSelections()
         }
     ];
 
@@ -105,23 +101,26 @@ export class PlanCofigComponent implements OnInit {
         this.phasesChange.emit(this.phases);
     }
 
-    createDefaultMeasurements() {
-        return {
-            measurementCategories: [
-                { label: 'Cat 1', selected: false, value: '' },
-                { label: 'Cat 2', selected: false, value: '' },
-                { label: 'Cat 3', selected: false, value: '' },
-                { label: 'Cat 4', selected: false, value: '' }
-            ],
-            measurementItems: [
-                { label: 'Range Of Motion', selected: false, value: '' },
-                { label: 'Range Of Motion', selected: false, value: '' },
-                { label: 'Range Of Motion', selected: false, value: '' }
-            ],
-            repeatMeasurement: false,
-            repeatSessionNumber: '',
-            activeSession: 1
-        };
+    getSessionsArray(count: number | string | null | undefined): number[] {
+        const num = Number(count) || 0;
+        return Array.from({ length: num }, (_, i) => i + 1);
+    }
+
+    toggleSessionSelection(phase: any, sessionNum: number) {
+        if (!phase.selectedSessions) {
+            phase.selectedSessions = [];
+        }
+        const index = phase.selectedSessions.indexOf(sessionNum);
+        if (index > -1) {
+            phase.selectedSessions.splice(index, 1);
+        } else {
+            phase.selectedSessions.push(sessionNum);
+        }
+    }
+
+    isSessionSelected(phase: any, sessionNum: number): boolean {
+        if (!phase.selectedSessions) return false;
+        return phase.selectedSessions.includes(sessionNum);
     }
 
     updatePhases() {
@@ -136,8 +135,7 @@ export class PlanCofigComponent implements OnInit {
                     weeks: 0,
                     sessions: 0,
                     objective: '',
-                    specializations: this.createDefaultSpecializations(),
-                    ...this.createDefaultMeasurements()
+                    ...this.createDefaultPhaseSelections()
                 }
             ];
         }
@@ -153,8 +151,7 @@ export class PlanCofigComponent implements OnInit {
             weeks: 0,
             sessions: 0,
             objective: '',
-            specializations: this.createDefaultSpecializations(),
-            ...this.createDefaultMeasurements()
+            ...this.createDefaultPhaseSelections()
         });
 
         this.emitPhasesChange();
@@ -206,13 +203,24 @@ export class PlanCofigComponent implements OnInit {
 
     ngOnInit() {
         this.normalizePhases();
+        this.loadServiceCategories();
+    }
+
+    loadServiceCategories() {
+        this.serviceCategoryService.getServiceCategories().subscribe({
+            next: (data: any) => {
+                debugger
+                this.serviceCategories = data.data.map((item: any) => ({ ...item, selected: false }));
+            },
+            error: (err) => console.error('Failed to load service categories', err)
+        });
     }
 
     private normalizePhases() {
         if (!Array.isArray(this.phases)) return;
         for (const phase of this.phases) {
-            if (!phase.specializations) {
-                phase.specializations = this.createDefaultSpecializations();
+            if (!phase.selectedSessions) {
+                phase.selectedSessions = [];
             }
         }
     }

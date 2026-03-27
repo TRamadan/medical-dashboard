@@ -8,7 +8,40 @@
         </div>
     </div>
 
+    <!-- Required Services Card -->
+    <p-card>
+        <ng-template pTemplate="title">
+            <span class="text-xl font-bold">Required Services</span>
+        </ng-template>
+        <div class="flex flex-col gap-4 mt-4">
+            <span class="text-gray-600 mb-2">Select the services related to this plan:</span>
 
+            <div *ngIf="serviceCategories && serviceCategories.length === 0" class="flex items-center gap-2 text-gray-500 italic">
+                <i class="pi pi-spin pi-spinner text-xl"></i>
+                <span>Loading services...</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div *ngFor="let service of serviceCategories"
+                    class="border-2 rounded-xl p-3 cursor-pointer transition-all duration-200 hover:shadow-md flex items-center justify-between"
+                    [ngClass]="{'border-[#131337] bg-[#131337]': service.selected, 'border-gray-100 bg-white hover:border-gray-300': !service.selected}"
+                    (click)="service.selected = !service.selected">
+                    <div class="flex items-center gap-3">
+                        <div class="h-8 w-8 rounded-full flex items-center justify-center transition-colors"
+                            [ngClass]="{'bg-[#2A2A4A] text-white': service.selected, 'bg-gray-100 text-gray-500': !service.selected}">
+                            <i class="pi pi-briefcase text-base"></i>
+                        </div>
+                        <span class="font-semibold text-sm" [ngClass]="{'text-white': service.selected, 'text-gray-800': !service.selected}">{{ service.nameEn || service.nameAr || 'Service
+                            Target' }}</span>
+                    </div>
+                    <div class="h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors"
+                        [ngClass]="{'border-[#70F4C3] bg-[#70F4C3]': service.selected, 'border-gray-300 bg-white': !service.selected}">
+                        <i class="pi pi-check text-[#131337] text-xs" *ngIf="service.selected"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </p-card>
 
     <!-- Plan Configuration Card -->
     <p-card>
@@ -18,21 +51,32 @@
         <div class="flex flex-col gap-6 mt-4">
             <!-- Weeks Input -->
             <div class="flex flex-col gap-2">
-                <label class="font-medium text-gray-700">Total Number Of Weeks <span class="text-red-500">*</span></label>
-                <input pInputText [(ngModel)]="planConfig.weeks" (ngModelChange)="onConfigChange()" placeholder="eg., 12" class="w-full" type="number" />
+                <label class="font-medium text-gray-700">Total Number Of Weeks <span
+                        class="text-red-500">*</span></label>
+                <input pInputText [(ngModel)]="planConfig.weeks" (ngModelChange)="onConfigChange()"
+                    placeholder="eg., 12" class="w-full" type="number" />
                 <small class="text-gray-500">Typical range: 8-16 weeks</small>
             </div>
 
             <!-- Sessions Input -->
             <div class="flex flex-col gap-2">
-                <label class="font-medium text-gray-700">Total Number of Sessions <span class="text-red-500">*</span></label>
-                <input pInputText [(ngModel)]="planConfig.sessions" (ngModelChange)="onConfigChange()" placeholder="eg., 3" class="w-full" type="number" />
+                <label class="font-medium text-gray-700">Total Number of Sessions <span
+                        class="text-red-500">*</span></label>
+                <input pInputText [(ngModel)]="planConfig.sessions" (ngModelChange)="onConfigChange()"
+                    placeholder="eg., 3" class="w-full" type="number" />
+            </div>
+
+            <!-- Doctor Assessment Input -->
+            <div class="flex flex-col gap-2">
+                <label class="font-medium text-gray-700">Doctor Assessment</label>
+                <textarea rows="4" pInputTextarea [(ngModel)]="planConfig.doctorAssessment" (ngModelChange)="onConfigChange()"
+                    placeholder="Enter doctor assessment details here" class="w-full"></textarea>
             </div>
         </div>
-    </p-card> 
+    </p-card>
 
 
-        <!-- Template Selection Card -->
+    <!-- Template Selection Card -->
     <p-card>
         <div class="flex flex-col gap-4">
             <div class="flex items-center gap-2">
@@ -40,26 +84,27 @@
                 <span class="text-xl font-bold">Use Treatment Plan Template</span>
             </div>
             <div class="flex items-center gap-2">
-                <p-checkbox [(ngModel)]="useTemplate" [binary]="true" inputId="template" (onChange)="onToggleTemplate()"></p-checkbox>
+                <p-checkbox [(ngModel)]="useTemplate" [binary]="true" inputId="template"
+                    (onChange)="onToggleTemplate()"></p-checkbox>
                 <label for="template" class="text-gray-700 cursor-pointer">Start from an existing template</label>
             </div>
 
             <!-- Templates List -->
             <div *ngIf="useTemplate" class="flex flex-col gap-4 mt-2">
                 <span class="text-gray-600">Select a template to customize:</span>
-                
-                <div *ngFor="let template of templates" 
-                     class="border rounded-xl p-4 cursor-pointer transition-all hover:border-blue-500 relative"
-                     [ngClass]="{'border-blue-500 bg-blue-50/10': selectedTemplate === template, 'border-gray-200': selectedTemplate !== template}"
-                     (click)="selectTemplate(template)">
-                    
+
+                <div *ngFor="let template of templates"
+                    class="border rounded-xl p-4 cursor-pointer transition-all duration-200 hover:shadow-md relative"
+                    [ngClass]="{'border-[#131337] bg-[#131337] shadow-lg scale-[1.02]': selectedTemplate === template, 'border-gray-200 bg-white hover:border-gray-300': selectedTemplate !== template}"
+                    (click)="selectTemplate(template)">
+
                     <div class="flex justify-between items-start">
                         <div class="flex flex-col gap-1">
-                            <span class="font-bold text-gray-800 text-lg">{{ template.title }}</span>
-                            <span class="text-gray-500 text-sm">{{ template.subtitle }}</span>
-                            <span class="text-gray-600 mt-1">{{ template.description }}</span>
-                            
-                            <div class="flex items-center gap-4 mt-3 text-gray-600 text-sm">
+                            <span class="font-bold text-lg transition-colors" [ngClass]="{'text-white': selectedTemplate === template, 'text-gray-800': selectedTemplate !== template}">{{ template.title }}</span>
+                            <span class="text-sm transition-colors" [ngClass]="{'text-gray-300': selectedTemplate === template, 'text-gray-500': selectedTemplate !== template}">{{ template.subtitle }}</span>
+                            <span class="mt-1 transition-colors" [ngClass]="{'text-gray-300': selectedTemplate === template, 'text-gray-600': selectedTemplate !== template}">{{ template.description }}</span>
+
+                            <div class="flex items-center gap-4 mt-3 text-sm transition-colors" [ngClass]="{'text-gray-400': selectedTemplate === template, 'text-gray-600': selectedTemplate !== template}">
                                 <div class="flex items-center gap-1">
                                     <i class="pi pi-stopwatch"></i>
                                     <span>{{ template.duration }}</span>
@@ -74,9 +119,9 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <div *ngIf="selectedTemplate === template" class="text-blue-500">
-                            <i class="pi pi-check-circle text-xl"></i>
+
+                        <div *ngIf="selectedTemplate === template" class="text-[#70f4c3] bg-[#2A2A4A] h-8 w-8 rounded-full flex items-center justify-center shadow-md">
+                            <i class="pi pi-check text-xl font-bold"></i>
                         </div>
                     </div>
                 </div>
@@ -91,7 +136,8 @@
             <i class="pi pi-info-circle text-[#A4A43D] text-2xl mt-1"></i>
             <div class="flex flex-col gap-1">
                 <span class="font-bold text-[#A4A43D] text-lg">Define Treatment Phases & Protocol</span>
-                <span class="text-[#A4A43D]">Break down the treatment into phases with specific objectives and exercises.</span>
+                <span class="text-[#A4A43D]">Break down the treatment into phases with specific objectives and
+                    exercises.</span>
             </div>
         </div>
 
@@ -105,7 +151,8 @@
 
                 <!-- Phase Items -->
                 <div class="flex flex-col gap-4">
-                    <div *ngFor="let phase of phases; let i = index" class="border rounded-xl p-4 flex flex-col gap-4 relative">
+                    <div *ngFor="let phase of phases; let i = index"
+                        class="border rounded-xl p-4 flex flex-col gap-4 relative">
                         <!-- Close Button -->
                         <button *ngIf="i > 0" class="absolute top-4 right-4 text-gray-500 hover:text-red-500"
                             (click)="removePhase(i)">
@@ -123,11 +170,13 @@
                         <div class="flex gap-4">
                             <div class="flex flex-col gap-2 flex-1">
                                 <label class="font-medium text-gray-700">Weeks:</label>
-                                <input pInputText [(ngModel)]="phase.weeks" placeholder="eg., 12" class="w-full" type="number" />
+                                <input pInputText [(ngModel)]="phase.weeks" placeholder="eg., 12" class="w-full"
+                                    type="number" />
                             </div>
                             <div class="flex flex-col gap-2 flex-1">
                                 <label class="font-medium text-gray-700">Sessions:</label>
-                                <input pInputText [(ngModel)]="phase.sessions" placeholder="eg., 12" class="w-full" type="number" />
+                                <input pInputText [(ngModel)]="phase.sessions" placeholder="eg., 12" class="w-full"
+                                    type="number" />
                             </div>
                         </div>
 
@@ -148,64 +197,27 @@
                         <!-- Divider -->
                         <div class="border-t border-gray-200 my-2"></div>
 
-                        <!-- Measurements Section -->
-                        <div class="flex flex-col gap-6">
-                            <span class="text-xl font-bold">Measurements</span>
-
-                            <!-- Categories Row -->
-                            <div class="flex flex-wrap gap-8">
-                                <div *ngFor="let cat of phase.measurementCategories; let ci = index" class="flex flex-col gap-2">
-                                    <div class="flex items-center gap-2">
-                                        <p-checkbox [(ngModel)]="cat.selected" [binary]="true" [inputId]="'cat_'+i+'_'+ci"></p-checkbox>
-                                        <label [for]="'cat_'+i+'_'+ci" class="cursor-pointer font-medium text-gray-800">{{ cat.label }}</label>
+                        <!-- Apply Sessions Section -->
+                        <div class="flex flex-col gap-4" *ngIf="phase.sessions">
+                            <span class="text-xl font-bold">Apply measurements to Sessions</span>
+                            <span class="text-gray-500 text-sm mb-2">Select which sessions will include this phase's
+                                measurements:</span>
+                            <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                                <div *ngFor="let sessionNum of getSessionsArray(phase.sessions)"
+                                    class="border rounded-xl p-2 cursor-pointer transition-all hover:shadow-md flex flex-col items-center justify-center gap-2"
+                                    [ngClass]="{'border-[#131337] bg-[#131337] text-white': isSessionSelected(phase, sessionNum), 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50': !isSessionSelected(phase, sessionNum)}"
+                                    (click)="toggleSessionSelection(phase, sessionNum)">
+                                    <span class="font-bold text-sm">Session {{ sessionNum }}</span>
+                                    <div class="h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors"
+                                        [ngClass]="{'border-[#70F4C3] bg-[#70F4C3]': isSessionSelected(phase, sessionNum), 'border-gray-300 bg-white': !isSessionSelected(phase, sessionNum)}">
+                                        <i class="pi pi-check text-[#131337] text-[10px]"
+                                            *ngIf="isSessionSelected(phase, sessionNum)"></i>
                                     </div>
-                                    <div *ngIf="cat.selected && ci > 0" class="flex flex-col gap-2">
-                                        <div class="flex items-center gap-2 text-yellow-600 bg-yellow-50 p-2 rounded text-sm">
-                                            <i class="pi pi-exclamation-triangle"></i>
-                                            <span>No items available for this category.</span>
-                                        </div>
-                                    </div>
                                 </div>
-                            </div>
-
-                            <!-- Measurement Items -->
-                            <div class="flex flex-col gap-4" *ngIf="phase.measurementCategories[0].selected">
-                                <div *ngFor="let item of phase.measurementItems; let mi = index" class="flex flex-col gap-2">
-                                    <div class="flex items-center gap-2">
-                                        <p-checkbox [(ngModel)]="item.selected" [binary]="true" [inputId]="'meas_'+i+'_'+mi"></p-checkbox>
-                                        <label [for]="'meas_'+i+'_'+mi" class="cursor-pointer text-gray-700">{{ item.label }}</label>
-                                    </div>
-                                    <input *ngIf="item.selected" pInputText [(ngModel)]="item.value" placeholder="Enter value" class="w-full p-inputtext-sm" />
-                                </div>
-                            </div>
-
-                            <!-- Repeat Measurement Box -->
-                            <div class="border rounded-xl p-6 flex flex-col gap-4">
-                                <span class="font-medium text-gray-800">Do you want repeat this measurement again ?</span>
-                                <div class="flex items-center gap-2">
-                                    <p-checkbox [(ngModel)]="phase.repeatMeasurement" [binary]="true" [inputId]="'repeat_'+i"></p-checkbox>
-                                    <label [for]="'repeat_'+i" class="cursor-pointer text-gray-700">Repeat Measurement</label>
-                                </div>
-
-                                <div *ngIf="phase.repeatMeasurement" class="flex flex-col gap-2 mt-2">
-                                    <label class="font-medium text-gray-800">Repeat in Session Number:</label>
-                                    <input pInputText [(ngModel)]="phase.repeatSessionNumber" placeholder="eg., 12" class="w-full" type="number" />
-                                </div>
-                            </div>
-                        </div>
-
-                    <!-- Specializations Section (per phase) -->
-                    <div class="flex flex-col gap-4">
-                        <span class="text-xl font-bold">Required Coach Specializations</span>
-                        <div class="flex flex-col gap-3">
-                            <div *ngFor="let spec of phase.specializations; let si = index" class="flex items-center gap-2">
-                                <p-checkbox [(ngModel)]="spec.selected" [binary]="true" [inputId]="'spec_'+si"></p-checkbox>
-                                <label [for]="'spec_'+si" class="cursor-pointer text-gray-700">{{ spec.label }}</label>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
             </div>
         </p-card>
     </div>

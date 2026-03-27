@@ -4,7 +4,8 @@
         <p-card *ngIf="selectedPatient" class="block mb-4">
             <div class="flex justify-between items-center">
                 <span class="text-xl font-bold text-green-700">Selected Patient: {{selectedPatient.name}}</span>
-                <p-button label="Reset Selection" severity="secondary" icon="pi pi-refresh" (onClick)="resetSelection()" />
+                <p-button label="Reset Selection" severity="secondary" icon="pi pi-refresh"
+                    (onClick)="resetSelection()" />
             </div>
         </p-card>
 
@@ -15,23 +16,23 @@
                     <div class="flex align-items-center gap-2 w-full justify-content-between">
                         <div class="flex align-items-center gap-2">
                             <!-- Report Accepted Status Icon -->
-                            <div *ngIf="patient.acceptedReport" 
-                                 class="flex items-center justify-center w-8 h-8 rounded-full bg-green-500"
-                                 pTooltip="Report Accepted" 
-                                 tooltipPosition="top">
+                            <div *ngIf="patient.acceptedReport"
+                                class="flex items-center justify-center w-8 h-8 rounded-full bg-green-500"
+                                pTooltip="Report Accepted" tooltipPosition="top">
                                 <i class="pi pi-check text-white text-sm"></i>
                             </div>
-                            <div *ngIf="!patient.acceptedReport" 
-                                 class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-300"
-                                 pTooltip="Report Pending" 
-                                 tooltipPosition="top">
+                            <div *ngIf="!patient.acceptedReport"
+                                class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-300"
+                                pTooltip="Report Pending" tooltipPosition="top">
                                 <i class="pi pi-clock text-white text-sm"></i>
                             </div>
-                            
+
                             <span class="font-bold white-space-nowrap">{{ patient.name }}</span>
                             <p-tag [value]="patient.status" [severity]="getSeverity(patient.status)" />
-                            <p-tag *ngIf="patient.acceptedReport" value="✓ Accepted Report" severity="success" icon="pi pi-check" />
-                            <p-tag *ngIf="!patient.acceptedReport" value="✗ Not Accepted" severity="danger" icon="pi pi-times" />
+                            <p-tag *ngIf="patient.acceptedReport" value="✓ Accepted Report" severity="success"
+                                icon="pi pi-check" />
+                            <p-tag *ngIf="!patient.acceptedReport" value="✗ Not Accepted" severity="danger"
+                                icon="pi pi-times" />
                         </div>
                     </div>
                 </ng-template>
@@ -67,8 +68,10 @@
                     <div class="flex justify-between items-center">
                         <span class="text-base text-gray-600">Report Status:</span>
                         <div class="flex items-center gap-2">
-                            <p-tag *ngIf="patient.acceptedReport" value="Accepted" severity="success" icon="pi pi-check-circle" />
-                            <p-tag *ngIf="!patient.acceptedReport" value="Not Accepted" severity="danger" icon="pi pi-times-circle" />
+                            <p-tag *ngIf="patient.acceptedReport" value="Accepted" severity="success"
+                                icon="pi pi-check-circle" />
+                            <p-tag *ngIf="!patient.acceptedReport" value="Not Accepted" severity="danger"
+                                icon="pi pi-times-circle" />
                         </div>
                     </div>
 
@@ -134,8 +137,10 @@
                     </div>
                     <div class="flex justify-between items-center">
                         <span class="text-lg">Report Status:</span>
-                        <p-tag *ngIf="patient.acceptedReport" value="Accepted" severity="success" icon="pi pi-check-circle" />
-                        <p-tag *ngIf="!patient.acceptedReport" value="Not Accepted" severity="danger" icon="pi pi-times-circle" />
+                        <p-tag *ngIf="patient.acceptedReport" value="Accepted" severity="success"
+                            icon="pi pi-check-circle" />
+                        <p-tag *ngIf="!patient.acceptedReport" value="Not Accepted" severity="danger"
+                            icon="pi pi-times-circle" />
                     </div>
                 </div>
             </p-accordionTab>
@@ -147,199 +152,286 @@
         <ng-template pTemplate="header">
             <div class="px-4 pt-4 pb-2">
                 <h2 class="text-2xl font-bold text-gray-800 mb-1">Treatment Phases from Report</h2>
-                <p class="text-gray-600 text-sm">Click on a phase to define sessions and sections</p>
+                <p class="text-gray-600 text-sm">Configure exercises and measurements for the patient</p>
+
             </div>
         </ng-template>
 
-        <p-accordion>
-            <p-accordionTab *ngFor="let phase of selectedPatient.reportPhases; let i = index">
-                <ng-template pTemplate="header">
-                    <div class="flex justify-between items-center w-full pr-4">
-                        <span class="font-bold text-lg">{{phase.title}}</span>
-                        <p-tag [value]="'Phase ' + (phase.id || i+1)" severity="warn"></p-tag>
-                    </div>
-                </ng-template>
+        <div>
 
-                <!-- Accordion Body -->
-                <div class="flex flex-col gap-4">
-                    <!-- Weeks and Sessions Per Week Inputs -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="flex flex-col gap-2">
-                            <label class="font-medium text-sm text-gray-700">Weeks:</label>
-                            <input pInputText type="number" [(ngModel)]="phase.weeksCount" 
-                                   (ngModelChange)="updateTotalSessions(phase)"
-                                   placeholder="eg., 12" class="w-full" />
+            <p-accordion>
+                <p-accordionTab *ngFor="let phase of selectedPatient.reportPhases; let i = index">
+                    <ng-template pTemplate="header">
+                        <div class="flex justify-between items-center w-full pr-4">
+                            <span class="font-bold text-lg">{{phase.title}}</span>
+                            <p-tag [value]="'Phase ' + (phase.id || i+1)" severity="warn"></p-tag>
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="font-medium text-sm text-gray-700">Sessions per week:</label>
-                            <input pInputText type="number" [(ngModel)]="phase.sessionsPerWeek" 
-                                   (ngModelChange)="updateTotalSessions(phase)"
-                                   placeholder="eg., 12" class="w-full" />
+                    </ng-template>
+
+                    <!-- Accordion Body -->
+                    <div class="flex flex-col gap-6 pb-4">
+                        <!-- Phase Objective -->
+                        <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 flex flex-col gap-2">
+                            <label class="font-bold text-blue-800">Phase Objective</label>
+                            <p class="text-blue-700" *ngIf="phase.objective">{{phase.objective}}</p>
+                            <p class="text-blue-700 italic" *ngIf="!phase.objective">No objective defined for this
+                                phase.</p>
                         </div>
-                    </div>
 
-                    <!-- All Weeks with Session Tabs -->
-                    <div *ngIf="phase.weeksCount && phase.sessionsPerWeek" class="flex flex-col gap-6">
-                        <!-- Loop through each week -->
-                        <div *ngFor="let weekNum of getWeeksRange(phase.weeksCount)" class="border rounded-lg p-4 bg-gray-50">
-                            <h3 class="font-bold text-lg mb-4">Week #{{weekNum}}</h3>
+                        <!-- Measurement Templates Selection (Removed from per-phase) -->
 
-                            <!-- Session Tabs for this week -->
-                            <div class="flex flex-wrap gap-2 mb-4">
-                                <button *ngFor="let sessionInWeek of getSessionsRange(phase.sessionsPerWeek)"
+                        <!-- Weeks and Sessions Per Week Inputs -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-2">
+                                <label class="font-medium text-sm text-gray-700">Weeks:</label>
+                                <input pInputText type="number" [(ngModel)]="phase.weeksCount"
+                                    (ngModelChange)="updateTotalSessions(phase)" placeholder="eg., 12" class="w-full" />
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <label class="font-medium text-sm text-gray-700">Sessions per week:</label>
+                                <input pInputText type="number" [(ngModel)]="phase.sessionsPerWeek"
+                                    (ngModelChange)="updateTotalSessions(phase)" placeholder="eg., 12" class="w-full" />
+                            </div>
+                        </div>
+
+                        <!-- All Weeks with Session Tabs -->
+                        <div *ngIf="phase.weeksCount && phase.sessionsPerWeek" class="flex flex-col gap-6">
+                            <!-- Loop through each week -->
+                            <div *ngFor="let weekNum of getWeeksRange(phase.weeksCount)"
+                                class="border rounded-lg p-4 bg-gray-50">
+                                <h3 class="font-bold text-lg mb-4">Week #{{weekNum}}</h3>
+
+                                <!-- Session Tabs for this week -->
+                                <div class="flex flex-wrap gap-2 mb-4">
+                                    <button *ngFor="let sessionInWeek of getSessionsRange(phase.sessionsPerWeek)"
                                         [class]="'px-6 py-2.5 rounded-lg font-medium text-base transition-all ' + 
                                                  (phase.selectedSessionTab === sessionInWeek ? 'bg-blue-600 text-white' : 'text-blue-600')"
                                         (click)="selectSessionTab(phase, sessionInWeek)">
-                                    Session {{sessionInWeek}}
-                                </button>
-                            </div>
+                                        Session {{sessionInWeek}}
+                                    </button>
+                                </div>
 
-                            <!-- Selected Session Content for this week -->
-                            <div *ngIf="phase.selectedSessionTab">
-                                <!-- Calculate global session number -->
-                                <ng-container *ngIf="getSessionNumber(weekNum, phase.selectedSessionTab, phase.sessionsPerWeek) as globalSessionNum">
-                                    <!-- Sections for this session in this week -->
-                                    <div class="flex flex-col gap-4">
-                                        <div *ngFor="let section of getSections(phase, globalSessionNum); let secIndex = index" 
-                                             class="border border-gray-300 rounded-lg p-4 bg-white">
-                                            
-                                            <!-- Section Header with Number Badge and Delete Button -->
-                                            <div class="flex items-center justify-between mb-4">
-                                                <div class="flex items-center gap-3">
-                                                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-400 text-white font-bold">
-                                                        {{secIndex + 1}}
+                                <!-- Selected Session Content for this week -->
+                                <div *ngIf="phase.selectedSessionTab">
+                                    <!-- Calculate global session number -->
+                                    <ng-container
+                                        *ngIf="getSessionNumber(weekNum, phase.selectedSessionTab, phase.sessionsPerWeek) as globalSessionNum">
+                                        <!-- Add modern Segmented Toggle for Session Mode (always locked/read-only) -->
+                                        <div class="flex bg-gray-100 p-1 rounded-xl mb-6 border border-gray-200 mx-auto w-full max-w-sm relative opacity-80">
+
+                                            <!-- Lock badge — always shown -->
+                                            <span class="absolute -top-2.5 -right-2.5 bg-amber-400 text-amber-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm z-10">
+                                                <i class="pi pi-lock text-[9px]"></i> Locked
+                                            </span>
+
+                                            <div class="flex-1 text-center py-2.5 rounded-lg font-bold transition-all duration-300 flex items-center justify-center cursor-not-allowed"
+                                                [ngClass]="{
+                                                    'bg-[#131337] text-white shadow-md': getSessionMode(phase, globalSessionNum) === 'exercises',
+                                                    'text-gray-400': getSessionMode(phase, globalSessionNum) !== 'exercises'
+                                                }">
+                                                <i class="pi pi-list mr-2" [ngClass]="{'text-[#70F4C3]': getSessionMode(phase, globalSessionNum) === 'exercises'}"></i>
+                                                <span class="text-sm">Exercises</span>
+                                            </div>
+                                            <div class="flex-1 text-center py-2.5 rounded-lg font-bold transition-all duration-300 flex items-center justify-center cursor-not-allowed"
+                                                [ngClass]="{
+                                                    'bg-[#131337] text-white shadow-md': getSessionMode(phase, globalSessionNum) === 'measurements',
+                                                    'text-gray-400': getSessionMode(phase, globalSessionNum) !== 'measurements'
+                                                }">
+                                                <i class="pi pi-chart-line mr-2" [ngClass]="{'text-[#70F4C3]': getSessionMode(phase, globalSessionNum) === 'measurements'}"></i>
+                                                <span class="text-sm">Measurements</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Sections for this session in this week -->
+                                        <div class="flex flex-col gap-4" *ngIf="getSessionMode(phase, globalSessionNum) === 'exercises'">
+                                            <div *ngFor="let section of getSections(phase, globalSessionNum); let secIndex = index"
+                                                class="border border-gray-300 rounded-lg p-4 bg-white">
+
+                                                <!-- Section Header with Number Badge and Delete Button -->
+                                                <div class="flex items-center justify-between mb-4">
+                                                    <div class="flex items-center gap-3">
+                                                        <div
+                                                            class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-400 text-white font-bold">
+                                                            {{secIndex + 1}}
+                                                        </div>
+                                                        <span class="font-medium text-lg">{{section.title || 'Section '
+                                                            + (secIndex + 1)}}</span>
                                                     </div>
-                                                    <span class="font-medium text-lg">{{section.title || 'Section ' + (secIndex + 1)}}</span>
-                                                </div>
-                                                <button pButton icon="pi pi-trash" 
-                                                        class="p-button-text p-button-danger p-button-sm" 
+                                                    <button pButton icon="pi pi-trash"
+                                                        class="p-button-text p-button-danger p-button-sm"
                                                         (click)="removeSection(phase, globalSessionNum, secIndex)"></button>
+                                                </div>
+
+                                                <!-- Section Configuration -->
+                                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+
+                                                    <div class="flex flex-col gap-2">
+                                                        <label class="font-medium text-sm text-gray-600">Time</label>
+                                                        <input pInputText type="number" [(ngModel)]="section.time"
+                                                            placeholder="e.g. 10" />
+                                                    </div>
+                                                    <div class="flex flex-col gap-2">
+                                                        <label class="font-medium text-sm text-gray-600"> Coach
+                                                            manager</label>
+                                                        <p-dropdown [options]="coaches" [(ngModel)]="section.coach"
+                                                            placeholder="Select Coach Manager" styleClass="w-full"
+                                                            optionLabel="label" optionValue="value"></p-dropdown>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Exercises Cards Layout -->
+                                                <div class="flex flex-col gap-4">
+                                                    <div *ngFor="let ex of section.exercises; let exIndex = index"
+                                                        class="border border-gray-200 rounded-lg p-4 bg-gray-50 flex flex-col gap-4 relative shadow-sm hover:shadow-md transition-shadow">
+
+                                                        <div class="absolute top-2 right-2">
+                                                            <span class="pi pi-bars mr-2 text-gray-500 cursor-move"
+                                                                pTooltip="Drag to reorder"
+                                                                tooltipPosition="left"></span>
+                                                            <button pButton icon="pi pi-trash"
+                                                                class="p-button-rounded p-button-danger p-button-text p-button-sm"
+                                                                (click)="removeExercise(section, exIndex)"
+                                                                pTooltip="Remove Exercise"></button>
+                                                        </div>
+
+                                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6 md:pt-2 pr-12 w-full">
+                                                            <!-- Left side: Basic Details -->
+                                                            <div class="flex flex-col gap-4 border-r border-gray-100 pr-4">
+                                                                <div class="flex flex-col gap-1">
+                                                                    <label class="text-sm font-semibold text-gray-700">Name</label>
+                                                                    <input pInputText [(ngModel)]="ex.name" class="w-full" placeholder="Exercise name" />
+                                                                </div>
+                                                                <div class="flex flex-col gap-1">
+                                                                    <label class="text-sm font-semibold text-gray-700">Tool</label>
+                                                                    <input pInputText [(ngModel)]="ex.tool" class="w-full" placeholder="e.g. Dumbbell" />
+                                                                </div>
+                                                                <div class="flex flex-col gap-1">
+                                                                    <label class="text-sm font-semibold text-gray-700">Description</label>
+                                                                    <textarea pInputTextarea [(ngModel)]="ex.description" rows="3" class="w-full" placeholder="Enter instructions..."></textarea>
+                                                                </div>
+                                                                <div class="flex flex-col gap-1">
+                                                                    <label class="text-sm font-semibold text-gray-700">Video URL</label>
+                                                                    <input pInputText [(ngModel)]="ex.videoUrl" class="w-full" placeholder="Enter video URL" />
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Right side: Metrics -->
+                                                            <div class="flex flex-col gap-6 pl-2 justify-start">
+                                                                <!-- Sets & Dynamic Reps Row -->
+                                                                <div class="flex flex-col gap-3">
+                                                                    <div class="flex flex-col sm:flex-row gap-4 items-start">
+                                                                        <div class="flex flex-col gap-1 w-full sm:w-1/4">
+                                                                            <label class="text-xs font-bold text-gray-500 uppercase">Sets</label>
+                                                                            <input pInputText [(ngModel)]="ex.sets" type="number" min="1" max="10" class="w-full font-medium" placeholder="1" />
+                                                                        </div>
+                                                                        <div class="flex flex-col gap-1 flex-1 w-full">
+                                                                            <label class="text-xs font-bold text-gray-500 uppercase mb-1">Repetitions Per Set</label>
+                                                                            <div class="flex flex-wrap gap-2">
+                                                                                <ng-container *ngFor="let i of getRepArray(ex)">
+                                                                                    <div class="flex items-center gap-1 border border-gray-200 rounded px-2 py-1 bg-white max-w-[5rem] shadow-sm">
+                                                                                        <span class="text-xs text-blue-500 font-bold">S{{i+1}}</span>
+                                                                                        <input pInputText [(ngModel)]="ex.reps[i]" class="w-full text-center font-medium p-1 border-none focus:ring-0 text-sm h-6" placeholder="reps" />
+                                                                                    </div>
+                                                                                </ng-container>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Other Metrics Row -->
+                                                                <div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm mt-auto">
+                                                                    <div class="grid grid-cols-3 gap-4">
+                                                                        <div class="flex flex-col gap-1">
+                                                                            <label class="text-xs font-bold text-gray-500 uppercase">Int</label>
+                                                                            <input pInputText [(ngModel)]="ex.intensity" class="w-full text-center font-medium" placeholder="Mod" />
+                                                                        </div>
+                                                                        <div class="flex flex-col gap-1">
+                                                                            <label class="text-xs font-bold text-gray-500 uppercase">Temp</label>
+                                                                            <input pInputText [(ngModel)]="ex.tempo" class="w-full text-center font-medium" placeholder="2-0-2" />
+                                                                        </div>
+                                                                        <div class="flex flex-col gap-1">
+                                                                            <label class="text-xs font-bold text-gray-500 uppercase">Rest</label>
+                                                                            <input pInputText [(ngModel)]="ex.rest" class="w-full text-center font-medium" placeholder="60s" />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div
+                                                        class="flex justify-center mt-2 p-2 border-t border-dashed border-gray-300">
+                                                        <p-button label="Add Exercise" icon="pi pi-plus"
+                                                            [outlined]="true" size="small"
+                                                            (click)="addExercise(section)"></p-button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Section Action Buttons -->
+                                                <div class="flex justify-end gap-3 mt-4">
+                                                    <p-button label="Cancel" [outlined]="true" severity="secondary"
+                                                        size="small"></p-button>
+                                                    <p-button label="Save" severity="success" size="small"
+                                                        [disabled]="!isSectionValid(section)"
+                                                        pTooltip="{{isSectionValid(section) ? 'Save section' : 'Please add at least one exercise with name, sets, and reps'}}"
+                                                        tooltipPosition="top"></p-button>
+                                                </div>
                                             </div>
 
-                                            <!-- Section Configuration -->
-                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                                           
-                                                <div class="flex flex-col gap-2">
-                                                    <label class="font-medium text-sm text-gray-600">Time</label>
-                                                    <input pInputText type="number" [(ngModel)]="section.time" placeholder="e.g. 10" />
-                                                </div>
-                                                <div class="flex flex-col gap-2">
-                                                    <label class="font-medium text-sm text-gray-600"> Coach manager</label>
-                                                    <p-dropdown [options]="coaches" [(ngModel)]="section.coach" 
-                                                               placeholder="Select Coach Manager" styleClass="w-full" 
-                                                               optionLabel="label" optionValue="value"></p-dropdown>
-                                                </div>
-                                            </div>
-
-                                            <!-- Exercises Table -->
-                                            <div class="bg-white rounded border border-gray-200 overflow-hidden">
-                                                <p-table [value]="section.exercises" styleClass="p-datatable-sm">
-                                                    <ng-template pTemplate="header">
-                                                        <tr>
-                                                            <th style="width: 3%"></th>
-                                                            <th style="width: 12%">Name</th>
-                                                            <th style="width: 18%">Description</th>
-                                                            <th style="width: 8%">Sets</th>
-                                                            <th style="width: 8%">Reps</th>
-                                                            <th style="width: 10%">Intensity</th>
-                                                            <th style="width: 8%">Tempo</th>
-                                                            <th style="width: 10%">Rest</th>
-                                                            <th style="width: 18%">Video URL</th>
-                                                            <th style="width: 5%"></th>
-                                                        </tr>
-                                                    </ng-template>
-                                                    <ng-template pTemplate="body" let-ex let-exIndex="rowIndex">
-                                                        <tr [pReorderableRow]="exIndex">
-                                                            <td>
-                                                                <span class="pi pi-bars" 
-                                                                      pReorderableRowHandle 
-                                                                      pTooltip="Drag to reorder exercises" 
-                                                                      tooltipPosition="top"
-                                                                      style="cursor: move; color: #6b7280;"></span>
-                                                            </td>
-                                                            <td>
-                                                                <input pInputText [(ngModel)]="ex.name" 
-                                                                       class="w-full p-inputtext-sm" 
-                                                                       placeholder="Exercise name" />
-                                                            </td>
-                                                            <td>
-                                                                <textarea pInputTextarea [(ngModel)]="ex.description" 
-                                                                         rows="2" 
-                                                                         class="w-full p-inputtext-sm" 
-                                                                         placeholder="Description"></textarea>
-                                                            </td>
-                                                            <td>
-                                                                <input pInputText [(ngModel)]="ex.sets" 
-                                                                       class="w-full p-inputtext-sm" 
-                                                                       placeholder="3" />
-                                                            </td>
-                                                            <td>
-                                                                <input pInputText [(ngModel)]="ex.reps" 
-                                                                       class="w-full p-inputtext-sm" 
-                                                                       placeholder="10" />
-                                                            </td>
-                                                            <td>
-                                                                <input pInputText [(ngModel)]="ex.intensity" 
-                                                                       class="w-full p-inputtext-sm" 
-                                                                       placeholder="Moderate" />
-                                                            </td>
-                                                            <td>
-                                                                <input pInputText [(ngModel)]="ex.tempo" 
-                                                                       class="w-full p-inputtext-sm" 
-                                                                       placeholder="2-0-2" />
-                                                            </td>
-                                                            <td>
-                                                                <input pInputText [(ngModel)]="ex.rest" 
-                                                                       class="w-full p-inputtext-sm" 
-                                                                       placeholder="60s" />
-                                                            </td>
-                                                            <td>
-                                                                <input pInputText [(ngModel)]="ex.videoUrl" 
-                                                                       class="w-full p-inputtext-sm" 
-                                                                       placeholder="Video URL" />
-                                                            </td>
-                                                            <td>
-                                                                <button pButton icon="pi pi-trash" 
-                                                                        class="p-button-text p-button-danger p-button-sm" 
-                                                                        (click)="removeExercise(section, exIndex)"></button>
-                                                            </td>
-                                                        </tr>
-                                                    </ng-template>
-                                                </p-table>
-                                                <div class="p-2 border-t bg-gray-50">
-                                                    <p-button label="Add Exercise" [text]="true" size="small" 
-                                                             icon="pi pi-plus" (onClick)="addExercise(section)"></p-button>
-                                                </div>
-                                            </div>
-
-                                            <!-- Section Action Buttons -->
-                                            <div class="flex justify-end gap-3 mt-4">
-                                                <p-button label="Cancel" 
-                                                         [outlined]="true" 
-                                                         severity="secondary"
-                                                         size="small"></p-button>
-                                                <p-button label="Save" 
-                                                         severity="success"
-                                                         size="small"
-                                                         [disabled]="!isSectionValid(section)"
-                                                         pTooltip="{{isSectionValid(section) ? 'Save section' : 'Please add at least one exercise with name, sets, and reps'}}"
-                                                         tooltipPosition="top"></p-button>
+                                            <!-- Add Section Button for this week's session -->
+                                            <div class="flex justify-center">
+                                                <p-button label="Add New Section" icon="pi pi-plus-circle"
+                                                    severity="secondary" [outlined]="true"
+                                                    (onClick)="addSection(phase, globalSessionNum)"></p-button>
                                             </div>
                                         </div>
 
-                                        <!-- Add Section Button for this week's session -->
-                                        <div class="flex justify-center">
-                                            <p-button label="Add New Section" icon="pi pi-plus-circle" 
-                                                     severity="secondary" [outlined]="true" 
-                                                     (onClick)="addSection(phase, globalSessionNum)"></p-button>
+                                        <!-- MEASUREMENTS VIEW -->
+                                        <div *ngIf="getSessionMode(phase, globalSessionNum) === 'measurements'" class="flex flex-col gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50">
+                                            <div class="flex items-center gap-3">
+                                                <i class="pi pi-chart-pie text-2xl text-purple-600"></i>
+                                                <div>
+                                                    <h3 class="text-xl font-bold text-gray-800">Measurement Template</h3>
+                                                    <p class="text-gray-600 text-sm">Select a template specifically to be applied for session {{globalSessionNum}}.</p>
+                                                </div>
+                                            </div>
+
+                                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                                                <div *ngFor="let template of availableTemplates"
+                                                    class="border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 hover:shadow-md flex items-center justify-between"
+                                                    [ngClass]="{'border-[#131337] bg-[#131337]': phase.sessionData[globalSessionNum]?.measurementTemplate?.id === template.id, 'border-gray-100 bg-white hover:border-gray-300': phase.sessionData[globalSessionNum]?.measurementTemplate?.id !== template.id}"
+                                                    (click)="setSessionMeasurementTemplate(phase, globalSessionNum, template)">
+                                                    <div class="flex items-center gap-4">
+                                                        <div class="h-10 w-10 rounded-full flex items-center justify-center transition-colors"
+                                                            [ngClass]="{'bg-[#2A2A4A] text-white': phase.sessionData[globalSessionNum]?.measurementTemplate?.id === template.id, 'bg-gray-100 border text-gray-500': phase.sessionData[globalSessionNum]?.measurementTemplate?.id !== template.id}">
+                                                            <i class="pi pi-file-edit text-lg"></i>
+                                                        </div>
+                                                        <span class="font-bold text-base"
+                                                            [ngClass]="{'text-white': phase.sessionData[globalSessionNum]?.measurementTemplate?.id === template.id, 'text-gray-800': phase.sessionData[globalSessionNum]?.measurementTemplate?.id !== template.id}">{{
+                                                            template.name || 'Template' }}</span>
+                                                    </div>
+                                                    <div class="h-6 w-6 rounded-md border-2 flex items-center justify-center transition-colors"
+                                                        [ngClass]="{'border-[#70F4C3] bg-[#70F4C3]': phase.sessionData[globalSessionNum]?.measurementTemplate?.id === template.id, 'border-gray-300 bg-white': phase.sessionData[globalSessionNum]?.measurementTemplate?.id !== template.id}">
+                                                        <i class="pi pi-check text-[#131337] text-sm"
+                                                            *ngIf="phase.sessionData[globalSessionNum]?.measurementTemplate?.id === template.id"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div *ngIf="!availableTemplates || availableTemplates.length === 0" class="p-4 text-center text-gray-500 italic">
+                                                Loading measurement templates...
+                                            </div>
                                         </div>
-                                    </div>
-                                </ng-container>
+                                    </ng-container>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </p-accordionTab>
-        </p-accordion>
+                </p-accordionTab>
+            </p-accordion>
+        </div>
+
+
+
     </p-card>
 </div>

@@ -11,6 +11,8 @@ import { DropdownModule } from 'primeng/dropdown';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
+import { MeasurementTemplatesService } from '../measurements-config/services/measurement-templates.service';
+import { OnInit } from '@angular/core';
 
 @Component({
     selector: 'app-phases-sessions',
@@ -18,7 +20,7 @@ import { TooltipModule } from 'primeng/tooltip';
     templateUrl: './phases-sessions.component.html',
     styleUrl: './phases-sessions.component.scss'
 })
-export class PhasesSessionsComponent {
+export class PhasesSessionsComponent implements OnInit {
     @Input() phases: any[] = [];
 
     selectedPatient: any = null;
@@ -44,23 +46,26 @@ export class PhasesSessionsComponent {
                 {
                     id: 1,
                     title: 'Phase 1: Foundation',
-                    weeksCount: undefined,
-                    sessionsPerWeek: undefined,
-                    selectedSessionTab: 1
+                    weeksCount: 4,
+                    sessionsPerWeek: 3,
+                    selectedSessionTab: 1,
+                    selectedSessions: [1, 5, 10]
                 },
                 {
                     id: 2,
                     title: 'Phase 2: Strength Building',
-                    weeksCount: undefined,
-                    sessionsPerWeek: undefined,
-                    selectedSessionTab: 1
+                    weeksCount: 6,
+                    sessionsPerWeek: 3,
+                    selectedSessionTab: 1,
+                    selectedSessions: [2, 8]
                 },
                 {
                     id: 3,
                     title: 'Phase 3: Advanced Training',
-                    weeksCount: undefined,
-                    sessionsPerWeek: undefined,
-                    selectedSessionTab: 1
+                    weeksCount: 2,
+                    sessionsPerWeek: 2,
+                    selectedSessionTab: 1,
+                    selectedSessions: []
                 }
             ]
         },
@@ -85,23 +90,26 @@ export class PhasesSessionsComponent {
                 {
                     id: 1,
                     title: 'Phase 1: Initial Assessment',
-                    weeksCount: undefined,
-                    sessionsPerWeek: undefined,
-                    selectedSessionTab: 1
+                    weeksCount: 2,
+                    sessionsPerWeek: 2,
+                    selectedSessionTab: 1,
+                    selectedSessions: [1, 4]
                 },
                 {
                     id: 2,
                     title: 'Phase 2: Progressive Training',
-                    weeksCount: undefined,
-                    sessionsPerWeek: undefined,
-                    selectedSessionTab: 1
+                    weeksCount: 4,
+                    sessionsPerWeek: 3,
+                    selectedSessionTab: 1,
+                    selectedSessions: [3, 7]
                 },
                 {
                     id: 3,
                     title: 'Phase 3: Performance',
-                    weeksCount: undefined,
-                    sessionsPerWeek: undefined,
-                    selectedSessionTab: 1
+                    weeksCount: 4,
+                    sessionsPerWeek: 2,
+                    selectedSessionTab: 1,
+                    selectedSessions: []
                 }
             ]
         }
@@ -119,6 +127,19 @@ export class PhasesSessionsComponent {
 
     selectPhase(phase: any) {
         this.selectedPhase = phase;
+    }
+
+    availableTemplates: any[] = [];
+
+    constructor(private measurementTemplatesService: MeasurementTemplatesService) {}
+
+    ngOnInit() {
+        this.measurementTemplatesService.getAllTemplates().subscribe({
+            next: (data) => {
+                this.availableTemplates = data;
+            },
+            error: (err) => console.error('Failed to load measurement templates', err)
+        });
     }
 
     getSeverity(status: string | undefined) {
@@ -146,7 +167,7 @@ export class PhasesSessionsComponent {
         return Array.from({ length: num }, (_, i) => i + 1);
     }
 
-    getSections(phase: any, sessionNum: number) {
+    ensureSessionData(phase: any, sessionNum: number) {
         if (!phase.sessionData) {
             phase.sessionData = {};
         }
@@ -162,6 +183,44 @@ export class PhasesSessionsComponent {
                 ]
             };
         }
+    }
+
+    getSessionMode(phase: any, sessionNum: number): 'exercises' | 'measurements' {
+        this.ensureSessionData(phase, sessionNum);
+        
+        if (!phase.sessionData[sessionNum].mode) {
+            const isMeasurement = this.isSessionPredefined(phase, sessionNum);
+            phase.sessionData[sessionNum].mode = isMeasurement ? 'measurements' : 'exercises';
+        }
+        
+        return phase.sessionData[sessionNum].mode;
+    }
+
+    /**
+     * Returns true if the session was pre-defined as a measurement session
+     * from the Plan Configuration step. When true, the toggle should be locked/disabled.
+     */
+    isSessionPredefined(phase: any, sessionNum: number): boolean {
+        return (phase.selectedSessions && phase.selectedSessions.includes(sessionNum)) ||
+               (phase.measurementSessions && phase.measurementSessions.includes(sessionNum));
+    }
+
+    setSessionMode(phase: any, sessionNum: number, mode: 'exercises' | 'measurements') {
+        this.ensureSessionData(phase, sessionNum);
+        phase.sessionData[sessionNum].mode = mode;
+    }
+
+    setSessionMeasurementTemplate(phase: any, sessionNum: number, template: any) {
+        this.ensureSessionData(phase, sessionNum);
+        if (phase.sessionData[sessionNum].measurementTemplate?.id === template.id) {
+            phase.sessionData[sessionNum].measurementTemplate = null;
+        } else {
+            phase.sessionData[sessionNum].measurementTemplate = template;
+        }
+    }
+
+    getSections(phase: any, sessionNum: number) {
+        this.ensureSessionData(phase, sessionNum);
         return phase.sessionData[sessionNum].sections;
     }
 
@@ -174,9 +233,10 @@ export class PhasesSessionsComponent {
             exercises: [
                 {
                     name: '',
+                    tool: '',
                     description: '',
-                    sets: '',
-                    reps: '',
+                    sets: '1',
+                    reps: [''],
                     intensity: '',
                     tempo: '',
                     rest: '',
@@ -194,14 +254,30 @@ export class PhasesSessionsComponent {
     addExercise(section: any) {
         section.exercises.push({
             name: '',
+            tool: '',
             description: '',
-            sets: '',
-            reps: '',
+            sets: '1',
+            reps: [''],
             intensity: '',
             tempo: '',
             rest: '',
             videoUrl: ''
         });
+    }
+
+    getRepArray(ex: any): number[] {
+        const numSets = parseInt(ex.sets, 10);
+        const count = isNaN(numSets) || numSets <= 0 ? 1 : Math.min(numSets, 10);
+        
+        if (!Array.isArray(ex.reps)) {
+            ex.reps = [ex.reps || ''];
+        }
+        
+        while (ex.reps.length < count) {
+            ex.reps.push('');
+        }
+        
+        return Array.from({length: count}, (_, i) => i);
     }
 
     removeExercise(section: any, index: number) {
@@ -217,7 +293,8 @@ export class PhasesSessionsComponent {
 
         // Check if all exercises have required fields filled
         return section.exercises.every((exercise: any) => {
-            return exercise.name && exercise.name.trim() !== '' && exercise.sets && exercise.sets.trim() !== '' && exercise.reps && exercise.reps.trim() !== '';
+            const hasReps = Array.isArray(exercise.reps) ? exercise.reps.some((r: any) => r && r.toString().trim() !== '') : exercise.reps && exercise.reps.toString().trim() !== '';
+            return exercise.name && exercise.name.trim() !== '' && exercise.sets && exercise.sets.toString().trim() !== '' && hasReps;
         });
     }
 
@@ -264,4 +341,6 @@ export class PhasesSessionsComponent {
         if (isNaN(num) || num <= 0) return [];
         return Array.from({ length: num }, (_, i) => i + 1);
     }
+
+
 }
