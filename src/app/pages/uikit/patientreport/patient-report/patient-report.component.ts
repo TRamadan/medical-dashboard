@@ -15,7 +15,8 @@ export class PatientReportComponent {
     @Input() report = {
         injuryNames: [] as string[],
         description: '',
-        recommendation: ''
+        recommendation: '',
+        doctorAssessment: ''
     };
     @Output() reportChange = new EventEmitter<any>();
 

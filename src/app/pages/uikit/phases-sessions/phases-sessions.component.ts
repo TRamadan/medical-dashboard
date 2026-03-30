@@ -155,11 +155,18 @@ export class PhasesSessionsComponent implements OnInit {
         }
     }
 
+    selectedCoach: string | null = null;
+
     coaches = [
         { label: 'Coach 1', value: '1' },
         { label: 'Coach 2', value: '2' },
         { label: 'Coach 3', value: '3' }
     ];
+
+    getSelectedCoachLabel(): string {
+        const coach = this.coaches.find(c => c.value === this.selectedCoach);
+        return coach ? coach.label : '';
+    }
 
     getSessionsRange(count: any): number[] {
         const num = parseInt(count, 10);
@@ -269,13 +276,9 @@ export class PhasesSessionsComponent implements OnInit {
         const numSets = parseInt(ex.sets, 10);
         const count = isNaN(numSets) || numSets <= 0 ? 1 : Math.min(numSets, 10);
         
-        if (!Array.isArray(ex.reps)) {
-            ex.reps = [ex.reps || ''];
-        }
+        if (!Array.isArray(ex.reps)) ex.reps = [ex.reps || ''];
         
-        while (ex.reps.length < count) {
-            ex.reps.push('');
-        }
+        while (ex.reps.length < count) ex.reps.push('');
         
         return Array.from({length: count}, (_, i) => i);
     }

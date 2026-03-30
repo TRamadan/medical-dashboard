@@ -153,9 +153,27 @@
             <div class="px-4 pt-4 pb-2">
                 <h2 class="text-2xl font-bold text-gray-800 mb-1">Treatment Phases from Report</h2>
                 <p class="text-gray-600 text-sm">Configure exercises and measurements for the patient</p>
-
             </div>
         </ng-template>
+
+        <!-- Global Coach Dropdown -->
+        <div class="px-2 pb-4">
+            <div class="flex items-center gap-4 bg-blue-50 border border-blue-100 rounded-lg p-4">
+                <i class="pi pi-user text-blue-600 text-xl"></i>
+                <div class="flex flex-col gap-1 flex-1">
+                    <label class="font-semibold text-sm text-blue-800">Assigned Coach</label>
+                    <p class="text-xs text-blue-600 mb-1">This coach is assigned to the entire treatment plan program.
+                    </p>
+                    <p-dropdown [options]="coaches" [(ngModel)]="selectedCoach" placeholder="Select Coach"
+                        styleClass="w-full md:w-64" optionLabel="label" optionValue="value">
+                    </p-dropdown>
+                </div>
+                <div *ngIf="selectedCoach" class="flex items-center gap-2 bg-blue-100 rounded-lg px-3 py-2">
+                    <i class="pi pi-check-circle text-blue-600"></i>
+                    <span class="text-sm font-medium text-blue-800">{{ getSelectedCoachLabel() }}</span>
+                </div>
+            </div>
+        </div>
 
         <div>
 
@@ -217,10 +235,12 @@
                                     <ng-container
                                         *ngIf="getSessionNumber(weekNum, phase.selectedSessionTab, phase.sessionsPerWeek) as globalSessionNum">
                                         <!-- Add modern Segmented Toggle for Session Mode (always locked/read-only) -->
-                                        <div class="flex bg-gray-100 p-1 rounded-xl mb-6 border border-gray-200 mx-auto w-full max-w-sm relative opacity-80">
+                                        <div
+                                            class="flex bg-gray-100 p-1 rounded-xl mb-6 border border-gray-200 mx-auto w-full max-w-sm relative opacity-80">
 
                                             <!-- Lock badge — always shown -->
-                                            <span class="absolute -top-2.5 -right-2.5 bg-amber-400 text-amber-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm z-10">
+                                            <span
+                                                class="absolute -top-2.5 -right-2.5 bg-amber-400 text-amber-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm z-10">
                                                 <i class="pi pi-lock text-[9px]"></i> Locked
                                             </span>
 
@@ -229,7 +249,8 @@
                                                     'bg-[#131337] text-white shadow-md': getSessionMode(phase, globalSessionNum) === 'exercises',
                                                     'text-gray-400': getSessionMode(phase, globalSessionNum) !== 'exercises'
                                                 }">
-                                                <i class="pi pi-list mr-2" [ngClass]="{'text-[#70F4C3]': getSessionMode(phase, globalSessionNum) === 'exercises'}"></i>
+                                                <i class="pi pi-list mr-2"
+                                                    [ngClass]="{'text-[#70F4C3]': getSessionMode(phase, globalSessionNum) === 'exercises'}"></i>
                                                 <span class="text-sm">Exercises</span>
                                             </div>
                                             <div class="flex-1 text-center py-2.5 rounded-lg font-bold transition-all duration-300 flex items-center justify-center cursor-not-allowed"
@@ -237,13 +258,15 @@
                                                     'bg-[#131337] text-white shadow-md': getSessionMode(phase, globalSessionNum) === 'measurements',
                                                     'text-gray-400': getSessionMode(phase, globalSessionNum) !== 'measurements'
                                                 }">
-                                                <i class="pi pi-chart-line mr-2" [ngClass]="{'text-[#70F4C3]': getSessionMode(phase, globalSessionNum) === 'measurements'}"></i>
+                                                <i class="pi pi-chart-line mr-2"
+                                                    [ngClass]="{'text-[#70F4C3]': getSessionMode(phase, globalSessionNum) === 'measurements'}"></i>
                                                 <span class="text-sm">Measurements</span>
                                             </div>
                                         </div>
 
                                         <!-- Sections for this session in this week -->
-                                        <div class="flex flex-col gap-4" *ngIf="getSessionMode(phase, globalSessionNum) === 'exercises'">
+                                        <div class="flex flex-col gap-4"
+                                            *ngIf="getSessionMode(phase, globalSessionNum) === 'exercises'">
                                             <div *ngFor="let section of getSections(phase, globalSessionNum); let secIndex = index"
                                                 class="border border-gray-300 rounded-lg p-4 bg-white">
 
@@ -270,13 +293,6 @@
                                                         <input pInputText type="number" [(ngModel)]="section.time"
                                                             placeholder="e.g. 10" />
                                                     </div>
-                                                    <div class="flex flex-col gap-2">
-                                                        <label class="font-medium text-sm text-gray-600"> Coach
-                                                            manager</label>
-                                                        <p-dropdown [options]="coaches" [(ngModel)]="section.coach"
-                                                            placeholder="Select Coach Manager" styleClass="w-full"
-                                                            optionLabel="label" optionValue="value"></p-dropdown>
-                                                    </div>
                                                 </div>
 
                                                 <!-- Exercises Cards Layout -->
@@ -293,66 +309,120 @@
                                                                 (click)="removeExercise(section, exIndex)"
                                                                 pTooltip="Remove Exercise"></button>
                                                         </div>
-
-                                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6 md:pt-2 pr-12 w-full">
+                                                        <div
+                                                            class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6 md:pt-2 pr-12 w-full">
                                                             <!-- Left side: Basic Details -->
-                                                            <div class="flex flex-col gap-4 border-r border-gray-100 pr-4">
-                                                                <div class="flex flex-col gap-1">
-                                                                    <label class="text-sm font-semibold text-gray-700">Name</label>
-                                                                    <input pInputText [(ngModel)]="ex.name" class="w-full" placeholder="Exercise name" />
-                                                                </div>
-                                                                <div class="flex flex-col gap-1">
-                                                                    <label class="text-sm font-semibold text-gray-700">Tool</label>
-                                                                    <input pInputText [(ngModel)]="ex.tool" class="w-full" placeholder="e.g. Dumbbell" />
-                                                                </div>
-                                                                <div class="flex flex-col gap-1">
-                                                                    <label class="text-sm font-semibold text-gray-700">Description</label>
-                                                                    <textarea pInputTextarea [(ngModel)]="ex.description" rows="3" class="w-full" placeholder="Enter instructions..."></textarea>
-                                                                </div>
-                                                                <div class="flex flex-col gap-1">
-                                                                    <label class="text-sm font-semibold text-gray-700">Video URL</label>
-                                                                    <input pInputText [(ngModel)]="ex.videoUrl" class="w-full" placeholder="Enter video URL" />
-                                                                </div>
-                                                            </div>
-
-                                                            <!-- Right side: Metrics -->
-                                                            <div class="flex flex-col gap-6 pl-2 justify-start">
-                                                                <!-- Sets & Dynamic Reps Row -->
-                                                                <div class="flex flex-col gap-3">
-                                                                    <div class="flex flex-col sm:flex-row gap-4 items-start">
-                                                                        <div class="flex flex-col gap-1 w-full sm:w-1/4">
-                                                                            <label class="text-xs font-bold text-gray-500 uppercase">Sets</label>
-                                                                            <input pInputText [(ngModel)]="ex.sets" type="number" min="1" max="10" class="w-full font-medium" placeholder="1" />
-                                                                        </div>
-                                                                        <div class="flex flex-col gap-1 flex-1 w-full">
-                                                                            <label class="text-xs font-bold text-gray-500 uppercase mb-1">Repetitions Per Set</label>
-                                                                            <div class="flex flex-wrap gap-2">
-                                                                                <ng-container *ngFor="let i of getRepArray(ex)">
-                                                                                    <div class="flex items-center gap-1 border border-gray-200 rounded px-2 py-1 bg-white max-w-[5rem] shadow-sm">
-                                                                                        <span class="text-xs text-blue-500 font-bold">S{{i+1}}</span>
-                                                                                        <input pInputText [(ngModel)]="ex.reps[i]" class="w-full text-center font-medium p-1 border-none focus:ring-0 text-sm h-6" placeholder="reps" />
-                                                                                    </div>
-                                                                                </ng-container>
-                                                                            </div>
-                                                                        </div>
+                                                            <div
+                                                                class="flex flex-col gap-4 border-r border-gray-100 pr-4">
+                                                                <!-- Row 1: Name, Tool, Sets -->
+                                                                <div class="flex items-start gap-4">
+                                                                    <div class="flex flex-col gap-1 flex-1">
+                                                                        <label
+                                                                            class="text-sm font-semibold text-gray-700">Name</label>
+                                                                        <input pInputText [(ngModel)]="ex.name"
+                                                                            class="w-full"
+                                                                            placeholder="Exercise name" />
+                                                                    </div>
+                                                                    <div class="flex flex-col gap-1 w-32">
+                                                                        <label
+                                                                            class="text-sm font-semibold text-gray-700">Tool</label>
+                                                                        <input pInputText [(ngModel)]="ex.tool"
+                                                                            class="w-full"
+                                                                            placeholder="e.g. Dumbbell" />
+                                                                    </div>
+                                                                    <div class="flex flex-col gap-1 w-24">
+                                                                        <label
+                                                                            class="text-sm font-semibold text-gray-700">Sets</label>
+                                                                        <input pInputText [(ngModel)]="ex.sets"
+                                                                            type="number" min="1" max="10"
+                                                                            class="w-full text-center"
+                                                                            placeholder="1" />
                                                                     </div>
                                                                 </div>
 
-                                                                <!-- Other Metrics Row -->
-                                                                <div class="bg-white p-3 rounded-lg border border-gray-200 shadow-sm mt-auto">
-                                                                    <div class="grid grid-cols-3 gap-4">
-                                                                        <div class="flex flex-col gap-1">
-                                                                            <label class="text-xs font-bold text-gray-500 uppercase">Int</label>
-                                                                            <input pInputText [(ngModel)]="ex.intensity" class="w-full text-center font-medium" placeholder="Mod" />
-                                                                        </div>
-                                                                        <div class="flex flex-col gap-1">
-                                                                            <label class="text-xs font-bold text-gray-500 uppercase">Temp</label>
-                                                                            <input pInputText [(ngModel)]="ex.tempo" class="w-full text-center font-medium" placeholder="2-0-2" />
-                                                                        </div>
-                                                                        <div class="flex flex-col gap-1">
-                                                                            <label class="text-xs font-bold text-gray-500 uppercase">Rest</label>
-                                                                            <input pInputText [(ngModel)]="ex.rest" class="w-full text-center font-medium" placeholder="60s" />
-                                                                        </div>
+                                                                <!-- Row 2: Description -->
+                                                                <div class="flex flex-col gap-1">
+                                                                    <label
+                                                                        class="text-sm font-semibold text-gray-700">Dec</label>
+                                                                    <textarea pInputTextarea
+                                                                        [(ngModel)]="ex.description" rows="3"
+                                                                        class="w-full"
+                                                                        placeholder="Enter instructions..."></textarea>
+                                                                </div>
+
+                                                                <!-- Row 3: Video URL -->
+                                                                <div class="flex flex-col gap-1">
+                                                                    <label
+                                                                        class="text-sm font-semibold text-gray-700">Video
+                                                                        URL</label>
+                                                                    <input pInputText [(ngModel)]="ex.videoUrl"
+                                                                        class="w-full" placeholder="Enter video URL" />
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Right side: Metrics Grid -->
+                                                            <div class="flex flex-col gap-2 pl-2 w-full">
+                                                                <div
+                                                                    class="grid grid-cols-[3rem_1fr_1fr_1fr_1fr] gap-2 items-start">
+                                                                    <!-- Table Headers -->
+                                                                    <div
+                                                                        class="text-xs font-bold text-gray-500 uppercase text-center mb-1">
+                                                                        Set #</div>
+                                                                    <div
+                                                                        class="text-xs font-bold text-gray-500 uppercase text-center mb-1">
+                                                                        Reps</div>
+                                                                    <div
+                                                                        class="text-xs font-bold text-gray-500 uppercase text-center mb-1">
+                                                                        Int</div>
+                                                                    <div
+                                                                        class="text-xs font-bold text-gray-500 uppercase text-center mb-1">
+                                                                        Temp</div>
+                                                                    <div
+                                                                        class="text-xs font-bold text-gray-500 uppercase text-center mb-1">
+                                                                        Res</div>
+
+                                                                    <!-- Reps (Repeated per set) -->
+                                                                    <div
+                                                                        class="col-span-2 flex flex-col gap-2 overflow-y-auto max-h-[300px] pr-2 pb-2">
+                                                                        <ng-container *ngFor="let i of getRepArray(ex)">
+                                                                            <div
+                                                                                class="grid grid-cols-[3rem_1fr] gap-2 items-center">
+                                                                                <div class="flex justify-center">
+                                                                                    <div
+                                                                                        class="flex items-center justify-center w-8 h-8 rounded bg-gray-100 border border-gray-300">
+                                                                                        <span
+                                                                                            class="text-sm text-blue-600 font-bold">{{i+1}}</span>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div>
+                                                                                    <input pInputText
+                                                                                        [(ngModel)]="ex.reps[i]"
+                                                                                        class="w-full text-center font-medium p-2 text-sm h-10 shadow-sm"
+                                                                                        placeholder="reps" />
+                                                                                </div>
+                                                                            </div>
+                                                                        </ng-container>
+                                                                    </div>
+
+                                                                    <!-- Int (Single Shared) -->
+                                                                    <div class="col-span-1">
+                                                                        <input pInputText [(ngModel)]="ex.intensity"
+                                                                            class="w-full text-center font-medium p-2 text-sm h-10 shadow-sm"
+                                                                            placeholder="Mod" />
+                                                                    </div>
+
+                                                                    <!-- Temp (Single Shared) -->
+                                                                    <div class="col-span-1">
+                                                                        <input pInputText [(ngModel)]="ex.tempo"
+                                                                            class="w-full text-center font-medium p-2 text-sm h-10 shadow-sm"
+                                                                            placeholder="2-0-2" />
+                                                                    </div>
+
+                                                                    <!-- Res (Single Shared) -->
+                                                                    <div class="col-span-1">
+                                                                        <input pInputText [(ngModel)]="ex.rest"
+                                                                            class="w-full text-center font-medium p-2 text-sm h-10 shadow-sm"
+                                                                            placeholder="60s" />
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -387,12 +457,15 @@
                                         </div>
 
                                         <!-- MEASUREMENTS VIEW -->
-                                        <div *ngIf="getSessionMode(phase, globalSessionNum) === 'measurements'" class="flex flex-col gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50">
+                                        <div *ngIf="getSessionMode(phase, globalSessionNum) === 'measurements'"
+                                            class="flex flex-col gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50">
                                             <div class="flex items-center gap-3">
                                                 <i class="pi pi-chart-pie text-2xl text-purple-600"></i>
                                                 <div>
-                                                    <h3 class="text-xl font-bold text-gray-800">Measurement Template</h3>
-                                                    <p class="text-gray-600 text-sm">Select a template specifically to be applied for session {{globalSessionNum}}.</p>
+                                                    <h3 class="text-xl font-bold text-gray-800">Measurement Template
+                                                    </h3>
+                                                    <p class="text-gray-600 text-sm">Select a template specifically to
+                                                        be applied for session {{globalSessionNum}}.</p>
                                                 </div>
                                             </div>
 
@@ -417,8 +490,9 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            
-                                            <div *ngIf="!availableTemplates || availableTemplates.length === 0" class="p-4 text-center text-gray-500 italic">
+
+                                            <div *ngIf="!availableTemplates || availableTemplates.length === 0"
+                                                class="p-4 text-center text-gray-500 italic">
                                                 Loading measurement templates...
                                             </div>
                                         </div>
@@ -430,8 +504,4 @@
                 </p-accordionTab>
             </p-accordion>
         </div>
-
-
-
     </p-card>
-</div>

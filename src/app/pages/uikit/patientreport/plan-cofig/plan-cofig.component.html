@@ -65,13 +65,6 @@
                 <input pInputText [(ngModel)]="planConfig.sessions" (ngModelChange)="onConfigChange()"
                     placeholder="eg., 3" class="w-full" type="number" />
             </div>
-
-            <!-- Doctor Assessment Input -->
-            <div class="flex flex-col gap-2">
-                <label class="font-medium text-gray-700">Doctor Assessment</label>
-                <textarea rows="4" pInputTextarea [(ngModel)]="planConfig.doctorAssessment" (ngModelChange)="onConfigChange()"
-                    placeholder="Enter doctor assessment details here" class="w-full"></textarea>
-            </div>
         </div>
     </p-card>
 
