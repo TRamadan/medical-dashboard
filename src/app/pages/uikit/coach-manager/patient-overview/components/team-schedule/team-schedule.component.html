@@ -1,0 +1,42 @@
+<div class="team-schedule" dir="ltr">
+    <div class="team-schedule__header">
+        <h2 class="team-schedule__title">Team Schedule - Brief</h2>
+        <a href="#" (click)="navigateToSchedule.emit(); $event.preventDefault()" class="team-schedule__link">View Full Schedule</a>
+    </div>
+
+    <div class="team-schedule__table-container">
+        <table class="team-schedule__table">
+            <thead>
+                <tr>
+                    <th>Engineer</th>
+                    <th>11:00 AM</th>
+                    <th>2:00 PM</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (row of scheduleData; track row.name) {
+                    <tr>
+                        <td>
+                            <div class="team-schedule__user">
+                                <div class="team-schedule__avatar" [style.background-color]="row.initialBg">
+                                    {{ row.initial }}
+                                </div>
+                                <span class="team-schedule__name">{{ row.name }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="team-schedule__badge team-schedule__badge--{{ row.slot11.type }}">
+                                {{ row.slot11.text }}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="team-schedule__badge team-schedule__badge--{{ row.slot14.type }}">
+                                {{ row.slot14.text }}
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -5,10 +5,6 @@
 <br />
 <section>
   <div class="container">
-    <div class="header">
-      <h1>Session managment</h1>
-    </div>
-
     @if(selectedPatient){
     <div class="treatment-plan-container">
       <h2 class="title p-2">Treatment Plan</h2>
@@ -46,17 +42,19 @@
     <ng-container [ngSwitch]="currentTab">
       <ng-container *ngSwitchCase="'overview'">
         <app-patient-overview [selectedPatient]="selectedPatient" (patientSelected)="onPatientSelected($event)"
-          (navigateToAssign)="onTabChange('assign')"></app-patient-overview>
+          (navigateToAssign)="onTabChange('assign')" (navigateToSchedule)="onTabChange('schedule')"
+          (navigateToTreatmentPlan)="onTabChange('edit')"></app-patient-overview>
       </ng-container>
-      <ng-container *ngSwitchCase="'edit'">
-        <app-edit-protocol [selectedPatient]="selectedPatient"></app-edit-protocol>
-      </ng-container>
-      <ng-container *ngSwitchCase="'assign'">
-        <app-assign-sessions></app-assign-sessions>
-      </ng-container>
+
       <ng-container *ngSwitchCase="'schedule'">
         <app-schedule></app-schedule>
       </ng-container>
+
+      <ng-container *ngSwitchCase="'edit'">
+        <app-edit-protocol></app-edit-protocol>
+      </ng-container>
+
+
     </ng-container>
 
 

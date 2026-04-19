@@ -1,0 +1,216 @@
+.urgent-actions {
+    font-family: 'Inter', 'Cairo', sans-serif;
+    color: #111827;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+
+    &__header {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin-bottom: 16px;
+        gap: 8px;
+    }
+
+    &__title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    &__badge {
+        background-color: #fef2f2;
+        color: #ef4444;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 12px;
+    }
+
+    &__header-icon {
+        color: #f59e0b;
+        font-size: 20px;
+        margin-left: auto; /* Push to right edge */
+    }
+
+    &__list {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        max-height: 400px;
+        overflow-y: auto;
+        padding-right: 8px; /* space for scrollbar */
+        
+        /* Custom scrollbar */
+        &::-webkit-scrollbar {
+            width: 6px;
+        }
+        &::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        &::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    }
+
+    &__empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 0;
+        color: #64748b;
+        text-align: center;
+        background-color: #f8fafc;
+        border-radius: 12px;
+        border: 1px dashed #cbd5e1;
+    }
+
+    &__empty-icon {
+        font-size: 32px;
+        color: #10b981;
+        margin-bottom: 12px;
+    }
+}
+
+.action-card {
+    background-color: #ffffff;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+
+    &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 16px;
+        bottom: 16px;
+        width: 4px;
+        border-radius: 0 4px 4px 0;
+    }
+
+    &--red::after {
+        background-color: #ef4444;
+    }
+
+    &--yellow::after {
+        background-color: #f59e0b;
+    }
+
+    &--blue::after {
+        background-color: #3b82f6;
+    }
+
+    &__content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    &__icon-container {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+
+        &--red {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        &--yellow {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #f59e0b;
+        }
+
+        &--blue {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #3b82f6;
+        }
+    }
+
+    &__details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    &__title {
+        font-size: 15px;
+        font-weight: 600;
+        margin: 0;
+        color: #111827;
+    }
+
+    &__subtitle {
+        font-size: 13px;
+        color: #6B7280;
+        margin: 0;
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &__badge {
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+
+        &--red {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        &--yellow {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+
+        &--dark-blue {
+            background-color: #1e293b;
+            color: #60a5fa;
+        }
+    }
+
+    &__button {
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: opacity 0.2s;
+
+        &:hover {
+            opacity: 0.9;
+        }
+
+        &--dark {
+            background-color: #374151;
+            color: #ffffff;
+        }
+
+        &--blue {
+            background-color: #2563eb;
+            color: #ffffff;
+        }
+    }
+}

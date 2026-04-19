@@ -62,11 +62,32 @@
     grid-template-columns: repeat(2, max-content);
     gap: 0.5rem;
     width: 100%;
-    justify-content: start; /* Default to start for mobile */
+    justify-content: start;
+    /* Default to start for mobile */
 
     @media (min-width: 1200px) {
         /* xl breakpoint */
         grid-template-columns: repeat(4, max-content);
-        justify-content: end; /* Align to end for desktop */
+        justify-content: end;
+        /* Align to end for desktop */
+    }
+}
+
+.patient-overview-dashboard {
+    margin-bottom: 32px;
+    padding: 24px;
+    border-radius: 16px;
+}
+
+.dashboard-grid {
+    display: grid;
+    /* In LTR: first element is Schedule (left), second is Actions (right) */
+    grid-template-columns: 2fr 3fr;
+    gap: 24px;
+}
+
+@media (max-width: 1200px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
     }
 }

@@ -35,7 +35,7 @@
                                 class="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-colors duration-200 bg-[#70F4C3] border-[#70F4C3] text-[#131337]">
                                 <i class="pi pi-list text-2xl"></i>
                             </div>
-                            <span class="font-bold text-[#131337]">plan config</span>
+                            <span class="font-bold text-[#131337]">Recommendations</span>
                         </div>
                     </ng-template>
                 </p-step>
@@ -60,7 +60,7 @@
                                 (onPatientSelect)="onPatientSelection($event)"></app-patient-info>
                             <div class="flex p-4 justify-end" *ngIf="isPatientSelected">
                                 <p-button label="Next" icon="pi pi-arrow-right" iconPos="right"
-                                     (onClick)="activateCallback(2)" />
+                                    (onClick)="activateCallback(2)" />
                             </div>
                         </div>
                     </ng-template>
@@ -81,8 +81,7 @@
                 <p-step-panel [value]="3">
                     <ng-template #content let-activateCallback="activateCallback">
                         <div class="flex flex-col">
-                            <app-plan-cofig [(planConfig)]="planConfigData"
-                                [(phases)]="phasesData"></app-plan-cofig>
+                            <app-plan-cofig [(planConfig)]="planConfigData" [(phases)]="phasesData"></app-plan-cofig>
                             <div class="flex p-4 justify-between">
                                 <p-button label="Back" severity="secondary" icon="pi pi-arrow-left"
                                     (onClick)="activateCallback(2)" />

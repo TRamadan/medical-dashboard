@@ -1,0 +1,34 @@
+<div class="urgent-actions" dir="ltr">
+    <div class="urgent-actions__header">
+        <h2 class="urgent-actions__title">Urgent Actions</h2>
+        <div class="urgent-actions__badge">{{ actions.length }}</div>
+        <i class="pi pi-bolt urgent-actions__header-icon"></i>
+    </div>
+
+    @if (actions.length > 0) {
+        <div class="urgent-actions__list">
+            @for (action of actions; track action.title) {
+                <div class="action-card action-card--{{ action.type }}">
+                    <div class="action-card__content">
+                        <div class="action-card__icon-container action-card__icon-container--{{ action.type }}">
+                            <i class="pi {{ action.icon }}"></i>
+                        </div>
+                        <div class="action-card__details">
+                            <h3 class="action-card__title">{{ action.title }}</h3>
+                            <p class="action-card__subtitle">{{ action.subtitle }}</p>
+                        </div>
+                    </div>
+                    <div class="action-card__actions">
+                        <span class="action-card__badge action-card__badge--{{ action.badgeType }}">{{ action.badgeText }}</span>
+                        <button class="action-card__button action-card__button--{{ action.buttonType }}" (click)="onActionClick(action)">{{ action.buttonText }}</button>
+                    </div>
+                </div>
+            }
+        </div>
+    } @else {
+        <div class="urgent-actions__empty">
+            <i class="pi pi-check-circle urgent-actions__empty-icon"></i>
+            <p>No urgent actions right now!</p>
+        </div>
+    }
+</div>

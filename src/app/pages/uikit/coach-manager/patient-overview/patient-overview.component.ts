@@ -12,9 +12,13 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DropdownModule } from 'primeng/dropdown';
 
+import { KpiCardsComponent } from './components/kpi-cards/kpi-cards.component';
+import { TeamScheduleComponent } from './components/team-schedule/team-schedule.component';
+import { UrgentActionsComponent } from './components/urgent-actions/urgent-actions.component';
+
 @Component({
     selector: 'app-patient-overview',
-    imports: [CommonModule, FormsModule, AccordionModule, TagModule, ButtonModule, TooltipModule, CardModule, TableModule, TabViewModule, InputTextModule, InputNumberModule, DropdownModule],
+    imports: [CommonModule, FormsModule, AccordionModule, TagModule, ButtonModule, TooltipModule, CardModule, TableModule, TabViewModule, InputTextModule, InputNumberModule, DropdownModule, KpiCardsComponent, TeamScheduleComponent, UrgentActionsComponent],
     standalone: true,
     templateUrl: './patient-overview.component.html',
     styleUrl: './patient-overview.component.scss'
@@ -201,6 +205,8 @@ export class PatientOverviewComponent {
     ];
     @Output() patientSelected = new EventEmitter<any>();
     @Output() navigateToAssign = new EventEmitter<void>();
+    @Output() navigateToSchedule = new EventEmitter<void>();
+    @Output() navigateToTreatmentPlan = new EventEmitter<void>();
 
     selectPatient(patient: any) {
         this.selectedPatient = patient;

@@ -1,1 +1,61 @@
-<p>schedule works!</p>
+<div class="schedule-container min-h-screen p-6 overflow-x-auto text-gray-800" dir="rtl">
+    <div class="min-w-[1000px] border border-gray-200 rounded-lg overflow-hidden bg-white shadow-lg">
+        <!-- Header Row -->
+        <div class="flex border-b border-gray-200 bg-gray-50">
+            <!-- Time Header (Far right logically because RTL applies) -->
+            <div class="w-24 shrink-0 border-l border-gray-200 py-5 flex items-center justify-center">
+                <i class="pi pi-clock text-[#475569] text-xl"></i>
+            </div>
+            
+            <!-- Coach Headers -->
+            <div class="flex-1 grid grid-cols-3">
+                <ng-container *ngFor="let coach of coaches; let last = last">
+                    <div class="flex flex-col items-center justify-center py-5" [ngClass]="{'border-l border-gray-200': !last}">
+                        <h3 class="text-[17px] font-bold text-gray-900 m-0">{{ coach.name }}</h3>
+                        <p class="text-[10px] text-gray-500 tracking-[0.2em] uppercase m-0 mt-2">{{ coach.clinic }}</p>
+                    </div>
+                </ng-container>
+            </div>
+        </div>
+
+        <!-- Body Rows -->
+        <ng-container *ngFor="let slot of timeSlots; let lastRow = last">
+            <div class="flex" [ngClass]="{'border-b border-gray-200': !lastRow}">
+                <!-- Time Column -->
+                <div class="w-24 shrink-0 border-l border-gray-200 flex items-center justify-center bg-gray-50">
+                    <span class="text-lg font-bold text-gray-800">{{ slot.time }}</span>
+                </div>
+
+                <!-- Slots Row -->
+                <div class="flex-1 grid grid-cols-3">
+                    <!-- Coach Columns per Timeslot -->
+                    <ng-container *ngFor="let coach of coaches; let lastCol = last">
+                        <div class="p-4" [ngClass]="{'border-l border-gray-200': !lastCol}">
+                            <!-- The Card -->
+                            <ng-container *ngIf="slot.slots[coach.id] as card">
+                                <div *ngIf="card.status !== 'empty'" class="schedule-card flex flex-col justify-between p-3.5 rounded-lg border transition-all h-[104px]" [ngClass]="getCardClasses(card.status)">
+                                    
+                                    <!-- Top Row: Badge & Icon -->
+                                    <div class="flex justify-between items-start w-full">
+                                        <span class="inline-block px-3 py-0.5 rounded-full text-[11px] font-bold shadow-sm" [ngClass]="getBadgeClasses(card.status)">
+                                            {{ card.badge }}
+                                        </span>
+                                        <div class="mt-0.5">
+                                            <i *ngIf="card.icon" [class]="card.icon + ' ' + getIconClasses(card.status) + ' text-[12px]'"></i>
+                                        </div>
+                                    </div>
+
+                                    <!-- Bottom Row: Title and Subtitle -->
+                                    <div class="flex flex-col items-start w-full mt-1.5 leading-[1.2]">
+                                        <span class="font-bold text-[14px] text-gray-900 block">{{ card.title }}</span>
+                                        <span class="text-[11px] text-[#64748B] block mt-1">{{ card.subtitle }}</span>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </div>
+                    </ng-container>
+                </div>
+            </div>
+        </ng-container>
+    </div>
+</div>

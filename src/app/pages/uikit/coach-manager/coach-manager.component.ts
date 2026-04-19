@@ -43,7 +43,7 @@ import { ScheduleComponent } from './schedule/schedule.component';
 })
 export class CoachManagerComponent implements OnInit {
     currentTab = 'overview';
-    selectedPatient: any = null; 
+    selectedPatient: any = null;
 
 
     onPatientSelected(patient: any) {
@@ -58,14 +58,13 @@ export class CoachManagerComponent implements OnInit {
 
     tabs = [
         { id: 'overview', label: 'Overview' },
-        { id: 'edit', label: 'Edit Protocol' },
-        { id: 'assign', label: 'Assign Coaches' },
-        { id: 'schedule', label: 'Schedule' }
+        { id: 'schedule', label: 'Team Schedule' },
+        { id: 'edit', label: 'Treatment plan' },
     ];
 
-    constructor() {}
+    constructor() { }
 
-    ngOnInit() {}
+    ngOnInit() { }
 
     onTabChange(tabId: any): void {
         this.currentTab = tabId;

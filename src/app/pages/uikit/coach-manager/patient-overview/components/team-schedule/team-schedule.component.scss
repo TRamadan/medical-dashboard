@@ -1,0 +1,123 @@
+.team-schedule {
+    font-family: 'Inter', 'Cairo', sans-serif;
+    color: #111827;
+    height: 100%;
+
+    &__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    &__title {
+        font-size: 18px;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    &__link {
+        color: #3b82f6;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &__table-container {
+        background-color: #ffffff;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    &__table {
+        width: 100%;
+        border-collapse: collapse;
+
+        th {
+            text-align: left;
+            padding: 16px;
+            color: #6B7280;
+            font-weight: 500;
+            font-size: 14px;
+            border-bottom: 1px solid #E5E7EB;
+
+            &:nth-child(2),
+            &:nth-child(3) {
+                text-align: center;
+            }
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #E5E7EB;
+            vertical-align: middle;
+
+            &:nth-child(2),
+            &:nth-child(3) {
+                text-align: center;
+            }
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+    }
+
+    &__user {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    &__avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        color: #ffffff;
+    }
+
+    &__name {
+        font-size: 15px;
+        font-weight: 500;
+    }
+
+    &__badge {
+        display: inline-block;
+        padding: 6px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        min-width: 80px;
+        text-align: center;
+
+        &--late {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+
+        &--available {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #9CA3AF;
+        }
+
+        &--session {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+
+        &--training {
+            background-color: rgba(245, 158, 11, 0.15);
+            color: #f59e0b;
+        }
+    }
+}
