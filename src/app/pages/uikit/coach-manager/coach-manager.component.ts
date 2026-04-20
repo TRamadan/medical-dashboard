@@ -17,6 +17,9 @@ import { PatientOverviewComponent } from './patient-overview/patient-overview.co
 import { EditProtocolComponent } from './edit-protocol/edit-protocol.component';
 import { AssignSessionsComponent } from './assign-sessions/assign-sessions.component';
 import { ScheduleComponent } from './schedule/schedule.component';
+import { TeamPerformanceComponent } from './team-performance/team-performance.component';
+import { EngineerEvaluationComponent } from './egineer-evaluation/egineer-evaluation.component';
+
 @Component({
     selector: 'app-coach-manager',
     standalone: true,
@@ -35,7 +38,12 @@ import { ScheduleComponent } from './schedule/schedule.component';
         TabsNavigationComponent,
         EditProtocolComponent,
         AssignSessionsComponent,
-        ScheduleComponent
+        TabsNavigationComponent,
+        EditProtocolComponent,
+        AssignSessionsComponent,
+        ScheduleComponent,
+        TeamPerformanceComponent,
+        EngineerEvaluationComponent
     ],
 
     templateUrl: './coach-manager.component.html',
@@ -60,6 +68,10 @@ export class CoachManagerComponent implements OnInit {
         { id: 'overview', label: 'Overview' },
         { id: 'schedule', label: 'Team Schedule' },
         { id: 'edit', label: 'Treatment plan' },
+        { id: 'teamPerformance', label: 'Team performance' },
+        { id: 'engineerEvaluation', label: 'Engineer Evaluation' },
+
+
     ];
 
     constructor() { }
