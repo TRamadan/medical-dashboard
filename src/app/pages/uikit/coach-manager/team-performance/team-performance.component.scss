@@ -1,0 +1,6 @@
+// Responsive top grid: 2 cols on sm+, 1 col on mobile
+@media (max-width: 640px) {
+  .sm\:grid-cols-2 {
+    grid-template-columns: 1fr !important;
+  }
+}
