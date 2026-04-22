@@ -63,12 +63,12 @@ export class SessionManagementComponent implements OnInit {
     currentTab = 'overview';
 
     tabs = [
-        { id: 'overview', label: 'Overview' },
+        { id: 'overview', label: 'Today schedule' },
         { id: 'sessions', label: 'Sessions' }
     ];
 
     onTabChange(tabId: any): void {
         this.currentTab = tabId;
     }
-    ngOnInit(): void {}
+    ngOnInit(): void { }
 }

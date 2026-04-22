@@ -7,6 +7,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { TagModule } from 'primeng/tag';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { TooltipModule } from 'primeng/tooltip';
 
 interface Exercise {
     name: string;
@@ -59,7 +60,8 @@ interface Station {
         DropdownModule,
         InputNumberModule,
         TagModule,
-        ProgressBarModule
+        ProgressBarModule,
+        TooltipModule
     ],
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './edit-protocol.component.html',
@@ -116,7 +118,39 @@ export class EditProtocolComponent {
                                     time: 10,
                                     coachManager: 'Ahmed Coach',
                                     exercises: [
-                                        { name: '', tool: '', description: '', sets: '1', reps: [''], intensity: '', tempo: '', rest: '', videoUrl: '' }
+                                        {
+                                            name: 'Stationary Bike',
+                                            tool: 'Bike',
+                                            description: 'Light resistance to increase blood flow.',
+                                            sets: '1',
+                                            reps: ['5 min'],
+                                            intensity: 'Low',
+                                            tempo: 'Steady',
+                                            rest: '0s',
+                                            videoUrl: 'https://example.com/bike'
+                                        },
+                                        {
+                                            name: 'Dynamic Stretching',
+                                            tool: 'Bodyweight',
+                                            description: 'Leg swings and arm circles.',
+                                            sets: '2',
+                                            reps: ['10 reps', '10 reps'],
+                                            intensity: 'Low',
+                                            tempo: 'Controlled',
+                                            rest: '30s',
+                                            videoUrl: 'https://example.com/stretch'
+                                        },
+                                        {
+                                            name: 'Glute Bridges',
+                                            tool: 'Mat',
+                                            description: 'Squeeze glutes at the top, hold for 2s.',
+                                            sets: '3',
+                                            reps: ['15 reps', '15 reps', '15 reps'],
+                                            intensity: 'Medium',
+                                            tempo: '2-0-2-2',
+                                            rest: '45s',
+                                            videoUrl: 'https://example.com/bridge'
+                                        }
                                     ]
                                 }
                             ]

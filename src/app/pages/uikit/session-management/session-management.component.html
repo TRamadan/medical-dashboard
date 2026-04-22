@@ -40,14 +40,16 @@
     <div class="my-2">
       <app-tabs-navigation [tabs]="tabs" [activeTab]="currentTab"
         (tabChange)="onTabChange($event)"></app-tabs-navigation>
-    </div> 
+    </div>
 
     <ng-container [ngSwitch]="currentTab">
       <ng-container *ngSwitchCase="'overview'">
-        <app-overview></app-overview>
+        <app-sessions></app-sessions>
+
       </ng-container>
       <ng-container *ngSwitchCase="'sessions'">
-        <app-sessions></app-sessions>
+        <app-overview></app-overview>
+
       </ng-container>
     </ng-container>
 

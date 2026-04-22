@@ -60,25 +60,58 @@
 
     <!-- STATS ROW -->
     <div class="row g-3 mb-4">
-        <div class="col-6">
-            <div class="card shadow-sm border-none p-4 d-flex align-items-center gap-4 hover:shadow-md transition-all transition-duration-200 cursor-pointer">
-                <div class="bg-indigo-50 text-indigo-500 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
-                    <i class="pi pi-th-large text-xl"></i>
+        <div class="col-6 col-md col-sm-4">
+            <div class="card shadow-sm border-0 p-3 d-flex align-items-center gap-3">
+                <div class="bg-green-50 text-green-600 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
+                    <i class="pi pi-check-circle text-xl"></i>
                 </div>
                 <div>
-                    <div class="text-3xl font-bold text-gray-900">{{ totalSlots() }}</div>
-                    <div class="text-sm font-semibold text-gray-500 uppercase tracking-widest mt-1">Total Slots</div>
+                    <div class="text-2xl font-bold text-green-600">{{ executedSessions() }}</div>
+                    <div class="text-xs font-semibold text-gray-500 uppercase mt-1">Done</div>
                 </div>
             </div>
         </div>
-        <div class="col-6">
-            <div class="card shadow-sm border-none p-4 d-flex align-items-center gap-4 hover:shadow-md transition-all transition-duration-200 cursor-pointer">
-                <div class="bg-blue-50 text-blue-500 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
-                    <i class="pi pi-calendar text-xl"></i>
+        <div class="col-6 col-md col-sm-4">
+            <div class="card shadow-sm border-0 p-3 d-flex align-items-center gap-3">
+                <div class="bg-orange-50 text-orange-500 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
+                    <i class="pi pi-clock text-xl"></i>
                 </div>
                 <div>
-                    <div class="text-3xl font-bold text-gray-900">{{ upcomingSlots() }}</div>
-                    <div class="text-sm font-semibold text-gray-500 uppercase tracking-widest mt-1">Next Sessions</div>
+                    <div class="text-2xl font-bold text-orange-600">{{ remainingSessions() }}</div>
+                    <div class="text-xs font-semibold text-gray-500 uppercase mt-1">Remaining</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md col-sm-4">
+            <div class="card shadow-sm border-0 p-3 d-flex align-items-center gap-3">
+                <div class="bg-teal-50 text-teal-600 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
+                    <i class="pi pi-users text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-teal-600">{{ swarmCount() }}</div>
+                    <div class="text-xs font-semibold text-gray-500 uppercase mt-1">Swarm</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md col-sm-4">
+            <div class="card shadow-sm border-0 p-3 d-flex align-items-center gap-3">
+                <div class="bg-purple-50 text-purple-600 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
+                    <i class="pi pi-user text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-purple-600">{{ soloCount() }}</div>
+                    <div class="text-xs font-semibold text-gray-500 uppercase mt-1">Solo</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 col-md col-sm-4">
+            <div class="card shadow-sm border-0 p-3 d-flex align-items-center gap-3">
+                <div class="bg-indigo-50 text-indigo-600 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
+                    <i class="pi pi-chart-bar text-xl"></i>
+                </div>
+                <div>
+                    <div class="text-2xl font-bold text-indigo-600">{{ measurementsCount() }}</div>
+                    <div class="text-xs font-semibold text-gray-500 uppercase mt-1">Assess.</div>
                 </div>
             </div>
         </div>
@@ -119,19 +152,49 @@
                         <td class="fw-bold text-center text-gray-600 time-col bg-gray-50 border-right-1 surface-border py-4">
                             <i class="pi pi-clock me-2 text-primary text-sm"></i>{{ time }}
                         </td>
-                        <td class="text-center align-middle slot-cell position-relative p-0" [ngClass]="getStatusColor(getAppointmentStatus(time))">
+                        <td class="text-center align-middle slot-cell position-relative p-0"
+                            [ngClass]="getStatusColor(getAppointmentStatus(time))">
                             <ng-container *ngIf="getAppointment(time) as appt; else emptySlot">
-                                <div class="w-100 h-100 p-3 d-flex flex-column align-items-center justify-content-center">
-                                    <div class="slot-patient text-lg font-bold text-gray-900">{{ appt.patientName }}</div>
-                                    <div class="text-sm text-gray-700 my-2 font-semibold bg-white px-2 py-1 border-round border-1 surface-border shadow-sm">{{ appt.phase }}</div>
-                                    <div class="text-xs text-gray-500 font-medium">Session #{{ appt.sessionNumber }}</div>
-                                    <span class="badge mt-2 px-3 py-2 status-pill rounded-pill font-bold"
-                                        [ngClass]="getBadgeColor(appt.status)">
-                                        {{ appt.status | uppercase }}
-                                    </span>
-                                </div>
+                                <ng-container *ngIf="appt.type === 'Measurements'; else trainingSlot">
+                                    <div class="w-100 h-100 p-3 d-flex flex-column align-items-center justify-content-center text-center cursor-pointer"
+                                         style="border-left:4px solid #6610f2;background:rgba(102,16,242,.04);"
+                                         (click)="onSessionClick(appt)">
+                                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap justify-content-center">
+                                            <span class="fw-bold text-dark small">{{ appt.patientName }}</span>
+                                            <span class="badge rounded-pill" style="background:rgba(102,16,242,.12);color:#6610f2;font-size:10px;">📐 Measurements</span>
+                                        </div>
+                                        <div class="text-xs text-muted">{{ appt.stationInfo }}</div>
+                                        <div class="text-xs text-muted">{{ appt.progress }}</div>
+                                        <span class="badge mt-2 rounded-pill text-white" style="background:#6610f2;font-size:10px;">ASSESSMENT</span>
+                                    </div>
+                                </ng-container>
+                                <ng-template #trainingSlot>
+                                    <div class="w-100 h-100 p-3 d-flex flex-column align-items-center justify-content-center text-center cursor-pointer"
+                                         [ngStyle]="{
+                                             'border-left': appt.type === 'Swarm' ? '4px solid #0d9488' : '4px solid #7c3aed',
+                                             'background': appt.status === 'in-progress' ? 'rgba(245,166,35,.06)' : 'transparent'
+                                         }"
+                                         (click)="onSessionClick(appt)">
+                                        <div *ngIf="appt.status === 'in-progress'" class="d-flex align-items-center gap-1 mb-1">
+                                            <span class="rounded-circle bg-warning d-inline-block" style="width:7px;height:7px;"></span>
+                                            <span class="text-warning fw-bold" style="font-size:10px;">LIVE NOW</span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap justify-content-center">
+                                            <span class="fw-bold text-dark small">{{ appt.patientName }}</span>
+                                            <span class="badge rounded-pill" style="font-size:10px;"
+                                                [ngClass]="appt.type === 'Swarm' ? 'bg-teal-100 text-teal-800' : 'bg-purple-100 text-purple-800'">{{ appt.type }}</span>
+                                        </div>
+                                        <div class="text-xs text-muted">{{ appt.stationInfo }}</div>
+                                        <div class="text-xs text-muted">{{ appt.progress }}</div>
+                                        <span class="badge mt-2 rounded-pill fw-bold" style="font-size:10px;"
+                                            [ngClass]="appt.status === 'completed' ? 'bg-success text-white'
+                                                     : appt.status === 'in-progress' ? 'bg-warning text-dark'
+                                                     : 'bg-primary text-white'">
+                                            {{ appt.status === 'completed' ? 'Done' : appt.status === 'in-progress' ? 'In Progress' : 'Upcoming' }}
+                                        </span>
+                                    </div>
+                                </ng-template>
                             </ng-container>
-                            
                             <ng-template #emptySlot>
                                 <div class="empty-slot text-gray-400 d-flex flex-column align-items-center justify-content-center h-100 py-5 cursor-pointer hover:bg-gray-100 transition-colors transition-duration-200">
                                     <i class="pi pi-plus text-2xl mb-2"></i>
@@ -139,6 +202,7 @@
                                 </div>
                             </ng-template>
                         </td>
+
                     </tr>
                 </ng-template>
             </p-table>

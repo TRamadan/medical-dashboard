@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed, output } from '@angular/core';
 import { CardModule } from 'primeng/card';
 import { TableModule } from 'primeng/table';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -16,6 +16,9 @@ import { CommonModule } from '@angular/common';
 })
 export class SessionsComponent implements OnInit {
     coachName: string = 'Captain Sarah Johnson';
+
+    // Event emitted when a session is clicked
+    sessionSelected = output<any>();
     
     // Filter states
     dateRange: Date[] = [new Date(), new Date()];
@@ -32,14 +35,47 @@ export class SessionsComponent implements OnInit {
     schedule: {[time: string]: any} = {};
     timeSlots = signal<string[]>([]);
     
+    // New stats based on reference HTML
     totalSlots = signal<number>(0);
     upcomingSlots = signal<number>(0);
+    executedSessions = signal<number>(0);
+    remainingSessions = signal<number>(0);
+    soloCount = signal<number>(0);
+    swarmCount = signal<number>(0);
+    measurementsCount = signal<number>(0);
 
+    // Today's sessions — all 3 types in one day
     upcomingSessions: any[] = [
-        { id: 1, patientName: 'Ali Hassan', sessionNumber: 7, date: '2025-11-16', time: '10:00 - 10:30', phase: 'Phase 2', status: 'scheduled' },
-        { id: 2, patientName: 'Sara Ahmed', sessionNumber: 8, date: '2025-11-18', time: '11:00 - 11:30', phase: 'Phase 2', status: 'scheduled' },
-        { id: 3, patientName: 'John Doe', sessionNumber: 9, date: '2025-11-20', time: '14:00 - 14:30', phase: 'Phase 2', status: 'scheduled' },
-        { id: 4, patientName: 'Mona Zaki', sessionNumber: 10, date: '2025-11-23', time: '15:30 - 16:00', phase: 'Phase 2', status: 'scheduled' }
+        {
+            id: 1, patientName: 'Ali Hassan', sessionNumber: 5, date: '', time: '10:00 - 10:30',
+            phase: 'Phase 2', status: 'completed', type: 'Swarm',
+            stationInfo: 'Recharger · Station 1/3', progress: 'Session 5 / 36'
+        },
+        {
+            id: 2, patientName: 'Nour Khaled', sessionNumber: 12, date: '', time: '10:30 - 11:00',
+            phase: 'Phase 2', status: 'completed', type: 'Swarm',
+            stationInfo: 'Recharger · Station 1/3', progress: 'Session 12 / 36'
+        },
+        {
+            id: 3, patientName: 'Hana Salem', sessionNumber: 7, date: '', time: '11:00 - 11:30',
+            phase: 'Phase 3', status: 'in-progress', type: 'Swarm',
+            stationInfo: 'Recharger · Station 2/3', progress: 'Session 7 / 36'
+        },
+        {
+            id: 4, patientName: 'Rami Mostafa', sessionNumber: 1, date: '', time: '14:00 - 14:15',
+            phase: 'Knee Basic', status: 'scheduled', type: 'Measurements',
+            stationInfo: 'Periodic Measurements · 15 min', progress: 'Assessment 2 / 4'
+        },
+        {
+            id: 5, patientName: 'Rami Mostafa', sessionNumber: 1, date: '', time: '14:30 - 15:30',
+            phase: 'Phase 1', status: 'scheduled', type: 'Solo',
+            stationInfo: 'Solo · 60 min', progress: 'Session 1 / 36'
+        },
+        {
+            id: 6, patientName: 'Fatma Ali', sessionNumber: 20, date: '', time: '15:30 - 16:00',
+            phase: 'Phase 4', status: 'scheduled', type: 'Swarm',
+            stationInfo: 'Apex Station', progress: 'Session 20 / 24'
+        }
     ];
 
     ngOnInit(): void {
@@ -113,11 +149,27 @@ export class SessionsComponent implements OnInit {
         });
 
         const scheduledCount = Object.values(this.schedule).filter(s => s.status === 'scheduled').length;
-        this.upcomingSlots.set(scheduledCount);
+        const inProgressCount = Object.values(this.schedule).filter(s => s.status === 'in-progress').length;
+        const completedCount = Object.values(this.schedule).filter(s => s.status === 'completed').length;
+        const solo = Object.values(this.schedule).filter(s => s.type === 'Solo').length;
+        const swarm = Object.values(this.schedule).filter(s => s.type === 'Swarm').length;
+        const meas = Object.values(this.schedule).filter(s => s.type === 'Measurements').length;
+
+        this.upcomingSlots.set(scheduledCount + inProgressCount);
+        this.executedSessions.set(completedCount);
+        this.remainingSessions.set(scheduledCount);
+        this.soloCount.set(solo);
+        this.swarmCount.set(swarm);
+        this.measurementsCount.set(meas);
     }
 
     getAppointment(time: string) {
         return this.schedule[time];
+    }
+
+    onSessionClick(appt: any) {
+        if (!appt) return;
+        this.sessionSelected.emit(appt);
     }
 
     getAppointmentStatus(time: string) {

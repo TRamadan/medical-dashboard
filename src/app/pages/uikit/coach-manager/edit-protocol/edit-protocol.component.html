@@ -60,6 +60,9 @@
                                 <!-- Exercises Cards Layout -->
                                 <div class="flex flex-col gap-4 mt-4">
                                     @for (ex of section.exercises; track ex; let exIndex = $index) {
+                                    <p class="p-0 m-0 fw-bold">
+                                        Exercise # {{exIndex + 1}}
+                                    </p>
                                     <div
                                         class="border border-gray-200 rounded-lg p-4 bg-gray-50 flex flex-col gap-4 relative shadow-sm hover:shadow-md transition-shadow">
 
@@ -82,17 +85,18 @@
                                                     <div class="flex flex-col gap-1 flex-1">
                                                         <label class="text-sm font-semibold text-gray-700">Name</label>
                                                         <input pInputText [(ngModel)]="ex.name" class="w-full"
-                                                            placeholder="Exercise name" />
+                                                            placeholder="Exercise name" disabled />
                                                     </div>
                                                     <div class="flex flex-col gap-1 w-32">
                                                         <label class="text-sm font-semibold text-gray-700">Tool</label>
                                                         <input pInputText [(ngModel)]="ex.tool" class="w-full"
-                                                            placeholder="e.g. Dumbbell" />
+                                                            placeholder="e.g. Dumbbell" disabled />
                                                     </div>
                                                     <div class="flex flex-col gap-1 w-24">
                                                         <label class="text-sm font-semibold text-gray-700">Sets</label>
                                                         <input pInputText [(ngModel)]="ex.sets" type="number" min="1"
-                                                            max="10" class="w-full text-center" placeholder="1" />
+                                                            max="10" class="w-full text-center" placeholder="1"
+                                                            disabled />
                                                     </div>
                                                 </div>
 
@@ -100,14 +104,15 @@
                                                 <div class="flex flex-col gap-1">
                                                     <label class="text-sm font-semibold text-gray-700">Dec</label>
                                                     <textarea pInputTextarea [(ngModel)]="ex.description" rows="3"
-                                                        class="w-full" placeholder="Enter instructions..."></textarea>
+                                                        class="w-full" placeholder="Enter instructions..."
+                                                        disabled></textarea>
                                                 </div>
 
                                                 <!-- Row 3: Video URL -->
                                                 <div class="flex flex-col gap-1">
                                                     <label class="text-sm font-semibold text-gray-700">Video URL</label>
                                                     <input pInputText [(ngModel)]="ex.videoUrl" class="w-full"
-                                                        placeholder="Enter video URL" />
+                                                        placeholder="Enter video URL" disabled />
                                                 </div>
                                             </div>
 
@@ -146,7 +151,7 @@
                                                             <div>
                                                                 <input pInputText [(ngModel)]="ex.reps[i]"
                                                                     class="w-full text-center font-medium p-2 text-sm h-10 shadow-sm"
-                                                                    placeholder="reps" />
+                                                                    placeholder="reps" disabled />
                                                             </div>
                                                         </div>
                                                         }
@@ -156,21 +161,21 @@
                                                     <div class="col-span-1">
                                                         <input pInputText [(ngModel)]="ex.intensity"
                                                             class="w-full text-center font-medium p-2 text-sm h-10 shadow-sm"
-                                                            placeholder="Mod" />
+                                                            placeholder="Mod" disabled />
                                                     </div>
 
                                                     <!-- Temp (Single Shared) -->
                                                     <div class="col-span-1">
                                                         <input pInputText [(ngModel)]="ex.tempo"
                                                             class="w-full text-center font-medium p-2 text-sm h-10 shadow-sm"
-                                                            placeholder="2-0-2" />
+                                                            placeholder="2-0-2" disabled />
                                                     </div>
 
                                                     <!-- Res (Single Shared) -->
                                                     <div class="col-span-1">
                                                         <input pInputText [(ngModel)]="ex.rest"
                                                             class="w-full text-center font-medium p-2 text-sm h-10 shadow-sm"
-                                                            placeholder="60s" />
+                                                            placeholder="60s" disabled />
                                                     </div>
                                                 </div>
                                             </div>

@@ -1,5 +1,4 @@
 import { Component, Input, OnDestroy, ViewChild, ElementRef } from '@angular/core';
-import { PatientData } from '../../appointments/booking-form/patient-form/patient-form.component';
 import { CommonModule } from '@angular/common';
 import { AccordionModule } from 'primeng/accordion';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -12,11 +11,11 @@ import { TextareaModule } from 'primeng/textarea';
 @Component({
     selector: 'app-overview',
     imports: [CommonModule, AccordionModule, CheckboxModule, InputTextModule, FormsModule, ButtonModule, DialogModule, TextareaModule],
-    standalone: true,
     templateUrl: './overview.component.html',
-    styleUrl: './overview.component.scss'
+    styleUrl: './overview.component.scss',
 })
 export class OverviewComponent implements OnDestroy {
+
     @Input() patientData: any = {
         patientId: 'PT-202225',
         name: 'Ahmed Ali Hassan',
@@ -26,16 +25,9 @@ export class OverviewComponent implements OnDestroy {
         injuryDate: '25-11-2025'
     };
 
-    coaches: any = {
-        name: 'You ( Ahmed Samir )',
-        specialty: 'Physical Therapy',
-        isPrimary: true
-    };
+    coaches: any = { name: 'You ( Ahmed Samir )', specialty: 'Physical Therapy', isPrimary: true };
 
-    @Input() progressData: any = {
-        completed: 6,
-        total: 36
-    };
+    @Input() progressData: any = { completed: 6, total: 36 };
 
     @Input() workflowData: any = {
         title: 'Plan Activation Workflow',
@@ -44,20 +36,82 @@ export class OverviewComponent implements OnDestroy {
         location: 'Cairo - Nasr City Branch'
     };
 
-    isSessionStarted: boolean = false;
-    sessionTimer: string = '00:00:00';
+    // ── Session Type ─────────────────────────────────────────────
+    sessionType: 'Swarm' | 'Solo' = 'Swarm';
+
+    // ── Session Meta Bar ─────────────────────────────────────────
+    sessionMeta = {
+        sessionNumber: 7,
+        totalSessions: 36,
+        stationDuration: '30 min',
+        lastSRPE: 6,
+        lastWellness: 5.2,
+        sessionGoal: 'Full ROM + Weight Bearing'
+    };
+
+    // ── Timer ────────────────────────────────────────────────────
+    isSessionStarted = false;
+    isPaused = false;
+    isTimerFinished = false;
+    sessionTimer = '30:00';
+    sessionDurationSeconds = 30 * 60;
+    private remainingTimeSeconds = 0;
+    private elapsedSeconds = 0;
     private timerInterval: any;
-    private endTime: number = 0;
 
+    get timerSubtitle(): string {
+        if (this.sessionType === 'Swarm') {
+            const m = Math.floor(this.sessionDurationSeconds / 60);
+            return `Remaining of ${String(m).padStart(2, '0')}:00`;
+        }
+        return 'Session in progress — elapsed time';
+    }
+
+    get timerProgressPercent(): number {
+        if (this.sessionType === 'Swarm') {
+            return Math.round(((this.sessionDurationSeconds - this.remainingTimeSeconds) / this.sessionDurationSeconds) * 100);
+        }
+        return Math.min(100, Math.round((this.elapsedSeconds / (60 * 60)) * 100));
+    }
+
+    // ── Protocol Context Panel ───────────────────────────────────
+    isProtocolCtxOpen = false;
+    notifyDoctorSent = false;
+    protocolCtx = {
+        phaseName: 'Phase 3 — Functional Strength Building',
+        phaseNumber: 3,
+        phaseTotal: 5,
+        phaseProgress: 50,
+        isApproachingTransition: true,
+        criteria: [
+            { label: 'ROM Flexion ≥ 120°', value: '124°', status: 'met' },
+            { label: 'VAS ≤ 3 / 10', value: '2.5', status: 'met' },
+            { label: 'Quad LSI ≥ 40%', value: '35%', percentOfTarget: 87, status: 'approaching' },
+            { label: 'Avg sRPE ≤ 5', value: '6.2', percentOfTarget: 62, status: 'not-met' }
+        ],
+        doctorNotes: 'Athlete shows improvement in movement pattern but LSI is still below target. Do not increase exercise load until exceeding 40%. If pain noticed at Full Extension — stop and record immediately.',
+        lastMeasurement: '18 March 2026',
+        nextMeasurement: '25 March 2026'
+    };
+
+    // ── Station Handoff Chain (Swarm) ─────────────────────────────
+    stationChain: any[] = [
+        { name: '—', engineer: 'Before You', status: 'done' },
+        { name: 'Recharger', engineer: 'Eng. Karim (You)', status: 'current' },
+        { name: 'Resilience', engineer: 'Eng. Sarah', status: 'next' },
+        { name: 'Apex', engineer: 'Eng. Amr', status: 'pending' }
+    ];
+
+    // ── Misc State ───────────────────────────────────────────────
     activePanels: number[] = [];
-    displayNoShowDialog: boolean = false;
-    noShowReason: string = '';
-
-    isTimerFinished: boolean = false;
-    sessionDurationSeconds: number = 30; // Reduced to 30 seconds for quick testing purposes
+    displayNoShowDialog = false;
+    noShowReason = '';
+    generalComment = '';
+    saveDraftSent = false;
 
     @ViewChild('timerContainer') timerContainer!: ElementRef;
 
+    // ── Phases & Exercises (Sections Model) ──────────────────────
     phases: any[] = [
         {
             id: 1,
@@ -75,122 +129,156 @@ export class OverviewComponent implements OnDestroy {
             completed: false,
             current: true,
             objectives: 'Restore full ROM, begin light strengthening, improve flexibility',
-            exercises: [
-                { name: 'Stationary bike: 10-15 minutes (low resistance)', completed: false, comment: '' },
-                { name: 'Heel slides: 3 sets of 15 reps', completed: false, comment: '' },
-                { name: 'Wall slides: 3 sets of 10 reps', completed: false, comment: '' },
-                { name: 'Mini squats (0-45 degrees): 3 sets of 10 reps', completed: false, comment: '' },
-                { name: 'Step-ups (4-inch height): 3 sets of 10 reps', completed: false, comment: '' },
-                { name: 'Hamstring curls: 3 sets of 12 reps (light weight)', completed: false, comment: '' },
-                { name: 'Calf raises: 3 sets of 15 reps', completed: false, comment: '' }
-            ],
-            measurementNote: 'Measurements due after session 15'
+            measurementNote: 'Measurements due after session 15',
+            sections: [
+                {
+                    label: 'Warm-up — 10 min',
+                    exercises: [
+                        { name: 'Stationary bike: 10-15 min (low resistance)', params: '1 × 10 min · Low resistance', completed: false, noteVisible: false, note: '' },
+                        { name: 'Ankle Pumps', params: '2 × 20 reps · Both directions', completed: false, noteVisible: false, note: '' }
+                    ]
+                },
+                {
+                    label: 'Main — 40 min',
+                    exercises: [
+                        { name: 'Heel slides', params: '3 × 15 reps · Track ROM angle', completed: false, noteVisible: false, note: '' },
+                        { name: 'Wall slides', params: '3 × 10 reps', completed: false, noteVisible: false, note: '' },
+                        { name: 'Mini squats (0-45°)', params: '3 × 10 reps · 0-45° range', completed: false, noteVisible: false, note: '' },
+                        { name: 'Step-ups (4-inch height)', params: '3 × 10 reps', completed: false, noteVisible: false, note: '' },
+                        { name: 'Hamstring curls', params: '3 × 12 reps · Light weight', completed: false, noteVisible: false, note: '' }
+                    ]
+                },
+                {
+                    label: 'Cool-down — 10 min',
+                    exercises: [
+                        { name: 'Calf raises', params: '3 × 15 reps', completed: false, noteVisible: false, note: '' }
+                    ]
+                }
+            ]
         }
     ];
 
+    // ── Helpers ──────────────────────────────────────────────────
     getProgressPercentage(): number {
         return Math.round((this.progressData.completed / this.progressData.total) * 100);
     }
 
-    onNoShow(): void {
-        this.displayNoShowDialog = true;
+    get metCriteriaCount(): number {
+        return this.protocolCtx.criteria.filter((c: any) => c.status === 'met').length;
     }
 
-    submitNoShow(): void {
-        console.log('No show reason:', this.noShowReason);
-        this.displayNoShowDialog = false;
-        this.noShowReason = '';
+    get totalCriteriaCount(): number {
+        return this.protocolCtx.criteria.length;
     }
 
-    cancelNoShow(): void {
-        this.displayNoShowDialog = false;
-        this.noShowReason = '';
+    getAllExercises(phase: any): any[] {
+        if (phase.sections) return phase.sections.flatMap((s: any) => s.exercises);
+        return phase.exercises || [];
     }
 
-    onStartSession(): void {
-        if (!this.isSessionStarted) {
-            this.isSessionStarted = true;
-            this.activePanels = this.phases.map(p => p.id);
-            this.isTimerFinished = false;
-            this.endTime = Date.now() + this.sessionDurationSeconds * 1000;
+    getGlobalIndex(phase: any, sectionIdx: number, exIdx: number): number {
+        if (!phase.sections) return exIdx;
+        let offset = 0;
+        for (let i = 0; i < sectionIdx; i++) offset += phase.sections[i].exercises.length;
+        return offset + exIdx;
+    }
 
-            this.updateTimer(); // Process immediately
-            this.timerInterval = setInterval(() => {
-                this.updateTimer();
-            }, 1000);
+    canCheckExercise(phase: any, globalIndex: number): boolean {
+        if (globalIndex === 0) return true;
+        return this.getAllExercises(phase)[globalIndex - 1]?.completed ?? false;
+    }
 
-            setTimeout(() => {
-                if (this.timerContainer) {
-                    this.timerContainer.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
-            }, 100);
+    onExerciseCheckChange(phase: any, globalIndex: number, checked: boolean): void {
+        if (!checked) {
+            const all = this.getAllExercises(phase);
+            for (let i = globalIndex; i < all.length; i++) all[i].completed = false;
         }
+    }
+
+    toggleExerciseNote(exercise: any): void {
+        exercise.noteVisible = !exercise.noteVisible;
+    }
+
+    // ── No Show ──────────────────────────────────────────────────
+    onNoShow(): void { this.displayNoShowDialog = true; }
+    submitNoShow(): void { console.log('No show:', this.noShowReason); this.displayNoShowDialog = false; this.noShowReason = ''; }
+    cancelNoShow(): void { this.displayNoShowDialog = false; this.noShowReason = ''; }
+
+    // ── Protocol Context ─────────────────────────────────────────
+    toggleProtocolCtx(): void { this.isProtocolCtxOpen = !this.isProtocolCtxOpen; }
+    notifyDoctor(): void { this.notifyDoctorSent = true; }
+
+    // ── Session Controls ─────────────────────────────────────────
+    onStartSession(): void {
+        if (this.isSessionStarted) return;
+        this.isSessionStarted = true;
+        this.isPaused = false;
+        this.isTimerFinished = false;
+        this.activePanels = this.phases.map(p => p.id);
+        if (this.sessionType === 'Swarm') {
+            this.remainingTimeSeconds = this.sessionDurationSeconds;
+        } else {
+            this.elapsedSeconds = 0;
+        }
+        this.updateTimerDisplay();
+        this.timerInterval = setInterval(() => this.tick(), 1000);
+        setTimeout(() => this.timerContainer?.nativeElement?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    }
+
+    pauseTimer(): void {
+        if (!this.isSessionStarted || this.isTimerFinished) return;
+        this.isPaused = !this.isPaused;
+        if (this.isPaused) {
+            clearInterval(this.timerInterval);
+        } else {
+            this.timerInterval = setInterval(() => this.tick(), 1000);
+        }
+    }
+
+    private tick(): void {
+        if (this.sessionType === 'Swarm') {
+            this.remainingTimeSeconds--;
+            if (this.remainingTimeSeconds <= 0) {
+                this.remainingTimeSeconds = 0;
+                this.isTimerFinished = true;
+                clearInterval(this.timerInterval);
+            }
+        } else {
+            this.elapsedSeconds++;
+        }
+        this.updateTimerDisplay();
+    }
+
+    private updateTimerDisplay(): void {
+        const val = this.sessionType === 'Swarm' ? this.remainingTimeSeconds : this.elapsedSeconds;
+        const m = Math.floor(val / 60);
+        const s = val % 60;
+        this.sessionTimer = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }
 
     onEndSession(): void {
-        // Enforce the guard programmatically too
-        if (this.isSessionStarted && this.isTimerFinished) {
-            this.isSessionStarted = false;
-
-            if (this.timerInterval) {
-                clearInterval(this.timerInterval);
-                this.timerInterval = null;
-            }
-
-            this.sessionTimer = '00:00:00';
-
-            this.phases.forEach(phase => {
-                if (phase.exercises) {
-                    phase.exercises.forEach((ex: any) => {
-                        ex.completed = false;
-                        ex.comment = '';
-                    });
-                }
-            });
-        }
+        if (!this.isSessionStarted) return;
+        if (this.sessionType === 'Swarm' && !this.isTimerFinished) return;
+        this.isSessionStarted = false;
+        this.isPaused = false;
+        clearInterval(this.timerInterval);
+        this.timerInterval = null;
+        this.sessionTimer = this.sessionType === 'Swarm' ? `${String(this.sessionDurationSeconds / 60).padStart(2, '0')}:00` : '00:00';
+        this.phases.forEach(p => this.getAllExercises(p).forEach((ex: any) => { ex.completed = false; ex.note = ''; ex.noteVisible = false; }));
+        this.generalComment = '';
     }
 
-    private updateTimer(): void {
-        const diff = Math.floor((this.endTime - Date.now()) / 1000);
+    saveDraft(): void {
+        this.saveDraftSent = true;
+        console.log('Draft saved');
+        setTimeout(() => this.saveDraftSent = false, 2000);
+    }
 
-        if (diff <= 0) {
-            this.isTimerFinished = true;
-            if (this.timerInterval) {
-                clearInterval(this.timerInterval);
-                this.timerInterval = null;
-            }
-            this.sessionTimer = '00:00:00';
-            return;
-        }
-
-        const hours = Math.floor(diff / 3600);
-        const minutes = Math.floor((diff % 3600) / 60);
-        const seconds = diff % 60;
-        this.sessionTimer =
-            String(hours).padStart(2, '0') + ':' +
-            String(minutes).padStart(2, '0') + ':' +
-            String(seconds).padStart(2, '0');
+    handoffToNextStation(): void {
+        console.log('Handoff to next station');
     }
 
     ngOnDestroy(): void {
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-        }
-    }
-
-    canCheckExercise(phaseIndex: number, exerciseIndex: number): boolean {
-        // Only the first exercise is enabled unconditionally
-        // For others, the previous exercise must be completed.
-        if (exerciseIndex === 0) return true;
-        return this.phases[phaseIndex].exercises[exerciseIndex - 1].completed;
-    }
-
-    onExerciseCheckChange(phaseIndex: number, exerciseIndex: number, checked: boolean): void {
-        // If unchecking, uncheck all subsequent exercises to maintain strict chronology
-        if (!checked) {
-            for (let i = exerciseIndex; i < this.phases[phaseIndex].exercises.length; i++) {
-                this.phases[phaseIndex].exercises[i].completed = false;
-            }
-        }
+        if (this.timerInterval) clearInterval(this.timerInterval);
     }
 }

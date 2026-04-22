@@ -1,70 +1,44 @@
 <div class="container-fluid patient-info-container">
     <div class="row g-3">
-        <!-- Patient Information Section -->
-        <div class="col-12">
-            <div class="card shadow-sm patient-info border-none">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <svg class="icon me-2" viewBox="0 0 24 24" fill="currentColor">
-                            <path
-                                d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                        </svg>
-                        <h2 class="h5 mb-0 fw-semibold">Patient Information</h2>
-                    </div>
 
+        <!-- Patient Information -->
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h2 class="h5 mb-3 fw-semibold"><i class="pi pi-user me-2"></i>Patient Information</h2>
                     <div class="info-grid">
-                        <div class="d-flex justify-content-between align-items-center py-2  info-row">
-                            <span class="info-label">Patient ID:</span>
-                            <span class="info-value fw-medium">{{ patientData.patientId }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center py-2 info-row">
-                            <span class="info-label ">Name:</span>
-                            <span class="info-value fw-medium">{{ patientData.name }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center py-2  info-row">
-                            <span class="info-label ">Age:</span>
-                            <span class="info-value fw-medium">{{ patientData.age }} Years</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center py-2  info-row">
-                            <span class="info-label ">Gender:</span>
-                            <span class="info-value fw-medium">{{ patientData.gender }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center py-2  info-row">
-                            <span class="info-label ">Injury:</span>
-                            <span class="info-value fw-medium">{{ patientData.injury }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center py-2 info-row">
-                            <span class="info-label ">Injury Date:</span>
-                            <span class="info-value fw-medium">{{ patientData.injuryDate }}</span>
-                        </div>
+                        <div class="d-flex justify-content-between py-2 info-row"><span class="info-label">Patient ID:</span><span class="info-value fw-medium">{{ patientData.patientId }}</span></div>
+                        <div class="d-flex justify-content-between py-2 info-row"><span class="info-label">Name:</span><span class="info-value fw-medium">{{ patientData.name }}</span></div>
+                        <div class="d-flex justify-content-between py-2 info-row"><span class="info-label">Age:</span><span class="info-value fw-medium">{{ patientData.age }} Years</span></div>
+                        <div class="d-flex justify-content-between py-2 info-row"><span class="info-label">Gender:</span><span class="info-value fw-medium">{{ patientData.gender }}</span></div>
+                        <div class="d-flex justify-content-between py-2 info-row"><span class="info-label">Injury:</span><span class="info-value fw-medium">{{ patientData.injury }}</span></div>
+                        <div class="d-flex justify-content-between py-2 info-row"><span class="info-label">Injury Date:</span><span class="info-value fw-medium">{{ patientData.injuryDate }}</span></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Overall Progress Section -->
+        <!-- Overall Progress -->
         <div class="col-12">
-            <div class="card shadow-sm border-none">
+            <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h3 class="h5 mb-3 fw-semibold">Overall Progress</h3>
-
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex justify-content-between mb-3">
                         <span>Sessions Completed:</span>
-                        <span class="fw-semibold fs-6">{{ progressData.completed }} of {{ progressData.total }}</span>
+                        <span class="fw-semibold">{{ progressData.completed }} of {{ progressData.total }}</span>
                     </div>
-
-                    <div class="progress" style="height: 24px; border-radius: 12px;">
+                    <div class="progress" style="height:24px;border-radius:12px;">
                         <div class="progress-bar bg-primary d-flex align-items-center justify-content-center"
                             role="progressbar" [style.width.%]="getProgressPercentage()"
                             [attr.aria-valuenow]="getProgressPercentage()" aria-valuemin="0" aria-valuemax="100">
-                            <p class="fw-semibold percentage-style">{{ getProgressPercentage() }}%</p>
+                            <span class="fw-semibold small">{{ getProgressPercentage() }}%</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Plan Activation Workflow Section -->
+        <!-- Plan Activation Workflow -->
         <div class="col-12">
             <div class="card shadow-sm workflow-section text-white p-2">
                 <div class="card-body">
@@ -72,251 +46,342 @@
                         <i class="pi pi-calendar fs-5"></i>
                         <h3 class="h5 mb-0 fw-semibold">Plan Activation Workflow</h3>
                     </div>
-
                     <div class="row g-3">
                         <div class="col-md-5">
-                            <div class="workflow-details mb-3">
-                                <div class="d-flex align-items-center mb-2 gap-2">
-                                    <i class="pi pi-clock fs-6"></i>
-                                    <span>{{ workflowData.dateTime }}</span>
-                                </div>
-
-                                <div class="d-flex align-items-center mb-2 gap-2">
-                                    <i class="pi pi-wave-pulse fs-6"></i>
-                                    <span>{{ workflowData.session }}</span>
-                                </div>
-
-                                <div class="d-flex align-items-center gap-2">
-                                    <i class="pi pi-map-marker fs-6"></i>
-                                    <span>{{ workflowData.location }}</span>
-                                </div>
+                            <div class="d-flex align-items-center mb-2 gap-2"><i class="pi pi-clock"></i><span>{{ workflowData.dateTime }}</span></div>
+                            <div class="d-flex align-items-center mb-2 gap-2"><i class="pi pi-wave-pulse"></i><span>{{ workflowData.session }}</span></div>
+                            <div class="d-flex align-items-center mb-2 gap-2"><i class="pi pi-map-marker"></i><span>{{ workflowData.location }}</span></div>
+                            <!-- Session Type + Meta badges -->
+                            <div class="d-flex align-items-center gap-2 mt-2 flex-wrap">
+                                <span class="badge px-3 py-2 border-round"
+                                    [class]="sessionType === 'Swarm' ? 'bg-teal-100 text-teal-800' : 'bg-purple-100 text-purple-800'">
+                                    <i class="pi me-1" [class]="sessionType === 'Swarm' ? 'pi-users' : 'pi-user'"></i>{{ sessionType }}
+                                </span>
+                                <span class="badge bg-light text-dark px-3 py-2 border-round">Session {{ sessionMeta.sessionNumber }} / {{ sessionMeta.totalSessions }}</span>
+                                @if (sessionType === 'Swarm') {
+                                    <span class="badge bg-light text-dark px-3 py-2 border-round"><i class="pi pi-clock me-1"></i>{{ sessionMeta.stationDuration }}</span>
+                                    <span class="badge bg-orange-100 text-orange-800 px-3 py-2 border-round">Last sRPE: {{ sessionMeta.lastSRPE }}/10</span>
+                                } @else {
+                                    <span class="badge bg-teal-100 text-teal-800 px-3 py-2 border-round">Wellness: {{ sessionMeta.lastWellness }}/7</span>
+                                }
                             </div>
                         </div>
-
-
-                        <div class="col-md-7 buttons-style">
-                            <div class="workflow-actions d-flex gap-2">
-                                <button
-                                    class="btn btn-no-show d-flex align-items-center justify-content-center gap-2 flex-fill"
-                                    (click)="onNoShow()">
-                                    <i class="pi pi-eye-slash"></i>
-                                    <span>No Show</span>
+                        <div class="col-md-7 d-flex align-items-start gap-2 justify-content-md-end flex-wrap">
+                            <button class="btn btn-no-show d-flex align-items-center gap-2" (click)="onNoShow()">
+                                <i class="pi pi-eye-slash"></i><span>No Show</span>
+                            </button>
+                            @if (!isSessionStarted) {
+                                <button class="btn btn-start d-flex align-items-center gap-2" (click)="onStartSession()">
+                                    <i class="pi pi-power-off"></i><span>Start Session</span>
                                 </button>
-                                <button *ngIf="!isSessionStarted"
-                                    class="btn btn-start d-flex align-items-center justify-content-center gap-2 flex-fill"
-                                    (click)="onStartSession()">
-                                    <i class="pi pi-power-off"></i>
-                                    <span>Start Session</span>
-                                </button>
-                                <button *ngIf="isSessionStarted"
-                                    class="btn btn-danger text-white border-none border-round d-flex align-items-center justify-content-center gap-2 flex-fill"
-                                    [ngClass]="{'bg-red-500 hover:bg-red-600': isTimerFinished, 'bg-gray-400 cursor-not-allowed opacity-60': !isTimerFinished}"
-                                    [disabled]="!isTimerFinished"
-                                    title="{{ !isTimerFinished ? 'Timer must finish before ending the session' : '' }}"
+                            } @else {
+                                <button class="btn btn-danger text-white d-flex align-items-center gap-2"
+                                    [disabled]="sessionType === 'Swarm' && !isTimerFinished"
                                     (click)="onEndSession()">
                                     <i class="pi pi-stop-circle"></i>
-                                    <span class="font-medium text-lg">End Session</span>
+                                    <span>{{ sessionType === 'Swarm' ? 'End Station' : 'End Session' }}</span>
                                 </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Info Box (Appears when the session has not started) -->
-                    <div class="mt-4" *ngIf="!isSessionStarted">
-                        <div class="card shadow-sm border-none bg-blue-50 border-blue-200 border-2">
-                            <div class="card-body d-flex align-items-center p-4 gap-3 text-blue-800">
-                                <i class="pi pi-info-circle text-4xl text-blue-500"></i>
-                                <div>
-                                    <h4 class="m-0 mb-1 font-bold text-lg">Session Details Hidden</h4>
-                                    <p class="m-0 fw-bold text-dark">The exercise protocol and session details will not
-                                        appear until you click the <strong>Start Session</strong> button above.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dynamic Session Excecution Protocol Container (Appears when Start Session is clicked) -->
-                    <div #timerContainer class="mt-4" *ngIf="isSessionStarted">
-                        <!-- Timer Banner -->
-                        <div class="card shadow-sm border-none bg-indigo-50 border-indigo-200 border-2 mb-4">
-                            <div class="card-body d-flex justify-content-between align-items-center p-4">
-                                <div class="d-flex align-items-center gap-3">
-                                    <i class="pi pi-clock text-5xl text-indigo-500"></i>
-                                    <div>
-                                        <h3 class="m-0 text-xl font-bold text-indigo-900">Session in Progress</h3>
-                                        <p class="m-0 text-indigo-600 mt-1">Please complete the exercises in sequential
-                                            order.</p>
-                                    </div>
-                                </div>
-                                <div
-                                    class="text-4xl font-mono fw-bold text-indigo-700 bg-white px-4 py-2 border-round shadow-sm border-1 border-indigo-100">
-                                    {{ sessionTimer }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Exercise Protocol -->
-                        <div class="card shadow-sm border-none">
-                            <div class="card-body">
-                                <h3 class="h5 mb-4 text-gray-800 fw-semibold d-flex align-items-center gap-2">
-                                    <i class="pi pi-list"></i> Exercise Protocol Checklist
-                                </h3>
-
-                                <p-accordion [value]="activePanels" [multiple]="true">
-                                    @for (phase of phases; track phase.id; let pIndex = $index) {
-                                    <p-accordion-panel [value]="phase.id">
-                                        <p-accordion-header>
-                                            <div class="d-flex align-items-center w-100 phase-header"
-                                                [class.completed-phase]="phase.completed"
-                                                [class.current-phase]="phase.current">
-
-                                                <div class="phase-icon me-3">
-                                                    @if (phase.completed) {
-                                                    <i class="pi pi-check text-green-500 font-bold"></i>
-                                                    }
-                                                    @if (!phase.completed) {
-                                                    <span
-                                                        class="font-bold border-circle bg-gray-200 text-gray-700 w-2rem h-2rem flex align-items-center justify-content-center">{{
-                                                        phase.id }}</span>
-                                                    }
-                                                </div>
-
-                                                <div class="flex-grow-1">
-                                                    <div class="phase-title font-bold text-lg text-gray-800">{{
-                                                        phase.title }}</div>
-                                                    <div class="phase-meta text-sm text-gray-500 mt-1">
-                                                        <span class="me-3">{{ phase.weeks }}</span>
-                                                        <span class="me-3">{{ phase.sessions }}</span>
-                                                        @if (phase.current) {
-                                                        <span
-                                                            class="current-badge text-blue-500 bg-blue-50 px-2 py-1 border-round ms-2 font-medium">
-                                                            <i class="pi pi-bolt me-1"></i>Current Phase
-                                                        </span>
-                                                        }
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </p-accordion-header>
-
-                                        <p-accordion-content>
-                                            <div class="accordion-body-content py-3">
-                                                @if (phase.objectives) {
-                                                <div class="mb-4 bg-gray-50 p-3 border-round border-1 surface-border">
-                                                    <h4 class="text-sm font-bold text-gray-700 m-0 mb-2">Phase
-                                                        Objectives</h4>
-                                                    <p class="m-0 text-gray-600">{{ phase.objectives }}</p>
-                                                </div>
-                                                }
-
-                                                @if (phase.exercises && phase.exercises.length > 0) {
-                                                <div class="mb-4">
-                                                    <h4 class="text-sm font-bold text-gray-700 m-0 mb-3">Exercise
-                                                        Checklist</h4>
-                                                    <div class="exercise-list d-flex flex-column gap-3">
-                                                        @for (exercise of phase.exercises; track exercise.name; let
-                                                        eIndex = $index) {
-                                                        <div class="exercise-item border-1 surface-border border-round px-4 py-3"
-                                                            [ngClass]="{'bg-gray-50 opacity-60': !canCheckExercise(pIndex, eIndex)}">
-                                                            <div class="d-flex align-items-start gap-3">
-                                                                <p-checkbox [(ngModel)]="exercise.completed"
-                                                                    [binary]="true"
-                                                                    [inputId]="'ex-' + pIndex + '-' + eIndex"
-                                                                    [disabled]="!canCheckExercise(pIndex, eIndex)"
-                                                                    (ngModelChange)="onExerciseCheckChange(pIndex, eIndex, $event)">
-                                                                </p-checkbox>
-
-                                                                <div class="flex-grow-1">
-                                                                    <label [for]="'ex-' + pIndex + '-' + eIndex"
-                                                                        class="cursor-pointer font-medium text-gray-800 d-block mb-3"
-                                                                        [ngClass]="{'text-decoration-line-through text-gray-500': exercise.completed}">
-                                                                        {{ exercise.name }}
-                                                                    </label>
-
-                                                                    <!-- Comment box directly under the exercise -->
-                                                                    <div class="w-100">
-                                                                        <input type="text" pInputText
-                                                                            placeholder="Add a comment... (optional)"
-                                                                            class="w-100 p-inputtext-sm bg-white"
-                                                                            [(ngModel)]="exercise.comment"
-                                                                            [disabled]="!canCheckExercise(pIndex, eIndex)">
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        }
-                                                    </div>
-                                                </div>
-                                                }
-
-                                                @if (phase.measurementNote) {
-                                                <div class="measurement-section mt-4">
-                                                    <div class="alert alert-warning d-flex align-items-center m-0"
-                                                        role="alert">
-                                                        <i class="pi pi-info-circle me-2 fs-5"></i>
-                                                        <span class="font-medium">{{ phase.measurementNote }}</span>
-                                                    </div>
-                                                </div>
-                                                }
-                                            </div>
-                                        </p-accordion-content>
-                                    </p-accordion-panel>
-                                    }
-                                </p-accordion>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="container-fluid coaches-container">
-            <div class="card shadow-sm">
-                <div class="card-body p-3 p-md-4">
-                    <!-- Section Header -->
-                    <h2 class="section-title mb-4">Assigned Coaches ( Team Collaboration )</h2>
-
-                    <!-- Coaches List -->
-                    <div class="coaches-list">
-                        <div
-                            class="coach-item d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-2 gap-sm-3">
-
-                            <div class="coach-info">
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <h3 class="coach-name mb-0">{{ coaches.name }}</h3>
-                                </div>
-                                <p class="coach-specialty text-muted mb-0">{{ coaches.specialty }}</p>
-                            </div>
-
-                            @if(coaches.isPrimary){
-                            <div class="coach-badge">
-                                <span class="badge bg-primary-custom">Primary</span>
-                            </div>
                             }
                         </div>
                     </div>
+
+                    <!-- Protocol Context Panel -->
+                    @if (isSessionStarted) {
+                        <div class="mt-3">
+                            @if (protocolCtx.isApproachingTransition && !notifyDoctorSent) {
+                                <div class="d-flex align-items-center gap-3 mb-2 px-3 py-2 border-round"
+                                    style="background:rgba(245,166,35,.1);border:1px solid rgba(245,166,35,.35);">
+                                    <div class="rounded-circle bg-warning" style="width:8px;height:8px;flex-shrink:0;"></div>
+                                    <span class="text-warning small flex-grow-1">Approaching phase transition — 2 criteria within 10% of target</span>
+                                    <button class="btn btn-sm" style="background:rgba(245,166,35,.15);border:1px solid rgba(245,166,35,.4);color:#c47f00;font-size:11px;" (click)="notifyDoctor()">Notify Doctor</button>
+                                </div>
+                            }
+                            @if (notifyDoctorSent) {
+                                <div class="d-flex align-items-center gap-2 mb-2 px-3 py-2 border-round bg-teal-50">
+                                    <i class="pi pi-check-circle text-teal-600"></i>
+                                    <span class="small text-teal-800">Doctor notified successfully</span>
+                                </div>
+                            }
+                            <!-- Collapsible Protocol Context -->
+                            <div class="border-round overflow-hidden" style="border:1px solid #dee2e6;">
+                                <div class="d-flex align-items-center gap-3 px-3 py-2 cursor-pointer bg-light"
+                                    (click)="toggleProtocolCtx()" style="cursor:pointer;">
+                                    <span class="fw-semibold small text-dark flex-grow-1">{{ protocolCtx.phaseName }}</span>
+                                    <span class="small text-warning fw-bold">{{ metCriteriaCount }} / {{ totalCriteriaCount }} criteria</span>
+                                    <i class="pi text-muted" [class]="isProtocolCtxOpen ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+                                </div>
+                                @if (isProtocolCtxOpen) {
+                                    <div class="px-3 py-3 bg-white">
+                                        <!-- Phase Progress -->
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <span class="small text-muted">Phase Progress</span>
+                                            <span class="fw-bold text-warning">{{ protocolCtx.phaseProgress }}%</span>
+                                        </div>
+                                        <div class="progress mb-3" style="height:6px;">
+                                            <div class="progress-bar bg-warning" [style.width.%]="protocolCtx.phaseProgress"></div>
+                                        </div>
+                                        <!-- Transition Criteria -->
+                                        <div class="fw-semibold small text-muted text-uppercase mb-2" style="letter-spacing:.05em;">Phase Transition Criteria</div>
+                                        <div class="d-flex flex-column gap-2 mb-3">
+                                            @for (c of protocolCtx.criteria; track c.label) {
+                                                <div class="d-flex align-items-center gap-2 px-3 py-2 border-round"
+                                                    [style]="c.status === 'met' ? 'background:rgba(25,135,84,.06);border:1px solid rgba(25,135,84,.2)'
+                                                           : c.status === 'approaching' ? 'background:rgba(255,193,7,.06);border:1px solid rgba(255,193,7,.25)'
+                                                           : 'background:rgba(220,53,69,.06);border:1px solid rgba(220,53,69,.2)'">
+                                                    <i class="pi" [class]="c.status === 'met' ? 'pi-check-circle text-success' : c.status === 'approaching' ? 'pi-exclamation-circle text-warning' : 'pi-times-circle text-danger'" style="font-size:12px;"></i>
+                                                    <span class="small flex-grow-1 text-dark">{{ c.label }}</span>
+                                                    <span class="fw-bold small" [class]="c.status === 'met' ? 'text-success' : c.status === 'approaching' ? 'text-warning' : 'text-danger'">{{ c.value }}</span>
+                                                    <span class="badge small" [class]="c.status === 'met' ? 'bg-success-subtle text-success' : c.status === 'approaching' ? 'bg-warning-subtle text-warning' : 'bg-danger-subtle text-danger'">
+                                                        {{ c.status === 'met' ? 'Met' : c.status === 'approaching' ? (c.percentOfTarget + '% of target') : 'Not Met' }}
+                                                    </span>
+                                                </div>
+                                            }
+                                        </div>
+                                        <!-- Doctor Notes (Read-only) -->
+                                        <div class="px-3 py-2 border-round mb-3" style="background:rgba(102,16,242,.05);border:1px solid rgba(102,16,242,.2);border-right:3px solid #6610f2;">
+                                            <div class="small fw-bold mb-1" style="color:#6610f2;"><i class="pi pi-lock me-1"></i>Doctor's Notes — Read Only</div>
+                                            <p class="small text-muted mb-0">{{ protocolCtx.doctorNotes }}</p>
+                                        </div>
+                                        <!-- Measurement Dates -->
+                                        <div class="d-flex gap-4">
+                                            <div><div class="small text-muted">Last Measurement</div><div class="small fw-bold">{{ protocolCtx.lastMeasurement }}</div></div>
+                                            <div><div class="small text-muted">Next Measurement</div><div class="small fw-bold text-warning">{{ protocolCtx.nextMeasurement }}</div></div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Info box before session starts -->
+                    @if (!isSessionStarted) {
+                        <div class="mt-4">
+                            <div class="card border-0 bg-blue-50 border-blue-200 border-2">
+                                <div class="card-body d-flex align-items-center gap-3 text-blue-800 p-4">
+                                    <i class="pi pi-info-circle text-4xl text-blue-500"></i>
+                                    <div>
+                                        <h4 class="m-0 mb-1 fw-bold">Session Details Hidden</h4>
+                                        <p class="m-0 fw-bold text-dark">The exercise protocol will not appear until you click <strong>Start Session</strong>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Active Session Container -->
+                    @if (isSessionStarted) {
+                        <div #timerContainer class="mt-4">
+
+                            <!-- Timer -->
+                            <div class="card border-0 mb-3" [class]="sessionType === 'Swarm' ? 'bg-indigo-50' : 'bg-purple-50'">
+                                <div class="card-body p-4">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <div class="small text-muted text-uppercase fw-bold mb-1">{{ sessionType === 'Swarm' ? 'Station Time' : 'Session Time' }}</div>
+                                            <div class="text-5xl fw-bold font-monospace" [class]="isPaused ? 'opacity-50' : ''"
+                                                [style]="sessionType === 'Swarm' ? 'color:#3730a3' : 'color:#6d28d9'">{{ sessionTimer }}</div>
+                                            <div class="small text-muted mt-1">{{ timerSubtitle }}</div>
+                                            <div class="progress mt-2" style="height:4px;width:200px;">
+                                                <div class="progress-bar" [style.width.%]="timerProgressPercent"
+                                                    [class]="sessionType === 'Swarm' ? 'bg-indigo-600' : 'bg-purple-600'"></div>
+                                            </div>
+                                        </div>
+                                        <div class="d-flex flex-column gap-2">
+                                            <button pButton [icon]="isPaused ? 'pi pi-play' : 'pi pi-pause'"
+                                                [label]="isPaused ? 'Resume' : 'Pause'"
+                                                class="p-button-outlined p-button-secondary p-button-sm"
+                                                [disabled]="isTimerFinished"
+                                                (click)="pauseTimer()"></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Exercise Checklist -->
+                            <div class="card border-0 shadow-sm mb-3">
+                                <div class="card-body">
+                                    <h3 class="h5 mb-4 fw-semibold d-flex align-items-center gap-2">
+                                        <i class="pi pi-list"></i> Exercise Protocol Checklist
+                                    </h3>
+                                    <p-accordion [value]="activePanels" [multiple]="true">
+                                        @for (phase of phases; track phase.id; let pIndex = $index) {
+                                            <p-accordion-panel [value]="phase.id">
+                                                <p-accordion-header>
+                                                    <div class="d-flex align-items-center w-100" [class.completed-phase]="phase.completed" [class.current-phase]="phase.current">
+                                                        <div class="me-3">
+                                                            @if (phase.completed) { <i class="pi pi-check text-success fw-bold"></i> }
+                                                            @else { <span class="fw-bold border-circle bg-gray-200 text-gray-700 w-2rem h-2rem flex align-items-center justify-content-center">{{ phase.id }}</span> }
+                                                        </div>
+                                                        <div class="flex-grow-1">
+                                                            <div class="fw-bold">{{ phase.title }}</div>
+                                                            <div class="small text-muted mt-1">
+                                                                <span class="me-3">{{ phase.weeks }}</span>
+                                                                <span class="me-3">{{ phase.sessions }}</span>
+                                                                @if (phase.current) { <span class="badge bg-blue-50 text-blue-600 px-2 py-1"><i class="pi pi-bolt me-1"></i>Current Phase</span> }
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </p-accordion-header>
+                                                <p-accordion-content>
+                                                    <div class="py-3">
+                                                        @if (phase.objectives) {
+                                                            <div class="mb-3 bg-gray-50 p-3 border-round border-1 surface-border">
+                                                                <h4 class="small fw-bold text-gray-700 mb-2">Phase Objectives</h4>
+                                                                <p class="mb-0 text-gray-600 small">{{ phase.objectives }}</p>
+                                                            </div>
+                                                        }
+                                                        <!-- Sections with exercises -->
+                                                        @if (phase.sections) {
+                                                            @for (section of phase.sections; track section.label; let sIdx = $index) {
+                                                                <!-- Section Divider -->
+                                                                <div class="d-flex align-items-center gap-2 my-3">
+                                                                    <div style="flex:1;height:1px;background:#e9ecef;"></div>
+                                                                    <span class="small text-muted fw-semibold px-2">{{ section.label }}</span>
+                                                                    <div style="flex:1;height:1px;background:#e9ecef;"></div>
+                                                                </div>
+                                                                <div class="d-flex flex-column gap-3">
+                                                                    @for (exercise of section.exercises; track exercise.name; let eIdx = $index) {
+                                                                        <div class="border-1 surface-border border-round px-4 py-3"
+                                                                            [class]="!canCheckExercise(phase, getGlobalIndex(phase, sIdx, eIdx)) ? 'bg-gray-50 opacity-60' : ''">
+                                                                            <div class="d-flex align-items-start gap-3">
+                                                                                <p-checkbox [(ngModel)]="exercise.completed" [binary]="true"
+                                                                                    [inputId]="'ex-' + phase.id + '-' + sIdx + '-' + eIdx"
+                                                                                    [disabled]="!canCheckExercise(phase, getGlobalIndex(phase, sIdx, eIdx))"
+                                                                                    (ngModelChange)="onExerciseCheckChange(phase, getGlobalIndex(phase, sIdx, eIdx), $event)">
+                                                                                </p-checkbox>
+                                                                                <div class="flex-grow-1">
+                                                                                    <label [for]="'ex-' + phase.id + '-' + sIdx + '-' + eIdx"
+                                                                                        class="fw-medium cursor-pointer d-block mb-1"
+                                                                                        [class]="exercise.completed ? 'text-decoration-line-through text-muted' : 'text-dark'">
+                                                                                        {{ exercise.name }}
+                                                                                    </label>
+                                                                                    <div class="small text-muted font-monospace">{{ exercise.params }}</div>
+                                                                                    <!-- Collapsible Note Toggle -->
+                                                                                    <span class="small text-muted cursor-pointer mt-2 d-inline-block"
+                                                                                        style="cursor:pointer;"
+                                                                                        (click)="toggleExerciseNote(exercise)">
+                                                                                        {{ exercise.noteVisible ? '− Hide note' : '+ Add note' }}
+                                                                                    </span>
+                                                                                    @if (exercise.noteVisible) {
+                                                                                        <textarea pInputTextarea [(ngModel)]="exercise.note" rows="2"
+                                                                                            class="w-100 mt-1 p-inputtext-sm"
+                                                                                            placeholder="Note on this exercise..."></textarea>
+                                                                                    }
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                        }
+                                                        @if (phase.measurementNote) {
+                                                            <div class="alert alert-warning d-flex align-items-center mt-3 mb-0">
+                                                                <i class="pi pi-info-circle me-2"></i>
+                                                                <span class="small">{{ phase.measurementNote }}</span>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </p-accordion-content>
+                                            </p-accordion-panel>
+                                        }
+                                    </p-accordion>
+                                </div>
+                            </div>
+
+                            <!-- General Session Comment -->
+                            <div class="card border-0 shadow-sm mb-3 bg-gray-50">
+                                <div class="card-body">
+                                    <h4 class="small fw-bold text-gray-700 mb-2">Session General Comment</h4>
+                                    <div class="small text-muted mb-2">Notes for the doctor or next coach</div>
+                                    <textarea pInputTextarea [(ngModel)]="generalComment" rows="3" class="w-100"
+                                        placeholder="e.g. Athlete showed discomfort on exercise 3 — reduced resistance..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Handoff Card (Swarm only) -->
+                            @if (sessionType === 'Swarm') {
+                                <div class="card border-0 shadow-sm mb-3" style="background:rgba(25,135,84,.05);border:1px solid rgba(25,135,84,.2)!important;">
+                                    <div class="card-body">
+                                        <h4 class="small fw-bold text-success mb-3 d-flex align-items-center gap-2">
+                                            <i class="pi pi-send"></i> Station Handoff — Swarm
+                                        </h4>
+                                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                                            @for (station of stationChain; track station.name; let last = $last) {
+                                                <div class="text-center px-3 py-2 border-round flex-1"
+                                                    [style]="station.status === 'current' ? 'background:#fff;border:2px solid #198754;min-width:80px;'
+                                                           : station.status === 'next' ? 'background:rgba(25,135,84,.08);border:1px solid rgba(25,135,84,.3);min-width:80px;'
+                                                           : 'background:#f8f9fa;border:1px solid #dee2e6;opacity:.55;min-width:80px;'">
+                                                    <div class="fw-bold small" [class]="station.status === 'next' ? 'text-success' : 'text-dark'">{{ station.name }}</div>
+                                                    <div class="small text-muted" style="font-size:10px;">{{ station.engineer }}</div>
+                                                    @if (station.status === 'current') { <div class="badge bg-success-subtle text-success mt-1" style="font-size:9px;">YOU</div> }
+                                                    @if (station.status === 'next') { <div class="badge bg-teal-100 text-teal-800 mt-1" style="font-size:9px;">Next</div> }
+                                                </div>
+                                                @if (!last) { <i class="pi pi-arrow-right text-muted"></i> }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2 mt-2">
+                                <button pButton label="Save Draft" icon="pi pi-save"
+                                    class="p-button-outlined p-button-secondary flex-grow-1"
+                                    [class]="saveDraftSent ? 'p-button-success' : ''"
+                                    (click)="saveDraft()">
+                                </button>
+                                @if (sessionType === 'Swarm') {
+                                    <button pButton label="Handoff to Next Station" icon="pi pi-send"
+                                        class="p-button-success flex-grow-1"
+                                        [disabled]="!isTimerFinished"
+                                        (click)="handoffToNextStation()">
+                                    </button>
+                                } @else {
+                                    <button pButton label="End Session" icon="pi pi-stop-circle"
+                                        class="p-button-danger flex-grow-1"
+                                        (click)="onEndSession()">
+                                    </button>
+                                }
+                            </div>
+
+                        </div>
+                    }
+
                 </div>
             </div>
         </div>
 
+        <!-- Assigned Coaches -->
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body p-3 p-md-4">
+                    <h2 class="h5 mb-4 fw-semibold">Assigned Coaches (Team Collaboration)</h2>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="fw-semibold mb-0">{{ coaches.name }}</h3>
+                            <p class="text-muted mb-0 small">{{ coaches.specialty }}</p>
+                        </div>
+                        @if (coaches.isPrimary) {
+                            <span class="badge bg-primary">Primary</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div>
 
     <!-- No Show Dialog -->
-    <p-dialog header="Record No-Show" [(visible)]="displayNoShowDialog" [modal]="true" [style]="{ width: '450px' }"
-        [draggable]="false" [resizable]="false">
+    <p-dialog header="Record No-Show" [(visible)]="displayNoShowDialog" [modal]="true" [style]="{ width: '450px' }" [draggable]="false" [resizable]="false">
         <div class="flex flex-col gap-3 mt-3">
-            <p class="text-sm text-gray-600 mb-2">Please provide a reason or comment for why the patient was a no-show
-                for this session.</p>
-            <div class="flex flex-col gap-2">
-                <label class="font-medium text-gray-700">Reason / Comment</label>
-                <textarea pInputTextarea rows="4" [(ngModel)]="noShowReason" placeholder="Enter reason here..."
-                    class="w-full"></textarea>
-            </div>
+            <p class="small text-muted mb-2">Please provide a reason for the no-show.</p>
+            <label class="fw-medium">Reason / Comment</label>
+            <textarea pInputTextarea rows="4" [(ngModel)]="noShowReason" placeholder="Enter reason here..." class="w-full"></textarea>
         </div>
         <ng-template pTemplate="footer">
             <p-button icon="pi pi-times" (click)="cancelNoShow()" label="Cancel" styleClass="p-button-text"></p-button>
-            <p-button icon="pi pi-check" (click)="submitNoShow()" label="Submit"
-                [disabled]="!noShowReason.trim()"></p-button>
+            <p-button icon="pi pi-check" (click)="submitNoShow()" label="Submit" [disabled]="!noShowReason.trim()"></p-button>
         </ng-template>
     </p-dialog>
+
 </div>
