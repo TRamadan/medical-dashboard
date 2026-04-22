@@ -1,0 +1,105 @@
+<div class="cumulative-wrap" dir="ltr">
+
+  <!-- ===== Coach Selector ===== -->
+  <div class="coach-selector">
+    @for (coach of coaches; track $index) {
+      <button
+        class="coach-chip"
+        [class.active]="selectedCoach === $index"
+        (click)="selectCoach($index)">
+        @if (coach.icon) {
+          <span class="chip-icon">{{ coach.icon }}</span>
+        }
+        {{ coach.label }}
+      </button>
+    }
+  </div>
+
+  <!-- ===== Stats Row ===== -->
+  <div class="stats-row">
+    @for (s of stats; track s.label) {
+      <div class="stat-card">
+        <div class="stat-value">{{ s.value }}</div>
+        <div class="stat-label">{{ s.label }}</div>
+      </div>
+    }
+  </div>
+
+  <!-- ===== Line Chart Section ===== -->
+  <div class="chart-section">
+
+    <div class="chart-header">
+      <div class="chart-title">Weekly Evaluation Trend — 12 Weeks</div>
+      <div class="chart-warning">
+        <span class="warn-icon">⚠</span>
+        3 consecutive weeks under 3.0 — Manager Notified
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <!-- Red zone overlay for last 3 weeks -->
+      <div class="red-zone">
+        <span class="red-zone-label">3 Consecutive Weeks</span>
+      </div>
+      <!-- Threshold label -->
+      <div class="threshold-label">3.0</div>
+
+      <p-chart
+        type="line"
+        [data]="lineChartData"
+        [options]="lineChartOptions"
+        height="180px">
+      </p-chart>
+    </div>
+  </div>
+
+  <!-- ===== Promotion Track ===== -->
+  <div class="promotion-section">
+    <div class="promotion-header">
+      <div class="promotion-title">Promotion Track</div>
+      <div class="promotion-sub">Junior → Senior</div>
+    </div>
+
+    <!-- Track boxes -->
+    <div class="track-boxes">
+      <div class="track-box current active">
+        <div class="track-box-value">Junior</div>
+        <div class="track-box-sub">Current Level</div>
+      </div>
+      <div class="track-arrow">→</div>
+      <div class="track-box target">
+        <div class="track-box-value">Senior</div>
+        <div class="track-box-sub">Target</div>
+      </div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="checklist">
+      @for (item of promotionItems; track item.label) {
+        <div class="check-row">
+          <div class="check-left">
+            @if (item.done === true) {
+              <span class="check-icon done">✓</span>
+            } @else if (item.done === false) {
+              <span class="check-icon fail">✗</span>
+            } @else {
+              <span class="check-icon pending">○</span>
+            }
+            <span class="check-label">{{ item.label }}</span>
+          </div>
+          <div class="check-value"
+               [class.done-val]="item.done === true"
+               [class.fail-val]="item.done === false"
+               [class.pending-val]="item.done === 'pending'">
+            {{ item.valueLabel }}
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="promotion-note">
+      ⚠ Promotion Pending — Criteria not met. Automatic notification sent to Manager.
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,82 @@
+<div class="athlete-wrap" dir="ltr">
+
+  <!-- ===== Page Header ===== -->
+  <div class="page-header">
+    NPS linked to each coach — from post-session surveys
+  </div>
+
+  <!-- ===== Anonymous Ranking ===== -->
+  <div class="section-card">
+    <div class="section-title">Anonymous Ranking</div>
+
+    <!-- PrimeNG horizontal bar chart -->
+    <div style="height: 140px; margin-bottom: 1rem;">
+      <p-chart
+        type="bar"
+        [data]="npsChartData"
+        [options]="npsChartOptions"
+        height="140px">
+      </p-chart>
+    </div>
+
+    <!-- Ranking rows with score + label -->
+    <div class="ranking-rows">
+      @for (r of rankings; track r.label) {
+        <div class="rank-row">
+          <div class="rank-score" [style.color]="r.color">{{ r.score }}</div>
+          <div class="rank-info">
+            <span class="rank-label">{{ r.label }}</span>
+            <span class="rank-name">— {{ r.name }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="anon-note">
+      Names are visible only to the team leader — athletes see "Coach" without a name
+    </div>
+  </div>
+
+  <!-- ===== Feedback Columns ===== -->
+  <div class="feedback-grid">
+
+    <!-- Positive Feedback -->
+    <div class="feedback-col positive">
+      <div class="feedback-col-header positive-header">
+        <span class="col-icon">★</span> Outstanding Positive Feedback
+      </div>
+
+      @for (f of positiveFeedback; track f.date) {
+        <div class="feedback-item">
+          <p class="feedback-text">{{ f.text }}</p>
+          <div class="feedback-meta">
+            <span class="station-tag" [style.color]="f.stationColor">{{ f.station }}</span>
+            <span class="feedback-date">{{ f.date }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Attention Feedback -->
+    <div class="feedback-col attention">
+      <div class="feedback-col-header attention-header">
+        <span class="col-icon">⚠</span> Feedback Requiring Attention
+      </div>
+
+      @for (f of attentionFeedback; track f.date) {
+        <div class="feedback-item">
+          <p class="feedback-text">{{ f.text }}</p>
+          <div class="feedback-meta">
+            <span class="station-tag" [style.color]="f.stationColor">
+              @if (f.stationColor === '#f97316') { <span>⚠</span> }
+              {{ f.station }}
+            </span>
+            <span class="feedback-date">{{ f.date }}</span>
+          </div>
+        </div>
+      }
+    </div>
+
+  </div>
+
+</div>

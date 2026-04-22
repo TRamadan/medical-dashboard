@@ -54,35 +54,7 @@
                                         <div class="section-badge">{{ sectionIdx + 1 }}</div>
                                         <span class="section-name">{{ section.name }}</span>
                                     </div>
-                                    <div class="section-header-right">
-                                        <div class="section-meta">
-                                            <div class="meta-item">
-                                                <i class="pi pi-clock"></i>
-                                                <span>{{ section.time }} min</span>
-                                            </div>
-                                            @if (section.coachManager) {
-                                            <div class="meta-item">
-                                                <i class="pi pi-user"></i>
-                                                <span>{{ section.coachManager }}</span>
-                                            </div>
-                                            }
-                                        </div>
 
-                                    </div>
-                                </div>
-
-                                <!-- Section Controls -->
-                                <div class="section-controls">
-                                    <div class="control-field">
-                                        <label [attr.for]="'time-' + sectionIdx">Time (min)</label>
-                                        <input pInputText [(ngModel)]="section.time" placeholder="e.g. 10"
-                                            [id]="'time-' + sectionIdx" />
-                                    </div>
-                                    <div class="control-field">
-                                        <label [attr.for]="'coach-' + sectionIdx">Coach Manager</label>
-                                        <p-dropdown [options]="coaches" [(ngModel)]="section.coachManager"
-                                            placeholder="Select Coach" [inputId]="'coach-' + sectionIdx"></p-dropdown>
-                                    </div>
                                 </div>
 
                                 <!-- Exercises Cards Layout -->

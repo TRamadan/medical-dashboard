@@ -1,0 +1,298 @@
+// ============================================================
+// Grid helpers (responsive)
+// ============================================================
+.sliders-grid {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.textarea-grid {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.card-divider {
+    border-bottom: 1px solid #f1f5f9;
+}
+
+// ============================================================
+// PrimeNG DatePicker – week range
+// ============================================================
+::ng-deep .week-range-picker {
+    .p-datepicker-input {
+        background: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        color: #374151;
+        font-size: 0.72rem;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        padding: 0.35rem 0.6rem;
+        border-radius: 0.5rem;
+        cursor: pointer;
+        width: 180px;
+
+        &:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+            outline: none;
+        }
+    }
+
+    .p-datepicker-dropdown {
+        background: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        border-left: none;
+        border-radius: 0 0.5rem 0.5rem 0;
+        color: #6b7280;
+        padding: 0 0.4rem;
+
+        &:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+    }
+}
+
+// Card base
+.eval-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.04);
+    padding: 1.25rem;
+    transition: box-shadow 0.2s ease;
+
+    &:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+}
+
+// PrimeNG Slider overrides — per-card color via CSS variable
+.custom-slider {
+
+    // PrimeNG 17+ uses .p-slider component styles
+    ::ng-deep p-slider {
+        display: block;
+        width: 100%;
+
+        .p-slider {
+            background: #e5e7eb;
+            height: 5px;
+            border-radius: 999px;
+            border: none;
+            position: relative;
+
+            .p-slider-range {
+                background: var(--slider-color, #6366f1);
+                border-radius: 999px;
+            }
+
+            .p-slider-handle {
+                background: var(--slider-color, #6366f1);
+                border: 2px solid #ffffff;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+                transition: transform 0.15s ease, box-shadow 0.15s ease;
+                cursor: grab;
+
+                &:focus,
+                &:hover {
+                    transform: scale(1.2);
+                    box-shadow: 0 0 0 4px color-mix(in srgb, var(--slider-color, #6366f1) 20%, transparent);
+                    outline: none;
+                }
+            }
+        }
+    }
+}
+
+// PrimeNG 17+ Textarea overrides
+.custom-textarea {
+
+    ::ng-deep textarea[pInputTextarea],
+    ::ng-deep textarea.p-inputtext {
+        background: #f9fafb;
+        border: 1.5px solid #e5e7eb;
+        color: #111827;
+        font-size: 0.75rem;
+        font-family: 'Inter', sans-serif;
+        border-radius: 0.5rem;
+        resize: vertical;
+        width: 100%;
+        padding: 0.625rem 0.75rem;
+        line-height: 1.5;
+        min-height: 72px;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+        &::placeholder {
+            color: #9ca3af;
+        }
+
+        &:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+            outline: none;
+        }
+    }
+}
+
+// Header tab group
+.tab-group {
+    display: flex;
+    background: #f3f4f6;
+    padding: 3px;
+    border-radius: 0.625rem;
+    gap: 2px;
+
+    button {
+        padding: 0.4rem 1rem;
+        border-radius: 0.5rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        color: #6b7280;
+        background: transparent;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+
+        &.active {
+            background: #6366f1;
+            color: #ffffff;
+            box-shadow: 0 1px 6px rgba(99, 102, 241, 0.35);
+        }
+
+        &:not(.active):hover {
+            color: #374151;
+            background: rgba(0, 0, 0, 0.04);
+        }
+    }
+}
+
+// Week badge
+.week-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #374151;
+    cursor: default;
+    user-select: none;
+}
+
+// Metric row label
+.metric-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+// Score badge
+.score-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+}
+
+// Range labels
+.range-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.4rem;
+    font-size: 0.6rem;
+    color: #9ca3af;
+}
+
+// Save button sticky footer
+.save-footer {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 0.75rem 1rem;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+    z-index: 20;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
+
+    button {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+        background: #6366f1;
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 0.8rem;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s ease, transform 0.1s ease;
+        letter-spacing: 0.01em;
+
+        &:hover {
+            background: #4f46e5;
+        }
+
+        &:active {
+            transform: scale(0.98);
+        }
+    }
+}
+
+// Initials avatar
+.avatar {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.75rem;
+    border: 1.5px solid transparent;
+}
+
+// Responsive
+@media (max-width: 640px) {
+    .sliders-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .textarea-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .tab-group {
+        flex-wrap: wrap;
+        width: 100%;
+
+        button {
+            flex: 1;
+            text-align: center;
+            min-width: 0;
+        }
+    }
+
+    .header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    ::ng-deep .week-range-picker .p-datepicker-input {
+        width: 100% !important;
+    }
+
+    .eval-card {
+        padding: 1rem;
+    }
+}

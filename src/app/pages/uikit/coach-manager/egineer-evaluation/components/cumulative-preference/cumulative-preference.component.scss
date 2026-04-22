@@ -1,0 +1,269 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.cumulative-wrap {
+  color: #111827;
+  font-family: 'Inter', sans-serif;
+  padding: 1rem;
+  min-height: 100%;
+}
+
+// ── Coach selector ──────────────────────────────────────────
+.coach-selector {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.coach-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.active {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: #ffffff;
+  }
+
+  .chip-icon {
+    font-size: 0.65rem;
+  }
+}
+
+// ── Stats row ────────────────────────────────────────────────
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.2;
+  margin-bottom: 0.4rem;
+}
+
+.stat-label {
+  font-size: 0.65rem;
+  color: #6b7280;
+}
+
+// ── Chart section ────────────────────────────────────────────
+.chart-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.chart-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.chart-warning {
+  font-size: 0.65rem;
+  color: #f59e0b;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+
+  .warn-icon {
+    font-size: 0.7rem;
+  }
+}
+
+.chart-container {
+  position: relative;
+  height: 180px;
+}
+
+.red-zone {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 23%;
+  height: 100%;
+  background: rgba(239, 68, 68, 0.07);
+  border-left: 1px dashed rgba(239, 68, 68, 0.3);
+  pointer-events: none;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 4px;
+}
+
+.red-zone-label {
+  font-size: 0.58rem;
+  color: #ef4444;
+  white-space: nowrap;
+}
+
+.threshold-label {
+  position: absolute;
+  left: 0;
+  font-size: 0.6rem;
+  color: #f59e0b;
+  z-index: 2;
+  top: 55%;
+}
+
+// ── Promotion Track ───────────────────────────────────────────
+.promotion-section {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.promotion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.75rem;
+}
+
+.promotion-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.promotion-sub {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #f59e0b;
+}
+
+.track-boxes {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.track-box {
+  flex: 1;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+
+  &.active {
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+}
+
+.track-box-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.track-box-sub {
+  font-size: 0.6rem;
+  color: #6b7280;
+  margin-top: 0.2rem;
+}
+
+.track-arrow {
+  font-size: 1rem;
+  color: #4b5563;
+}
+
+// ── Checklist ─────────────────────────────────────────────────
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 0.75rem;
+}
+
+.check-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.68rem;
+}
+
+.check-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #374151;
+}
+
+.check-icon {
+  font-size: 0.7rem;
+  font-weight: 700;
+  width: 16px;
+  text-align: center;
+
+  &.done    { color: #10b981; }
+  &.fail    { color: #ef4444; }
+  &.pending { color: #f59e0b; }
+}
+
+.check-value {
+  font-size: 0.65rem;
+  font-weight: 600;
+
+  &.done-val    { color: #10b981; }
+  &.fail-val    { color: #ef4444; }
+  &.pending-val { color: #f59e0b; }
+}
+
+.promotion-note {
+  font-size: 0.62rem;
+  color: #6b7280;
+  border-top: 1px solid #e5e7eb;
+  padding-top: 0.5rem;
+  text-align: center;
+}

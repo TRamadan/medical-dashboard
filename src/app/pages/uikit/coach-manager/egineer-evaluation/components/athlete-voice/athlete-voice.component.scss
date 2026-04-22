@@ -1,0 +1,161 @@
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.athlete-wrap {
+  color: #111827;
+  font-family: 'Inter', sans-serif;
+  padding: 1rem;
+  min-height: 100%;
+}
+
+// ── Page header ──────────────────────────────────────────────
+.page-header {
+  font-size: 0.65rem;
+  color: #6b7280;
+  text-align: right;
+  margin-bottom: 1rem;
+}
+
+// ── Section card ─────────────────────────────────────────────
+.section-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 0.75rem;
+}
+
+// ── Ranking rows ─────────────────────────────────────────────
+.ranking-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.rank-score {
+  font-size: 1.4rem;
+  font-weight: 800;
+  min-width: 3rem;
+  text-align: left;
+}
+
+.rank-info {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.rank-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.rank-name {
+  font-size: 0.65rem;
+  color: #6b7280;
+}
+
+.anon-note {
+  font-size: 0.6rem;
+  color: #6b7280;
+  text-align: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+// ── Feedback grid ─────────────────────────────────────────────
+.feedback-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.feedback-col {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.feedback-col-header {
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: flex-start;
+  margin-bottom: 0.25rem;
+
+  .col-icon {
+    font-size: 0.75rem;
+  }
+}
+
+.positive-header {
+  color: #10b981;
+}
+
+.attention-header {
+  color: #f59e0b;
+}
+
+// ── Feedback item ─────────────────────────────────────────────
+.feedback-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.75rem;
+}
+
+.feedback-text {
+  font-size: 0.68rem;
+  color: #374151;
+  margin: 0 0 0.4rem 0;
+  line-height: 1.6;
+}
+
+.feedback-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.station-tag {
+  font-size: 0.62rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.feedback-date {
+  font-size: 0.6rem;
+  color: #6b7280;
+}
