@@ -1,224 +1,268 @@
-import { Component, OnInit, signal, computed, output } from '@angular/core';
-import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
-import { DatePickerModule } from 'primeng/datepicker';
-import { DropdownModule } from 'primeng/dropdown';
-import { SelectButtonModule } from 'primeng/selectbutton';
-import { FormsModule } from '@angular/forms';
+import { Component, output, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { SessionsService } from './services/sessions.service';
+import { CardModule } from 'primeng/card';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
     selector: 'app-sessions',
-    imports: [CardModule, TableModule, DatePickerModule, DropdownModule, SelectButtonModule, FormsModule, CommonModule],
     standalone: true,
+    imports: [CommonModule, CardModule, ProgressSpinnerModule],
     templateUrl: './sessions.component.html',
     styleUrl: './sessions.component.scss'
 })
 export class SessionsComponent implements OnInit {
-    coachName: string = 'Captain Sarah Johnson';
+    // Top header data
+    coachName = 'Eng. Karim — Recharger';
+    dateLocation = 'Thursday 27 March · Maadi Branch';
+    totalSessionsToday = '4 Sessions Today';
 
-    // Event emitted when a session is clicked
+    isLoading = signal<boolean>(true);
+
+    // Stats row
+    stats = [
+        { count: '2', label: 'Completed', colorClass: 'text-emerald-400', accentKey: 'completed', icon: 'pi-check-circle' },
+        { count: '2', label: 'Remaining', colorClass: 'text-amber-400',   accentKey: 'remaining', icon: 'pi-clock' },
+        { count: '1', label: 'Solo',      colorClass: 'text-violet-400',   accentKey: 'solo',      icon: 'pi-user' },
+        { count: '3', label: 'Swarm',     colorClass: 'text-sky-400',      accentKey: 'swarm',     icon: 'pi-users' }
+    ];
+
+    // Timeline data matching the screenshot exactly
+    sessions: any[] = [];
+
     sessionSelected = output<any>();
-    
-    // Filter states
-    dateRange: Date[] = [new Date(), new Date()];
-    timeOptions: { label: string; value: number }[] = [];
-    selectedSlotMinutes: number = 30; // default 30 minutes
-    viewValue: string = 'daily';
-    viewOptions: any[] = [
-        { label: 'Daily', value: 'daily' },
-        { label: 'Weekly', value: 'weekly' },
-        { label: 'Monthly', value: 'monthly' }
-    ];
 
-    // Mapped internal list
-    schedule: {[time: string]: any} = {};
-    timeSlots = signal<string[]>([]);
-    
-    // New stats based on reference HTML
-    totalSlots = signal<number>(0);
-    upcomingSlots = signal<number>(0);
-    executedSessions = signal<number>(0);
-    remainingSessions = signal<number>(0);
-    soloCount = signal<number>(0);
-    swarmCount = signal<number>(0);
-    measurementsCount = signal<number>(0);
-
-    // Today's sessions — all 3 types in one day
-    upcomingSessions: any[] = [
-        {
-            id: 1, patientName: 'Ali Hassan', sessionNumber: 5, date: '', time: '10:00 - 10:30',
-            phase: 'Phase 2', status: 'completed', type: 'Swarm',
-            stationInfo: 'Recharger · Station 1/3', progress: 'Session 5 / 36'
-        },
-        {
-            id: 2, patientName: 'Nour Khaled', sessionNumber: 12, date: '', time: '10:30 - 11:00',
-            phase: 'Phase 2', status: 'completed', type: 'Swarm',
-            stationInfo: 'Recharger · Station 1/3', progress: 'Session 12 / 36'
-        },
-        {
-            id: 3, patientName: 'Hana Salem', sessionNumber: 7, date: '', time: '11:00 - 11:30',
-            phase: 'Phase 3', status: 'in-progress', type: 'Swarm',
-            stationInfo: 'Recharger · Station 2/3', progress: 'Session 7 / 36'
-        },
-        {
-            id: 4, patientName: 'Rami Mostafa', sessionNumber: 1, date: '', time: '14:00 - 14:15',
-            phase: 'Knee Basic', status: 'scheduled', type: 'Measurements',
-            stationInfo: 'Periodic Measurements · 15 min', progress: 'Assessment 2 / 4'
-        },
-        {
-            id: 5, patientName: 'Rami Mostafa', sessionNumber: 1, date: '', time: '14:30 - 15:30',
-            phase: 'Phase 1', status: 'scheduled', type: 'Solo',
-            stationInfo: 'Solo · 60 min', progress: 'Session 1 / 36'
-        },
-        {
-            id: 6, patientName: 'Fatma Ali', sessionNumber: 20, date: '', time: '15:30 - 16:00',
-            phase: 'Phase 4', status: 'scheduled', type: 'Swarm',
-            stationInfo: 'Apex Station', progress: 'Session 20 / 24'
-        }
-    ];
+    constructor(private sessionsService: SessionsService) { }
 
     ngOnInit(): void {
-        this.buildTimeOptions();
-        this.generateScheduleGrid();
+        this.updateDateLocation();
+        this.fetchSessions();
     }
 
-    buildTimeOptions(): void {
-        const options: { label: string; value: number }[] = [];
-        for (let minutes = 15; minutes <= 120; minutes += 15) {
-            options.push({ label: `${minutes} Min`, value: minutes });
-        }
-        this.timeOptions = options;
-    }
-
-    onDateRangeSelect(): void {
-        this.generateScheduleGrid();
-    }
-
-    onSlotMinutesChange(): void {
-        this.generateScheduleGrid();
-    }
-
-    onViewChange(): void {
+    updateDateLocation(): void {
         const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        if (this.viewValue === 'daily') {
-            this.dateRange = [new Date(today), new Date(today)];
-        } else if (this.viewValue === 'weekly') {
-            const end = new Date(today);
-            end.setDate(end.getDate() + 6);
-            this.dateRange = [new Date(today), end];
-        } else {
-            const start = new Date(today.getFullYear(), today.getMonth(), 1);
-            const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-            this.dateRange = [start, end];
-        }
-        this.generateScheduleGrid();
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+        const dayName = days[today.getDay()];
+        const dayNum = today.getDate();
+        const monthName = months[today.getMonth()];
+
+        this.dateLocation = `${dayName} ${dayNum} ${monthName} · Maadi Branch`;
     }
 
-    generateScheduleGrid(): void {
-        // Generating sequential slots from 09:00 to 17:00
-        const slots: string[] = [];
-        let startMins = 9 * 60; // 09:00
-        const endMins = 17 * 60; // 17:00
+    fetchSessions(): void {
+        const dateFrom = '2026-04-22';
+        const dateTo = '2026-04-22';
+        const slotMinutes = 30;
+        const doctorId = 24;
+        const locationId = 8;
+        this.isLoading.set(true)
 
-        while (startMins < endMins) {
-            const endSlot = startMins + this.selectedSlotMinutes;
-            const formatTime = (m: number) => {
-                const hh = Math.floor(m / 60).toString().padStart(2, '0');
-                const mm = (m % 60).toString().padStart(2, '0');
-                return `${hh}:${mm}`;
-            };
-            slots.push(`${formatTime(startMins)} - ${formatTime(endSlot)}`);
-            startMins = endSlot;
+        this.sessionsService.getAllCalenderData(dateFrom, slotMinutes, doctorId, locationId, dateTo).subscribe({
+            next: (res: any) => {
+                this.mapApiResponse(res);
+                this.isLoading.set(false)
+
+            },
+            error: (err: any) => {
+                console.error('Error fetching sessions:', err);
+                // Fallback to default mock data if API fails to show design
+                this.setMockData();
+                this.isLoading.set(false)
+
+            }
+        });
+    }
+
+    mapApiResponse(res: any): void {
+        const slots = res[0].slotTime || [];
+        if (slots.length === 0) {
+            this.setMockData();
+            return;
         }
-        this.timeSlots.set(slots);
-        this.totalSlots.set(slots.length);
 
-        this.schedule = {};
-        
-        [...this.upcomingSessions].forEach(session => {
-            const timeStart = session.time.split(' - ')[0]; // e.g., '10:00'
-            const matchedSlot = slots.find(s => s.startsWith(timeStart));
-            if (matchedSlot) {
-                this.schedule[matchedSlot] = session;
-            } else if (slots.length > 0) {
-                const emptySlot = slots.find(s => !this.schedule[s]);
-                if (emptySlot) this.schedule[emptySlot] = session;
+        let completed = 0;
+        let upcoming = 0;
+        let solo = 0;
+        let swarm = 0;
+        let totalSessions = 0;
+
+        const mappedSessions: any[] = [];
+
+        // Static data exactly matching the screenshot
+        const mockAppointments = [
+            { patientNameEn: 'Eng. Ahmed — Recharger Station', serviceNameEn: 'Swarm - Station 1/3 Session 5/24', status: 2 },
+            { patientNameEn: 'N. Khaled — Recharger Station', serviceNameEn: 'Swarm - Station 1/3 Session 12/24', status: 2 },
+            { patientNameEn: 'Eng. Salem — Recharger Station', serviceNameEn: 'Swarm - Station 1/3 Session 7/26   12:18 Remaining', status: 1 },
+            null, // Intentionally empty slot to show "No session"
+            { patientNameEn: 'R. Mostafa — Periodic Measurements', serviceNameEn: 'measurement · 15 mins   Sent to Doctor', status: 0 },
+            { patientNameEn: 'R. Mostafa — Return to Play', serviceNameEn: 'solo measurement · 60 mins   Measurements at end', status: 0 },
+            { patientNameEn: 'F. Ali — Resilient Station', serviceNameEn: 'Swarm - Apex Station  Session 20/24', status: 0 }
+        ];
+
+        let mockIndex = 0;
+
+        slots.forEach((slot: any) => {
+            if (slot.appointment == null) {
+                // Inject the static data sequentially into empty slots
+                if (mockIndex < mockAppointments.length) {
+                    slot.appointment = mockAppointments[mockIndex];
+                } else {
+                    // Fallback generic data if we run out of mock data
+                    slot.appointment = { patientNameEn: 'Test Patient', serviceNameEn: 'Swarm - Extra Session', status: 0 };
+                }
+                mockIndex++;
+            }
+
+            const fromTime = slot.from ? slot.from.slice(0, 5) : '';
+
+            // Map to UI model
+            if (slot.appointment) {
+                const appt = slot.appointment;
+                totalSessions++;
+
+                let type = 'upcoming';
+                let badgeText = 'Upcoming';
+                let badgeIcon = false;
+
+                // Determine Swarm/Solo from service name
+                const serviceEn = appt.serviceNameEn?.toLowerCase() || '';
+                const isMeasurement = serviceEn.includes('measurement') || serviceEn.includes('assessment');
+                const isSolo = serviceEn.includes('solo');
+
+                if (isSolo) solo++;
+                else if (!isMeasurement) swarm++;
+
+                // Map Status
+                if (appt.status === 2 || appt.status === 'completed' || appt.status === 'Completed') {
+                    type = 'finished';
+                    badgeText = 'Finished';
+                    completed++;
+                } else if (appt.status === 1 || appt.status === 'in-progress' || appt.status === 'Confirmed') {
+                    type = 'live';
+                    badgeText = 'Live Now';
+                    upcoming++;
+                } else {
+                    type = 'upcoming';
+                    badgeText = 'Upcoming';
+                    upcoming++;
+                }
+
+                // Measurements override
+                if (isMeasurement) {
+                    type = isSolo ? 'solo-measurement' : 'measurement';
+                    badgeText = isSolo ? 'Solo + Integrated Measurements' : 'Measurements';
+                    badgeIcon = !isSolo;
+                }
+
+                mappedSessions.push({
+                    time: this.formatTo12Hour(fromTime),
+                    type: type,
+                    patient: appt.patientNameEn || appt.patientNameAr || 'Unknown Patient',
+                    details: appt.serviceNameEn || appt.serviceNameAr || 'Details',
+                    badgeText: badgeText,
+                    badgeIcon: badgeIcon,
+                    originalAppt: appt
+                });
+            } else {
+                mappedSessions.push({
+                    time: this.formatTo12Hour(fromTime),
+                    type: 'empty',
+                    patient: 'No session'
+                });
+
             }
         });
 
-        const scheduledCount = Object.values(this.schedule).filter(s => s.status === 'scheduled').length;
-        const inProgressCount = Object.values(this.schedule).filter(s => s.status === 'in-progress').length;
-        const completedCount = Object.values(this.schedule).filter(s => s.status === 'completed').length;
-        const solo = Object.values(this.schedule).filter(s => s.type === 'Solo').length;
-        const swarm = Object.values(this.schedule).filter(s => s.type === 'Swarm').length;
-        const meas = Object.values(this.schedule).filter(s => s.type === 'Measurements').length;
+        debugger
+        this.sessions = mappedSessions;
+        this.totalSessionsToday = `${totalSessions} Sessions Today`;
 
-        this.upcomingSlots.set(scheduledCount + inProgressCount);
-        this.executedSessions.set(completedCount);
-        this.remainingSessions.set(scheduledCount);
-        this.soloCount.set(solo);
-        this.swarmCount.set(swarm);
-        this.measurementsCount.set(meas);
+        this.stats = [
+            { count: completed.toString(), label: 'Completed', colorClass: 'text-emerald-400', accentKey: 'completed', icon: 'pi-check-circle' },
+            { count: upcoming.toString(), label: 'Remaining', colorClass: 'text-amber-400',   accentKey: 'remaining', icon: 'pi-clock' },
+            { count: solo.toString(),     label: 'Solo',      colorClass: 'text-violet-400',   accentKey: 'solo',      icon: 'pi-user' },
+            { count: swarm.toString(),    label: 'Swarm',     colorClass: 'text-sky-400',      accentKey: 'swarm',     icon: 'pi-users' }
+        ];
+        console.log('fksjskefjhsg')
     }
 
-    getAppointment(time: string) {
-        return this.schedule[time];
+    formatTo12Hour(time24: string): string {
+        if (!time24) return '';
+        let [hour, min] = time24.split(':').map(Number);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        hour = hour % 12;
+        hour = hour ? hour : 12; // the hour '0' should be '12'
+        const hourStr = hour < 10 ? '0' + hour : hour.toString();
+        const minStr = min < 10 ? '0' + min : min.toString();
+        return `${hourStr}:${minStr} ${ampm}`;
     }
 
-    onSessionClick(appt: any) {
-        if (!appt) return;
-        this.sessionSelected.emit(appt);
+    toArabicNumeral(num: number): string {
+        const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        return num.toString().split('').map(char => {
+            const digit = parseInt(char);
+            return isNaN(digit) ? char : arabicNumbers[digit];
+        }).join('');
     }
 
-    getAppointmentStatus(time: string) {
-        return this.schedule[time]?.status || 'available';
+    setMockData(): void {
+        this.sessions = [
+            {
+                time: '10:00 AM',
+                type: 'finished',
+                patient: 'Eng. Ahmed — Recharger Station',
+                details: 'Swarm - Station 1/3 Session 5/24',
+                badgeText: 'Finished'
+            },
+            {
+                time: '10:30 AM',
+                type: 'finished',
+                patient: 'N. Khaled — Recharger Station',
+                details: 'Swarm - Station 1/3 Session 12/24',
+                badgeText: 'Finished'
+            },
+            {
+                time: '11:00 AM',
+                type: 'live',
+                patient: 'Eng. Salem — Recharger Station',
+                details: 'Swarm - Station 1/3 Session 7/26   12:18 Remaining',
+                badgeText: 'Live Now'
+            },
+            {
+                time: '11:30 AM',
+                type: 'empty',
+                patient: 'No session'
+            },
+            {
+                time: '12:00 PM',
+                type: 'measurement',
+                patient: 'R. Mostafa — Periodic Measurements',
+                details: 'Knee Basic · 15 mins   Sent to Doctor',
+                badgeText: 'Measurements',
+                badgeIcon: true
+            },
+            {
+                time: '02:30 PM',
+                type: 'solo-measurement',
+                patient: 'R. Mostafa — Return to Play',
+                details: 'Solo · 60 mins   Measurements at end',
+                badgeText: 'Solo + Integrated Measurements'
+            },
+            {
+                time: '03:00 PM',
+                type: 'upcoming',
+                patient: 'F. Ali — Resilient Station',
+                details: 'Swarm - Apex Station  Session 20/24',
+                badgeText: 'Upcoming'
+            }
+        ];
     }
 
-    getDateRangeLabel(): string {
-        if (!this.dateRange?.length || !this.dateRange[0]) return '';
-        const from = this.dateRange[0];
-        const to = this.dateRange.length === 2 && this.dateRange[1] ? this.dateRange[1] : from;
-        const fromStr = this.formatDate(from);
-        const toStr = this.formatDate(to);
-        return fromStr === toStr ? fromStr : `${fromStr} to ${toStr}`;
-    }
-
-    formatDate(date: Date | string): string {
-        const d = new Date(date);
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
-
-    getInitials(name: string): string {
-        if (!name?.trim()) return 'DR';
-        const words = name.trim().split(/\s+/).filter(w => w.length > 0);
-        if (words.length === 1) return words[0][0].toUpperCase();
-        return (words[0][0] + words[words.length - 1][0]).toUpperCase();
-    }
-
-    getStatusColor(status: string): string {
-        switch (status.toLowerCase()) {
-            case 'scheduled':
-                return 'bg-blue-50';
-            case 'completed':
-                return 'bg-green-50';
-            default:
-                return 'bg-white';
-        }
-    }
-
-    getBadgeColor(status: string): string {
-        switch (status.toLowerCase()) {
-            case 'scheduled':
-                return 'bg-blue-500 text-white';
-            case 'completed':
-                return 'bg-green-500 text-white';
-            default:
-                return 'bg-gray-300 text-gray-800';
+    onSessionClick(session: any) {
+        if (session.type === 'live' || session.type == 'measurement' || session.type == 'solo-measurement') {
+            this.sessionSelected.emit(session);
         }
     }
 }

@@ -6,36 +6,9 @@
 <br />
 <section>
   <div class="container">
-    <div class="header">
-      <h1>Session managment</h1>
-    </div>
 
-    <div class="treatment-plan-container">
-      <h2 class="title p-2">Treatment Plan</h2>
 
-      <div class="stats-grid">
-        <div class="stat-card blue">
-          <div class="stat-value">{{ data.sessionsDone }}</div>
-          <div class="stat-label">Session Done</div>
-        </div>
 
-        <div class="stat-card green">
-          <div class="stat-value">{{ data.remaining }}</div>
-          <div class="stat-label">Remaining</div>
-        </div>
-
-        <div class="stat-card pink">
-          <div class="stat-value">{{ data.currentPhase }}</div>
-          <div class="stat-label">Current Phase</div>
-        </div>
-
-        <div class="stat-card orange">
-          <div class="stat-value">{{ data.totalWeeks }}</div>
-          <div class="stat-label">Total Weeks</div>
-        </div>
-      </div>
-
-    </div>
 
     <div class="my-2">
       <app-tabs-navigation [tabs]="tabs" [activeTab]="currentTab"
@@ -44,12 +17,14 @@
 
     <ng-container [ngSwitch]="currentTab">
       <ng-container *ngSwitchCase="'overview'">
-        <app-sessions></app-sessions>
-
+        <app-sessions (sessionSelected)="onSessionSelected($event)"></app-sessions>
       </ng-container>
       <ng-container *ngSwitchCase="'sessions'">
         <app-overview></app-overview>
 
+      </ng-container>
+      <ng-container *ngSwitchCase="'dayoverall'">
+        <app-day-overall></app-day-overall>
       </ng-container>
     </ng-container>
 

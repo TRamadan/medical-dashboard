@@ -1,235 +1,144 @@
-// Sessions Component Styles
+.sessions-wrapper {
+    min-height: 100vh;
+    padding: 2rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
 
-.sessions-section {
-  .section-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 1rem;
-  }
-
-  .sessions-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .session-card {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    padding: 1.25rem 1.5rem;
-    transition: all 0.3s ease;
-
-    &:hover {
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      transform: translateY(-1px);
-    }
-
-    // Upcoming Session Styles
-    &.upcoming-session {
-      background: #eff6ff;
-      border-color: #bfdbfe;
-    }
-
-    // Completed Session Styles
-    &.completed-session {
-      background: #ffffff;
-      border-color: #e5e7eb;
-    }
-  }
-
-  // Session Badge Styles
-  .session-badge {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
+.sessions-spinner-overlay {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
-    font-size: 1.1rem;
-    flex-shrink: 0;
+    min-height: 300px;
+    width: 100%;
 
-    &.upcoming-badge {
-      background-color: #2563eb;
-      color: white;
+    ::ng-deep .sessions-spinner {
+        width: 56px;
+        height: 56px;
     }
+}
 
-    &.completed-badge {
-      background-color: #10b981;
-      color: white;
-      font-size: 1.3rem;
+/* RTL Specifics */
+[dir="rtl"] .text-end {
+    text-align: right !important;
+}
+
+[dir="rtl"] .text-start {
+    text-align: left !important;
+}
+
+[dir="rtl"] .ms-1 {
+    margin-left: 0 !important;
+    margin-right: 0.25rem !important;
+}
+
+[dir="rtl"] .pe-5 {
+    padding-right: 0 !important;
+    padding-left: 3rem !important;
+}
+
+/* The vertical line position */
+[dir="rtl"] .timeline-container>.position-absolute {
+    right: auto !important;
+    left: 120px !important;
+}
+
+/* If the user container is not actually RTL context locally, force it for timeline dot */
+.timeline-container {
+    .position-absolute {
+        left: auto;
+        right: 110px;
+        /* Overridden if RTL wrapper is working */
     }
-  }
+}
 
-  // Session Details for Upcoming Sessions
-  .session-datetime {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 0.25rem;
-  }
+::ng-deep .p-card .p-card-body {
+    padding: 0 !important;
+}
 
-  .session-phase {
-    font-size: 0.875rem;
-    color: #6b7280;
-  }
-
-  // Status Badge
-  .status-badge {
-    padding: 0.375rem 1rem;
-    border-radius: 6px;
-    font-size: 0.875rem;
-    font-weight: 500;
-    flex-shrink: 0;
-
-    &.scheduled-badge {
-      background-color: #dbeafe;
-      color: #1e40af;
-    }
-  }
-
-  // Session Details for Completed Sessions
-  .session-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #1f2937;
-    margin-bottom: 0.25rem;
-  }
-
-  .session-info {
-    font-size: 0.875rem;
-    color: #6b7280;
-    margin-bottom: 0.5rem;
-  }
-
-  .session-notes {
-    font-size: 0.875rem;
-    color: #6b7280;
-    font-style: italic;
-    margin-top: 0.5rem;
-    padding-left: 0.5rem;
-    border-left: 2px solid #e5e7eb;
-  }
-
-  // View Details Link
-  .view-details-link {
-    display: flex;
-    align-items: center;
-    color: #2563eb;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    flex-shrink: 0;
-    margin-left: 1rem;
-    transition: color 0.2s ease;
+/* ── Premium Stat Cards ─────────────────────────────────────────── */
+.stat-card {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    background: var(--surface-card, #1e293b);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: default;
 
     &:hover {
-      color: #1d4ed8;
-      text-decoration: underline;
+        transform: translateY(-2px);
     }
 
-    i {
-      font-size: 1rem;
-    }
-  }
-}
-
-// Responsive Design
-@media (max-width: 768px) {
-  .sessions-section {
-    .section-title {
-      font-size: 1.1rem;
-    }
-
-    .session-card {
-      padding: 1rem;
-
-      &.completed-session {
-        .d-flex {
-          flex-direction: column;
-          align-items: flex-start !important;
-        }
-      }
-    }
-
-    .session-badge {
-      width: 40px;
-      height: 40px;
-      font-size: 1rem;
-
-      &.completed-badge {
-        font-size: 1.2rem;
-      }
-    }
-
-    .session-datetime,
-    .session-title {
-      font-size: 0.95rem;
-    }
-
-    .session-phase,
-    .session-info,
-    .session-notes,
-    .status-badge {
-      font-size: 0.8rem;
-    }
-
-    .view-details-link {
-      margin-left: 0;
-      margin-top: 0.75rem;
-      padding-left: 3rem;
-    }
-
-    .status-badge {
-      padding: 0.25rem 0.75rem;
-    }
-  }
-}
-
-@media (max-width: 576px) {
-  .sessions-section {
-    .session-card {
-      padding: 0.875rem;
-    }
-
-    .session-badge {
-      width: 36px;
-      height: 36px;
-      font-size: 0.9rem;
-      margin-right: 0.75rem !important;
-    }
-
-    .sessions-container {
-      gap: 0.75rem;
-    }
-
-    // Stack upcoming session content on very small screens
-    .session-card.upcoming-session {
-      .d-flex {
-        flex-wrap: wrap;
-      }
-
-      .status-badge {
-        margin-top: 0.5rem;
+    &__top-bar {
+        height: 3px;
         width: 100%;
-        text-align: center;
-      }
-    }
-  }
-}
-
-// Print Styles
-@media print {
-  .sessions-section {
-    .session-card {
-      box-shadow: none !important;
-      break-inside: avoid;
     }
 
-    .view-details-link {
-      display: none;
+    &__inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 14px 10px 16px;
+        gap: 6px;
     }
-  }
+
+    &__icon-wrap {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2px;
+
+        .pi { font-size: 15px; }
+    }
+
+    &__count {
+        font-size: 1.6rem;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.5px;
+    }
+
+    &__label {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #94a3b8;
+    }
+
+    /* ── Variants ── */
+    &--completed {
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.1);
+        .stat-card__top-bar  { background: linear-gradient(90deg, #10b981, #059669); }
+        .stat-card__icon-wrap { background: rgba(16, 185, 129, 0.12); .pi { color: #10b981; } }
+        .stat-card__count    { color: #10b981; }
+        &:hover { box-shadow: 0 6px 28px rgba(16, 185, 129, 0.18); }
+    }
+
+    &--remaining {
+        box-shadow: 0 4px 20px rgba(251, 191, 36, 0.1);
+        .stat-card__top-bar  { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+        .stat-card__icon-wrap { background: rgba(251, 191, 36, 0.12); .pi { color: #fbbf24; } }
+        .stat-card__count    { color: #fbbf24; }
+        &:hover { box-shadow: 0 6px 28px rgba(251, 191, 36, 0.18); }
+    }
+
+    &--solo {
+        box-shadow: 0 4px 20px rgba(139, 92, 246, 0.1);
+        .stat-card__top-bar  { background: linear-gradient(90deg, #8b5cf6, #7c3aed); }
+        .stat-card__icon-wrap { background: rgba(139, 92, 246, 0.12); .pi { color: #8b5cf6; } }
+        .stat-card__count    { color: #8b5cf6; }
+        &:hover { box-shadow: 0 6px 28px rgba(139, 92, 246, 0.18); }
+    }
+
+    &--swarm {
+        box-shadow: 0 4px 20px rgba(56, 189, 248, 0.1);
+        .stat-card__top-bar  { background: linear-gradient(90deg, #38bdf8, #0ea5e9); }
+        .stat-card__icon-wrap { background: rgba(56, 189, 248, 0.12); .pi { color: #38bdf8; } }
+        .stat-card__count    { color: #38bdf8; }
+        &:hover { box-shadow: 0 6px 28px rgba(56, 189, 248, 0.18); }
+    }
 }

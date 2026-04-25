@@ -7,10 +7,11 @@ import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TextareaModule } from 'primeng/textarea';
+import { CardModule } from 'primeng/card';
 
 @Component({
     selector: 'app-overview',
-    imports: [CommonModule, AccordionModule, CheckboxModule, InputTextModule, FormsModule, ButtonModule, DialogModule, TextareaModule],
+    imports: [CommonModule, AccordionModule, CheckboxModule, InputTextModule, FormsModule, ButtonModule, DialogModule, TextareaModule, CardModule],
     templateUrl: './overview.component.html',
     styleUrl: './overview.component.scss',
 })
@@ -43,7 +44,7 @@ export class OverviewComponent implements OnDestroy {
     sessionMeta = {
         sessionNumber: 7,
         totalSessions: 36,
-        stationDuration: '30 min',
+        stationDuration: '5 min',
         lastSRPE: 6,
         lastWellness: 5.2,
         sessionGoal: 'Full ROM + Weight Bearing'
@@ -53,8 +54,8 @@ export class OverviewComponent implements OnDestroy {
     isSessionStarted = false;
     isPaused = false;
     isTimerFinished = false;
-    sessionTimer = '30:00';
-    sessionDurationSeconds = 30 * 60;
+    sessionTimer = '05:00';
+    sessionDurationSeconds = 5 * 60;
     private remainingTimeSeconds = 0;
     private elapsedSeconds = 0;
     private timerInterval: any;

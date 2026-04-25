@@ -12,6 +12,7 @@ import { TagModule } from 'primeng/tag';
 import { TabsNavigationComponent } from './tabs-navigation/tabs-navigation.component';
 import { OverviewComponent } from './overview/overview.component';
 import { SessionsComponent } from './sessions/sessions.component';
+import { DayOverallComponent } from "./day-overall/day-overall.component";
 export interface TreatmentPlan {
     phase: string;
     exercises: string[];
@@ -43,7 +44,7 @@ export interface Coach {
 
 @Component({
     selector: 'app-session-management',
-    imports: [SessionsComponent, OverviewComponent, TabsNavigationComponent, TagModule, ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
+    imports: [DayOverallComponent, SessionsComponent, OverviewComponent, TabsNavigationComponent, TagModule, ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
     templateUrl: './session-management.component.html',
     styleUrls: ['./session-management.component.css']
 })
@@ -64,11 +65,20 @@ export class SessionManagementComponent implements OnInit {
 
     tabs = [
         { id: 'overview', label: 'Today schedule' },
-        { id: 'sessions', label: 'Sessions' }
+        { id: 'sessions', label: 'Sessions' },
+        {
+            id: 'dayoverall', label: 'Day overlall'
+        }
     ];
 
     onTabChange(tabId: any): void {
         this.currentTab = tabId;
     }
+
+    onSessionSelected(session: any): void {
+        // Change to the sessions tab (which opens app-overview) when a session is clicked
+        this.currentTab = 'sessions';
+    }
+
     ngOnInit(): void { }
 }

@@ -1,0 +1,78 @@
+<div class="day-overall-container">
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        @for (stat of stats(); track stat.label) {
+        <div class="stat-card" [class]="'stat-card--' + stat.accentKey">
+            <div class="stat-card__top-bar"></div>
+            <div class="stat-card__inner">
+                <div class="stat-card__icon-wrap">
+                    <i class="pi" [class]="stat.icon"></i>
+                </div>
+                <div class="stat-card__count">{{ stat.count }}</div>
+                <div class="stat-card__label">{{ stat.label }}</div>
+                <div class="stat-card__subtitle mt-1" style="font-size: 9px; color: var(--text-color-secondary, #6a718b); text-align: center;">{{ stat.subtitle }}</div>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Divider -->
+    <div class="section-divider">
+        <span class="divider-text">Sessions in Detail</span>
+    </div>
+
+    <!-- Sessions List -->
+    <div class="sessions-list">
+        @for (session of sessions(); track session.engineer) {
+        <p-card styleClass="session-pcard"
+                [style.--card-top-border-color]="session.topBorderColor"
+                [style.--card-top-border-width]="session.topBorderColor !== 'transparent' ? '2px' : '0px'">
+
+            <div class="session-card-content">
+                <!-- Left Content (Details) -->
+                <div class="session-details">
+                    <div class="status-dot" [style.background-color]="session.dotColor"></div>
+                    <div class="session-info">
+                        <div class="session-title">
+                            {{ session.engineer }}
+                            @if (session.station) {
+                            <span>- {{ session.station }}</span>
+                            }
+                        </div>
+                        <div class="session-meta">
+                            {{ session.type }} {{ session.time }}
+                            @if (session.duration) {
+                            <span>- {{ session.duration }}</span>
+                            }
+                            @if (session.sessionNum) {
+                            <span>- {{ session.sessionNum }}</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Content (Rating / Badge) -->
+                <div class="session-actions">
+                    @if (session.rating !== null) {
+                    <div class="rating-display">
+                        <span class="rating-number">{{ session.ratingLabel }}</span>
+                        <div class="stars">
+                            @for (star of session.stars; track $index) {
+                            <i [class]="star === 1 ? 'pi pi-star-fill star-filled' : 'pi pi-star star-empty'"></i>
+                            }
+                        </div>
+                    </div>
+                    }
+
+                    @if (session.badge) {
+                    <div class="status-badge" [style.color]="session.badge.color"
+                        [style.border-color]="session.badge.border" [style.background-color]="session.badge.bg">
+                        {{ session.badge.label }}
+                    </div>
+                    }
+                </div>
+            </div>
+        </p-card>
+        }
+    </div>
+</div>

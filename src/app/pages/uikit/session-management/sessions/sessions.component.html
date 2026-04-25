@@ -1,211 +1,123 @@
-<section class="sessions-section container-fluid py-4">
-
-    <!-- SEARCH & FILTER PANEL -->
-    <div class="search-panel card border-0 shadow-sm mb-4">
-        <div class="card-body p-4">
-            <div class="d-flex align-items-center mb-4">
-                <div class="panel-icon-wrapper me-3 bg-blue-50 text-blue-500 p-3 border-circle d-flex align-items-center justify-content-center">
-                    <i class="pi pi-sliders-h text-xl"></i>
-                </div>
-                <div>
-                    <h5 class="mb-0 fw-bold text-dark text-xl">My Schedule Filters</h5>
-                    <p class="mb-0 text-muted mt-1 font-medium">Select a date range and view to load your schedule grid</p>
-                </div>
+<div class="sessions-wrapper" dir="ltr">
+    @if (isLoading()) {
+    <div class="sessions-spinner-overlay" aria-live="polite" aria-label="Loading sessions">
+        <p-progressSpinner
+            styleClass="sessions-spinner"
+            strokeWidth="4"
+            animationDuration="0.8s"
+            ariaLabel="Loading"
+        />
+    </div>
+    } @else {
+    <!-- Header Row -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- Left side in LTR (Coach info) -->
+        <div class="text-start">
+            <h2 class="text-white m-0 mb-1 fw-semibold" style="font-size:1.1rem;letter-spacing:0.3px;">{{ coachName }}
+            </h2>
+            <div class="text-muted" style="font-size:13px;">{{ dateLocation }}</div>
+        </div>
+        <!-- Right side in LTR (Button) -->
+        <div>
+            <div class="badge rounded-pill d-inline-flex align-items-center justify-content-center"
+                style="background-color:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);font-size:12px;padding:6px 14px;font-weight:600;">
+                {{ totalSessionsToday }}
             </div>
+        </div>
+    </div>
 
-            <div class="row g-4 align-items-end">
-                <div class="col-md-4">
-                    <label class="filter-label mb-2 d-block text-uppercase text-gray-600 font-bold"
-                        style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                        Date Range
-                    </label>
-                    <p-datepicker [(ngModel)]="dateRange" selectionMode="range" [readonlyInput]="true"
-                        placeholder="Select date range…" dateFormat="yy-mm-dd" styleClass="w-100"
-                        [showButtonBar]="true" (onSelect)="onDateRangeSelect()">
-                    </p-datepicker>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="filter-label mb-2 d-block text-uppercase text-gray-600 font-bold"
-                        style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                        Slot Time
-                    </label>
-                    <p-dropdown [options]="timeOptions" [(ngModel)]="selectedSlotMinutes" optionLabel="label"
-                        optionValue="value" placeholder="Select time…" styleClass="w-100"
-                        [showClear]="true" (onChange)="onSlotMinutesChange()">
-                    </p-dropdown>
-                </div>
-
-                <div class="col-md-4">
-                    <label class="filter-label mb-2 d-block text-uppercase text-gray-600 font-bold"
-                        style="font-size: 0.75rem; letter-spacing: 0.5px;">
-                        View Mode
-                    </label>
-                    <div class="w-100">
-                        <p-selectButton [options]="viewOptions" [(ngModel)]="viewValue" optionLabel="label"
-                            optionValue="value" (onChange)="onViewChange()">
-                        </p-selectButton>
+    <!-- Stats Row -->
+    <div class="d-flex gap-3 mb-5">
+        @for (stat of stats; track stat.label) {
+        <div class="flex-grow-1" style="flex: 1 1 0px;">
+            <div class="stat-card" [class]="'stat-card--' + stat.accentKey">
+                <div class="stat-card__top-bar"></div>
+                <div class="stat-card__inner">
+                    <div class="stat-card__icon-wrap">
+                        <i class="pi" [class]="stat.icon"></i>
                     </div>
+                    <div class="stat-card__count">{{ stat.count }}</div>
+                    <div class="stat-card__label">{{ stat.label }}</div>
                 </div>
             </div>
-
-            <div class="mt-4" *ngIf="dateRange?.length">
-                <span class="range-badge bg-blue-50 text-blue-800 px-3 py-2 border-round font-semibold text-sm border-1 border-blue-200">
-                    <i class="pi pi-calendar-clock me-2"></i>
-                    {{ getDateRangeLabel() }}
-                </span>
-            </div>
         </div>
+        }
     </div>
 
-    <!-- STATS ROW -->
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-md col-sm-4">
-            <div class="card shadow-sm border-0 p-3 d-flex align-items-center gap-3">
-                <div class="bg-green-50 text-green-600 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
-                    <i class="pi pi-check-circle text-xl"></i>
+
+
+    <!-- Timeline List -->
+    <div class="timeline-container ps-5">
+        @for (session of sessions; track session.time; let isLast = $last) {
+        <div class="d-flex align-items-stretch" style="margin-bottom: 0;"
+            [style.cursor]="session.type === 'live' ? 'pointer' : 'default'" (click)="onSessionClick(session)">
+
+            <!-- Time Label with right border connecting the dots in LTR -->
+            <div class="position-relative text-end"
+                style="width:120px; padding-top:16px; padding-right:24px; padding-left:16px;" [ngStyle]="{
+                    
+                    'color': session.type === 'empty' ? '#64748b' : (session.type === 'live' ? '#fbbf24' : '#cbd5e1')
+                 }">
+
+                <!-- Timeline Dot exactly on the right border -->
+                <div class="position-absolute rounded-circle flex-shrink-0"
+                    style="right:-4px; top:28px; width:7px; height:7px; z-index:1;" [ngStyle]="{
+                        'background-color': session.type === 'empty' ? '#64748b' : (session.type === 'live' ? '#fbbf24' : '#10b981'),
+                        'box-shadow': session.type === 'live' ? '0 0 0 3px rgba(251,191,36,0.2)' : 'none'
+                    }">
                 </div>
-                <div>
-                    <div class="text-2xl font-bold text-green-600">{{ executedSessions() }}</div>
-                    <div class="text-xs font-semibold text-gray-500 uppercase mt-1">Done</div>
+
+                <!-- Time Card -->
+                <p-card styleClass="d-inline-block rounded px-2 py-1 shadow-sm p-0 m-0" [style]="{
+                         'background-color': session.type === 'empty' ? '#ffffff' : (session.type === 'live' ? 'rgba(251,191,36,0.1)' : 'rgba(51,65,85,0.4)'),
+                         'color': session.type === 'empty' ? '#94a3b8' : (session.type === 'live' ? '#fbbf24' : '#ffffff'),
+                         'border': session.type === 'empty' ? '1px solid rgba(51,65,85,0.4)' : (session.type === 'live' ? '1px solid rgba(251,191,36,0.4)' : '1px solid rgba(148,163,184,0.3)')
+                     }">
+                    <span class="fw-bold" style="font-size: 13px; letter-spacing: 0.5px;">{{ session.time }}</span>
+                </p-card>
+            </div>
+
+            <!-- Card Column (padded at bottom to create the gap, allowing the left border to span continuously) -->
+            <div class="flex-grow-1 ps-4" [style.padding-bottom]="isLast ? '0' : '1rem'">
+                <div class="w-100 px-4 py-3 d-flex align-items-center justify-content-between h-100"
+                    style=" min-height: 64px; border-radius: 12px; box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 4px; background-color: transparent;"
+                    [ngStyle]="{
+                        'background-color': 'transparent',
+                        'border-color': session.type === 'live' ? '#fbbf24' : (session.type === 'measurement' || session.type === 'solo-measurement' ? 'rgba(124,58,237,0.4)' : 'rgba(51,65,85,0.5)')
+                    }">
+
+                    @if (session.type !== 'empty') {
+                    <!-- Text content (Right side inside card) -->
+                    <p-card styleClass="text-start shadow-none p-0 m-0"
+                        [style]="{'background': 'transparent', 'box-shadow': 'none'}">
+                        <!-- Athlete Name Emphasized -->
+                        <div class="fw-bolder mb-1 text-left" style="color:#000000; font-size:15px;">{{ session.patient
+                            }}</div>
+                        <div style="font-size:12px;"
+                            [ngStyle]="{'color': session.type === 'live' ? '#fbbf24' : '#94a3b8'}">
+                            {{ session.details }}
+                        </div>
+                    </p-card>
+
+                    <p-card styleClass="badge rounded-pill shadow-none m-0" [style]="{
+                                'background-color': session.type === 'live' ? 'rgba(251,191,36,0.1)' : (session.type === 'measurement' ? 'rgba(124,58,237,0.15)' : 'rgba(255,255,255,0.03)'),
+                                'color': session.type === 'live' ? '#fbbf24' : (session.type === 'measurement' || session.type === 'solo-measurement' ? '#a78bfa' : '#94a3b8'),
+                                'border': session.type === 'live' ? '1px solid rgba(251,191,36,0.3)' : '1px solid transparent',
+                                'font-size': '11px', 'padding': '5px 12px', 'font-weight': '500', 'box-shadow': 'none'
+                            }">
+                        <i *ngIf="session.badgeIcon" class="pi pi-play ms-1" style="font-size:9px;"></i>
+                        {{ session.badgeText }}
+                    </p-card>
+                    } @else {
+                    <p-card styleClass="w-100 text-start shadow-none m-0 p-0"
+                        [style]="{'color':'#64748b', 'font-size':'12px', 'background': 'transparent', 'box-shadow': 'none'}">
+                        {{ session.patient }}
+                    </p-card>
+                    }
                 </div>
             </div>
         </div>
-        <div class="col-6 col-md col-sm-4">
-            <div class="card shadow-sm border-0 p-3 d-flex align-items-center gap-3">
-                <div class="bg-orange-50 text-orange-500 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
-                    <i class="pi pi-clock text-xl"></i>
-                </div>
-                <div>
-                    <div class="text-2xl font-bold text-orange-600">{{ remainingSessions() }}</div>
-                    <div class="text-xs font-semibold text-gray-500 uppercase mt-1">Remaining</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md col-sm-4">
-            <div class="card shadow-sm border-0 p-3 d-flex align-items-center gap-3">
-                <div class="bg-teal-50 text-teal-600 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
-                    <i class="pi pi-users text-xl"></i>
-                </div>
-                <div>
-                    <div class="text-2xl font-bold text-teal-600">{{ swarmCount() }}</div>
-                    <div class="text-xs font-semibold text-gray-500 uppercase mt-1">Swarm</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md col-sm-4">
-            <div class="card shadow-sm border-0 p-3 d-flex align-items-center gap-3">
-                <div class="bg-purple-50 text-purple-600 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
-                    <i class="pi pi-user text-xl"></i>
-                </div>
-                <div>
-                    <div class="text-2xl font-bold text-purple-600">{{ soloCount() }}</div>
-                    <div class="text-xs font-semibold text-gray-500 uppercase mt-1">Solo</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6 col-md col-sm-4">
-            <div class="card shadow-sm border-0 p-3 d-flex align-items-center gap-3">
-                <div class="bg-indigo-50 text-indigo-600 w-3rem h-3rem border-circle d-flex align-items-center justify-content-center">
-                    <i class="pi pi-chart-bar text-xl"></i>
-                </div>
-                <div>
-                    <div class="text-2xl font-bold text-indigo-600">{{ measurementsCount() }}</div>
-                    <div class="text-xs font-semibold text-gray-500 uppercase mt-1">Assess.</div>
-                </div>
-            </div>
-        </div>
+        }
     </div>
-
-    <!-- TABLE -->
-    <div class="appointments-table-wrapper card border-0 shadow-sm overflow-hidden">
-        <div class="card-header d-flex align-items-center gap-3 border-bottom-1 surface-border bg-white p-4">
-            <div class="bg-blue-50 text-blue-600 p-2 border-circle">
-                <i class="pi pi-table text-xl"></i>
-            </div>
-            <h5 class="mb-0 fw-bold text-gray-900 text-xl">
-                My Schedule
-                <span class="text-gray-500 font-medium text-base ml-2">
-                    — {{ getDateRangeLabel() }}
-                </span>
-            </h5>
-        </div>
-
-        <div class="card-body p-0">
-            <p-table [value]="timeSlots()" class="p-datatable-lg p-datatable-gridlines" [scrollable]="true" scrollHeight="500px">
-                <ng-template pTemplate="header">
-                    <tr class="table-header-row bg-gray-50">
-                        <th class="time-col text-center border-bottom-1 surface-border uppercase font-bold text-gray-600" style="width: 180px; font-size: 0.8rem;">Time Slot</th>
-                        <th class="text-center doctor-col border-bottom-1 surface-border">
-                            <div class="d-flex flex-column align-items-center gap-2 py-3">
-                                <div class="bg-blue-600 text-white border-circle w-3rem h-3rem d-flex align-items-center justify-content-center text-xl fw-bold shadow-1">
-                                    {{ getInitials(coachName) }}
-                                </div>
-                                <span class="font-bold text-gray-800">{{ coachName }}</span>
-                            </div>
-                        </th>
-                    </tr>
-                </ng-template>
-
-                <ng-template pTemplate="body" let-time>
-                    <tr class="table-body-row hover:surface-100 transition-colors transition-duration-150">
-                        <td class="fw-bold text-center text-gray-600 time-col bg-gray-50 border-right-1 surface-border py-4">
-                            <i class="pi pi-clock me-2 text-primary text-sm"></i>{{ time }}
-                        </td>
-                        <td class="text-center align-middle slot-cell position-relative p-0"
-                            [ngClass]="getStatusColor(getAppointmentStatus(time))">
-                            <ng-container *ngIf="getAppointment(time) as appt; else emptySlot">
-                                <ng-container *ngIf="appt.type === 'Measurements'; else trainingSlot">
-                                    <div class="w-100 h-100 p-3 d-flex flex-column align-items-center justify-content-center text-center cursor-pointer"
-                                         style="border-left:4px solid #6610f2;background:rgba(102,16,242,.04);"
-                                         (click)="onSessionClick(appt)">
-                                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap justify-content-center">
-                                            <span class="fw-bold text-dark small">{{ appt.patientName }}</span>
-                                            <span class="badge rounded-pill" style="background:rgba(102,16,242,.12);color:#6610f2;font-size:10px;">📐 Measurements</span>
-                                        </div>
-                                        <div class="text-xs text-muted">{{ appt.stationInfo }}</div>
-                                        <div class="text-xs text-muted">{{ appt.progress }}</div>
-                                        <span class="badge mt-2 rounded-pill text-white" style="background:#6610f2;font-size:10px;">ASSESSMENT</span>
-                                    </div>
-                                </ng-container>
-                                <ng-template #trainingSlot>
-                                    <div class="w-100 h-100 p-3 d-flex flex-column align-items-center justify-content-center text-center cursor-pointer"
-                                         [ngStyle]="{
-                                             'border-left': appt.type === 'Swarm' ? '4px solid #0d9488' : '4px solid #7c3aed',
-                                             'background': appt.status === 'in-progress' ? 'rgba(245,166,35,.06)' : 'transparent'
-                                         }"
-                                         (click)="onSessionClick(appt)">
-                                        <div *ngIf="appt.status === 'in-progress'" class="d-flex align-items-center gap-1 mb-1">
-                                            <span class="rounded-circle bg-warning d-inline-block" style="width:7px;height:7px;"></span>
-                                            <span class="text-warning fw-bold" style="font-size:10px;">LIVE NOW</span>
-                                        </div>
-                                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap justify-content-center">
-                                            <span class="fw-bold text-dark small">{{ appt.patientName }}</span>
-                                            <span class="badge rounded-pill" style="font-size:10px;"
-                                                [ngClass]="appt.type === 'Swarm' ? 'bg-teal-100 text-teal-800' : 'bg-purple-100 text-purple-800'">{{ appt.type }}</span>
-                                        </div>
-                                        <div class="text-xs text-muted">{{ appt.stationInfo }}</div>
-                                        <div class="text-xs text-muted">{{ appt.progress }}</div>
-                                        <span class="badge mt-2 rounded-pill fw-bold" style="font-size:10px;"
-                                            [ngClass]="appt.status === 'completed' ? 'bg-success text-white'
-                                                     : appt.status === 'in-progress' ? 'bg-warning text-dark'
-                                                     : 'bg-primary text-white'">
-                                            {{ appt.status === 'completed' ? 'Done' : appt.status === 'in-progress' ? 'In Progress' : 'Upcoming' }}
-                                        </span>
-                                    </div>
-                                </ng-template>
-                            </ng-container>
-                            <ng-template #emptySlot>
-                                <div class="empty-slot text-gray-400 d-flex flex-column align-items-center justify-content-center h-100 py-5 cursor-pointer hover:bg-gray-100 transition-colors transition-duration-200">
-                                    <i class="pi pi-plus text-2xl mb-2"></i>
-                                    <span class="text-sm font-bold uppercase tracking-widest">Available</span>
-                                </div>
-                            </ng-template>
-                        </td>
-
-                    </tr>
-                </ng-template>
-            </p-table>
-        </div>
-    </div>
-</section>
+    }
+</div>
