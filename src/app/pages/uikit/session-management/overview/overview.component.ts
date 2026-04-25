@@ -8,10 +8,11 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { TextareaModule } from 'primeng/textarea';
 import { CardModule } from 'primeng/card';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
     selector: 'app-overview',
-    imports: [CommonModule, AccordionModule, CheckboxModule, InputTextModule, FormsModule, ButtonModule, DialogModule, TextareaModule, CardModule],
+    imports: [CommonModule, AccordionModule, CheckboxModule, InputTextModule, FormsModule, ButtonModule, DialogModule, TextareaModule, CardModule, TooltipModule],
     templateUrl: './overview.component.html',
     styleUrl: './overview.component.scss',
 })
@@ -28,7 +29,15 @@ export class OverviewComponent implements OnDestroy {
 
     coaches: any = { name: 'You ( Ahmed Samir )', specialty: 'Physical Therapy', isPrimary: true };
 
-    @Input() progressData: any = { completed: 6, total: 36 };
+    @Input() progressData: any = { 
+        completed: 6, 
+        total: 36,
+        currentPhase: 'Phase 2 — Range of Motion',
+        phaseNumber: 2,
+        totalPhases: 5,
+        phaseSessionsRange: 'Sessions 7–15',
+        currentSessionInPhase: 7
+    };
 
     @Input() workflowData: any = {
         title: 'Plan Activation Workflow',
@@ -46,9 +55,26 @@ export class OverviewComponent implements OnDestroy {
         totalSessions: 36,
         stationDuration: '5 min',
         lastSRPE: 6,
+        avgSRPE4Wk: 4.2,
         lastWellness: 5.2,
         sessionGoal: 'Full ROM + Weight Bearing'
     };
+
+    get sRPEData() {
+        const lastRPE = this.sessionMeta.lastSRPE;
+        const avgRPE = this.sessionMeta.avgSRPE4Wk;
+        const deviation = (lastRPE - avgRPE) / avgRPE;
+
+        let color = 'mint';
+        if (deviation > 0.3) color = 'amber';
+        else if (deviation < -0.3) color = 'blue';
+
+        const percent = Math.abs(Math.round(deviation * 100));
+        const direction = deviation > 0 ? 'above' : 'below';
+        const tooltip = `Athlete's load is ${percent}% ${direction} 4-week average. Monitor for fatigue.`;
+
+        return { lastRPE, avgRPE, deviation, color, tooltip };
+    }
 
     // ── Timer ────────────────────────────────────────────────────
     isSessionStarted = false;
@@ -109,6 +135,8 @@ export class OverviewComponent implements OnDestroy {
     noShowReason = '';
     generalComment = '';
     saveDraftSent = false;
+    displayHandoffDialog = false;
+    handoffChecklist: string[] = [];
 
     @ViewChild('timerContainer') timerContainer!: ElementRef;
 
@@ -177,6 +205,12 @@ export class OverviewComponent implements OnDestroy {
         return phase.exercises || [];
     }
 
+    get allExercisesChecked(): boolean {
+        return this.phases.every(phase => 
+            this.getAllExercises(phase).every((ex: any) => ex.completed)
+        );
+    }
+
     getGlobalIndex(phase: any, sectionIdx: number, exIdx: number): number {
         if (!phase.sections) return exIdx;
         let offset = 0;
@@ -185,15 +219,11 @@ export class OverviewComponent implements OnDestroy {
     }
 
     canCheckExercise(phase: any, globalIndex: number): boolean {
-        if (globalIndex === 0) return true;
-        return this.getAllExercises(phase)[globalIndex - 1]?.completed ?? false;
+        return true;
     }
 
     onExerciseCheckChange(phase: any, globalIndex: number, checked: boolean): void {
-        if (!checked) {
-            const all = this.getAllExercises(phase);
-            for (let i = globalIndex; i < all.length; i++) all[i].completed = false;
-        }
+        // No-op to allow independent toggling
     }
 
     toggleExerciseNote(exercise: any): void {
@@ -276,7 +306,51 @@ export class OverviewComponent implements OnDestroy {
     }
 
     handoffToNextStation(): void {
-        console.log('Handoff to next station');
+        let uncheckedWithoutNoteRowId: string | null = null;
+        let uncheckedWithoutNoteName = '';
+
+        for (let pIdx = 0; pIdx < this.phases.length; pIdx++) {
+            const phase = this.phases[pIdx];
+            if (phase.sections) {
+                for (let sIdx = 0; sIdx < phase.sections.length; sIdx++) {
+                    const section = phase.sections[sIdx];
+                    for (let eIdx = 0; eIdx < section.exercises.length; eIdx++) {
+                        const ex = section.exercises[eIdx];
+                        if (!ex.completed && (!ex.note || ex.note.trim() === '')) {
+                            ex.noteVisible = true;
+                            uncheckedWithoutNoteRowId = 'row-ex-' + phase.id + '-' + sIdx + '-' + eIdx;
+                            uncheckedWithoutNoteName = ex.name;
+                            break;
+                        }
+                    }
+                    if (uncheckedWithoutNoteRowId) break;
+                }
+            }
+            if (uncheckedWithoutNoteRowId) break;
+        }
+
+        if (uncheckedWithoutNoteRowId) {
+            alert('Please add a note for the skipped exercise:\n' + uncheckedWithoutNoteName);
+            setTimeout(() => {
+                const el = document.getElementById(uncheckedWithoutNoteRowId!);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => {
+                        const textarea = el.querySelector('textarea');
+                        if (textarea) textarea.focus();
+                    }, 50);
+                }
+            }, 100);
+            return;
+        }
+
+        this.handoffChecklist = [];
+        this.displayHandoffDialog = true;
+    }
+
+    confirmHandoff(): void {
+        this.displayHandoffDialog = false;
+        console.log('Handoff confirmed');
     }
 
     ngOnDestroy(): void {

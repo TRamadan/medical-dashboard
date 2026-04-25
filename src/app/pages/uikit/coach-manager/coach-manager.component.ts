@@ -67,7 +67,7 @@ export class CoachManagerComponent implements OnInit {
     tabs = [
         { id: 'overview', label: 'Overview' },
         { id: 'schedule', label: 'Team Schedule' },
-        { id: 'edit', label: 'Treatment plan' },
+        { id: 'edit', label: 'Engineering Protocol' },
         { id: 'teamPerformance', label: 'Team performance' },
         { id: 'engineerEvaluation', label: 'Engineer Evaluation' },
 

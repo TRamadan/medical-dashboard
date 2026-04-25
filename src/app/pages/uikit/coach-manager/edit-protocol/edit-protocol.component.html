@@ -213,7 +213,8 @@
     <div class="stations-container mt-4">
         <div class="stations-header mb-3">
             <h3 class="stations-title m-0"><i class="pi pi-building mr-2 text-primary"></i>Station Assignments</h3>
-            <p class="text-sm text-color-secondary mt-1">Assign dedicated coaches to oversee specific performance
+            <p class="text-sm text-color-secondary mt-1">Assign dedicated performance engineers to oversee specific
+                performance
                 stations</p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -229,9 +230,10 @@
                         <span class="font-bold text-lg">{{ station.name }}</span>
                     </div>
                     <div class="station-card-body flex-grow-1 flex flex-column justify-content-end gap-2">
-                        <label class="text-sm font-semibold text-color-secondary uppercase">Assigned Coach</label>
+                        <label class="text-sm font-semibold text-color-secondary uppercase">Assign Performance
+                            Engineer</label>
                         <p-dropdown appendTo="body" [options]="coaches" [(ngModel)]="station.coach"
-                            placeholder="Select Coach" styleClass="w-full"
+                            placeholder="Select Performance Engineer" styleClass="w-full"
                             emptyMessage="No coaches available"></p-dropdown>
 
                         <div class="station-status mt-2 flex align-items-center gap-1 text-xs font-medium"

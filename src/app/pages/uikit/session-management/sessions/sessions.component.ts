@@ -22,9 +22,9 @@ export class SessionsComponent implements OnInit {
     // Stats row
     stats = [
         { count: '2', label: 'Completed', colorClass: 'text-emerald-400', accentKey: 'completed', icon: 'pi-check-circle' },
-        { count: '2', label: 'Remaining', colorClass: 'text-amber-400',   accentKey: 'remaining', icon: 'pi-clock' },
-        { count: '1', label: 'Solo',      colorClass: 'text-violet-400',   accentKey: 'solo',      icon: 'pi-user' },
-        { count: '3', label: 'Swarm',     colorClass: 'text-sky-400',      accentKey: 'swarm',     icon: 'pi-users' }
+        { count: '2', label: 'Remaining', colorClass: 'text-amber-400', accentKey: 'remaining', icon: 'pi-clock' },
+        { count: '1', label: 'Solo', colorClass: 'text-violet-400', accentKey: 'solo', icon: 'pi-user' },
+        { count: '3', label: 'Swarm', colorClass: 'text-sky-400', accentKey: 'swarm', icon: 'pi-users' }
     ];
 
     // Timeline data matching the screenshot exactly
@@ -108,9 +108,6 @@ export class SessionsComponent implements OnInit {
                 // Inject the static data sequentially into empty slots
                 if (mockIndex < mockAppointments.length) {
                     slot.appointment = mockAppointments[mockIndex];
-                } else {
-                    // Fallback generic data if we run out of mock data
-                    slot.appointment = { patientNameEn: 'Test Patient', serviceNameEn: 'Swarm - Extra Session', status: 0 };
                 }
                 mockIndex++;
             }
@@ -165,25 +162,18 @@ export class SessionsComponent implements OnInit {
                     badgeIcon: badgeIcon,
                     originalAppt: appt
                 });
-            } else {
-                mappedSessions.push({
-                    time: this.formatTo12Hour(fromTime),
-                    type: 'empty',
-                    patient: 'No session'
-                });
-
             }
         });
 
-        debugger
+
         this.sessions = mappedSessions;
         this.totalSessionsToday = `${totalSessions} Sessions Today`;
 
         this.stats = [
             { count: completed.toString(), label: 'Completed', colorClass: 'text-emerald-400', accentKey: 'completed', icon: 'pi-check-circle' },
-            { count: upcoming.toString(), label: 'Remaining', colorClass: 'text-amber-400',   accentKey: 'remaining', icon: 'pi-clock' },
-            { count: solo.toString(),     label: 'Solo',      colorClass: 'text-violet-400',   accentKey: 'solo',      icon: 'pi-user' },
-            { count: swarm.toString(),    label: 'Swarm',     colorClass: 'text-sky-400',      accentKey: 'swarm',     icon: 'pi-users' }
+            { count: upcoming.toString(), label: 'Remaining', colorClass: 'text-amber-400', accentKey: 'remaining', icon: 'pi-clock' },
+            { count: solo.toString(), label: 'Solo', colorClass: 'text-violet-400', accentKey: 'solo', icon: 'pi-user' },
+            { count: swarm.toString(), label: 'Swarm', colorClass: 'text-sky-400', accentKey: 'swarm', icon: 'pi-users' }
         ];
         console.log('fksjskefjhsg')
     }

@@ -51,7 +51,7 @@ export interface Coach {
 export class SessionManagementComponent implements OnInit {
     coachData: Coach = {
         id: 'C001',
-        name: 'Captain. Sarah Johnson',
+        name: 'Eng. Sarah Johnson',
         specialization: 'Orthopedic Rehabilitation'
     };
     data = {
@@ -65,7 +65,7 @@ export class SessionManagementComponent implements OnInit {
 
     tabs = [
         { id: 'overview', label: 'Today schedule' },
-        { id: 'sessions', label: 'Sessions' },
+        { id: 'sessions', label: 'Active Session' },
         {
             id: 'dayoverall', label: 'Day overlall'
         }

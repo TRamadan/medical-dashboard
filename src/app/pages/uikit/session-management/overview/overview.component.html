@@ -5,7 +5,7 @@
         <div class="col-12">
             <div class="card shadow-sm border-0">
                 <div class="card-body">
-                    <h2 class="h5 mb-3 fw-semibold"><i class="pi pi-user me-2"></i>Patient Information</h2>
+                    <h2 class="h5 mb-3 fw-semibold"><i class="pi pi-user me-2"></i>Athlete Information</h2>
                     <div class="info-grid">
 
                         <div class="d-flex justify-content-between py-2 info-row"><span
@@ -17,10 +17,10 @@
                         <div class="d-flex justify-content-between py-2 info-row"><span
                                 class="info-label">Gender:</span><span class="info-value fw-medium">{{
                                 patientData.gender }}</span></div>
-                        <div class="d-flex justify-content-between py-2 info-row"><span
-                                class="info-label">Injury:</span><span class="info-value fw-medium">{{
+                        <div class="d-flex justify-content-between py-2 info-row"><span class="info-label">Chief
+                                Complaint:</span><span class="info-value fw-medium">{{
                                 patientData.injury }}</span></div>
-                        <div class="d-flex justify-content-between py-2 info-row"><span class="info-label">Injury
+                        <div class="d-flex justify-content-between py-2 info-row"><span class="info-label">Onset
                                 Date:</span><span class="info-value fw-medium">{{ patientData.injuryDate }}</span></div>
                     </div>
                 </div>
@@ -32,15 +32,27 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h3 class="h5 mb-3 fw-semibold">Overall Progress</h3>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span>Sessions Completed:</span>
-                        <span class="fw-semibold">{{ progressData.completed }} of {{ progressData.total }}</span>
+                    
+                    <div class="d-flex flex-column gap-2 mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-secondary" style="font-size: 0.95rem;">Sessions Completed:</span>
+                            <span class="fw-bold text-dark">{{ progressData.completed }} of {{ progressData.total }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-secondary" style="font-size: 0.95rem;">Current Phase:</span>
+                            <span class="fw-bold text-dark">{{ progressData.currentPhase }} <span class="text-secondary fw-medium" style="font-size: 0.9em;">(Phase {{ progressData.phaseNumber }} of {{ progressData.totalPhases }})</span></span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="text-secondary" style="font-size: 0.95rem;">Phase Progress:</span>
+                            <span class="fw-bold text-dark">{{ progressData.phaseSessionsRange }} · Currently on Session {{ progressData.currentSessionInPhase }}</span>
+                        </div>
                     </div>
-                    <div class="progress" style="height:24px;border-radius:12px;">
+
+                    <div class="progress shadow-sm mt-3" style="height:24px;border-radius:12px;">
                         <div class="progress-bar bg-primary d-flex align-items-center justify-content-center"
                             role="progressbar" [style.width.%]="getProgressPercentage()"
                             [attr.aria-valuenow]="getProgressPercentage()" aria-valuemin="0" aria-valuemax="100">
-                            <span class="fw-semibold small">{{ getProgressPercentage() }}%</span>
+                            <span class="fw-bold small">{{ getProgressPercentage() }}%</span>
                         </div>
                     </div>
                 </div>
@@ -84,8 +96,67 @@
                                     <div class="wf-pill__icon"><i class="pi pi-map-marker"></i></div>
                                     <span class="wf-pill__text">{{ workflowData.location }}</span>
                                 </div>
+                                @if (sessionType === 'Swarm') {
+                                <div class="wf-pill">
+                                    <div class="wf-pill__icon"><i class="pi pi-stopwatch"></i></div>
+                                    <span class="wf-pill__text">{{ sessionMeta.stationDuration }}</span>
+                                </div>
+                                <div class="wf-pill">
+                                    <div class="wf-pill__icon"
+                                        [style.color]="sRPEData.color === 'amber' ? '#ea580c' : sRPEData.color === 'blue' ? '#2563eb' : '#16a34a'"
+                                        [style.backgroundColor]="sRPEData.color === 'amber' ? '#ffedd5' : sRPEData.color === 'blue' ? '#dbeafe' : '#dcfce7'">
+                                        <i class="pi pi-chart-bar"></i>
+                                    </div>
+                                    <span class="wf-pill__text" style="display: flex; align-items: center; gap: 4px;">
+                                        Last sRPE: {{ sRPEData.lastRPE }}/10
+                                        @if (sRPEData.deviation > 0.3) {
+                                        <span [style.color]="'#ea580c'" class="fw-bold">↑</span>
+                                        } @else if (sRPEData.deviation < -0.3) { <span [style.color]="'#2563eb'"
+                                            class="fw-bold">↓</span>
+                                    }
+                                    <span style="font-size: 0.85em; opacity: 0.8;">avg {{ sRPEData.avgRPE }}</span>
+                                    </span>
+                                </div>
+                                }
+                                @else {
+                                <div class="wf-pill">
+                                    <div class="wf-pill__icon"><i class="pi pi-heart"></i></div>
+                                    <span class="wf-pill__text">Wellness: {{ sessionMeta.lastWellness }}/7</span>
+                                </div>
+                                }
                             </div>
-                            <div class="wf-chips">
+
+                            <!-- Performance Engineer Observation -->
+                            @if (sessionType === 'Swarm') {
+                            <div class="mt-3 p-3 rounded-3 d-flex align-items-center gap-3 border"
+                                [style.backgroundColor]="sRPEData.color === 'amber' ? '#fff7ed' : sRPEData.color === 'blue' ? '#eff6ff' : '#f0fdf4'"
+                                [style.borderColor]="sRPEData.color === 'amber' ? '#ffedd5' : sRPEData.color === 'blue' ? '#dbeafe' : '#dcfce7'">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                                    [style.width]="'42px'" [style.height]="'42px'"
+                                    [style.backgroundColor]="sRPEData.color === 'amber' ? '#ffedd5' : sRPEData.color === 'blue' ? '#dbeafe' : '#dcfce7'"
+                                    [style.color]="sRPEData.color === 'amber' ? '#ea580c' : sRPEData.color === 'blue' ? '#2563eb' : '#16a34a'">
+                                    <i class="pi" [ngClass]="{
+                                         'pi-exclamation-triangle': sRPEData.color === 'amber',
+                                         'pi-info-circle': sRPEData.color === 'blue',
+                                         'pi-check-circle': sRPEData.color === 'mint'
+                                     }" style="font-size: 1.25rem;"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div class="fw-bold mb-1"
+                                        [style.color]="sRPEData.color === 'amber' ? '#9a3412' : sRPEData.color === 'blue' ? '#1e40af' : '#166534'"
+                                        style="font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">
+                                        Performance Engineer Alert
+                                    </div>
+                                    <div class="fw-semibold"
+                                        [style.color]="sRPEData.color === 'amber' ? '#c2410c' : sRPEData.color === 'blue' ? '#1d4ed8' : '#15803d'"
+                                        style="font-size: 0.95rem; line-height: 1.4;">
+                                        {{ sRPEData.tooltip }}
+                                    </div>
+                                </div>
+                            </div>
+                            }
+
+                            <div class="wf-chips mt-3">
                                 <span class="wf-chip"
                                     [class]="sessionType === 'Swarm' ? 'wf-chip--teal' : 'wf-chip--violet'">
                                     <i class="pi" [class]="sessionType === 'Swarm' ? 'pi-users' : 'pi-user'"></i>
@@ -95,18 +166,6 @@
                                     <i class="pi pi-list-check"></i>
                                     Session {{ sessionMeta.sessionNumber }} / {{ sessionMeta.totalSessions }}
                                 </span>
-                                @if (sessionType === 'Swarm') {
-                                <span class="wf-chip wf-chip--slate">
-                                    <i class="pi pi-clock"></i>{{ sessionMeta.stationDuration }}
-                                </span>
-                                <span class="wf-chip wf-chip--amber">
-                                    <i class="pi pi-chart-bar"></i>Last sRPE: {{ sessionMeta.lastSRPE }}/10
-                                </span>
-                                } @else {
-                                <span class="wf-chip wf-chip--teal">
-                                    <i class="pi pi-heart"></i>Wellness: {{ sessionMeta.lastWellness }}/7
-                                </span>
-                                }
                             </div>
                         </div>
                         <!-- Right: action buttons -->
@@ -123,8 +182,8 @@
                             </button>
                             }
 
-                            <button pButton icon="pi pi-eye-slash" label="No Show" [raised]="true"
-                                severity="secondary"></button>
+                            <button pButton icon="pi pi-file-o" label="Report Absence" [raised]="true"
+                                severity="secondary" (click)="onNoShow()"></button>
 
 
                         </div>
@@ -206,14 +265,6 @@
                                     </div>
                                     <p class="doctor-notes-text">{{ protocolCtx.doctorNotes }}</p>
                                 </div>
-
-                                <!-- Measurement Dates -->
-                                <div class="measurement-dates">
-                                    <div class="measurement-date-item">
-                                        <div class="measurement-date-value">{{ protocolCtx.lastMeasurement }}</div>
-                                    </div>
-
-                                </div>
                             </div>
                             }
                         </div>
@@ -254,10 +305,12 @@
                                         <div class="timer-card__fill" [style.width.%]="timerProgressPercent"></div>
                                     </div>
                                 </div>
+                                @if (!isTimerFinished) {
                                 <button pButton [icon]="isPaused ? 'pi pi-play' : 'pi pi-pause'"
                                     [label]="isPaused ? 'Resume' : 'Pause'" class="p-button-outlined timer-pause-btn"
-                                    [disabled]="isTimerFinished" (click)="pauseTimer()">
+                                    (click)="pauseTimer()">
                                 </button>
+                                }
                             </div>
                         </div>
 
@@ -335,6 +388,7 @@
                                                 @for (exercise of section.exercises; track exercise.name; let eIdx =
                                                 $index) {
                                                 <div class="exercise-row"
+                                                    [id]="'row-ex-' + phase.id + '-' + sIdx + '-' + eIdx"
                                                     [class.exercise-row--disabled]="!canCheckExercise(phase, getGlobalIndex(phase, sIdx, eIdx))">
                                                     <div class="d-flex align-items-start gap-3">
                                                         <p-checkbox [(ngModel)]="exercise.completed" [binary]="true"
@@ -351,7 +405,7 @@
                                                             <div class="exercise-params">{{ exercise.params }}</div>
                                                             <span class="exercise-note-toggle"
                                                                 (click)="toggleExerciseNote(exercise)">
-                                                                {{ exercise.noteVisible ? 'âˆ’ Hide note' : '+ Add note'
+                                                                {{ exercise.noteVisible ? '− Hide note' : '+ Add note'
                                                                 }}
                                                             </span>
                                                             @if (exercise.noteVisible) {
@@ -412,7 +466,7 @@
                                         </div>
                                         <div>
                                             <div class="handoff-pcard-title">Station Handoff</div>
-                                            <div class="handoff-pcard-subtitle">Session Path â€” Swarm</div>
+                                            <div class="handoff-pcard-subtitle">Session Path Swarm</div>
                                         </div>
                                     </div>
                                     <div class="handoff-pcard-path-badge">
@@ -454,15 +508,15 @@
                             </div>
                             <ng-template pTemplate="footer">
                                 <div class="handoff-pcard-footer">
-                                    <button pButton icon="pi pi-send" label="Handoff to Next Station"
-                                        class="p-button-success handoff-btn-primary" [disabled]="!isTimerFinished"
-                                        (click)="handoffToNextStation()">
-                                    </button>
-                                    <button pButton icon="pi pi-save"
-                                        [label]="saveDraftSent ? 'Draft Saved' : 'Save Draft'"
-                                        [class]="saveDraftSent ? 'p-button-outlined p-button-success handoff-btn-secondary' : 'p-button-outlined p-button-secondary handoff-btn-secondary'"
-                                        (click)="saveDraft()">
-                                    </button>
+                                    <span style="display: inline-block;"
+                                        pTooltip="You cannot take any action until the time of the session has ended"
+                                        [tooltipDisabled]="isTimerFinished" tooltipPosition="top">
+                                        <button pButton icon="pi pi-send" label="Handoff to Next Station"
+                                            class="p-button-success handoff-btn-primary" [disabled]="!isTimerFinished"
+                                            (click)="handoffToNextStation()" style="pointer-events: auto;">
+                                        </button>
+                                    </span>
+
                                 </div>
                             </ng-template>
                         </p-card>
@@ -492,18 +546,67 @@
 
 
     <!-- No Show Dialog -->
-    <p-dialog header="Record No-Show" [(visible)]="displayNoShowDialog" [modal]="true" [style]="{ width: '450px' }"
-        [draggable]="false" [resizable]="false">
-        <div class="flex flex-col gap-3 mt-3">
-            <p class="small text-muted mb-2">Please provide a reason for the no-show.</p>
-            <label class="fw-medium">Reason / Comment</label>
-            <textarea pInputTextarea rows="4" [(ngModel)]="noShowReason" placeholder="Enter reason here..."
-                class="w-full"></textarea>
+    <p-dialog [header]="'Report Absence — ' + patientData.name" [(visible)]="displayNoShowDialog" [modal]="true"
+        [style]="{ width: '450px' }" [draggable]="false" [resizable]="false">
+        <div class="flex flex-col gap-3 mt-4">
+            <div class="text-center mb-4">
+                <i class="pi pi-exclamation-triangle text-warning mb-3" style="font-size: 2rem;"></i>
+                <p class="fw-bold text-dark m-0" style="font-size: 1.1rem; color: #212529;">This will notify the Team
+                    Leader immediately.</p>
+                <p class="fw-bold text-dark m-0 mt-2" style="font-size: 1.1rem; color: #212529;">Are you sure?</p>
+            </div>
+            <label class="fw-semibold text-dark">Reason / Comment</label>
+            <textarea pInputTextarea rows="5" [(ngModel)]="noShowReason" placeholder="Enter reason here..."
+                class="w-full p-3 shadow-sm rounded"
+                style="border: 1px solid #ced4da; font-size: 1rem; outline: none; transition: border-color 0.2s;"></textarea>
         </div>
         <ng-template pTemplate="footer">
             <p-button icon="pi pi-times" (click)="cancelNoShow()" label="Cancel" styleClass="p-button-text"></p-button>
-            <p-button icon="pi pi-check" (click)="submitNoShow()" label="Submit"
+            <p-button icon="pi pi-check" (click)="submitNoShow()" label="Yes, Report Absence"
                 [disabled]="!noShowReason.trim()"></p-button>
+        </ng-template>
+    </p-dialog>
+
+    <!-- Handoff Dialog -->
+    <p-dialog header="Handoff to Resilience Station?" [(visible)]="displayHandoffDialog" [modal]="true" position="top"
+        [style]="{ width: '500px', top: '10vh' }" [draggable]="false" [resizable]="false">
+        <div class="flex flex-col gap-4 mt-4">
+            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg shadow-sm">
+                <div class="flex flex-col gap-3">
+                    <div class="flex align-items-start gap-3">
+                        <p-checkbox name="handoffGroup" value="exercises" [(ngModel)]="handoffChecklist" inputId="chk1"
+                            class="mt-1"></p-checkbox>
+                        <label for="chk1" class="fw-medium text-dark m-0 cursor-pointer lh-sm">All exercises completed
+                            or skipped with note</label>
+                    </div>
+                    <div class="flex align-items-start gap-3">
+                        <p-checkbox name="handoffGroup" value="comments" [(ngModel)]="handoffChecklist" inputId="chk2"
+                            class="mt-1"></p-checkbox>
+                        <label for="chk2" class="fw-medium text-dark m-0 cursor-pointer lh-sm">Session Comment added (if
+                            any observations)</label>
+                    </div>
+                    <div class="flex align-items-start gap-3">
+                        <p-checkbox name="handoffGroup" value="timer" [(ngModel)]="handoffChecklist" inputId="chk3"
+                            class="mt-1"></p-checkbox>
+                        <label for="chk3" class="fw-medium text-dark m-0 cursor-pointer lh-sm">Timer has ended</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3 bg-red-50 rounded" style="border: 1px solid #fecaca;">
+                <div class="flex gap-2">
+                    <i class="pi pi-exclamation-triangle text-red-500 mt-1"></i>
+                    <p class="m-0 fw-bold text-red-700" style="font-size: 0.95rem;">This action cannot be undone. The
+                        session will be recorded as complete.</p>
+                </div>
+            </div>
+        </div>
+
+        <ng-template pTemplate="footer">
+            <p-button icon="pi pi-arrow-left" (click)="displayHandoffDialog = false" label="Go Back"
+                styleClass="p-button-text text-secondary"></p-button>
+            <p-button icon="pi pi-arrow-right" (click)="confirmHandoff()" label="Confirm Handoff " iconPos="right"
+                [disabled]="handoffChecklist.length <=1"></p-button>
         </ng-template>
     </p-dialog>
 
