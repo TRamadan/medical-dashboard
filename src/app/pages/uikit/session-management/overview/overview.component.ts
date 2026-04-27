@@ -1,4 +1,5 @@
-import { Component, Input, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, OnDestroy, ViewChild, ElementRef, AfterViewInit, Renderer2, Inject, ChangeDetectorRef } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { AccordionModule } from 'primeng/accordion';
 import { CheckboxModule } from 'primeng/checkbox';
@@ -16,7 +17,13 @@ import { TooltipModule } from 'primeng/tooltip';
     templateUrl: './overview.component.html',
     styleUrl: './overview.component.scss',
 })
-export class OverviewComponent implements OnDestroy {
+export class OverviewComponent implements OnDestroy, AfterViewInit {
+
+    constructor(
+        private renderer: Renderer2,
+        private cdr: ChangeDetectorRef,
+        @Inject(DOCUMENT) private document: Document
+    ) {}
 
     @Input() patientData: any = {
         patientId: 'PT-202225',
@@ -139,6 +146,47 @@ export class OverviewComponent implements OnDestroy {
     handoffChecklist: string[] = [];
 
     @ViewChild('timerContainer') timerContainer!: ElementRef;
+    @ViewChild('fabContainer') fabContainer!: ElementRef;
+    @ViewChild('handoffSection') handoffSection!: ElementRef;
+
+    isHandoffVisible = false;
+    private scrollListenerFn: (() => void) | null = null;
+
+    ngAfterViewInit() {
+        if (this.fabContainer) {
+            this.renderer.appendChild(this.document.body, this.fabContainer.nativeElement);
+        }
+
+        // Track visibility of Handoff section reliably on any scroll container
+        this.scrollListenerFn = this.checkHandoffVisibility.bind(this);
+        this.document.addEventListener('scroll', this.scrollListenerFn as any, true);
+        window.addEventListener('resize', this.scrollListenerFn as any);
+
+        setTimeout(() => this.checkHandoffVisibility(), 200);
+    }
+
+    checkHandoffVisibility() {
+        const target = this.handoffSection ? this.handoffSection.nativeElement : this.document.getElementById('handoff-section');
+        if (!target) return;
+
+        const rect = target.getBoundingClientRect();
+        const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+        
+        // Element is visible if its top is above the bottom of the screen and its bottom is below the top
+        const isVisible = rect.top < windowHeight && rect.bottom > 0;
+
+        if (this.isHandoffVisible !== isVisible) {
+            this.isHandoffVisible = isVisible;
+            this.cdr.detectChanges();
+        }
+    }
+
+    scrollToHandoff() {
+        const el = this.document.getElementById('handoff-section');
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
 
     // ── Phases & Exercises (Sections Model) ──────────────────────
     phases: any[] = [
@@ -355,5 +403,12 @@ export class OverviewComponent implements OnDestroy {
 
     ngOnDestroy(): void {
         if (this.timerInterval) clearInterval(this.timerInterval);
+        if (this.fabContainer) {
+            this.renderer.removeChild(this.document.body, this.fabContainer.nativeElement);
+        }
+        if (this.scrollListenerFn) {
+            this.document.removeEventListener('scroll', this.scrollListenerFn as any, true);
+            window.removeEventListener('resize', this.scrollListenerFn as any);
+        }
     }
 }

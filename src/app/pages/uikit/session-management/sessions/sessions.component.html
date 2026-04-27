@@ -1,12 +1,7 @@
 <div class="sessions-wrapper" dir="ltr">
     @if (isLoading()) {
     <div class="sessions-spinner-overlay" aria-live="polite" aria-label="Loading sessions">
-        <p-progressSpinner
-            styleClass="sessions-spinner"
-            strokeWidth="4"
-            animationDuration="0.8s"
-            ariaLabel="Loading"
-        />
+        <p-progressSpinner styleClass="sessions-spinner" strokeWidth="4" animationDuration="0.8s" ariaLabel="Loading" />
     </div>
     } @else {
     <!-- Header Row -->
@@ -46,6 +41,20 @@
 
 
 
+    @if (hasNoData()) {
+    <div class="empty-state-wrapper">
+        <div class="empty-state-glow"></div>
+        <div class="empty-state-content">
+            <div class="empty-state-icon-container">
+                <i class="pi pi-calendar-times empty-state-icon"></i>
+            </div>
+            <h3 class="empty-state-title text-dark">No Sessions Scheduled</h3>
+            <p class="empty-state-desc text-dark">
+                There is no data added for the current user today. Take a break or check back later for updates.
+            </p>
+        </div>
+    </div>
+    } @else {
     <!-- Timeline List -->
     <div class="timeline-container ps-5">
         @for (session of sessions; track session.time; let isLast = $last) {
@@ -119,5 +128,6 @@
         </div>
         }
     </div>
+    }
     }
 </div>

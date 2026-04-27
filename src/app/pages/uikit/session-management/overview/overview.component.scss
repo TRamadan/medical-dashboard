@@ -1119,16 +1119,38 @@
 /* Handoff Footer */
 .handoff-pcard-footer {
     display: flex;
+    justify-content: center;
     gap: 10px;
     padding: 12px 18px;
     border-top: 1px solid rgba(16, 185, 129, 0.1);
     background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, transparent 100%);
 }
 
+/* Fixed Handoff Bar */
+.fixed-handoff-bar {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 1000;
+    pointer-events: none; /* Allows clicking behind it if needed, children re-enable */
+}
+
+.fixed-handoff-bar > span {
+    pointer-events: auto;
+}
+
 .handoff-btn-primary {
-    flex: 1;
     font-weight: 700 !important;
-    font-size: 13px !important;
+    font-size: 15px !important;
+    padding: 14px 28px !important;
+    border-radius: 50px !important; /* pill shape */
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4) !important;
+    transition: all 0.3s ease;
+
+    &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(16, 185, 129, 0.5) !important;
+    }
 }
 
 .handoff-btn-secondary {

@@ -32,19 +32,23 @@
             <div class="card shadow-sm border-0">
                 <div class="card-body">
                     <h3 class="h5 mb-3 fw-semibold">Overall Progress</h3>
-                    
+
                     <div class="d-flex flex-column gap-2 mb-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-secondary" style="font-size: 0.95rem;">Sessions Completed:</span>
-                            <span class="fw-bold text-dark">{{ progressData.completed }} of {{ progressData.total }}</span>
+                            <span class="fw-bold text-dark">{{ progressData.completed }} of {{ progressData.total
+                                }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-secondary" style="font-size: 0.95rem;">Current Phase:</span>
-                            <span class="fw-bold text-dark">{{ progressData.currentPhase }} <span class="text-secondary fw-medium" style="font-size: 0.9em;">(Phase {{ progressData.phaseNumber }} of {{ progressData.totalPhases }})</span></span>
+                            <span class="fw-bold text-dark">{{ progressData.currentPhase }} <span
+                                    class="text-secondary fw-medium" style="font-size: 0.9em;">(Phase {{
+                                    progressData.phaseNumber }} of {{ progressData.totalPhases }})</span></span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-secondary" style="font-size: 0.95rem;">Phase Progress:</span>
-                            <span class="fw-bold text-dark">{{ progressData.phaseSessionsRange }} · Currently on Session {{ progressData.currentSessionInPhase }}</span>
+                            <span class="fw-bold text-dark">{{ progressData.phaseSessionsRange }} · Currently on Session
+                                {{ progressData.currentSessionInPhase }}</span>
                         </div>
                     </div>
 
@@ -456,6 +460,7 @@
 
                         <!-- Handoff Card (Swarm only) -->
                         @if (sessionType === 'Swarm') {
+                        <div #handoffSection id="handoff-section">
                         <p-card styleClass="handoff-pcard mb-3">
                             <ng-template pTemplate="header">
                                 <div class="handoff-pcard-header">
@@ -516,10 +521,11 @@
                                             (click)="handoffToNextStation()" style="pointer-events: auto;">
                                         </button>
                                     </span>
-
                                 </div>
                             </ng-template>
                         </p-card>
+                        </div>
+
                         }
 
                         <!-- Solo Action Buttons (non-Swarm) -->
@@ -610,4 +616,12 @@
         </ng-template>
     </p-dialog>
 
+</div>
+
+<!-- Fixed Floating Action Button for Handoff -->
+<div #fabContainer class="fixed-handoff-bar" [hidden]="!(sessionType === 'Swarm' && isSessionStarted && !isHandoffVisible)">
+    <button pButton icon="pi pi-arrow-down" label="Go to Handoff"
+        class="p-button-success handoff-btn-primary p-button-rounded shadow-6" 
+        (click)="scrollToHandoff()" style="pointer-events: auto;">
+    </button>
 </div>

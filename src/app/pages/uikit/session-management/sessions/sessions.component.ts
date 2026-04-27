@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { SessionsService } from './services/sessions.service';
 import { CardModule } from 'primeng/card';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { EngineerStats } from './models/engineer-stats';
+
 
 @Component({
     selector: 'app-sessions',
@@ -18,9 +20,10 @@ export class SessionsComponent implements OnInit {
     totalSessionsToday = '4 Sessions Today';
 
     isLoading = signal<boolean>(true);
+    hasNoData = signal<boolean>(false);
 
     // Stats row
-    stats = [
+    stats: EngineerStats[] = [
         { count: '2', label: 'Completed', colorClass: 'text-emerald-400', accentKey: 'completed', icon: 'pi-check-circle' },
         { count: '2', label: 'Remaining', colorClass: 'text-amber-400', accentKey: 'remaining', icon: 'pi-clock' },
         { count: '1', label: 'Solo', colorClass: 'text-violet-400', accentKey: 'solo', icon: 'pi-user' },
@@ -52,15 +55,25 @@ export class SessionsComponent implements OnInit {
     }
 
     fetchSessions(): void {
-        const dateFrom = '2026-04-22';
-        const dateTo = '2026-04-22';
+        const today = new Date();
+        const currentDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        const dateFrom = currentDate;
+        const dateTo = currentDate;
         const slotMinutes = 30;
-        const doctorId = 24;
+        const userDataStr = localStorage.getItem('userData');
+        const userData = userDataStr ? JSON.parse(userDataStr) : null;
+        const doctorId = userData?.id || 24;
         const locationId = 8;
-        this.isLoading.set(true)
+        this.hasNoData.set(false);
+        this.isLoading.set(true);
 
         this.sessionsService.getAllCalenderData(dateFrom, slotMinutes, doctorId, locationId, dateTo).subscribe({
             next: (res: any) => {
+                if (!res || res.length === 0) {
+                    this.hasNoData.set(true);
+                    this.isLoading.set(false);
+                    return;
+                }
                 this.mapApiResponse(res);
                 this.isLoading.set(false)
 
@@ -68,7 +81,7 @@ export class SessionsComponent implements OnInit {
             error: (err: any) => {
                 console.error('Error fetching sessions:', err);
                 // Fallback to default mock data if API fails to show design
-                this.setMockData();
+                this.hasNoData.set(true);
                 this.isLoading.set(false)
 
             }
@@ -78,7 +91,7 @@ export class SessionsComponent implements OnInit {
     mapApiResponse(res: any): void {
         const slots = res[0].slotTime || [];
         if (slots.length === 0) {
-            this.setMockData();
+            this.hasNoData.set(true);
             return;
         }
 
