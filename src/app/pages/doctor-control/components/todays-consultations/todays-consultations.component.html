@@ -8,11 +8,12 @@
         <span class="dc-tc__legend-dot" style="background:#10b981" aria-hidden="true"></span>
         <span class="dc-tc__legend-label">Confirmed Consultation</span>
         <span class="dc-tc__legend-dot" style="background:#f59e0b; margin-right:0.75rem;" aria-hidden="true"></span>
-        <span class="dc-tc__legend-label">Waiting</span>
+        <span class="dc-tc__legend-label">Needs your decision </span>
       </div>
     </div>
     <div class="dc-tc__nav" role="group" aria-label="Week navigation">
-      <button type="button" class="dc-week-btn" (click)="prevWeek()" [disabled]="weekOffset() === 0" aria-label="Previous week">
+      <button type="button" class="dc-week-btn" (click)="prevWeek()" [disabled]="weekOffset() === 0"
+        aria-label="Previous week">
         <i class="pi pi-chevron-left" aria-hidden="true"></i>
         Previous
       </button>
@@ -28,42 +29,42 @@
     <!-- Day headers -->
     <div class="dc-cal-grid__header" role="row">
       @for (day of weekDays; track day.key) {
-        <div class="dc-cal-day-header" role="columnheader">
-          <div class="dc-cal-day-header__name">{{ day.name }}</div>
-          <div class="dc-cal-day-header__date">{{ day.date }}</div>
-        </div>
+      <div class="dc-cal-day-header" role="columnheader">
+        <div class="dc-cal-day-header__name">{{ day.name }}</div>
+        <div class="dc-cal-day-header__date">{{ day.date }}</div>
+      </div>
       }
     </div>
 
     <!-- Slot rows -->
-    @for (slotIdx of [0, 1]; track slotIdx) {
-      <div class="dc-cal-grid__row" role="row">
-        @for (day of weekDays; track day.key) {
-          <div class="dc-cal-cell" role="gridcell" [attr.aria-label]="day.name + ' ' + day.slots[slotIdx].label">
-            @if (day.slots[slotIdx].doctor) {
-              <div class="dc-cal-chip"
-                [style.background-color]="day.slots[slotIdx].color + '22'"
-                [style.border-color]="day.slots[slotIdx].color + '55'"
-                [style.color]="day.slots[slotIdx].color">
-                {{ day.slots[slotIdx].doctor }}
-              </div>
-            } @else {
-              <div class="dc-cal-empty">—</div>
-            }
-          </div>
+    @for (slotIdx of slotIndices; track slotIdx) {
+    <div class="dc-cal-grid__row" role="row">
+      @for (day of weekDays; track day.key) {
+      <div class="dc-cal-cell" role="gridcell" [attr.aria-label]="day.name + ' slot ' + (slotIdx + 1)">
+        @if (day.slots[slotIdx]?.doctor) {
+        <div class="dc-cal-chip" [style.border-left]="'3px solid ' + day.slots[slotIdx].color"
+          [style.color]="day.slots[slotIdx].color">
+          <i class="pi pi-user" aria-hidden="true"></i>
+          <span>{{ day.slots[slotIdx].doctor }}</span>
+        </div>
+        } @else {
+        <div class="dc-cal-empty">No slots</div>
         }
       </div>
+      }
+    </div>
     }
   </div>
 
   <!-- ── Divider ────────────────────────────────────────────── -->
   <div class="dc-tc__divider" role="separator">
-    <span>Full Patient — Do not publish</span>
+    <span>Next Two Weeks — What's waiting for you</span>
   </div>
 
   <!-- ── Upcoming consultations ─────────────────────────────── -->
   <div class="dc-tc__list" aria-label="Upcoming consultations">
     @for (c of upcomingConsultations; track c.name) {
+    <p-card styleClass="dc-consult-p-card">
       <div class="dc-consult-row">
         <div class="dc-consult-row__indicator">
           <span class="dc-consult-row__dot" [style.background-color]="c.dot" aria-hidden="true"></span>
@@ -73,15 +74,14 @@
           <div class="dc-consult-row__name">{{ c.name }}</div>
           <div class="dc-consult-row__details">{{ c.details }}</div>
         </div>
-        @if (c.badge) {
-          <span class="dc-badge"
-            [style.color]="c.badgeAccent"
-            [style.border-color]="c.badgeAccent + '44'"
-            [style.background-color]="c.badgeAccent + '18'">
-            {{ c.badge }}
-          </span>
-        }
+        <!-- @if (c.badge) {
+        <span class="dc-badge" [style.color]="c.badgeAccent" [style.border-color]="c.badgeAccent + '44'"
+          [style.background-color]="c.badgeAccent + '18'">
+          {{ c.badge }}
+        </span>
+        } -->
       </div>
+    </p-card>
     }
   </div>
 

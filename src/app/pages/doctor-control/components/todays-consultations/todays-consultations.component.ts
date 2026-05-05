@@ -25,87 +25,82 @@ export class TodaysConsultationsComponent {
 
   readonly timeSlots = ['Morning', 'Afternoon'];
 
+
   readonly weekDays: WeekDay[] = [
     {
       key: 'sun', name: 'Sunday', date: 1,
       slots: [
-        { label: 'Morning', doctor: 'M. Tarek',  color: '#3b82f6' },
-        { label: 'Afternoon',  doctor: 'F. Sami',  color: '#8b5cf6' }
+        { label: 'Morning', doctor: 'M. Tarek', color: '#10b981' },
+        { label: 'Afternoon', doctor: 'F. Sami', color: '#10b981' }
       ]
     },
     {
       key: 'mon', name: 'Monday', date: 2,
       slots: [
-        { label: 'Morning', doctor: 'Dr. Salem',  color: '#10b981' },
-        { label: 'Afternoon',  doctor: 'N. Khaled',  color: '#f59e0b' }
+        { label: 'Morning', doctor: 'Dr. Salem', color: '#10b981' },
+        { label: 'Afternoon', doctor: 'N. Khaled', color: '#f59e0b' }
       ]
     },
     {
       key: 'tue', name: 'Tuesday', date: 3,
       slots: [
-        { label: 'Morning', doctor: 'M. Ahmed',     color: '#3b82f6' },
-        { label: 'Afternoon',  doctor: 'Dr. Salem',     color: '#10b981' }
+        { label: 'Morning', doctor: 'M. Ahmed', color: '#f59e0b' },
+        { label: 'Afternoon', doctor: 'Dr. Salem', color: '#10b981' }
       ]
     },
     {
       key: 'wed', name: 'Wednesday', date: 4,
       slots: [
-        { label: 'Morning', doctor: null,          color: '' },
-        { label: 'Afternoon',  doctor: 'R. Mustafa',   color: '#a78bfa' }
+        { label: 'Morning', doctor: null, color: '' },
+        { label: 'Afternoon', doctor: 'R. Mustafa', color: '#f59e0b' }
       ]
     },
     {
       key: 'thu', name: 'Thursday', date: 5,
       slots: [
-        { label: 'Morning', doctor: 'M. Salem',    color: '#10b981' },
-        { label: 'Afternoon',  doctor: 'R. Mustafa',   color: '#a78bfa' }
+        { label: 'Morning', doctor: 'M. Salem', color: '#10b981' },
+        { label: 'Morning', doctor: 'M. Salem', color: '#10b981' },
+
+        { label: 'Afternoon', doctor: 'R. Mustafa', color: '#f59e0b' }
       ]
     },
     {
       key: 'fri', name: 'Friday', date: 6,
       slots: [
-        { label: 'Morning', doctor: null,          color: '' },
-        { label: 'Afternoon',  doctor: null,          color: '' }
+        { label: 'Morning', doctor: null, color: '' },
+        { label: 'Afternoon', doctor: null, color: '' }
       ]
     },
-    {
-      key: 'sat', name: 'Saturday', date: 7,
-      slots: [
-        { label: 'Morning', doctor: 'M. Tarek',    color: '#3b82f6' },
-        { label: 'Afternoon',  doctor: 'F. Sami',    color: '#8b5cf6' }
-      ]
-    }
   ];
+
+  readonly slotIndices = (() => {
+    const max = Math.max(...this.weekDays.map(d => d.slots.length));
+    return Array.from({ length: max }, (_, i) => i);
+  })();
 
   readonly upcomingConsultations: ConsultationRow[] = [
     {
       name: 'M. Ahmed — New Fluorite',
       type: 'Today',
-      badge: 'New',    badgeAccent: '#10b981',
+      badge: 'New', badgeAccent: '#10b981',
       dot: '#10b981',
-      details: 'First Consultation — April 2026'
+      details: 'First Consultation — Knee injury'
     },
     {
       name: 'R. Khaled — NPS Specialist',
       type: '24/3',
-      badge: 'Classic',   badgeAccent: '#f59e0b',
+      badge: 'Classic', badgeAccent: '#f59e0b',
       dot: '#f59e0b',
       details: 'Needs review signal on dot'
     },
     {
       name: 'A. Mahmoud — Second Consultation',
       type: '4/4',
-      badge: 'Partial',     badgeAccent: '#a78bfa',
+      badge: 'Partial', badgeAccent: '#a78bfa',
       dot: '#a78bfa',
       details: 'External consultation result available now'
     },
-    {
-      name: 'No — Global',
-      type: '2/2',
-      badge: '',         badgeAccent: '#64748b',
-      dot: '#64748b',
-      details: 'Since forever'
-    }
+
   ];
 
   prevWeek(): void {
