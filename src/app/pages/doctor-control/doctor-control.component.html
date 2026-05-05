@@ -1,0 +1,57 @@
+<div class="dc-shell" dir="ltr">
+
+  <!-- ═══ Sidebar ════════════════════════════════ -->
+  <aside class="dc-sidebar" aria-label="Doctor Control Navigation">
+
+    <!-- Doctor profile -->
+    <div class="dc-sidebar__profile">
+      <div class="dc-sidebar__avatar" aria-hidden="true">H</div>
+      <div>
+        <div class="dc-sidebar__name">Dr. Hossam Zeidan</div>
+        <div class="dc-sidebar__sub">Doctor Command Center</div>
+      </div>
+    </div>
+
+    <div class="dc-sidebar__section-label">Menu</div>
+
+    <!-- Primary nav -->
+    <nav class="dc-sidebar__nav" role="navigation">
+      @for (item of navItems; track item.id) {
+      <button type="button" class="dc-nav-btn" [class.dc-nav-btn--active]="activeNav() === item.id"
+        (click)="setActive(item.id)" [id]="'dc-nav-' + item.id"
+        [attr.aria-current]="activeNav() === item.id ? 'page' : null">
+
+        @if (item.dot) {
+        <span class="dc-nav-dot" [style.background-color]="item.dot" aria-hidden="true"></span>
+        }
+        <i class="pi" [class]="item.icon" aria-hidden="true"></i>
+        <span class="dc-nav-btn__label">{{ item.label }}</span>
+        @if (item.badge) {
+        <span class="dc-nav-btn__badge" [attr.aria-label]="item.badge + ' items'">{{ item.badge }}</span>
+        }
+      </button>
+      }
+    </nav>
+
+
+  </aside>
+
+  <!-- ═══ Main content ═══════════════════════════════════════════ -->
+  <main class="dc-main" id="dc-main-content" role="main" aria-live="polite">
+    @switch (activeNav()) {
+    @case ('dashboard') {
+    <app-dc-dashboard />
+    }
+    @case ('todays-consultations') {
+    <app-dc-todays-consultations />
+    }
+    @case ('pending-tickets') {
+    <app-dc-pending-tickets />
+    }
+    @case ('notifications-alerts') {
+    <app-dc-notifications-alerts />
+    }
+    }
+  </main>
+
+</div>

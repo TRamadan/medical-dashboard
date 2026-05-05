@@ -1,0 +1,76 @@
+<div class="dc-dash" dir="ltr">
+
+  <!-- ── 4 Stat cards ───────────────────────────────────────── -->
+  <div class="dc-stats-grid" role="list" aria-label="Today's stats">
+    @for (s of stats; track s.label) {
+    <p-card styleClass="dc-stat-card" [style]="{'--accent': s.accent}" role="listitem">
+      <div class="dc-stat-card__bar"></div>
+      <div class="dc-stat-card__body">
+        <div class="dc-stat-card__icon-wrap" aria-hidden="true">
+          <i class="pi" [class]="s.icon"></i>
+        </div>
+        <div class="dc-stat-card__value">{{ s.value }}</div>
+        <div class="dc-stat-card__label">{{ s.label }}</div>
+        <div class="dc-stat-card__sub">{{ s.sub }}</div>
+      </div>
+    </p-card>
+    }
+  </div>
+
+  <!-- ── Today's Schedule ─────────────────────────────────────────── -->
+  <div class="dc-section-title">Today's Schedule</div>
+
+  <div class="dc-patient-list" aria-label="Today's schedule">
+    @for (p of patients; track p.name) {
+    <p-card styleClass="dc-patient-p-card" [style]="{'border-left': '4px solid ' + p.badgeAccent}">
+      <div class="dc-patient-row">
+        <span class="dc-patient-row__dot" [style.background-color]="p.dot" aria-hidden="true"></span>
+        <div class="dc-patient-row__info">
+          <div class="dc-patient-row__name">{{ p.name }}</div>
+          <div class="dc-patient-row__details">{{ p.details }}</div>
+        </div>
+        <div class="dc-patient-row__meta">
+          <span class="dc-badge" [style.color]="p.badgeAccent" [style.border-color]="p.badgeAccent + '44'"
+            [style.background-color]="p.badgeAccent + '18'">
+            {{ p.badge }}
+          </span>
+          <span class="dc-patient-row__time">{{ p.time }}</span>
+        </div>
+      </div>
+    </p-card>
+    }
+  </div>
+
+  <!-- ── Divider ────────────────────────────────────────────── -->
+  <div class="dc-priority-divider" role="separator">
+    <span>Highest Priority — Needs Your Decision</span>
+  </div>
+
+  <!-- ── Priority action rows ──────────────────────────────── -->
+  <div class="dc-action-list" aria-label="Priority actions">
+    @for (row of priorityRows; track row.name) {
+    <p-card styleClass="dc-action-p-card" [style]="{'border-top': '4px solid ' + row.dot}">
+      <div class="dc-action-row">
+        <div class="dc-action-row__left">
+          <span class="dc-action-row__dot" [style.background-color]="row.dot" aria-hidden="true"></span>
+          <div class="dc-action-row__info">
+            <div class="dc-action-row__name">{{ row.name }}</div>
+            <div class="dc-action-row__summary">{{ row.summary }}</div>
+            <div class="dc-action-row__details">{{ row.details }}</div>
+          </div>
+        </div>
+        <div class="dc-action-row__actions">
+          @for (btn of row.actions; track btn.label) {
+          <button type="button" class="dc-action-btn" [class.dc-action-btn--primary]="btn.style === 'primary'"
+            [class.dc-action-btn--danger]="btn.style === 'danger'">
+            {{ btn.label }}
+          </button>
+          }
+          <button type="button" class="dc-action-btn dc-action-btn--primary">View Ticket →</button>
+        </div>
+      </div>
+    </p-card>
+    }
+  </div>
+
+</div>

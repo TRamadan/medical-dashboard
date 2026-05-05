@@ -1,0 +1,212 @@
+// ── Design tokens ──────────────────────────────────────────────
+$bg-shell: #09101e;
+$bg-sidebar: #0d1525;
+$bg-card: #131f35;
+$border: rgba(255, 255, 255, 0.06);
+$text-primary: #e2e8f0;
+$text-muted: #64748b;
+$accent: #818cf8;
+$accent-bg: rgba(99, 102, 241, 0.12);
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+// ── Shell layout ──────────────────────────────────────────────
+.dc-shell {
+  display: flex;
+  min-height: calc(100vh - 4rem);
+  background: transparent;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: $text-primary;
+  direction: ltr;
+}
+
+// ── Sidebar ───────────────────────────────────────────────────
+.dc-sidebar {
+  width: 210px;
+  flex-shrink: 0;
+  background: transparent;
+  border-right: 1px solid $border;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0.625rem;
+  gap: 3px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+
+  &__profile {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.875rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid $border;
+  }
+
+  &__avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  &__name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: $text-primary;
+    line-height: 1.3;
+  }
+
+  &__sub {
+    font-size: 9.5px;
+    color: $text-muted;
+    line-height: 1.3;
+  }
+
+  &__section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #3d4f6e;
+    padding: 0.375rem 0.5rem 0.25rem;
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    &--bottom {
+      margin-top: auto;
+    }
+  }
+
+  &__divider {
+    height: 1px;
+    background: $border;
+    margin: 0.375rem 0;
+  }
+
+  &__urgency {
+    margin-top: 0.75rem;
+    padding: 0.5rem 0.5rem;
+    background: rgba(239, 68, 68, 0.04);
+    border: 1px solid rgba(239, 68, 68, 0.12);
+    border-radius: 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__urgency-title {
+    font-size: 9px;
+    font-weight: 600;
+    color: #94a3b8;
+  }
+
+  &__urgency-body {
+    font-size: 9px;
+    color: #3d4f6e;
+    line-height: 1.5;
+  }
+}
+
+// ── Nav dot ───────────────────────────────────────────────────
+.dc-nav-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+// ── Nav button ────────────────────────────────────────────────
+.dc-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.44rem 0.625rem;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: $text-muted;
+  font-size: 12.5px;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  direction: ltr;
+  transition: background 0.13s ease, color 0.13s ease;
+
+  .pi {
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  &__label {
+    flex: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #09101e;
+  }
+
+  &__badge {
+    font-size: 10px;
+    font-weight: 700;
+    background: $accent-bg;
+    color: $accent;
+    border-radius: 10px;
+    padding: 1px 6px;
+    min-width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+
+    &--muted {
+      background: rgba(100, 116, 139, 0.1);
+      color: #3d4f6e;
+    }
+  }
+
+  &:hover:not(&--active) {
+    background: rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
+  }
+
+  &--active {
+    background: $accent-bg;
+    color: #c7d2fe;
+
+    .pi {
+      color: $accent;
+    }
+
+    .dc-nav-btn__badge {
+      background: rgba(99, 102, 241, 0.25);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid $accent;
+    outline-offset: 1px;
+  }
+}
+
+// ── Main content ──────────────────────────────────────────────
+.dc-main {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+}

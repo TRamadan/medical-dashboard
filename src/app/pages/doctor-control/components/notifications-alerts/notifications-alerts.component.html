@@ -1,0 +1,103 @@
+<div class="dc-na" dir="ltr">
+
+  <!-- ── Header ─────────────────────────────────────────────── -->
+  <div class="dc-na__header">
+    <div class="dc-na__title-group">
+      <h1 class="dc-na__title">
+        <i class="pi pi-bell" aria-hidden="true"></i>
+        Notifications & Alerts
+      </h1>
+      @if (unreadCount() > 0) {
+        <span class="dc-na__unread-badge" [attr.aria-label]="unreadCount() + ' unread notifications'">
+          {{ unreadCount() }} Unread
+        </span>
+      }
+    </div>
+    <button
+      type="button"
+      class="dc-na__mark-all-btn"
+      (click)="markAllRead()"
+      [disabled]="unreadCount() === 0"
+      aria-label="Mark all notifications as read">
+      <i class="pi pi-check-square" aria-hidden="true"></i>
+      Mark all as read
+    </button>
+  </div>
+
+  <!-- ── Legend ─────────────────────────────────────────────── -->
+  <div class="dc-na__legend" aria-label="Priority levels">
+    <span class="dc-na__legend-item dc-na__legend-item--critical">
+      <span class="dc-na__legend-dot"></span> Critical
+    </span>
+    <span class="dc-na__legend-item dc-na__legend-item--warning">
+      <span class="dc-na__legend-dot"></span> Warning
+    </span>
+    <span class="dc-na__legend-item dc-na__legend-item--info">
+      <span class="dc-na__legend-dot"></span> Info
+    </span>
+    <span class="dc-na__legend-item dc-na__legend-item--success">
+      <span class="dc-na__legend-dot"></span> Success
+    </span>
+  </div>
+
+  <!-- ── Notification list ──────────────────────────────────── -->
+  <div class="dc-na__list" role="list" aria-label="Notifications">
+    @for (n of notifications(); track n.id) {
+      <div
+        class="dc-notif"
+        [class.dc-notif--unread]="!n.read"
+        [class.dc-notif--critical]="n.level === 'critical'"
+        [class.dc-notif--warning]="n.level === 'warning'"
+        [class.dc-notif--info]="n.level === 'info'"
+        [class.dc-notif--success]="n.level === 'success'"
+        role="listitem"
+        [style.--notif-color]="levelConfig[n.level].color"
+        [style.--notif-bg]="levelConfig[n.level].bg"
+        [style.--notif-border]="levelConfig[n.level].border">
+
+        <!-- Unread indicator -->
+        @if (!n.read) {
+          <span class="dc-notif__unread-dot" aria-label="Unread"></span>
+        }
+
+        <!-- Icon -->
+        <div class="dc-notif__icon-wrap" aria-hidden="true">
+          <i class="pi" [class]="n.icon"></i>
+        </div>
+
+        <!-- Content -->
+        <div class="dc-notif__content">
+          <div class="dc-notif__top">
+            <span class="dc-notif__title">{{ n.title }}</span>
+            <div class="dc-notif__right">
+              @if (n.tag) {
+                <span class="dc-notif__tag">{{ n.tag }}</span>
+              }
+              <span class="dc-notif__time">{{ n.time }}</span>
+            </div>
+          </div>
+          <div class="dc-notif__body">{{ n.body }}</div>
+        </div>
+
+        <!-- Mark read button -->
+        @if (!n.read) {
+          <button
+            type="button"
+            class="dc-notif__read-btn"
+            (click)="markRead(n.id)"
+            [attr.aria-label]="'Mark ' + n.title + ' as read'">
+            <i class="pi pi-times" aria-hidden="true"></i>
+          </button>
+        }
+      </div>
+    }
+
+    @if (notifications().length === 0) {
+      <div class="dc-na__empty" aria-live="polite">
+        <i class="pi pi-bell-slash dc-na__empty-icon" aria-hidden="true"></i>
+        <p>No notifications</p>
+      </div>
+    }
+  </div>
+
+</div>

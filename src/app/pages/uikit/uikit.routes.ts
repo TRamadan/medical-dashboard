@@ -169,5 +169,10 @@ export default [
         path: 'consultation-form-configuration',
         data: { breadcrumb: 'Consultation Form Config' },
         component: ConsultationFormConfigurationComponent
+    },
+    {
+        path: 'doctor-control',
+        data: { breadcrumb: 'Doctor Control' },
+        loadComponent: () => import('../doctor-control/doctor-control.component').then(m => m.DoctorControlComponent)
     }
 ] as Routes;
