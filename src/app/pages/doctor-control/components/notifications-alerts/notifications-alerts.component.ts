@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
 import { ButtonModule } from 'primeng/button';
-
-type NotifLevel = 'critical' | 'warning' | 'info' | 'success';
+import { CardModule } from "primeng/card";
+type NotifLevel = 'critical' | 'warning' | 'info' | 'success' | 'protocol';
 
 interface Notification {
   id: string;
@@ -11,13 +11,14 @@ interface Notification {
   body: string;
   time: string;
   tag?: string;
-  read: boolean;
+  primaryAction?: string;
+  secondaryAction?: string;
 }
 
 @Component({
   selector: 'app-dc-notifications-alerts',
   standalone: true,
-  imports: [ButtonModule],
+  imports: [ButtonModule, CardModule],
   templateUrl: './notifications-alerts.component.html',
   styleUrl: './notifications-alerts.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -26,69 +27,60 @@ export class NotificationsAlertsComponent {
 
   notifications = signal<Notification[]>([
     {
-      id: 'n1', level: 'critical', icon: 'pi-exclamation-circle',
-      title: 'Urgent Alert — M. Salem', read: false,
-      body: 'NPS dropped to 2/10 · Requires immediate doctor intervention',
-      time: '5 mins ago', tag: 'SLA Overdue'
+      id: 'n1', level: 'protocol', icon: 'pi-file-edit',
+      title: 'Protocol Modification — H. Salem',
+      body: 'Team Lead (M. Khaled) added exercise Terminal Knee Extension · 3x12 for Phase 2. Modification applied - Review and approve or revert.',
+      time: '45 mins ago', tag: 'Return to Play Protocol',
+      primaryAction: 'Review Modification →', secondaryAction: 'Revert Modification'
     },
     {
-      id: 'n2', level: 'critical', icon: 'pi-exclamation-circle',
-      title: 'Negative Feedback — F. Sami', read: false,
-      body: '5th consecutive session without noticeable improvement · Protocol review required',
-      time: '20 mins ago', tag: 'Recurring'
+      id: 'n2', level: 'critical', icon: 'pi-exclamation-triangle',
+      title: 'Low NPS — N. Khaled',
+      body: 'Gave 5/10 in month 2 evaluation. Wrote: "Exercises are not suited for my level". Appointment on Friday — pathway review needed before.',
+      time: '3 hours ago',
+      primaryAction: 'Review Athlete Profile →'
     },
     {
-      id: 'n3', level: 'warning', icon: 'pi-clock',
-      title: 'SLA Expiring Soon — N. Khaled', read: false,
-      body: 'Must reply to NPS ticket within 2 hours',
-      time: '45 mins ago', tag: 'SLA'
+      id: 'n3', level: 'critical', icon: 'pi-comment',
+      title: 'Negative Session Feedback — F. Sami',
+      body: 'After session 18 wrote: "Feeling increased fatigue and seeing no difference". Attendance dropped to 70% this month.',
+      time: '1 day ago',
+      primaryAction: 'Review Session Log →'
     },
     {
-      id: 'n4', level: 'warning', icon: 'pi-user',
-      title: 'Waiting Consultation — M. Ahmed', read: false,
-      body: 'Waiting in the lobby for 15 minutes · Appointment was at 9:00 AM',
-      time: '15 mins ago', tag: 'Delay'
+      id: 'n4', level: 'warning', icon: 'pi-star',
+      title: 'Low Blueprint Rating — K. Mahmoud',
+      body: 'Report clarity 3/5. Wrote: "Need more explanation for phases". Consultation on April 1st — clarification call before.',
+      time: '4 days ago',
+      primaryAction: 'Contact Him →'
     },
     {
-      id: 'n5', level: 'info', icon: 'pi-file',
-      title: 'MRI Report Arrived — M. Salem', read: true,
-      body: 'Knee MRI results available for review · Please update rehab plan',
-      time: '1 hour ago', tag: undefined
-    },
-    {
-      id: 'n6', level: 'success', icon: 'pi-check-circle',
-      title: 'Rehab Phase Completed — B. Salem', read: true,
-      body: 'All ACI Protocol criteria met · Ready for Legacy Launch',
-      time: '2 hours ago', tag: 'Achievement'
-    },
-    {
-      id: 'n7', level: 'info', icon: 'pi-calendar',
-      title: 'Tomorrow\'s Appointments Confirmed', read: true,
-      body: '4 consultations scheduled · 2 need final confirmation from patient',
-      time: '3 hours ago', tag: undefined
+      id: 'n5', level: 'success', icon: 'pi-chart-line',
+      title: 'Noticeable Improvement — M. Tarek',
+      body: 'Session 12 measurement: 68% improvement in knee strength. On track for 90-day goal.',
+      time: '3 days ago',
+      primaryAction: 'View Report →'
     }
   ]);
 
-  unreadCount = signal(this.notifications().filter(n => !n.read).length);
 
   markAllRead(): void {
     this.notifications.update(list =>
       list.map(n => ({ ...n, read: true }))
     );
-    this.unreadCount.set(0);
   }
 
   markRead(id: string): void {
     this.notifications.update(list =>
       list.map(n => n.id === id ? { ...n, read: true } : n)
     );
-    this.unreadCount.set(this.notifications().filter(n => !n.read).length);
   }
 
   readonly levelConfig: Record<NotifLevel, { color: string; bg: string; border: string }> = {
-    critical: { color: '#f87171', bg: 'rgba(239,68,68,0.1)',   border: 'rgba(239,68,68,0.3)' },
-    warning:  { color: '#fbbf24', bg: 'rgba(245,158,11,0.1)',  border: 'rgba(245,158,11,0.3)' },
-    info:     { color: '#38bdf8', bg: 'rgba(56,189,248,0.08)', border: 'rgba(56,189,248,0.25)' },
-    success:  { color: '#34d399', bg: 'rgba(16,185,129,0.1)',  border: 'rgba(16,185,129,0.3)' }
+    critical: { color: '#f87171', bg: 'rgba(239,68,68,0.1)', border: 'rgba(239,68,68,0.3)' },
+    warning: { color: '#fbbf24', bg: 'rgba(245,158,11,0.1)', border: 'rgba(245,158,11,0.3)' },
+    info: { color: '#38bdf8', bg: 'rgba(56,189,248,0.08)', border: 'rgba(56,189,248,0.25)' },
+    success: { color: '#34d399', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.3)' },
+    protocol: { color: '#a855f7', bg: 'rgba(168,85,247,0.1)', border: 'rgba(168,85,247,0.3)' }
   };
 }

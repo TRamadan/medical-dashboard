@@ -7,31 +7,25 @@
   </div>
 
   <!-- ── Tab bar ────────────────────────────────────────────── -->
-  <div class="dc-pt__tabs" role="tablist" aria-label="Pending tickets tabs">
-    @for (tab of tabs; track tab.id) {
-      <button
-        type="button"
-        role="tab"
-        class="dc-pt-tab"
-        [class.dc-pt-tab--active]="activeTab() === tab.id"
-        (click)="setTab(tab.id)"
-        [attr.aria-selected]="activeTab() === tab.id"
-        [id]="'pt-tab-' + tab.id">
-        @if (tab.id === 'waiting') {
-          <i class="pi pi-clock" aria-hidden="true"></i>
-        } @else if (tab.id === 'followup') {
-          <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
-        } @else {
-          <i class="pi pi-list" aria-hidden="true"></i>
-        }
-        {{ tab.label }}
+  <p-card styleClass="p-0 dc-tabs-card">
+    <div class="dc-pt__tabs" role="tablist" aria-label="Pending tickets tabs">
+      @for (tab of tabs; track tab.id) {
+      <button type="button" role="tab" class="dc-pt-tab" [class.dc-pt-tab--active]="activeTab() === tab.id"
+        (click)="setTab(tab.id)" [attr.aria-selected]="activeTab() === tab.id" [id]="'pt-tab-' + tab.id">
+        <span class="dc-pt-tab__emoji">
+          @if (tab.id === 'waiting') { ✋ }
+          @else if (tab.id === 'followup') { 🚨 }
+          @else { 📋 }
+        </span>
+        <span class="dc-pt-tab__label">{{ tab.label }}</span>
         <span class="dc-pt-tab__count">{{ tab.count }}</span>
       </button>
-    }
-  </div>
+      }
+    </div>
+  </p-card>
 
-  <!-- ══ TAB 1: Waiting ══════════════════════════════════════ -->
   @if (activeTab() === 'waiting') {
+  <p-card>
     <div class="dc-pt__panel" role="tabpanel" id="panel-waiting" aria-labelledby="pt-tab-waiting">
       <div class="dc-pt__sort-line">
         <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
@@ -40,113 +34,235 @@
 
       <div class="dc-ticket-list">
         @for (t of waitingTickets; track t.id) {
-          <div class="dc-ticket" [style.--urgency-color]="t.urgencyAccent">
-            <div class="dc-ticket__header">
-              <span class="dc-ticket__urgency-badge" [style.color]="t.urgencyAccent"
-                [style.border-color]="t.urgencyAccent + '44'"
-                [style.background-color]="t.urgencyAccent + '18'">
-                {{ t.urgency }}
-              </span>
-              <span class="dc-ticket__type">{{ t.type }}</span>
-            </div>
+        <p-card styleClass="dc-ticket-p-card"
+          [style]="{'border-top': '3px solid ' + getPriorityColor(t.priority), 'border-radius': '10px'}">
+          <div class="dc-ticket" [style]="{'--urgency-color': getPriorityColor(t.priority)}">
 
-            <div class="dc-ticket__body">
-              <div class="dc-ticket__name">{{ t.name }}</div>
-              <div class="dc-ticket__complaint">{{ t.complaint }}</div>
-              <div class="dc-ticket__meta">{{ t.meta }}</div>
-            </div>
+            <div class="dc-ticket__content"
+              style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div class="dc-ticket__main">
 
-            @if (t.extraBadge) {
-              <div class="dc-ticket__extra">
-                <button type="button" class="dc-ticket__confirm-btn"
-                  [style.background-color]="t.extraBadgeAccent + '22'"
-                  [style.border-color]="t.extraBadgeAccent + '55'"
-                  [style.color]="t.extraBadgeAccent">
-                  {{ t.extraBadge }}
-                </button>
+                <!-- Top Row: Type Tag + SLA -->
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
+                  <span class="dc-ticket__urgency-badge" [style.color]="getPriorityColor(t.priority)"
+                    [style.border-color]="getPriorityColor(t.priority) + '40'"
+                    [style.background-color]="getPriorityColor(t.priority) + '15'"
+                    style="font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; border: 1px solid;">
+                    {{ t.type }}
+                  </span>
+                  @if (hasSLA(t)) {
+                  <span style="font-size: 0.65rem; color: #94a3b8; font-weight: 500;">
+                    SLA: {{ hasSLA(t) }}
+                  </span>
+                  }
+                </div>
+
+                <!-- Client Name + Program -->
+                <div class="dc-ticket__name"
+                  style="font-size: 0.85rem; font-weight: 600; color: #000000; margin-bottom: 0.2rem;">
+                  {{ t.client }} @if (hasProgram(t)) { — {{ hasProgram(t) }} }
+                </div>
+
+                <!-- Description -->
+                <div class="dc-ticket__complaint" style="font-size: 0.75rem; color: #000000; margin-bottom: 0.2rem;">
+                  {{ t.description }}
+                </div>
+
+                <!-- Meta: Metrics + Time -->
+                <div class="dc-ticket__meta" style="font-size: 0.7rem; color: #3c4249;">
+                  {{ formatMetrics(t) }}
+                  @if (t.time_ago) { · {{ t.time_ago }} }
+                </div>
+
               </div>
-            }
 
-            <div class="dc-ticket__actions">
-              @for (btn of t.actions; track btn.label) {
-                <button type="button" class="dc-act-btn"
-                  [class.dc-act-btn--primary]="btn.style === 'primary'"
-                  [class.dc-act-btn--danger]="btn.style === 'danger'"
-                  [class.dc-act-btn--warning]="btn.style === 'warning'"
-                  [class.dc-act-btn--purple]="btn.style === 'purple'">
-                  {{ btn.label }}
-                </button>
+              <!-- Far Side: Badge -->
+              @if (t.badge) {
+              <div class="dc-ticket__extra" style="margin-left: 0.5rem; flex-shrink: 0;">
+                <p-badge [value]="t.badge" [style]="{
+              'background-color': getPriorityColor(t.priority),
+              'color': '#ffffff',
+              'font-size': '0.65rem',
+              'font-weight': '600',
+              'border-radius': '4px'
+            }">
+                </p-badge>
+              </div>
               }
             </div>
+
+            <!-- Actions -->
+            <div class="dc-ticket__actions"
+              style="display: flex; gap: 0.5rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(255,255,255,0.08);">
+              @for (btn of t.actions; track btn.label) {
+              @if ((btn.style || getButtonStyle(btn.type)) === 'primary') {
+              <p-button [label]="btn.label" size="small" severity="success"
+                [style]="{'width': '100%', 'font-weight': '700', 'color': '#0f172a', 'flex': '1'}"
+                (onClick)="handleAction(btn.type, t)">
+              </p-button>
+              } @else if ((btn.style || getButtonStyle(btn.type)) === 'defer') {
+              <p-button [label]="btn.label" size="small" severity="secondary"
+                [style]="{'font-weight': '600', 'background': '#1e293b', 'border-color': '#334155', 'color': '#cbd5e1'}"
+                (onClick)="toggleDefer(t.id)">
+              </p-button>
+              } @else if ((btn.style || getButtonStyle(btn.type)) === 'ghost') {
+              <p-button [label]="btn.label" size="small" severity="secondary"
+                [style]="{'font-weight': '600', 'background': '#1e293b', 'border-color': '#334155', 'color': '#cbd5e1'}"
+                (onClick)="handleAction(btn.type, t)">
+              </p-button>
+              } @else if ((btn.style || getButtonStyle(btn.type)) === 'purple') {
+              <p-button [label]="btn.label" size="small" severity="help"
+                [style]="{'width': '100%', 'font-weight': '700', 'flex': '1'}" (onClick)="handleAction(btn.type, t)">
+              </p-button>
+              } @else if ((btn.style || getButtonStyle(btn.type)) === 'danger') {
+              <p-button [label]="btn.label" size="small" severity="danger"
+                [style]="{'font-weight': '600', 'background': 'rgba(239,68,68,0.1)', 'color': '#ef4444', 'border-color': 'rgba(239,68,68,0.25)'}"
+                (onClick)="handleAction(btn.type, t)">
+              </p-button>
+              } @else if ((btn.style || getButtonStyle(btn.type)) === 'warning') {
+              <p-button [label]="btn.label" size="small" severity="warn"
+                [style]="{'width': '100%', 'font-weight': '700', 'flex': '1'}" (onClick)="handleAction(btn.type, t)">
+              </p-button>
+              }
+              }
+            </div>
+
+            <!-- Defer Panel (Phase Transition tickets only) -->
+            @if (expandedDeferTicketId() === t.id && hasDefer(t)) {
+            <div class="dc-defer-panel" role="region" aria-label="Defer options">
+              <textarea class="dc-defer-textarea" [value]="deferNote()"
+                (input)="deferNote.set($any($event.target).value)" placeholder="Reason for deferral...">
+        </textarea>
+              <div class="dc-defer-notify">
+                <div class="dc-defer-notify__label">Notify on deferral — select who to notify:</div>
+                <div class="dc-defer-notify__checks">
+                  @for (option of hasDefer(t)!.notify; track option.label) {
+                  <label class="dc-defer-check">
+                    <input type="checkbox" [checked]="option.default_checked" (change)="toggleNotify(option.label)">
+                    <span class="text-dark">{{ option.label }}</span>
+                  </label>
+                  }
+                </div>
+              </div>
+              <p-button label="Save & Notify Selected" size="small" severity="success"
+                [style]="{'width': '100%', 'font-weight': '700', 'color': '#0f172a', 'margin-top': '0.75rem'}"
+                (onClick)="submitDefer(t.id)">
+              </p-button>
+            </div>
+            }
+
           </div>
+        </p-card>
         }
       </div>
     </div>
+  </p-card>
+
   }
 
   <!-- ══ TAB 2: Followup ════════════════════════════════════ -->
   @if (activeTab() === 'followup') {
-    <div class="dc-pt__panel" role="tabpanel" id="panel-followup" aria-labelledby="pt-tab-followup">
-      <div class="dc-pt__sort-line">
-        <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
-        Sorting Logic — Urgent: Sorted by severity + recency + NPS + negative incidents + SLA
-      </div>
-
-      <div class="dc-ticket-list">
-        @for (t of followupTickets; track t.id) {
-          <div class="dc-ticket dc-ticket--followup" [style.--urgency-color]="t.urgencyAccent">
-            <div class="dc-ticket__header">
-              <span class="dc-ticket__urgency-icon" aria-hidden="true">{{ t.urgencyIcon }}</span>
-              <span class="dc-ticket__type">{{ t.type }}</span>
-            </div>
-
-            <div class="dc-ticket__body">
-              <div class="dc-ticket__name">{{ t.name }}</div>
-              <div class="dc-ticket__quote">"{{ t.quote }}"</div>
-              <div class="dc-ticket__meta">{{ t.meta }}</div>
-            </div>
-
-            <div class="dc-ticket__actions">
-              @for (btn of t.actions; track btn.label) {
-                <button type="button" class="dc-act-btn"
-                  [class.dc-act-btn--primary]="btn.style === 'primary'">
-                  {{ btn.label }}
-                </button>
-              }
-            </div>
-          </div>
-        }
-      </div>
+  <div class="dc-pt__panel" role="tabpanel" id="panel-followup" aria-labelledby="pt-tab-followup">
+    <div class="dc-pt__sort-line">
+      <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+      Sorting Logic — Urgent: Sorted by severity + recency + NPS + negative incidents + SLA
     </div>
+
+    <div class="dc-ticket-list">
+      @for (t of followupTickets; track t.id) {
+      <p-card styleClass="p-0">
+        <div class="dc-ticket dc-ticket--followup" [style]="{'--urgency-color': t.urgencyAccent}">
+          <div class="dc-ticket__header">
+            <span class="dc-ticket__urgency-icon" aria-hidden="true">{{ t.urgencyIcon }}</span>
+            <span class="dc-ticket__type">{{ t.type }}</span>
+          </div>
+
+          <div class="dc-ticket__body">
+            <div class="dc-ticket__name">{{ t.name }}</div>
+            <div class="dc-ticket__quote">"{{ t.quote }}"</div>
+            <div class="dc-ticket__meta">{{ t.meta }}</div>
+          </div>
+
+          <div class="dc-ticket__actions"
+            style="display: flex; flex-direction: row; gap: 0.5rem; border-top: 1px solid rgba(255, 255, 255, 0.06); padding-top: 0.75rem; margin-top: 0.5rem;">
+            @for (btn of t.actions; track btn.label) {
+            @if (btn.id === 'followup') {
+            <p-button size="small" severity="warn" [outlined]="true" (onClick)="toggleFollowUp(t.id)"
+              [label]="followedUpTickets().has(t.id) ? 'Followed up' : btn.label">
+            </p-button>
+            } @else {
+            <p-button size="small" [severity]="btn.style === 'purple' ? 'help' : 'primary'" [label]="btn.label">
+            </p-button>
+            }
+            }
+          </div>
+        </div>
+      </p-card>
+
+      }
+    </div>
+  </div>
   }
 
   <!-- ══ TAB 3: All ═════════════════════════════════════════ -->
   @if (activeTab() === 'all') {
+  <p-card>
     <div class="dc-pt__panel" role="tabpanel" id="panel-all" aria-labelledby="pt-tab-all">
       <div class="dc-pt__sort-line">
         <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
         Sorting — All: Sorted chronologically (Newest first) — Click any row to open details
       </div>
-      <div class="dc-pt__all-hint">Click first</div>
 
       <div class="dc-all-list">
-        @for (row of allTickets; track row.name) {
-          <div class="dc-all-row">
-            <span class="dc-all-row__dot" [style.background-color]="row.dot" aria-hidden="true"></span>
-            <div class="dc-all-row__info">
-              <div class="dc-all-row__name">{{ row.name }}</div>
-              <div class="dc-all-row__meta">{{ row.meta }}</div>
+        @for (row of allTickets; track row.id) {
+        <p-card styleClass="dc-all-row-card"
+          [style]="{'background': '#ffffff', 'box-shadow': '0 1px 3px rgba(0, 0, 0, 0.05)', 'border-bottom': '1px solid #f1f5f9', 'border-radius': '0'}">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem;">
+            <!-- Main Content -->
+            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+              <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span class="dc-all-row__dot"
+                  [style.background-color]="row.status === 'Positive' ? '#10b981' : row.status === 'Urgent' ? '#ef4444' : '#f59e0b'"
+                  style="width: 6px; height: 6px; border-radius: 50%; display: inline-block; flex-shrink: 0;"></span>
+                <span style="font-weight: 600; font-size: 0.85rem; color: #475569;">{{ row.name }}</span>
+                <span style="color: #94a3b8; font-size: 0.85rem;">— {{ row.summary }}</span>
+              </div>
+              <div
+                style="font-size: 0.7rem; color: #64748b; margin-left: 0.85rem; display: flex; gap: 0.35rem; align-items: center;">
+                <span>{{ row.status }}</span>
+                @if (row.session) {
+                <span>· {{ row.session }}</span>
+                }
+                @if (row.program) {
+                <span>· {{ row.program }}</span>
+                }
+                @if (row.sla) {
+                <span>· SLA: {{ row.sla }}</span>
+                }
+                <span>· {{ row.time_ago }}</span>
+              </div>
             </div>
-            <span class="dc-badge"
-              [style.color]="row.badgeAccent"
-              [style.border-color]="row.badgeAccent + '44'"
-              [style.background-color]="row.badgeAccent + '18'">
-              {{ row.badge }}
-            </span>
+
+            <!-- Far side Badge -->
+            <div style="flex-shrink: 0; margin-left: 1rem;">
+              <p-badge [value]="row.status" [style]="{
+                'background-color': row.status === 'Positive' ? '#ecfdf5' : row.status === 'Urgent' ? '#fef2f2' : '#fffbeb',
+                'color': row.status === 'Positive' ? '#059669' : row.status === 'Urgent' ? '#dc2626' : '#d97706',
+                'border': '1px solid ' + (row.status === 'Positive' ? '#a7f3d0' : row.status === 'Urgent' ? '#fecaca' : '#fde68a'),
+                'font-size': '0.75rem',
+                'font-family': 'inherit',
+                'font-weight': '500',
+                'border-radius': '6px',
+                'letter-spacing': '0.3px',
+                'box-shadow': '0 1px 2px rgba(0,0,0,0.02)'
+              }"></p-badge>
+            </div>
           </div>
+        </p-card>
         }
       </div>
     </div>
+  </p-card>
   }
 
 </div>
