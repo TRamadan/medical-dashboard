@@ -43,33 +43,11 @@ export class PhasesSessionsComponent implements OnInit {
             sport: 'Football',
             acceptedReport: true,
             reportPhases: [
-                {
-                    id: 1,
-                    title: 'Phase 1: Foundation',
-                    weeksCount: 4,
-                    sessionsPerWeek: 3,
-                    selectedSessionTab: 1,
-                    selectedSessions: [1, 5, 10]
-                },
-                {
-                    id: 2,
-                    title: 'Phase 2: Strength Building',
-                    weeksCount: 6,
-                    sessionsPerWeek: 3,
-                    selectedSessionTab: 1,
-                    selectedSessions: [2, 8]
-                },
-                {
-                    id: 3,
-                    title: 'Phase 3: Advanced Training',
-                    weeksCount: 2,
-                    sessionsPerWeek: 2,
-                    selectedSessionTab: 1,
-                    selectedSessions: []
-                }
+                { id: 1, title: 'Phase 1: Foundation', weeksCount: 4, sessionsPerWeek: 3, selectedSessionTab: 1, selectedSessions: [1, 5, 10] },
+                { id: 2, title: 'Phase 2: Strength Building', weeksCount: 6, sessionsPerWeek: 3, selectedSessionTab: 1, selectedSessions: [2, 8] },
+                { id: 3, title: 'Phase 3: Advanced Training', weeksCount: 2, sessionsPerWeek: 2, selectedSessionTab: 1, selectedSessions: [] }
             ]
         },
-
         {
             id: 'PT-202227',
             name: 'Sara Ahmed',
@@ -87,76 +65,40 @@ export class PhasesSessionsComponent implements OnInit {
             sport: 'Swimming',
             acceptedReport: true,
             reportPhases: [
-                {
-                    id: 1,
-                    title: 'Phase 1: Initial Assessment',
-                    weeksCount: 2,
-                    sessionsPerWeek: 2,
-                    selectedSessionTab: 1,
-                    selectedSessions: [1, 4]
-                },
-                {
-                    id: 2,
-                    title: 'Phase 2: Progressive Training',
-                    weeksCount: 4,
-                    sessionsPerWeek: 3,
-                    selectedSessionTab: 1,
-                    selectedSessions: [3, 7]
-                },
-                {
-                    id: 3,
-                    title: 'Phase 3: Performance',
-                    weeksCount: 4,
-                    sessionsPerWeek: 2,
-                    selectedSessionTab: 1,
-                    selectedSessions: []
-                }
+                { id: 1, title: 'Phase 1: Initial Assessment', weeksCount: 2, sessionsPerWeek: 2, selectedSessionTab: 1, selectedSessions: [1, 4] },
+                { id: 2, title: 'Phase 2: Progressive Training', weeksCount: 4, sessionsPerWeek: 3, selectedSessionTab: 1, selectedSessions: [3, 7] },
+                { id: 3, title: 'Phase 3: Performance', weeksCount: 4, sessionsPerWeek: 2, selectedSessionTab: 1, selectedSessions: [] }
             ]
         }
     ];
 
-    selectPatient(patient: any) {
-        this.selectedPatient = patient;
-    }
-
-    resetSelection() {
-        this.selectedPatient = null;
-    }
+    selectPatient(patient: any) { this.selectedPatient = patient; }
+    resetSelection() { this.selectedPatient = null; }
 
     selectedPhase: any = null;
-
-    selectPhase(phase: any) {
-        this.selectedPhase = phase;
-    }
+    selectPhase(phase: any) { this.selectedPhase = phase; }
 
     availableTemplates: any[] = [];
 
-    constructor(private measurementTemplatesService: MeasurementTemplatesService) {}
+    constructor(private measurementTemplatesService: MeasurementTemplatesService) { }
 
     ngOnInit() {
         this.measurementTemplatesService.getAllTemplates().subscribe({
-            next: (data) => {
-                this.availableTemplates = data;
-            },
+            next: (data) => { this.availableTemplates = data; },
             error: (err) => console.error('Failed to load measurement templates', err)
         });
     }
 
     getSeverity(status: string | undefined) {
         switch (status) {
-            case 'Low':
-                return 'danger';
-            case 'Moderate':
-                return 'warn';
-            case 'VIP':
-                return 'success';
-            default:
-                return 'info';
+            case 'Low': return 'danger';
+            case 'Moderate': return 'warn';
+            case 'VIP': return 'success';
+            default: return 'info';
         }
     }
 
     selectedCoach: string | null = null;
-
     coaches = [
         { label: 'Coach 1', value: '1' },
         { label: 'Coach 2', value: '2' },
@@ -175,41 +117,39 @@ export class PhasesSessionsComponent implements OnInit {
     }
 
     ensureSessionData(phase: any, sessionNum: number) {
-        if (!phase.sessionData) {
-            phase.sessionData = {};
-        }
+        if (!phase.sessionData) phase.sessionData = {};
         if (!phase.sessionData[sessionNum]) {
             phase.sessionData[sessionNum] = {
+                exerciseMode: 'exercise',
                 sections: [
-                    {
-                        title: 'Warm Up',
-                        time: '',
-                        coach: null,
-                        exercises: []
-                    }
+                    { title: 'Warm Up', time: '', coach: null, exercises: [] }
                 ]
             };
         }
     }
 
+    getExerciseMode(phase: any, sessionNum: number): 'exercise' | 'manual' {
+        this.ensureSessionData(phase, sessionNum);
+        return phase.sessionData[sessionNum].exerciseMode || 'exercise';
+    }
+
+    setExerciseMode(phase: any, sessionNum: number, mode: 'exercise' | 'manual') {
+        this.ensureSessionData(phase, sessionNum);
+        phase.sessionData[sessionNum].exerciseMode = mode;
+    }
+
     getSessionMode(phase: any, sessionNum: number): 'exercises' | 'measurements' {
         this.ensureSessionData(phase, sessionNum);
-        
         if (!phase.sessionData[sessionNum].mode) {
-            const isMeasurement = this.isSessionPredefined(phase, sessionNum);
-            phase.sessionData[sessionNum].mode = isMeasurement ? 'measurements' : 'exercises';
+            phase.sessionData[sessionNum].mode = this.isSessionPredefined(phase, sessionNum)
+                ? 'measurements' : 'exercises';
         }
-        
         return phase.sessionData[sessionNum].mode;
     }
 
-    /**
-     * Returns true if the session was pre-defined as a measurement session
-     * from the Plan Configuration step. When true, the toggle should be locked/disabled.
-     */
     isSessionPredefined(phase: any, sessionNum: number): boolean {
         return (phase.selectedSessions && phase.selectedSessions.includes(sessionNum)) ||
-               (phase.measurementSessions && phase.measurementSessions.includes(sessionNum));
+            (phase.measurementSessions && phase.measurementSessions.includes(sessionNum));
     }
 
     setSessionMode(phase: any, sessionNum: number, mode: 'exercises' | 'measurements') {
@@ -231,77 +171,85 @@ export class PhasesSessionsComponent implements OnInit {
         return phase.sessionData[sessionNum].sections;
     }
 
+    // ─── Default exercise factory ───────────────────────────────────────────────
+    private createExercise(): any {
+        return {
+            mode: 'exercise',
+            name: '',
+            procedureName: '',
+            contractionType: 'Eccentric',
+            intensityMethod: 'kg/lb',
+            tool: '',
+            description: '',
+            sets: 1,
+            setData: [{ weight: '', reps: '', intenisty: '', tempo: '', rest: '' }],
+            videoUrl: '',
+            progressionType: 'Double Progression',
+            progressionIncrement: '',
+            progressionCondition: '',
+            progressionOpen: false
+        };
+    }
+
     addSection(phase: any, sessionNum: number) {
         const sections = this.getSections(phase, sessionNum);
         sections.push({
             title: 'New Section',
             time: '',
             coach: null,
-            exercises: [
-                {
-                    name: '',
-                    tool: '',
-                    description: '',
-                    sets: '1',
-                    reps: [''],
-                    intensity: '',
-                    tempo: '',
-                    rest: '',
-                    videoUrl: ''
-                }
-            ]
+            exercises: [this.createExercise()]
         });
     }
 
     removeSection(phase: any, sessionNum: number, index: number) {
-        const sections = this.getSections(phase, sessionNum);
-        sections.splice(index, 1);
+        this.getSections(phase, sessionNum).splice(index, 1);
     }
 
     addExercise(section: any) {
-        section.exercises.push({
-            name: '',
-            tool: '',
-            description: '',
-            sets: '1',
-            reps: [''],
-            intensity: '',
-            tempo: '',
-            rest: '',
-            videoUrl: ''
-        });
-    }
-
-    getRepArray(ex: any): number[] {
-        const numSets = parseInt(ex.sets, 10);
-        const count = isNaN(numSets) || numSets <= 0 ? 1 : Math.min(numSets, 10);
-        
-        if (!Array.isArray(ex.reps)) ex.reps = [ex.reps || ''];
-        
-        while (ex.reps.length < count) ex.reps.push('');
-        
-        return Array.from({length: count}, (_, i) => i);
+        section.exercises.push(this.createExercise());
     }
 
     removeExercise(section: any, index: number) {
         section.exercises.splice(index, 1);
     }
 
-    // Validation method to check if section can be saved
-    isSectionValid(section: any): boolean {
-        // Check if section has at least one exercise
-        if (!section.exercises || section.exercises.length === 0) {
-            return false;
+    // ─── Sets / setData sync ─────────────────────────────────────────────────────
+    getRepArray(ex: any): number[] {
+        const count = Math.max(1, Math.min(Number(ex.sets) || 1, 20));
+
+        if (!Array.isArray(ex.setData)) ex.setData = [];
+
+        // Grow: clone last row values as defaults for new rows
+        while (ex.setData.length < count) {
+            const last = ex.setData[ex.setData.length - 1];
+            ex.setData.push({
+                weight: last?.weight ?? '',
+                reps: last?.reps ?? '',
+                tempo: last?.tempo ?? '',
+                intenisty: last?.intenisty ?? '',
+                rest: last?.rest ?? '',
+            });
         }
 
-        // Check if all exercises have required fields filled
-        return section.exercises.every((exercise: any) => {
-            const hasReps = Array.isArray(exercise.reps) ? exercise.reps.some((r: any) => r && r.toString().trim() !== '') : exercise.reps && exercise.reps.toString().trim() !== '';
-            return exercise.name && exercise.name.trim() !== '' && exercise.sets && exercise.sets.toString().trim() !== '' && hasReps;
+        // Shrink
+        if (ex.setData.length > count) ex.setData.length = count;
+
+        return Array.from({ length: count }, (_, i) => i);
+    }
+
+
+    // ─── Validation ──────────────────────────────────────────────────────────────
+    isSectionValid(section: any): boolean {
+        if (!section.exercises?.length) return false;
+        return section.exercises.every((ex: any) => {
+            const hasSetData = Array.isArray(ex.setData) && ex.setData.some(
+                (row: any) => row.reps && row.reps.toString().trim() !== ''
+            );
+            return ex.name?.trim() && ex.sets && hasSetData;
         });
     }
 
-    // Helper methods for week/session calculations
+    // ─── Week / session helpers ───────────────────────────────────────────────────
     getWeeksRange(weeksCount: any): number[] {
         const num = parseInt(weeksCount, 10);
         if (isNaN(num) || num <= 0) return [];
@@ -316,8 +264,7 @@ export class PhasesSessionsComponent implements OnInit {
     }
 
     getSessionNumber(weekNum: number, sessionInWeek: number, sessionsPerWeek: any): number {
-        const perWeek = parseInt(sessionsPerWeek, 10);
-        return (weekNum - 1) * perWeek + sessionInWeek;
+        return (weekNum - 1) * parseInt(sessionsPerWeek, 10) + sessionInWeek;
     }
 
     getWeekForSession(sessionNum: number, sessionsPerWeek: any): number {
@@ -333,10 +280,7 @@ export class PhasesSessionsComponent implements OnInit {
     updateTotalSessions(phase: any) {
         const total = this.getTotalSessions(phase.weeksCount, phase.sessionsPerWeek);
         phase.sessions = total;
-        // Reset selected tab if it's beyond the new total
-        if (phase.selectedSessionTab > total) {
-            phase.selectedSessionTab = 1;
-        }
+        if (phase.selectedSessionTab > total) phase.selectedSessionTab = 1;
     }
 
     getSessionsInWeekRange(sessionsPerWeek: any): number[] {
@@ -344,6 +288,4 @@ export class PhasesSessionsComponent implements OnInit {
         if (isNaN(num) || num <= 0) return [];
         return Array.from({ length: num }, (_, i) => i + 1);
     }
-
-
 }
