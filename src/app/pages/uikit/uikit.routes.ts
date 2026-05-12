@@ -173,6 +173,11 @@ export default [
     {
         path: 'doctor-control',
         data: { breadcrumb: 'Doctor Control' },
-        loadComponent: () => import('../doctor-control/doctor-control.component').then(m => m.DoctorControlComponent)
+        loadComponent: () => import('./doctor-control/doctor-control.component').then(m => m.DoctorControlComponent)
+    },
+    {
+        path: 'protocol-config',
+        data: { breadcrumb: 'Protocol Config' },
+        loadComponent: () => import('./protocol-config/protocol-config.component').then(m => m.ProtocolConfigComponent)
     }
 ] as Routes;

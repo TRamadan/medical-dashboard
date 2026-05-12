@@ -1,0 +1,89 @@
+<div class="flex flex-col gap-6" *ngIf="protocol() as proto">
+    <!-- Success Banner -->
+    <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-5 flex gap-4 items-start w-11/12 mx-auto">
+        <div class="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-100 flex-shrink-0">
+            <i class="pi pi-check-circle text-emerald-600 text-2xl"></i>
+        </div>
+        <div class="flex flex-col gap-1">
+            <span class="font-bold text-emerald-800 text-lg">Ready to Activate</span>
+            <span class="text-emerald-600">Your protocol is configured and ready for activation. Review the summary
+                below and click "Activate Protocol" to make it available.</span>
+        </div>
+    </div>
+
+    <!-- Protocol Summary Card -->
+    <p-card>
+        <div class="flex flex-col gap-6">
+            <!-- Protocol Name -->
+            <div class="flex flex-col gap-2">
+                <label class="font-medium text-gray-700 text-sm">Protocol Name <span
+                        class="text-red-500">*</span></label>
+                <input pInputText [(ngModel)]="proto.name" class="w-full text-lg font-semibold"
+                    placeholder="Enter protocol name (e.g., ACL Reconstruction – Standard)" />
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="flex flex-col items-center bg-[#131337] rounded-xl p-4 text-white">
+                    <i class="pi pi-calendar text-[#70F4C3] text-xl mb-2"></i>
+                    <span class="text-2xl font-bold">{{ proto.weeks || '—' }}</span>
+                    <span class="text-xs text-gray-300 uppercase font-semibold mt-1">Weeks</span>
+                </div>
+                <div class="flex flex-col items-center bg-[#131337] rounded-xl p-4 text-white">
+                    <i class="pi pi-list text-[#70F4C3] text-xl mb-2"></i>
+                    <span class="text-2xl font-bold">{{ proto.totalSessions || '—' }}</span>
+                    <span class="text-xs text-gray-300 uppercase font-semibold mt-1">Total Sessions</span>
+                </div>
+                <div class="flex flex-col items-center bg-[#131337] rounded-xl p-4 text-white">
+                    <i class="pi pi-chart-bar text-[#70F4C3] text-xl mb-2"></i>
+                    <span class="text-2xl font-bold">{{ proto.phases.length }}</span>
+                    <span class="text-xs text-gray-300 uppercase font-semibold mt-1">Phases</span>
+                </div>
+                <div class="flex flex-col items-center bg-[#131337] rounded-xl p-4 text-white">
+                    <i class="pi pi-bolt text-[#70F4C3] text-xl mb-2"></i>
+                    <span class="text-2xl font-bold">{{ totalExercises }}</span>
+                    <span class="text-xs text-gray-300 uppercase font-semibold mt-1">Exercises</span>
+                </div>
+            </div>
+
+            <!-- Phases Summary -->
+            <div class="flex flex-col gap-3">
+                <span class="font-bold text-gray-700">Phases Overview</span>
+                <div *ngFor="let phase of proto.phases; let i = index"
+                    class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <div class="w-7 h-7 rounded-full bg-[#131337] text-[#70F4C3] flex items-center justify-center text-xs font-bold">
+                            {{ i + 1 }}
+                        </div>
+                        <span class="font-semibold text-sm text-gray-800">{{ phase.name }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <p-tag [value]="phase.totalWeeks + ' wks'" severity="info"></p-tag>
+                        <p-tag [value]="phase.totalSessions + ' sessions'" severity="success"></p-tag>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activation Notes -->
+            <div class="flex flex-col gap-2">
+                <label class="font-medium text-gray-700 text-sm">Activation Notes (Optional)</label>
+                <textarea pInputTextarea [(ngModel)]="activationNotes" rows="3" class="w-full"
+                    placeholder="Add any notes about this protocol activation..."></textarea>
+            </div>
+        </div>
+    </p-card>
+
+    <!-- Activation Action -->
+    <div class="flex justify-center">
+        <button pButton
+            class="px-8 py-3 text-base font-bold"
+            icon="pi pi-check-circle"
+            iconPos="left"
+            label="Activate Protocol"
+            [disabled]="!proto.name?.trim()"
+            pTooltip="{{ proto.name?.trim() ? 'Activate and save protocol' : 'Please enter a protocol name' }}"
+            tooltipPosition="top"
+            (click)="activateProtocol()">
+        </button>
+    </div>
+</div>

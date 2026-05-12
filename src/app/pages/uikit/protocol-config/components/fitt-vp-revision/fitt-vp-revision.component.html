@@ -1,0 +1,61 @@
+<div class="page-wrapper" dir="ltr">
+    <div class="page-content">
+        <!-- FITT-VP Section Header -->
+        <div class="section-header-row mb-3">
+            <span class="section-label">FITT-VP Completion – Current Protocol</span>
+        </div>
+
+        <!-- FITT-VP Grid -->
+        <div class="fitt-grid">
+            <p-card *ngFor="let card of fittCards" styleClass="fitt-card h-full">
+                <div class="flex flex-col h-full min-h-[110px]">
+                    <div class="fitt-card-top">
+                        <!-- Badge -->
+                        <div class="fitt-badge" [ngClass]="card.badgeClass">{{ card.letter }}</div>
+
+                        <!-- Info -->
+                        <div class="fitt-info">
+                            <div class="fitt-title">
+                                <span class="fitt-en">{{ card.titleEn }}</span>
+                            </div>
+                            <div class="fitt-desc">{{ card.desc }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="fitt-status mt-auto pt-3 flex justify-start" [ngClass]="card.statusClass">
+                        <i class="pi pi-check" *ngIf="card.statusClass === 'status-complete'"></i>
+                        <span>{{ card.status }}</span>
+                    </div>
+                </div>
+            </p-card>
+        </div>
+
+        <div class="my-5 border-t border-[#222840]"></div>
+
+        <!-- CERT Section Header -->
+        <div class="section-header-row cert-header mb-3">
+            <span class="section-label">CERT Completion – <span class="cert-count">16 items</span></span>
+        </div>
+
+        <!-- CERT List -->
+        <p-card *ngFor="let item of certItems" [ngClass]="{'checked': item.checked}" styleClass="fitt-card h-full">
+            <div class="cert-row">
+                <!-- In LTR: Tag left, Label middle, Checkbox right -->
+                <div class="cert-tag-badge">{{ item.tag }}</div>
+                <div class="cert-label">{{ item.label }}</div>
+                <div class="cert-checkbox">
+                    <p-checkbox [(ngModel)]="item.checked" [binary]="true"></p-checkbox>
+                </div>
+            </div>
+
+        </p-card>
+        <!-- <div class="cert-row">
+                <div class="cert-tag-badge">{{ item.tag }}</div>
+                <div class="cert-label">{{ item.label }}</div>
+                <div class="cert-checkbox">
+                    <p-checkbox [(ngModel)]="item.checked" [binary]="true"></p-checkbox>
+                </div>
+            </div> -->
+    </div>
+</div>

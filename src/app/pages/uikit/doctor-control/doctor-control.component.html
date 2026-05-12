@@ -38,20 +38,26 @@
 
   <!-- ═══ Main content ═══════════════════════════════════════════ -->
   <main class="dc-main" id="dc-main-content" role="main" aria-live="polite">
-    @switch (activeNav()) {
-    @case ('dashboard') {
-    <app-dc-dashboard />
-    }
-    @case ('todays-consultations') {
-    <app-dc-todays-consultations />
-    }
-    @case ('pending-tickets') {
-    <app-dc-pending-tickets />
-    }
-    @case ('notifications-alerts') {
-    <app-dc-notifications-alerts />
-    }
-    }
+    <p-card>
+      @switch (activeNav()) {
+      @case ('dashboard') {
+      <app-dc-dashboard />
+      }
+      @case ('todays-consultations') {
+      <app-dc-todays-consultations />
+      }
+      @case ('pending-tickets') {
+      <app-dc-pending-tickets />
+      }
+      @case ('notifications-alerts') {
+      <app-dc-notifications-alerts />
+      }
+      @case ('protocol-builder') {
+      <app-protocol-config />
+      }
+      }
+    </p-card>
+
   </main>
 
 </div>

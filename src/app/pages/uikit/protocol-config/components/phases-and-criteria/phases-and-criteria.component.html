@@ -1,0 +1,146 @@
+<div class="flex flex-col gap-6">
+    <!-- Phases Card -->
+    <p-card>
+        <div class="flex flex-col gap-6">
+            <div class="flex justify-between items-center">
+                <span class="text-xl font-bold">Treatment Phases</span>
+                <p-button label="+ Add Phase" [text]="true" (onClick)="addPhase()"></p-button>
+            </div>
+
+            <!-- Phase Items -->
+            <div class="flex flex-col gap-4">
+                <div *ngFor="let phase of phases; let i = index"
+                    class="border rounded-xl p-5 flex flex-col gap-5 relative bg-white shadow-sm">
+                    <!-- Close Button -->
+                    <button *ngIf="i > 0"
+                        class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition-colors"
+                        (click)="removePhase(i)">
+                        <i class="pi pi-times"></i>
+                    </button>
+
+                    <!-- Phase Number Badge -->
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="flex items-center justify-center w-9 h-9 rounded-full bg-[#131337] text-[#70F4C3] font-bold text-sm">
+                            {{ i + 1 }}
+                        </div>
+                        <div class="flex flex-col gap-1 flex-1">
+                            <label class="font-medium text-gray-700 text-sm">Phase Name:</label>
+                            <input pInputText [(ngModel)]="phase.name" placeholder="Enter phase name" class="w-full" />
+                        </div>
+                    </div>
+
+                    <!-- Weeks & Sessions -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="flex flex-col gap-2">
+                            <label class="font-medium text-gray-700 text-sm">Weeks:</label>
+                            <input pInputText [(ngModel)]="phase.totalWeeks" placeholder="eg., 12" class="w-full"
+                                type="number" />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="font-medium text-gray-700 text-sm">Total Sessions:</label>
+                            <input pInputText [(ngModel)]="phase.totalSessions" placeholder="eg., 12" class="w-full"
+                                type="number" />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="font-medium text-gray-700 text-sm">Sessions per Week:</label>
+                            <input pInputText [(ngModel)]="phase.sessionsPerWeek" placeholder="eg., 3" class="w-full"
+                                type="number" />
+                        </div>
+                    </div>
+
+                    <!-- Objective -->
+                    <div class="flex flex-col gap-2">
+                        <label class="font-medium text-gray-700 text-sm">Phase Objective:</label>
+                        <textarea pInputTextarea [(ngModel)]="phase.objective" rows="3" class="w-full"
+                            placeholder="Reduce inflammation, protect healing tissue, gentle ROM exercises"></textarea>
+                    </div>
+
+                    <!-- Criteria Section -->
+                    <div class="border-t border-gray-200 pt-4">
+                        <div class="flex items-center gap-2 mb-4">
+                            <i class="pi pi-check-square text-[#131337] text-lg"></i>
+                            <span class="text-lg font-bold text-gray-800">Phase Criteria</span>
+                        </div>
+
+                        <p-card>
+                            <div class="criteria-section">
+                                <div class="section-header">
+                                    <span class="info-icon">
+                                        <i class="pi pi-info-circle"></i>
+                                    </span>
+                                    <span class="section-title">Transition Criteria for next phase</span>
+                                </div>
+
+                                <div class="criteria-list" [formGroup]="form">
+                                    <ng-container formArrayName="criteria">
+                                        <div class="criteria-row" *ngFor="let row of criteriaControls; let i = index"
+                                            [formGroupName]="i">
+                                            <!-- Metric Dropdown -->
+                                            <p-dropdown formControlName="metric" [options]="metricOptions"
+                                                optionLabel="label" optionValue="value" styleClass="metric-dropdown"
+                                                (onChange)="onMetricChange(i, $event.value)"></p-dropdown>
+
+                                            <!-- Operator Text -->
+                                            <span class="operator-text">
+                                                {{ row.get('operator')?.value === '>=' ? '≥' : '≤' }}
+                                            </span>
+
+                                            <!-- Value Input -->
+                                            <p-inputNumber formControlName="value" [min]="0" [showButtons]="false"
+                                                styleClass="value-number" inputStyleClass="value-input"></p-inputNumber>
+
+                                            <!-- Unit label -->
+                                            <span class="unit-label">{{ row.get('unit')?.value }}</span>
+
+                                            <!-- Remove -->
+                                            <button class="remove-btn" type="button" (click)="removeCriterion(i)">
+                                                <i class="pi pi-times"></i>
+                                            </button>
+                                        </div>
+                                    </ng-container>
+                                </div>
+
+                                <!-- Add Row -->
+                                <p-button label="Add Criterion" [raised]="true" icon="pi pi-plus" severity="success"
+                                    (onClick)="addCriterion()" />
+                                <!-- <button class="add-criterion-btn" type="button" (click)="addCriterion()">
+                                    + Add Criterion
+                                </button> -->
+                            </div>
+                        </p-card>
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-gray-200 my-1"></div>
+
+                    <!-- Apply Sessions Section -->
+                    <div class="flex flex-col gap-4" *ngIf="phase.totalSessions">
+                        <span class="text-lg font-bold">Apply Measurements to Sessions</span>
+                        <span class="text-gray-500 text-sm mb-2">Select which sessions will include this
+                            phase's measurements:</span>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                            <div *ngFor="let sessionNum of getSessionsArray(phase.totalSessions)"
+                                class="border rounded-xl p-2 cursor-pointer transition-all hover:shadow-md flex flex-col items-center justify-center gap-2"
+                                [class]="isSessionSelected(phase, sessionNum)
+                                    ? 'border-[#131337] bg-[#131337] text-white'
+                                    : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'"
+                                (click)="toggleSessionSelection(phase, sessionNum)">
+                                <span class="font-bold text-sm">Session {{ sessionNum }}</span>
+                                <div class="h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors"
+                                    [class]="isSessionSelected(phase, sessionNum)
+                                        ? 'border-[#70F4C3] bg-[#70F4C3]'
+                                        : 'border-gray-300 bg-white'">
+                                    <i class="pi pi-check text-[#131337] text-[10px]"
+                                        *ngIf="isSessionSelected(phase, sessionNum)"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </p-card>
+
+</div>

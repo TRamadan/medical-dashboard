@@ -1,0 +1,329 @@
+<div class="flex flex-col gap-6">
+    <!-- Alert Banner -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-4 items-start w-11/12 mx-auto">
+        <i class="pi pi-eye text-blue-600 text-2xl mt-1"></i>
+        <div class="flex flex-col gap-1">
+            <span class="font-bold text-blue-800 text-lg">Review Your Protocol</span>
+            <span class="text-blue-600">Review all defined phases, sessions, sections, and exercises before
+                activation.</span>
+        </div>
+    </div>
+
+    <!-- Protocol Summary -->
+    <p-card *ngIf="protocol() as proto">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex flex-col gap-1">
+                <span class="text-xl font-bold text-gray-800">{{ proto.name || 'Untitled Protocol' }}</span>
+                <div class="flex items-center gap-3 text-sm text-gray-500">
+                    <span><i class="pi pi-calendar mr-1"></i>{{ proto.weeks || '—' }} weeks</span>
+                    <span><i class="pi pi-list mr-1"></i>{{ proto.totalSessions || '—' }} sessions</span>
+                    <span><i class="pi pi-chart-bar mr-1"></i>{{ proto.phases.length }} phases</span>
+                </div>
+            </div>
+            <p-tag [value]="proto.status | titlecase" severity="warn"></p-tag>
+        </div>
+    </p-card>
+
+    <!-- Phases Accordion -->
+    <p-accordion>
+        <p-accordionTab *ngFor="let phase of phases; let pi = index">
+            <ng-template pTemplate="header">
+                <div class="flex justify-between items-center w-full pr-4">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="flex items-center justify-center w-8 h-8 rounded-full bg-[#131337] text-[#70F4C3] font-bold text-xs">
+                            {{ pi + 1 }}
+                        </div>
+                        <span class="font-bold text-base">{{ phase.name }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <p-tag [value]="phase.totalWeeks + ' wks'" severity="info"></p-tag>
+                        <p-tag [value]="getTotalExercises(phase) + ' exercises'" severity="success"></p-tag>
+                    </div>
+                </div>
+            </ng-template>
+
+            <div class="flex flex-col gap-4">
+                <!-- Phase Info -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-2">
+                    <div class="bg-gray-50 rounded-lg p-3 flex flex-col gap-1">
+                        <span class="text-xs text-gray-500 uppercase font-semibold">Weeks</span>
+                        <span class="font-bold text-gray-800">{{ phase.totalWeeks }}</span>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3 flex flex-col gap-1">
+                        <span class="text-xs text-gray-500 uppercase font-semibold">Sessions</span>
+                        <span class="font-bold text-gray-800">{{ phase.totalSessions }}</span>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3 flex flex-col gap-1">
+                        <span class="text-xs text-gray-500 uppercase font-semibold">Sessions/Week</span>
+                        <span class="font-bold text-gray-800">{{ phase.sessionsPerWeek }}</span>
+                    </div>
+                </div>
+
+                <!-- Objective -->
+                <div *ngIf="phase.objective" class="bg-blue-50 border border-blue-100 rounded-lg p-3">
+                    <span class="text-xs font-bold text-blue-800 uppercase block mb-1">Objective</span>
+                    <span class="text-blue-700 text-sm">{{ phase.objective }}</span>
+                </div>
+
+                <!-- Criteria -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-3"
+                    *ngIf="phase.criteria.progressionCriteria || phase.criteria.regressionCriteria || phase.criteria.precautions">
+                    <div *ngIf="phase.criteria.progressionCriteria"
+                        class="bg-emerald-50 border border-emerald-100 rounded-lg p-3">
+                        <span class="text-xs font-bold text-emerald-800 uppercase block mb-1">
+                            <i class="pi pi-arrow-up mr-1"></i>Progression
+                        </span>
+                        <span class="text-emerald-700 text-sm">{{ phase.criteria.progressionCriteria }}</span>
+                    </div>
+                    <div *ngIf="phase.criteria.regressionCriteria"
+                        class="bg-amber-50 border border-amber-100 rounded-lg p-3">
+                        <span class="text-xs font-bold text-amber-800 uppercase block mb-1">
+                            <i class="pi pi-arrow-down mr-1"></i>Regression
+                        </span>
+                        <span class="text-amber-700 text-sm">{{ phase.criteria.regressionCriteria }}</span>
+                    </div>
+                    <div *ngIf="phase.criteria.precautions" class="bg-red-50 border border-red-100 rounded-lg p-3">
+                        <span class="text-xs font-bold text-red-800 uppercase block mb-1">
+                            <i class="pi pi-exclamation-triangle mr-1"></i>Precautions
+                        </span>
+                        <span class="text-red-700 text-sm">{{ phase.criteria.precautions }}</span>
+                    </div>
+                </div>
+
+                <!-- Sessions -->
+                <div class="flex flex-col gap-3 mt-2">
+                    <span class="font-bold text-gray-700">Sessions</span>
+
+                    <div *ngFor="let sessionNum of getSessionNumbers(phase)" class="border rounded-lg p-4 bg-white">
+                        <div class="flex justify-between items-center mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="bg-[#131337] text-white text-xs font-bold px-2.5 py-1 rounded-md">
+                                    Session {{ sessionNum }}
+                                </span>
+                                <p-tag [value]="getSessionMode(phase, sessionNum) | titlecase"
+                                    [severity]="getSessionMode(phase, sessionNum) === 'exercises' ? 'success' : 'info'">
+                                </p-tag>
+                            </div>
+                            <span *ngIf="getSessionMode(phase, sessionNum) === 'measurements'"
+                                class="text-xs text-gray-500">
+                                Template: {{ getMeasurementTemplate(phase, sessionNum) }}
+                            </span>
+                        </div>
+
+                        <!-- Sections within session -->
+                        <div *ngIf="getSessionMode(phase, sessionNum) === 'exercises'" class="flex flex-col gap-3">
+                            <div *ngFor="let section of getSections(phase, sessionNum); let si = index"
+                                class="border border-dashed border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <div
+                                        class="w-6 h-6 rounded-full bg-gray-300 text-white text-xs flex items-center justify-center font-bold">
+                                        {{ si + 1 }}
+                                    </div>
+                                    <span class="font-semibold text-sm text-gray-700">{{ section.sectionName }}</span>
+                                    <span *ngIf="section.time" class="text-xs text-gray-400 ml-auto">
+                                        <i class="pi pi-clock mr-1"></i>{{ section.time }}
+                                    </span>
+                                </div>
+
+                                <!-- Exercises table -->
+                                <div class="flex flex-col gap-2">
+                                    <div *ngFor="let ex of section.exercises; let ei = index"
+                                        class="flex items-center gap-3 bg-white rounded-lg px-3 py-2 border border-gray-100">
+                                        <span class="text-xs text-gray-400 font-mono w-5">{{ ei + 1 }}.</span>
+                                        <span class="font-medium text-sm text-gray-800 flex-1">{{ ex.name || 'Unnamed'
+                                            }}</span>
+                                        <p-tag [value]="getExerciseModeBadge(ex)"
+                                            [severity]="getExerciseModeSeverity(ex)" class="text-xs"></p-tag>
+                                        <ng-container *ngIf="ex.type === 'exercise'">
+                                            <span class="text-xs text-gray-500">
+                                                {{ $any(ex).sets.length }}×{{ $any(ex).sets[0]?.repetitions || '?' }}
+                                            </span>
+                                            <span
+                                                class="text-[10px] bg-[#134e4a] text-[#2dd4a0] px-1.5 py-0.5 rounded font-bold">
+                                                {{ $any(ex).contractionType }}
+                                            </span>
+                                        </ng-container>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Measurement info -->
+                        <div *ngIf="getSessionMode(phase, sessionNum) === 'measurements'"
+                            class="flex items-center gap-3 text-gray-500 text-sm italic p-2">
+                            <i class="pi pi-chart-pie text-purple-500"></i>
+                            <span>Measurement session — Template: {{ getMeasurementTemplate(phase, sessionNum) }}</span>
+                        </div>
+                    </div>
+
+                    <div *ngIf="getSessionNumbers(phase).length === 0" class="text-center text-gray-400 italic py-4">
+                        No sessions configured for this phase.
+                    </div>
+                </div>
+            </div>
+        </p-accordionTab>
+    </p-accordion>
+
+    <!-- ── Activation Section ──────────────────────────────────────────────── -->
+    <ng-container *ngIf="protocol() as proto">
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="flex flex-col items-center bg-[#131337] rounded-xl p-4 text-white">
+                <i class="pi pi-calendar text-[#70F4C3] text-xl mb-2"></i>
+                <span class="text-2xl font-bold">{{ proto.weeks || '—' }}</span>
+                <span class="text-xs text-gray-300 uppercase font-semibold mt-1">Weeks</span>
+            </div>
+            <div class="flex flex-col items-center bg-[#131337] rounded-xl p-4 text-white">
+                <i class="pi pi-list text-[#70F4C3] text-xl mb-2"></i>
+                <span class="text-2xl font-bold">{{ proto.totalSessions || '—' }}</span>
+                <span class="text-xs text-gray-300 uppercase font-semibold mt-1">Total Sessions</span>
+            </div>
+            <div class="flex flex-col items-center bg-[#131337] rounded-xl p-4 text-white">
+                <i class="pi pi-chart-bar text-[#70F4C3] text-xl mb-2"></i>
+                <span class="text-2xl font-bold">{{ proto.phases.length }}</span>
+                <span class="text-xs text-gray-300 uppercase font-semibold mt-1">Phases</span>
+            </div>
+            <div class="flex flex-col items-center bg-[#131337] rounded-xl p-4 text-white">
+                <i class="pi pi-bolt text-[#70F4C3] text-xl mb-2"></i>
+                <span class="text-2xl font-bold">{{ totalExercises }}</span>
+                <span class="text-xs text-gray-300 uppercase font-semibold mt-1">Exercises</span>
+            </div>
+        </div>
+
+        <!-- Phases Overview -->
+        <p-card>
+            <div class="flex flex-col gap-3">
+                <span class="font-bold text-gray-700">Phases Overview</span>
+                <div *ngFor="let phase of proto.phases; let i = index"
+                    class="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-100">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-7 h-7 rounded-full bg-[#131337] text-[#70F4C3] flex items-center justify-center text-xs font-bold">
+                            {{ i + 1 }}
+                        </div>
+                        <span class="font-semibold text-sm text-gray-800">{{ phase.name }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <p-tag [value]="phase.totalWeeks + ' wks'" severity="info"></p-tag>
+                        <p-tag [value]="phase.totalSessions + ' sessions'" severity="success"></p-tag>
+                    </div>
+                </div>
+            </div>
+        </p-card>
+
+
+
+        <!-- Action Cards -->
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-2">
+                <i class="pi pi-sliders-h text-[#131337] text-lg"></i>
+                <span class="font-bold text-gray-800 text-base">Save Options</span>
+                <span class="text-xs text-gray-400 ml-1">(Select one)</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Save as Template -->
+                <div (click)="toggleAction('template')" [class]="'border-2 rounded-xl p-5 cursor-pointer transition-all flex items-start gap-4 relative ' +
+                        (isActionSelected('template')
+                            ? 'border-[#131337] bg-[#131337] shadow-md'
+                            : 'border-gray-200 bg-white hover:shadow-md hover:border-gray-300')">
+                    <i [class]="'pi pi-folder text-2xl flex-shrink-0 ' +
+                        (isActionSelected('template') ? 'text-[#70F4C3]' : 'text-amber-500')"></i>
+                    <div class="flex flex-col gap-1 flex-1">
+                        <span [class]="'font-bold ' + (isActionSelected('template') ? 'text-white' : 'text-gray-800')">
+                            Save as Template
+                        </span>
+                        <span [class]="'text-sm ' + (isActionSelected('template') ? 'text-gray-300' : 'text-gray-500')">
+                            Save to template library for similar cases
+                        </span>
+                    </div>
+                    <div [class]="'w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ' +
+                        (isActionSelected('template') ? 'border-[#70F4C3] bg-[#70F4C3]' : 'border-gray-300 bg-white')">
+                        <i *ngIf="isActionSelected('template')" class="pi pi-check text-[#131337] text-[10px]"></i>
+                    </div>
+                </div>
+
+                <!-- Apply to Athlete -->
+                <div (click)="toggleAction('athlete')" [class]="'border-2 rounded-xl p-5 cursor-pointer transition-all flex items-start gap-4 relative ' +
+                        (isActionSelected('athlete')
+                            ? 'border-[#131337] bg-[#131337] shadow-md'
+                            : 'border-gray-200 bg-white hover:shadow-md hover:border-gray-300')">
+                    <i [class]="'pi pi-link text-2xl flex-shrink-0 ' +
+                        (isActionSelected('athlete') ? 'text-[#70F4C3]' : 'text-blue-500')"></i>
+                    <div class="flex flex-col gap-1 flex-1">
+                        <span [class]="'font-bold ' + (isActionSelected('athlete') ? 'text-white' : 'text-gray-800')">
+                            Apply to Athlete
+                        </span>
+                        <span [class]="'text-sm ' + (isActionSelected('athlete') ? 'text-gray-300' : 'text-gray-500')">
+                            Assign this protocol to a specific athlete
+                        </span>
+                    </div>
+                    <div [class]="'w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ' +
+                        (isActionSelected('athlete') ? 'border-[#70F4C3] bg-[#70F4C3]' : 'border-gray-300 bg-white')">
+                        <i *ngIf="isActionSelected('athlete')" class="pi pi-check text-[#131337] text-[10px]"></i>
+                    </div>
+                </div>
+
+                <!-- Share with Team -->
+                <div (click)="toggleAction('share')" [class]="'border-2 rounded-xl p-5 cursor-pointer transition-all flex items-start gap-4 relative ' +
+                        (isActionSelected('share')
+                            ? 'border-[#131337] bg-[#131337] shadow-md'
+                            : 'border-gray-200 bg-white hover:shadow-md hover:border-gray-300')">
+                    <i [class]="'pi pi-share-alt text-2xl flex-shrink-0 ' +
+                        (isActionSelected('share') ? 'text-[#70F4C3]' : 'text-purple-500')"></i>
+                    <div class="flex flex-col gap-1 flex-1">
+                        <span [class]="'font-bold ' + (isActionSelected('share') ? 'text-white' : 'text-gray-800')">
+                            Share with Team
+                        </span>
+                        <span [class]="'text-sm ' + (isActionSelected('share') ? 'text-gray-300' : 'text-gray-500')">
+                            Send to coaches and specialists for review
+                        </span>
+                    </div>
+                    <div [class]="'w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ' +
+                        (isActionSelected('share') ? 'border-[#70F4C3] bg-[#70F4C3]' : 'border-gray-300 bg-white')">
+                        <i *ngIf="isActionSelected('share')" class="pi pi-check text-[#131337] text-[10px]"></i>
+                    </div>
+                </div>
+
+                <!-- Export PDF -->
+                <div (click)="toggleAction('pdf')" [class]="'border-2 rounded-xl p-5 cursor-pointer transition-all flex items-start gap-4 relative ' +
+                        (isActionSelected('pdf')
+                            ? 'border-[#131337] bg-[#131337] shadow-md'
+                            : 'border-gray-200 bg-white hover:shadow-md hover:border-gray-300')">
+                    <i [class]="'pi pi-file-pdf text-2xl flex-shrink-0 ' +
+                        (isActionSelected('pdf') ? 'text-[#70F4C3]' : 'text-red-500')"></i>
+                    <div class="flex flex-col gap-1 flex-1">
+                        <span [class]="'font-bold ' + (isActionSelected('pdf') ? 'text-white' : 'text-gray-800')">
+                            Export PDF
+                        </span>
+                        <span [class]="'text-sm ' + (isActionSelected('pdf') ? 'text-gray-300' : 'text-gray-500')">
+                            Print-ready report for athlete or medical team
+                        </span>
+                    </div>
+                    <div [class]="'w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 mt-0.5 transition-colors ' +
+                        (isActionSelected('pdf') ? 'border-[#70F4C3] bg-[#70F4C3]' : 'border-gray-300 bg-white')">
+                        <i *ngIf="isActionSelected('pdf')" class="pi pi-check text-[#131337] text-[10px]"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activate Protocol & Save Draft -->
+        <div class="flex justify-center gap-4 pb-4">
+            <button pButton class="p-button-outlined px-10 py-3 text-base font-bold" icon="pi pi-save" iconPos="left"
+                label="Save as draft" [disabled]="!proto.name?.trim()"
+                pTooltip="{{ proto.name?.trim() ? 'Save protocol as draft' : 'Please enter a protocol name first' }}"
+                tooltipPosition="top" (click)="saveAsDraft()">
+            </button>
+            <button pButton class="px-10 py-3 text-base font-bold" icon="pi pi-check-circle" iconPos="left"
+                label="Activate protocol and send notifications" [disabled]="!proto.name?.trim()"
+                pTooltip="{{ proto.name?.trim() ? 'Activate and save protocol' : 'Please enter a protocol name first' }}"
+                tooltipPosition="top" (click)="activateProtocol()">
+            </button>
+        </div>
+
+    </ng-container>
+
+</div>

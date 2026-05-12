@@ -1,0 +1,211 @@
+<div class="flex flex-col gap-6">
+
+    <!-- Protocol Type Card -->
+    <p-card>
+        <ng-template pTemplate="title">
+            <span class="text-xl font-bold">Protocol Type</span>
+        </ng-template>
+        <div class="flex flex-col gap-4 mt-4">
+            <span class="text-gray-600 mb-2">Select the services related to this plan:</span>
+
+            <!-- <div *ngIf="loadingServices" class="flex items-center gap-2 text-gray-500 italic p-2">
+                <i class="pi pi-spin pi-spinner text-xl"></i>
+                <span>Loading services...</span>
+            </div>
+
+            <div *ngIf="!loadingServices && (!serviceCategories || serviceCategories.length === 0)"
+                class="flex items-center gap-2 text-gray-500 italic p-2">
+                <i class="pi pi-info-circle text-xl"></i>
+                <span>No services found.</span>
+            </div> -->
+
+            <div *ngIf=" serviceCategories.length> 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div *ngFor="let service of serviceCategories"
+                    class="border-2 rounded-xl p-3 transition-all duration-200 flex items-center justify-between"
+                    [class]="service.selected
+                        ? 'border-[#131337] bg-[#131337]'
+                        : 'border-gray-100 bg-white'" [class.cursor-pointer]="!readonly()"
+                    [class.cursor-default]="readonly()" [class.hover:shadow-md]="!readonly()"
+                    [class.hover:border-gray-300]="!readonly() && !service.selected" [class.opacity-70]="readonly()"
+                    (click)="!readonly() && (service.selected = !service.selected); !readonly() && onServiceChange()">
+                    <div class="flex items-center gap-3">
+                        <div class="h-8 w-8 rounded-full flex items-center justify-center transition-colors"
+                            [ngClass]="{'bg-[#2A2A4A] text-white': service.selected, 'bg-gray-100 text-gray-500': !service.selected}">
+                            <i class="pi pi-briefcase text-base"></i>
+                        </div>
+                        <span class="font-semibold text-sm"
+                            [ngClass]="{'text-white': service.selected, 'text-gray-800': !service.selected}">{{
+                            service.nameEn || service.nameAr || 'Service
+                            Target' }}</span>
+                    </div>
+                    <div class="h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors"
+                        [ngClass]="{'border-[#70F4C3] bg-[#70F4C3]': service.selected, 'border-gray-300 bg-white': !service.selected}">
+                        <i class="pi pi-check text-[#131337] text-xs" *ngIf="service.selected"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </p-card>
+
+    <!-- Template Selection Card -->
+    <p-card>
+        <div class="flex flex-col gap-4">
+            <div class="flex items-center gap-2">
+                <i class="pi pi-clone text-blue-600 text-xl"></i>
+                <span class="text-xl font-bold">Use Treatment Plan Template</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <p-checkbox [(ngModel)]="useTemplate" [binary]="true" inputId="template"
+                    (onChange)="onToggleTemplate()"></p-checkbox>
+                <label for="template" class="text-gray-700 cursor-pointer">Start from an existing template</label>
+            </div>
+
+            <div *ngIf="useTemplate" class="flex flex-col gap-4 mt-2">
+                <span class="text-gray-600">Select a template to customize:</span>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div *ngFor="let template of templates"
+                        class="border rounded-xl p-4 transition-all duration-200 relative flex flex-col h-full" [class]="selectedTemplate === template
+                            ? 'border-[#131337] bg-[#131337] shadow-lg scale-[1.02]'
+                            : 'border-gray-200 bg-white'" [class.cursor-pointer]="!readonly()"
+                        [class.cursor-default]="readonly()" [class.opacity-70]="readonly()"
+                        [class.hover:shadow-md]="!readonly()"
+                        [class.hover:border-gray-300]="!readonly() && selectedTemplate !== template"
+                        (click)="!readonly() && selectTemplate(template)">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex flex-col gap-1">
+                                <span class="font-bold text-lg transition-colors"
+                                    [ngClass]="{'text-white': selectedTemplate === template, 'text-gray-800': selectedTemplate !== template}">{{
+                                    template.title }}</span>
+                                <span class="text-sm transition-colors"
+                                    [ngClass]="{'text-[#70f4c3]': selectedTemplate === template, 'text-gray-500': selectedTemplate !== template}">{{
+                                    template.subtitle }}</span>
+                            </div>
+                            <div *ngIf="selectedTemplate === template"
+                                class="text-[#131337] bg-[#70f4c3] h-6 w-6 rounded-full flex items-center justify-center shadow-md flex-shrink-0">
+                                <i class="pi pi-check text-sm font-bold"></i>
+                            </div>
+                        </div>
+
+                        <span class="mt-1 transition-colors text-sm mb-4 flex-1"
+                            [ngClass]="{'text-gray-300': selectedTemplate === template, 'text-gray-600': selectedTemplate !== template}">{{
+                            template.description }}</span>
+
+                        <div class="flex items-center gap-4 mt-auto pt-3 border-t text-sm transition-colors"
+                            [ngClass]="{'text-gray-400 border-gray-700': selectedTemplate === template, 'text-gray-600 border-gray-100': selectedTemplate !== template}">
+                            <div class="flex items-center gap-1" title="Duration">
+                                <i class="pi pi-stopwatch"></i>
+                                <span>{{ template.duration }}</span>
+                            </div>
+                            <div class="flex items-center gap-1" title="Frequency">
+                                <i class="pi pi-calendar"></i>
+                                <span>{{ template.frequency }}</span>
+                            </div>
+                            <div class="flex items-center gap-1" title="Phases">
+                                <i class="pi pi-chart-bar"></i>
+                                <span>{{ template.phases }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </p-card>
+
+    <!-- Plan Configuration Card -->
+    <!-- acl-protocol.component.html -->
+    <div class="protocol-page" dir="ltr">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+            <!-- ═══════════════════════════════════════════
+         TOP CARDS ROW
+    ════════════════════════════════════════════ -->
+            <div class="cards-row">
+
+                <!-- LEFT: General Framework -->
+                <p-card>
+                    <div class="card-label">General Framework</div>
+
+                    <div class="field">
+                        <label>Total Weeks <span class="required">*</span></label>
+                        <p-inputNumber formControlName="totalWeeks" [min]="1" [showButtons]="false" styleClass="w-full"
+                            inputStyleClass="proto-input"></p-inputNumber>
+                    </div>
+
+                    <div class="field">
+                        <label>Sessions / Week <span class="req-note">(default)</span></label>
+                        <p-inputNumber formControlName="sessionsPerWeek" [min]="1" [showButtons]="false"
+                            styleClass="w-full" inputStyleClass="proto-input"></p-inputNumber>
+                    </div>
+
+                    <div class="field">
+                        <label>Number of Phases</label>
+                        <p-inputNumber formControlName="numberOfPhases" [min]="1" [showButtons]="false"
+                            styleClass="w-full" inputStyleClass="proto-input"></p-inputNumber>
+                    </div>
+
+                    <div class="field">
+                        <label>Target Athlete Level</label>
+                        <p-dropdown formControlName="athleteLevel" [options]="athleteLevelOptions" optionLabel="label"
+                            optionValue="value" styleClass="w-full proto-dropdown"></p-dropdown>
+                    </div>
+                </p-card>
+
+                <!-- RIGHT: Basic Details -->
+                <p-card>
+                    <div class="card-label">Basic Details</div>
+
+                    <div class="field">
+                        <label>Protocol Name <span class="required">*</span></label>
+                        <input pInputText formControlName="protocolName" class="proto-input w-full" />
+                    </div>
+
+                    <div class="field">
+                        <label>Injury / Condition <span class="required">*</span></label>
+                        <input pInputText formControlName="injuryCondition" class="proto-input w-full" />
+                    </div>
+
+
+                    <div class="field">
+                        <label>Primary Goal <span class="required">*</span></label>
+                        <textarea pInputTextarea formControlName="primaryGoal" class="proto-input w-full" rows="3"
+                            [autoResize]="false"></textarea>
+                    </div>
+                </p-card>
+            </div>
+
+            <!-- ═══════════════════════════════════════════
+         CONTRAINDICATIONS SECTION
+    ════════════════════════════════════════════ -->
+            <p-card>
+                <div class="contraindications-card">
+                    <div class="card-label">General Protocol Contraindications (CONTRAINDICATIONS)</div>
+
+                    <div class="cert-banner">
+                        <span class="cert-tag">CERT — Item 3:</span>
+                        Document cases that prevent this protocol from being applied and stop immediately.
+                    </div>
+
+                    <div class="contra-list" formArrayName="contraindications">
+                        <div *ngFor="let ctrl of contraindications.controls; let i = index" class="contra-item">
+                            <span class="contra-x" *ngIf="!readonly()" (click)="removeContraindication(i)">✕</span>
+                            <span class="contra-x opacity-30" *ngIf="readonly()">✕</span>
+                            <input pInputText [formControlName]="i" class="proto-input contra-input" />
+                        </div>
+                    </div>
+
+                    <!-- Add new contraindication (hidden in read-only mode) -->
+                    <div class="add-contra-row" *ngIf="!readonly()">
+                        <span class="contra-x add-icon">✕</span>
+                        <input pInputText formControlName="newContraindication" class="proto-input contra-input"
+                            placeholder="+ Add contraindication..." (keyup.enter)="addContraindication()" />
+                        <p-button label="Add" styleClass="add-btn" (onClick)="addContraindication()"></p-button>
+                    </div>
+                </div>
+            </p-card>
+
+
+
+        </form>
+    </div>
+</div>

@@ -1,0 +1,200 @@
+// ─── Tokens (same palette as parent form) ─────────────────────────────
+$bg-section: #12151f;
+$bg-input: #1a1f30;
+$bg-input-hover: #1e2438;
+$border: #252d45;
+$border-focus: #3a6bc4;
+$text-primary: #dde1ed;
+$text-secondary: #7a82a0;
+$text-muted: #4a526e;
+$accent-red: #e05c5c;
+$accent-orange: #e07c3c;
+$accent-blue: #3d7fe6;
+$accent-green: #3aaa6e;
+$radius: 7px;
+
+// ─── Section Wrapper ──────────────────────────────────────────────────
+.criteria-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 24px;
+    border-radius: $radius;
+}
+
+// ─── Header ───────────────────────────────────────────────────────────
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 7px;
+    margin-bottom: 6px;
+
+    .section-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #000000;
+        letter-spacing: 0.01em;
+    }
+
+    .info-icon {
+        color: #000000;
+        font-size: 14px;
+        display: flex;
+        align-items: center;
+    }
+}
+
+// ─── Criteria List ────────────────────────────────────────────────────
+.criteria-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+// ─── Single Row ───────────────────────────────────────────────────────
+.criteria-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+// ─── Remove Button ────────────────────────────────────────────────────
+.remove-btn {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: #ae230a;
+    color: #ffffff;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+
+
+}
+
+// ─── Metric Dropdown ──────────────────────────────────────────────────
+:host ::ng-deep {
+    .metric-dropdown {
+        &.p-dropdown {
+            border: 1px solid $border !important;
+            border-radius: $radius !important;
+            min-width: 160px !important;
+            height: 36px !important;
+            display: flex !important;
+            align-items: center !important;
+            transition: border-color 0.2s !important;
+
+            &:hover {
+                border-color: lighten($border, 10%) !important;
+            }
+
+            &.p-focus {
+                border-color: $border-focus !important;
+                box-shadow: 0 0 0 3px rgba($border-focus, 0.15) !important;
+            }
+
+            .p-dropdown-label {
+                color: $text-primary !important;
+                font-size: 13px !important;
+                padding: 0 10px !important;
+                line-height: 34px !important;
+                text-align: right !important;
+            }
+
+            .p-dropdown-trigger {
+                color: $text-secondary !important;
+                width: 28px !important;
+            }
+        }
+
+        .p-dropdown-panel {
+            background: #1a1f30 !important;
+            border: 1px solid $border !important;
+            border-radius: $radius !important;
+
+            .p-dropdown-item {
+                color: $text-primary !important;
+                font-size: 13px !important;
+                padding: 8px 12px !important;
+                text-align: right !important;
+
+                &:hover,
+                &.p-highlight {
+                    background: rgba($accent-blue, 0.15) !important;
+                    color: lighten($accent-blue, 20%) !important;
+                }
+            }
+        }
+    }
+
+    // ─── Value InputNumber ─────────────────────────────────────────────
+    .value-number {
+
+        .p-inputnumber-input,
+        .value-input {
+            background: $bg-input !important;
+            border: 1px solid $border !important;
+            border-radius: $radius !important;
+            color: $text-primary !important;
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            text-align: center !important;
+            width: 72px !important;
+            height: 36px !important;
+            padding: 0 10px !important;
+            box-shadow: none !important;
+            transition: border-color 0.2s !important;
+
+            &:focus {
+                border-color: $border-focus !important;
+                box-shadow: 0 0 0 3px rgba($border-focus, 0.15) !important;
+                outline: none !important;
+            }
+        }
+    }
+}
+
+// ─── Operator Text ────────────────────────────────────────────────────
+.operator-text {
+    flex-shrink: 0;
+    font-size: 18px;
+    font-weight: 700;
+    color: $accent-red;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+}
+
+// ─── Unit Label ───────────────────────────────────────────────────────
+.unit-label {
+    font-size: 12px;
+    color: $text-secondary;
+    min-width: 36px;
+    text-align: right;
+    white-space: nowrap;
+}
+
+// ─── Add Criterion Button ─────────────────────────────────────────────
+.add-criterion-btn {
+    align-self: flex-start;
+    background: none;
+    border: none;
+    color: $accent-red;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 4px 0;
+    margin-top: 4px;
+    transition: opacity 0.15s;
+
+    &:hover {
+        opacity: 0.75;
+    }
+}

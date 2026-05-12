@@ -1,0 +1,418 @@
+<div class="flex flex-col gap-6">
+    <p-card *ngIf="phases.length > 0">
+        <ng-template pTemplate="header">
+            <div class="px-4 pt-4 pb-2">
+                <h2 class="text-2xl font-bold text-gray-800 mb-1">Treatment Phases from Report</h2>
+                <p class="text-gray-600 text-sm">Configure exercises and measurements for each session</p>
+            </div>
+        </ng-template>
+
+        <p-accordion>
+            <p-accordionTab *ngFor="let phase of phases; let i = index">
+                <ng-template pTemplate="header">
+                    <div class="flex justify-between items-center w-full pr-4">
+                        <span class="font-bold text-lg">{{ phase.name }}</span>
+                        <p-tag [value]="'Phase ' + (phase.id || i+1)" severity="warn"></p-tag>
+                    </div>
+                </ng-template>
+
+                <div class="flex flex-col gap-6 pb-4">
+                    <!-- Phase Objective -->
+                    <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 flex flex-col gap-2">
+                        <label class="font-bold text-blue-800">Phase Objective</label>
+                        <p class="text-blue-700" *ngIf="phase.objective">{{ phase.objective }}</p>
+                        <p class="text-blue-700 italic" *ngIf="!phase.objective">No objective defined for this phase.
+                        </p>
+                    </div>
+
+                    <!-- Weeks and Sessions Per Week -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-2">
+                            <label class="font-medium text-sm text-gray-700">Weeks:</label>
+                            <input pInputText type="number" [(ngModel)]="phase.totalWeeks"
+                                (ngModelChange)="updateTotalSessions(phase)" placeholder="eg., 12" class="w-full" />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="font-medium text-sm text-gray-700">Sessions per week:</label>
+                            <input pInputText type="number" [(ngModel)]="phase.sessionsPerWeek"
+                                (ngModelChange)="updateTotalSessions(phase)" placeholder="eg., 3" class="w-full" />
+                        </div>
+                    </div>
+
+                    <!-- Weeks with Session Tabs -->
+
+                    <div *ngIf="phase.totalWeeks && phase.sessionsPerWeek" class="flex flex-col gap-6">
+                        <div *ngFor="let week of phase.weeks" class="border rounded-lg p-4 bg-gray-50">
+                            <h3 class="font-bold text-lg mb-4">Week #{{ week.weekNumber }}</h3>
+
+                            <!-- Session Tabs -->
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <button *ngFor="let session of week.sessions"
+                                    [class]="'px-6 py-2.5 rounded-lg font-medium text-base transition-all ' +
+                                     (getSelectedSessionTab(phase, week) === session.sessionNumber ? 'bg-blue-600 text-white' : 'text-blue-600')"
+                                    (click)="selectSessionTab(phase, week, session.sessionNumber)">
+                                    Session {{ session.sessionNumber }}
+                                </button>
+                            </div>
+
+                            <!-- Selected Session Content -->
+                            <div *ngIf="getSelectedSessionTab(phase, week) as globalSessionNum">
+
+                                <!-- Session Mode Toggle (locked) -->
+                                <div
+                                    class="flex bg-gray-100 p-1 rounded-xl mb-6 border border-gray-200 mx-auto w-full max-w-sm relative opacity-80">
+                                    <span
+                                        class="absolute -top-2.5 -right-2.5 bg-amber-400 text-amber-900 text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm z-10">
+                                        <i class="pi pi-lock text-[9px]"></i> Locked
+                                    </span>
+                                    <div class="flex-1 text-center py-2.5 rounded-lg font-bold transition-all duration-300 flex items-center justify-center cursor-not-allowed"
+                                        [ngClass]="{
+                                    'bg-[#131337] text-white shadow-md': getSessionMode(phase, globalSessionNum) === 'exercises',
+                                    'text-gray-400': getSessionMode(phase, globalSessionNum) !== 'exercises'
+                                }">
+                                        <i class="pi pi-list mr-2"
+                                            [ngClass]="{'text-[#70F4C3]': getSessionMode(phase, globalSessionNum) === 'exercises'}"></i>
+                                        <span class="text-sm">Exercises</span>
+                                    </div>
+                                    <div class="flex-1 text-center py-2.5 rounded-lg font-bold transition-all duration-300 flex items-center justify-center cursor-not-allowed"
+                                        [ngClass]="{
+                                    'bg-[#131337] text-white shadow-md': getSessionMode(phase, globalSessionNum) === 'measurements',
+                                    'text-gray-400': getSessionMode(phase, globalSessionNum) !== 'measurements'
+                                }">
+                                        <i class="pi pi-chart-line mr-2"
+                                            [ngClass]="{'text-[#70F4C3]': getSessionMode(phase, globalSessionNum) === 'measurements'}"></i>
+                                        <span class="text-sm">Measurements</span>
+                                    </div>
+                                </div>
+
+                                <!-- EXERCISES VIEW -->
+                                <div class="flex flex-col gap-4"
+                                    *ngIf="getSessionMode(phase, globalSessionNum) === 'exercises'">
+                                    <div *ngFor="let section of getSections(phase, globalSessionNum); let secIndex = index"
+                                        class="border border-gray-300 rounded-lg p-4 bg-white">
+
+                                        <!-- Section Header -->
+                                        <div class="flex items-center justify-between mb-4">
+                                            <div class="flex items-center gap-3">
+                                                <div
+                                                    class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-400 text-white font-bold">
+                                                    {{ secIndex + 1 }}
+                                                </div>
+                                                <span class="font-medium text-lg">{{ section.sectionName || 'Section ' +
+                                                    (secIndex + 1) }}</span>
+                                            </div>
+                                            <button pButton icon="pi pi-trash"
+                                                class="p-button-text p-button-danger p-button-sm"
+                                                (click)="removeSection(phase, globalSessionNum, secIndex)"></button>
+                                        </div>
+
+                                        <!-- Section Time -->
+                                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                            <div class="flex flex-col gap-2">
+                                                <label class="font-medium text-sm text-gray-600">Time</label>
+                                                <input pInputText type="text" [(ngModel)]="section.time"
+                                                    placeholder="e.g. 10 min" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Exercise Cards -->
+                                        <div class="flex flex-col gap-4">
+                                            <div *ngFor="let ex of section.exercises; let exIndex = index"
+                                                class="border border-gray-200 rounded-lg p-4 bg-gray-50 flex flex-col gap-4 relative shadow-sm hover:shadow-md transition-shadow">
+
+                                                <!-- Toggle + Actions -->
+                                                <div class="flex items-center justify-between pr-10">
+                                                    <div class="flex items-center bg-gray-200 p-1.5 rounded-full w-full max-w-[240px] relative"
+                                                        dir="ltr">
+                                                        <div class="absolute left-1.5 top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white rounded-full shadow transition-transform duration-300 ease-in-out pointer-events-none"
+                                                            [ngClass]="{'translate-x-full': ex.type === 'manual', 'translate-x-0': ex.type !== 'manual'}">
+                                                        </div>
+                                                        <button
+                                                            class="flex-1 relative z-10 py-1.5 text-center text-xs rounded-full transition-colors duration-300 focus:outline-none"
+                                                            [ngClass]="{'text-gray-900 font-bold': ex.type !== 'manual', 'text-gray-500 font-medium': ex.type === 'manual'}"
+                                                            (click)="ex.type = 'exercise'">Exercise</button>
+                                                        <button
+                                                            class="flex-1 relative z-10 py-1.5 text-center text-xs rounded-full transition-colors duration-300 focus:outline-none"
+                                                            [ngClass]="{'text-gray-900 font-bold': ex.type === 'manual', 'text-gray-500 font-medium': ex.type !== 'manual'}"
+                                                            (click)="ex.type = 'manual'">Manual</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="absolute top-2 right-2">
+                                                    <span class="pi pi-bars mr-2 text-gray-500 cursor-move"
+                                                        pTooltip="Drag to reorder" tooltipPosition="left"></span>
+                                                    <button pButton icon="pi pi-trash"
+                                                        class="p-button-rounded p-button-danger p-button-text p-button-sm"
+                                                        (click)="removeExercise(section, exIndex)"
+                                                        pTooltip="Remove Exercise"></button>
+                                                </div>
+
+                                                <!-- Exercise Name + Equipment -->
+                                                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                                    <div class="flex flex-col gap-1">
+                                                        <label class="text-sm font-semibold text-gray-700">Exercise
+                                                            Name <span class="text-red-500">*</span></label>
+                                                        <input pInputText [(ngModel)]="ex.name" class="w-full"
+                                                            placeholder="Exercise name" />
+                                                    </div>
+                                                    <div class="flex flex-col gap-1" *ngIf="ex.type === 'exercise'">
+                                                        <label
+                                                            class="text-sm font-semibold text-gray-700">Equipment</label>
+                                                        <input pInputText [(ngModel)]="$any(ex).equipment"
+                                                            class="w-full" placeholder="e.g. Leg Press Machine" />
+                                                    </div>
+                                                </div>
+
+                                                <!-- Description -->
+                                                <div class="flex flex-col gap-1">
+                                                    <label
+                                                        class="text-sm font-semibold text-gray-700">Description</label>
+                                                    <textarea pInputTextarea [(ngModel)]="ex.description" rows="3"
+                                                        class="w-full" placeholder="Enter Description..."></textarea>
+                                                </div>
+
+                                                <!-- Video URL (Manual mode only) -->
+                                                <div class="flex flex-col gap-1" *ngIf="ex.type === 'manual'">
+                                                    <label class="text-sm font-semibold text-gray-700">Video URL</label>
+                                                    <div class="flex items-center gap-2">
+                                                        <input pInputText [(ngModel)]="$any(ex).videoUrl" class="w-full"
+                                                            placeholder="https://youtube.com/watch?v=..." />
+                                                        <button pButton icon="pi pi-play"
+                                                            class="p-button-rounded p-button-success p-button-sm flex-shrink-0"></button>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Contraction Type (Exercise mode only) -->
+                                                <ng-container *ngIf="ex.type === 'exercise'">
+                                                    <div
+                                                        class="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                                        <div class="flex justify-between items-center">
+                                                            <span
+                                                                class="text-sm font-semibold text-gray-700">Contraction
+                                                                type</span>
+                                                            <span
+                                                                class="bg-[#134e4a] text-[#2dd4a0] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP
+                                                                T</span>
+                                                        </div>
+                                                        <div class="flex flex-wrap gap-2">
+                                                            <button
+                                                                *ngFor="let type of ['Dynamic', 'Isokinetic', 'Isometric', 'Eccentric', 'Concentric']"
+                                                                class="px-3 py-1.5 text-xs font-semibold rounded-full transition-colors border"
+                                                                [ngClass]="$any(ex).contractionType === type
+                                                            ? 'bg-[#451a03] text-[#f0a940] border-[#f0a940]'
+                                                            : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'"
+                                                                (click)="$any(ex).contractionType = type">{{ type
+                                                                }}</button>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Intensity Method -->
+                                                    <div
+                                                        class="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                                        <div class="flex justify-between items-center">
+                                                            <span class="text-sm font-semibold text-gray-700">Intensity
+                                                                method</span>
+                                                            <span
+                                                                class="bg-[#451a03] text-[#f0a940] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP
+                                                                I</span>
+                                                        </div>
+                                                        <div class="flex flex-wrap gap-2">
+                                                            <button
+                                                                *ngFor="let method of ['HR Zone', 'RIR', 'RPE 1-10', '1RM %', 'kg/lb', 'Bodyweight']"
+                                                                class="px-3 py-1.5 text-xs font-semibold rounded-full transition-colors border"
+                                                                [ngClass]="$any(ex).intensityMethod === method
+                                                            ? 'bg-[#134e4a] text-[#2dd4a0] border-[#2dd4a0]'
+                                                            : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'"
+                                                                (click)="$any(ex).intensityMethod = method">{{ method
+                                                                }}</button>
+                                                        </div>
+                                                    </div>
+                                                </ng-container>
+
+                                                <!-- Sets Table (Exercise mode only) -->
+                                                <div *ngIf="ex.type === 'exercise'"
+                                                    class="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                                    <div class="flex justify-between items-center mb-1">
+                                                        <div class="flex items-center gap-2">
+                                                            <span
+                                                                class="text-sm font-semibold text-gray-700">Sets:</span>
+                                                            <input pInputText [(ngModel)]="$any(ex).sets.length"
+                                                                type="number" min="1" max="20"
+                                                                class="w-16 text-center text-sm h-8 p-1" placeholder="1"
+                                                                (ngModelChange)="syncSetData(ex)" />
+                                                        </div>
+                                                        <span
+                                                            class="bg-[#134e4a] text-[#2dd4a0] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP
+                                                            V</span>
+                                                    </div>
+
+                                                    <!-- Table Header -->
+                                                    <div class="grid grid-cols-[2rem_1fr_1fr_1fr_1fr] gap-2 px-1">
+                                                        <div
+                                                            class="text-xs font-bold text-gray-400 uppercase text-center">
+                                                            Set #</div>
+                                                        <div
+                                                            class="text-xs font-bold text-gray-400 uppercase text-center">
+                                                            Reps</div>
+                                                        <div
+                                                            class="text-xs font-bold text-gray-400 uppercase text-center">
+                                                            Intensity</div>
+                                                        <div
+                                                            class="text-xs font-bold text-gray-400 uppercase text-center">
+                                                            Tempo</div>
+                                                        <div
+                                                            class="text-xs font-bold text-gray-400 uppercase text-center">
+                                                            Rest (sec)</div>
+                                                    </div>
+
+                                                    <!-- Table Rows -->
+                                                    <div class="flex flex-col gap-2 overflow-y-auto max-h-[300px]">
+                                                        <ng-container *ngFor="let idx of syncSetData(ex)">
+                                                            <div
+                                                                class="grid grid-cols-[2rem_1fr_1fr_1fr_1fr] gap-2 items-center px-1">
+                                                                <div class="flex justify-center">
+                                                                    <div
+                                                                        class="flex items-center justify-center w-7 h-7 rounded bg-gray-100 border border-gray-300">
+                                                                        <span class="text-xs text-blue-600 font-bold">{{
+                                                                            idx + 1 }}</span>
+                                                                    </div>
+                                                                </div>
+                                                                <input pInputText
+                                                                    [(ngModel)]="$any(ex).sets[idx].repetitions"
+                                                                    type="number" min="0"
+                                                                    class="w-full text-center text-sm h-9 shadow-sm"
+                                                                    placeholder="reps" />
+                                                                <input pInputText
+                                                                    [(ngModel)]="$any(ex).sets[idx].intensity"
+                                                                    class="w-full text-center text-sm h-9 shadow-sm"
+                                                                    placeholder="Mod" />
+                                                                <input pInputText [(ngModel)]="$any(ex).sets[idx].tempo"
+                                                                    class="w-full text-center text-sm h-9 shadow-sm"
+                                                                    placeholder="2-1-3" />
+                                                                <input pInputText [(ngModel)]="$any(ex).sets[idx].rest"
+                                                                    class="w-full text-center text-sm h-9 shadow-sm"
+                                                                    placeholder="90" />
+                                                            </div>
+                                                        </ng-container>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Progression Rule -->
+                                                <div
+                                                    class="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                                    <div class="flex justify-between items-center">
+                                                        <div class="flex items-center gap-2">
+                                                            <span
+                                                                class="text-sm font-semibold text-gray-700">Progression
+                                                                Rule</span>
+                                                        </div>
+                                                        <span
+                                                            class="bg-[#451a03] text-[#f0a940] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP
+                                                            P</span>
+                                                    </div>
+                                                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-1">
+                                                        <div class="flex flex-col gap-1">
+                                                            <label
+                                                                class="text-xs font-semibold text-gray-500 uppercase">Progression
+                                                                title</label>
+                                                            <input pInputText [(ngModel)]="ex.progressionRule.title"
+                                                                class="w-full text-sm"
+                                                                placeholder="e.g. Volume Progression" />
+                                                        </div>
+                                                        <div class="flex flex-col gap-1">
+                                                            <label
+                                                                class="text-xs font-semibold text-gray-500 uppercase">Increment
+                                                                amount</label>
+                                                            <input pInputText
+                                                                [(ngModel)]="ex.progressionRule.incrementAmount"
+                                                                type="number" class="w-full text-sm"
+                                                                placeholder="e.g. 2.5" />
+                                                        </div>
+                                                        <div class="flex flex-col gap-1">
+                                                            <label
+                                                                class="text-xs font-semibold text-gray-500 uppercase">Progression
+                                                                condition</label>
+                                                            <input pInputText
+                                                                [(ngModel)]="ex.progressionRule.progressionCondition"
+                                                                class="w-full text-sm"
+                                                                placeholder="e.g. VAS ≤ 4 + RIR ≥ 3" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Add Exercise Button -->
+                                            <div
+                                                class="flex justify-center mt-2 p-2 border-t border-dashed border-gray-300">
+                                                <p-button label="Add Exercise" icon="pi pi-plus" [outlined]="true"
+                                                    size="small" (click)="addExercise(section)"></p-button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Section Action Buttons -->
+                                        <div class="flex justify-end gap-3 mt-4">
+                                            <p-button label="Cancel" [outlined]="true" severity="secondary"
+                                                size="small"></p-button>
+                                            <p-button label="Save" severity="success" size="small"
+                                                [disabled]="!isSectionValid(section)"
+                                                pTooltip="{{ isSectionValid(section) ? 'Save section' : 'Please add at least one exercise with name, sets, and reps' }}"
+                                                tooltipPosition="top"></p-button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Add Section Button -->
+                                    <div class="flex justify-center">
+                                        <p-button label="Add New Section" icon="pi pi-plus-circle" severity="secondary"
+                                            [outlined]="true"
+                                            (onClick)="addSection(phase, globalSessionNum)"></p-button>
+                                    </div>
+                                </div>
+
+                                <!-- MEASUREMENTS VIEW -->
+                                <div *ngIf="getSessionMode(phase, globalSessionNum) === 'measurements'"
+                                    class="flex flex-col gap-4 p-4 border border-gray-200 rounded-xl bg-gray-50">
+                                    <div class="flex items-center gap-3">
+                                        <i class="pi pi-chart-pie text-2xl text-purple-600"></i>
+                                        <div>
+                                            <h3 class="text-xl font-bold text-gray-800">Measurement Template</h3>
+                                            <p class="text-gray-600 text-sm">Select a template for session {{
+                                                globalSessionNum }}.</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                                        <div *ngFor="let template of availableTemplates"
+                                            class="border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 hover:shadow-md flex items-center justify-between"
+                                            [ngClass]="{'border-[#131337] bg-[#131337]': isSessionMeasurementSelected(phase, globalSessionNum, template), 'border-gray-100 bg-white hover:border-gray-300': !isSessionMeasurementSelected(phase, globalSessionNum, template)}"
+                                            (click)="setSessionMeasurementTemplate(phase, globalSessionNum, template)">
+                                            <div class="flex items-center gap-4">
+                                                <div class="h-10 w-10 rounded-full flex items-center justify-center transition-colors"
+                                                    [ngClass]="{'bg-[#2A2A4A] text-white': isSessionMeasurementSelected(phase, globalSessionNum, template), 'bg-gray-100 border text-gray-500': !isSessionMeasurementSelected(phase, globalSessionNum, template)}">
+                                                    <i class="pi pi-file-edit text-lg"></i>
+                                                </div>
+                                                <span class="font-bold text-base"
+                                                    [ngClass]="{'text-white': isSessionMeasurementSelected(phase, globalSessionNum, template), 'text-gray-800': !isSessionMeasurementSelected(phase, globalSessionNum, template)}">
+                                                    {{ template.name || 'Template' }}
+                                                </span>
+                                            </div>
+                                            <div class="h-6 w-6 rounded-md border-2 flex items-center justify-center transition-colors"
+                                                [ngClass]="{'border-[#70F4C3] bg-[#70F4C3]': isSessionMeasurementSelected(phase, globalSessionNum, template), 'border-gray-300 bg-white': !isSessionMeasurementSelected(phase, globalSessionNum, template)}">
+                                                <i class="pi pi-check text-[#131337] text-sm"
+                                                    *ngIf="isSessionMeasurementSelected(phase, globalSessionNum, template)"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div *ngIf="!availableTemplates || availableTemplates.length === 0"
+                                        class="p-4 text-center text-gray-500 italic">
+                                        Loading measurement templates...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </p-accordionTab>
+        </p-accordion>
+    </p-card>
+</div>

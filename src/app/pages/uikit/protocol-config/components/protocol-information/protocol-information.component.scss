@@ -1,0 +1,356 @@
+/* acl-protocol.component.scss */
+
+// ─── Design Tokens ────────────────────────────────────────────────────
+$bg-page: #0f1117;
+$bg-card: #181c27;
+$bg-input: #1e2336;
+$bg-input-focus: #252b40;
+$border-color: #2a3150;
+$border-focus: #4a6fa5;
+$text-primary: #e8eaf0;
+$text-secondary: #8a91a8;
+$text-muted: #5a6180;
+$accent-red: #e05c5c;
+$accent-blue: #4a8cdb;
+$accent-orange: #e07c3c;
+$cert-bg: rgba(224, 92, 92, 0.08);
+$cert-border: rgba(224, 92, 92, 0.35);
+$required-star: #e05c5c;
+$note-bg: rgba(74, 140, 219, 0.07);
+$note-border: rgba(74, 140, 219, 0.25);
+$radius-card: 14px;
+$radius-input: 8px;
+
+// ─── Page Wrapper ─────────────────────────────────────────────────────
+.protocol-page {
+    min-height: 100vh;
+    padding: 32px 24px;
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    direction: ltr;
+
+    form {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+}
+
+// ─── Two-column Cards Row ─────────────────────────────────────────────
+.cards-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    @media (max-width: 820px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+// ─── Card ─────────────────────────────────────────────────────────────
+.card {
+    border: 1px solid $border-color;
+    border-radius: $radius-card;
+    padding: 24px 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.card-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: $text-muted;
+    padding-bottom: 4px;
+    border-bottom: 1px solid $border-color;
+    margin-bottom: 4px;
+}
+
+// ─── Field ────────────────────────────────────────────────────────────
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    label {
+        font-size: 12px;
+        font-weight: 500;
+        color: #000000;
+        text-align: left;
+    }
+
+    .required {
+        color: $required-star;
+        margin-left: 2px;
+    }
+
+    .req-note {
+        color: $text-muted;
+        font-weight: 400;
+        font-size: 11px;
+    }
+}
+
+// ─── Base Input Override ──────────────────────────────────────────────
+%input-base {
+    background: #ffffff !important;
+    border: 1px solid #2a3150 !important;
+    border-radius: 8px !important;
+    color: #000000 !important;
+    font-size: 14px !important;
+    padding: 10px 14px !important;
+    width: 100% !important;
+    transition: border-color 0.2s, background 0.2s !important;
+    box-shadow: none !important;
+    outline: none !important;
+
+    &:focus,
+    &:focus-within {
+        border-color: $border-focus !important;
+        background: #ffffff !important;
+        box-shadow: 0 0 0 3px rgba(74, 140, 219, 0.12) !important;
+    }
+
+    &::placeholder {
+        color: $text-muted !important;
+    }
+}
+
+// Plain input
+input.proto-input {
+    @extend %input-base;
+    height: 42px;
+}
+
+// Textarea
+textarea.proto-input {
+    @extend %input-base;
+    resize: vertical;
+    min-height: 80px;
+    line-height: 1.5;
+}
+
+// PrimeNG InputNumber
+:host ::ng-deep {
+
+    // InputNumber
+    .p-inputnumber {
+        width: 100%;
+
+        .p-inputtext {
+            @extend %input-base;
+        }
+    }
+
+    // Dropdown
+    .proto-dropdown {
+        width: 100%;
+
+        .p-dropdown {
+            background: $bg-input !important;
+            border: 1px solid $border-color !important;
+            border-radius: $radius-input !important;
+            width: 100% !important;
+
+            &:hover {
+                border-color: darken($border-focus, 10%) !important;
+            }
+
+            &.p-focus {
+                border-color: $border-focus !important;
+                box-shadow: 0 0 0 3px rgba(74, 140, 219, 0.12) !important;
+            }
+
+            .p-dropdown-label {
+                color: $text-primary !important;
+                font-size: 14px !important;
+                padding: 10px 14px !important;
+            }
+
+            .p-dropdown-trigger {
+                color: $text-secondary !important;
+            }
+        }
+
+        .p-dropdown-panel {
+            background: #1e2336 !important;
+            border: 1px solid $border-color !important;
+            border-radius: $radius-input !important;
+
+            .p-dropdown-item {
+                color: $text-primary !important;
+                font-size: 14px !important;
+                padding: 9px 14px !important;
+
+                &:hover,
+                &.p-highlight {
+                    background: rgba(74, 140, 219, 0.15) !important;
+                    color: $accent-blue !important;
+                }
+            }
+        }
+    }
+
+    // InputTextarea
+    .p-inputtextarea {
+        @extend %input-base;
+    }
+}
+
+// ─── Framework Note ──────────────────────────────────────────────────
+.framework-note {
+    background: $note-bg;
+    border: 1px solid $note-border;
+    border-left: 3px solid $accent-blue;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+    color: $text-secondary;
+    line-height: 1.55;
+
+    .note-bold {
+        color: $accent-blue;
+        font-weight: 700;
+        margin-right: 4px;
+    }
+
+    strong {
+        color: $text-primary;
+        font-weight: 600;
+    }
+}
+
+// ─── Contraindications Card ───────────────────────────────────────────
+.contraindications-card {
+    .card-label {
+        margin-bottom: 10px;
+    }
+}
+
+.cert-banner {
+    background: $cert-bg;
+    border: 1px solid $cert-border;
+    border-left: 3px solid $accent-red;
+    border-radius: 6px;
+    padding: 11px 16px;
+    font-size: 13px;
+    color: $text-secondary;
+    line-height: 1.5;
+
+    .cert-tag {
+        color: $accent-red;
+        font-weight: 700;
+        margin-right: 6px;
+    }
+}
+
+.contra-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+.contra-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.contra-x {
+    color: $accent-red;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+    width: 18px;
+    text-align: center;
+    transition: opacity 0.15s;
+
+    &:hover {
+        opacity: 0.7;
+    }
+}
+
+.contra-input {
+    flex: 1;
+    @extend %input-base;
+    height: 40px;
+}
+
+// ─── Add Contraindication Row ─────────────────────────────────────────
+.add-contra-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 4px;
+
+    .add-icon {
+        opacity: 0.4;
+        cursor: default;
+    }
+
+    .contra-input {
+        flex: 1;
+    }
+}
+
+// ─── Buttons ──────────────────────────────────────────────────────────
+:host ::ng-deep {
+    .add-btn {
+        .p-button {
+            background: rgba(74, 140, 219, 0.15) !important;
+            border: 1px solid rgba(74, 140, 219, 0.4) !important;
+            color: $accent-blue !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            padding: 8px 16px !important;
+            border-radius: 6px !important;
+            transition: background 0.2s !important;
+            white-space: nowrap;
+
+            &:hover {
+                background: rgba(74, 140, 219, 0.25) !important;
+            }
+        }
+    }
+
+    .save-btn {
+        .p-button {
+            background: $accent-blue !important;
+            border: none !important;
+            color: #fff !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            padding: 12px 32px !important;
+            border-radius: 8px !important;
+            transition: background 0.2s, transform 0.1s !important;
+
+            &:hover {
+                background: darken($accent-blue, 8%) !important;
+                transform: translateY(-1px);
+            }
+
+            &:disabled {
+                opacity: 0.45 !important;
+                cursor: not-allowed !important;
+                transform: none !important;
+            }
+        }
+    }
+}
+
+// ─── Submit Row ───────────────────────────────────────────────────────
+.submit-row {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 4px;
+}
+
+// ─── Utility ──────────────────────────────────────────────────────────
+.w-full {
+    width: 100%;
+}

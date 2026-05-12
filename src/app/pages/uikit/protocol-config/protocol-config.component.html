@@ -1,0 +1,139 @@
+<section>
+    <div class="container">
+        <div class="header">
+            <h1>Protocol Builder</h1>
+            <p class="text-white/70 text-sm mt-1">Define, manage, and activate treatment protocols</p>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-100">
+            <!-- Left: back button (always shown when stepper is open) -->
+            <div class="flex items-center gap-2" *ngIf="showStepper()">
+                <button pButton icon="pi pi-arrow-left" label="Back to All Protocols"
+                    class="p-button-text p-button-secondary p-button-sm" (click)="cancelProtocol()"></button>
+
+                <!-- Mode badge -->
+                @if (stepperMode() === 'view') {
+                <span
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">
+                    <i class="pi pi-lock text-[10px]"></i> Read-only view
+                </span>
+                }
+                @if (stepperMode() === 'edit') {
+                <span
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">
+                    <i class="pi pi-pencil text-[10px]"></i> Editing: {{ activeProtocol()?.name || 'Protocol' }}
+                </span>
+                }
+            </div>
+            <div *ngIf="!showStepper()"></div>
+
+            <!-- Right: context actions -->
+            <div class="flex items-center gap-2">
+                @if (!showStepper()) {
+                <p-button label="Define New Protocol" icon="pi pi-plus" (onClick)="startNewProtocol()"></p-button>
+                }
+                @if (showStepper() && stepperMode() === 'edit') {
+                <p-button label="Save Changes" icon="pi pi-save" (onClick)="saveEditedProtocol()"></p-button>
+                }
+                @if (showStepper() && stepperMode() === 'view') {
+                <p-button label="Edit Protocol" icon="pi pi-pencil" severity="secondary"
+                    (onClick)="switchToEdit()"></p-button>
+                }
+            </div>
+        </div>
+
+        <!-- All Protocols List -->
+        <div *ngIf="!showStepper()" class="p-4">
+            <app-all-protocols></app-all-protocols>
+        </div>
+
+        <!-- 6-Step Stepper -->
+        <div *ngIf="showStepper()" class="p-4">
+            <!-- Custom Clickable Step Bar -->
+            <div class="flex items-center justify-between mb-8 px-2">
+                <ng-container *ngFor="let step of steps; let i = index; let last = last">
+                    <!-- Step Circle + Label -->
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group" (click)="goToStep(step.value)">
+                        <div class="w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all duration-300"
+                            [ngClass]="{
+                                'bg-[#131337] border-[#131337] text-[#70F4C3] shadow-lg scale-110': currentStep() === step.value,
+                                'bg-[#70F4C3] border-[#70F4C3] text-[#131337]': currentStep() > step.value,
+                                'bg-gray-100 border-gray-300 text-gray-400': currentStep() < step.value
+                            }">
+                            <i [class]="step.icon + ' text-xl'" *ngIf="currentStep() <= step.value"></i>
+                            <i class="pi pi-check text-xl font-bold" *ngIf="currentStep() > step.value"></i>
+                        </div>
+                        <span class="text-xs text-center font-semibold transition-colors" [ngClass]="{
+                                'text-[#131337]': currentStep() === step.value,
+                                'text-[#10b981]': currentStep() > step.value,
+                                'text-gray-400': currentStep() < step.value
+                            }">{{ step.label }}</span>
+                    </div>
+                    <!-- Connector Line -->
+                    <div *ngIf="!last" class="flex-1 h-0.5 mx-2 mt-[-1.5rem] transition-colors duration-300" [ngClass]="{
+                            'bg-[#70F4C3]': currentStep() > step.value,
+                            'bg-gray-200': currentStep() <= step.value
+                        }"></div>
+                </ng-container>
+            </div>
+
+            <!-- Step Content -->
+            <div class="flex flex-col">
+
+                <!-- Read-only banner -->
+                @if (isReadonly()) {
+                <div
+                    class="flex items-center gap-3 mb-4 px-4 py-3 rounded-xl bg-blue-50 border border-blue-200 text-blue-700 text-sm">
+                    <i class="pi pi-lock text-base"></i>
+                    <span><strong>Read-only mode.</strong> This protocol is displayed for reference only. Click
+                        <strong>Edit Protocol</strong> to make changes.</span>
+                </div>
+                }
+
+                <!-- Step 1 -->
+                <div *ngIf="currentStep() === 1">
+                    <app-protocol-information [readonly]="isReadonly()"></app-protocol-information>
+                    <div class="flex p-4 justify-end">
+                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="nextStep()" />
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div *ngIf="currentStep() === 2">
+                    <app-phases-and-criteria></app-phases-and-criteria>
+                    <div class="flex p-4 justify-between">
+                        <p-button label="Back" severity="secondary" icon="pi pi-arrow-left" (onClick)="prevStep()" />
+                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="nextStep()" />
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div *ngIf="currentStep() === 3">
+                    <app-sessions-and-exercises></app-sessions-and-exercises>
+                    <div class="flex p-4 justify-between">
+                        <p-button label="Back" severity="secondary" icon="pi pi-arrow-left" (onClick)="prevStep()" />
+                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="nextStep()" />
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div *ngIf="currentStep() === 4">
+                    <app-fitt-vp-revision></app-fitt-vp-revision>
+                    <div class="flex p-4 justify-between">
+                        <p-button label="Back" severity="secondary" icon="pi pi-arrow-left" (onClick)="prevStep()" />
+                        <p-button label="Next" icon="pi pi-arrow-right" iconPos="right" (onClick)="nextStep()" />
+                    </div>
+                </div>
+
+                <!-- Step 5 -->
+                <div *ngIf="currentStep() === 5">
+                    <app-view-and-review></app-view-and-review>
+                    <div class="flex p-4 justify-start">
+                        <p-button label="Back" severity="secondary" icon="pi pi-arrow-left" (onClick)="prevStep()" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
