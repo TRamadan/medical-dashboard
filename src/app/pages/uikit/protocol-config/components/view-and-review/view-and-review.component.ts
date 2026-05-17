@@ -8,7 +8,7 @@ import { AccordionModule } from 'primeng/accordion';
 import { TooltipModule } from 'primeng/tooltip';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { ProtocolService } from '../../services/protocol.service';
-import { Phase, Section, Exercise } from '../../models/protocol.model';
+import { Phase, Section, Exercise, getPhaseSessionCount } from '../../models/protocol.model';
 
 @Component({
     selector: 'app-view-and-review',
@@ -20,6 +20,8 @@ import { Phase, Section, Exercise } from '../../models/protocol.model';
 export class ViewAndReviewComponent {
     private protocolService = inject(ProtocolService);
     readonly protocol = this.protocolService.activeProtocol;
+
+    readonly getPhaseSessionCount = getPhaseSessionCount;
 
     activationNotes = '';
     selectedAction: string | null = null;
@@ -75,17 +77,14 @@ export class ViewAndReviewComponent {
     }
 
     getSessionMode(phase: Phase, sessionNum: number): string {
-        const session = phase.weeks
-            .flatMap(week => week.sessions)
-            .find(session => session.sessionNumber === sessionNum);
-        return session?.applyMeasurements ? 'measurements' : 'exercises';
+        return phase.measurementSessionNums.includes(sessionNum) ? 'Measurements' : 'Exercises';
     }
 
     getMeasurementTemplate(phase: Phase, sessionNum: number): string {
         const session = phase.weeks
             .flatMap(week => week.sessions)
             .find(session => session.sessionNumber === sessionNum);
-        return session?.applyMeasurements ? 'Applied' : 'None';
+        return phase?.measurementSessionNums.includes(sessionNum) ? 'Applied' : 'None';
     }
 
     getTotalExercises(phase: Phase): number {

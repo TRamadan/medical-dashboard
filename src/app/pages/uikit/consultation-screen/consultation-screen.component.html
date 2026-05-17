@@ -1,0 +1,836 @@
+<!-- ── Page Header ─────────────────────────────────────────────────────── -->
+@if (entryType()) {
+<p-card styleClass="m-3">
+    <div class="page-header">
+        <div class="athlete-chip">
+            <div class="athlete-avatar">{{ athleteInfo()?.initials }}</div>
+            <div>
+                <div class="athlete-name">{{ athleteInfo()?.name }}</div>
+                <div class="athlete-meta">{{ athleteInfo()?.meta }}</div>
+            </div>
+        </div>
+        <div style="flex:1"></div>
+        <p-tag [value]="entryBadge()?.label || ''" [severity]="entryBadge()?.severity"></p-tag>
+    </div>
+</p-card>
+}
+
+<!-- ── Layout ──────────────────────────────────────────────────────────── -->
+<p-card>
+    <div class="consultation-layout mt-4">
+
+        <!-- Sidebar -->
+
+        <aside class="consultation-sidebar">
+
+            @if (!entryType()) {
+            <div class="empty-sidebar">
+                <div style="font-size:2rem">←</div>
+                <div>Select a consultation type<br />to view athlete data</div>
+            </div>
+            }
+
+            @else {
+            <p-card>
+                @if (sidebarData(); as sb) {
+                <div class="sb-section-label">{{ sb.title }}</div>
+                @for (item of sb.items; track $index) {
+                <div class="sb-item">
+                    <span>{{ item.text }}</span>
+                </div>
+                }
+
+                @if (sb.activeProtocol; as ap) {
+                <div class="sb-section-label">Active Protocol</div>
+                <div class="active-protocol-card">
+                    <div class="apc-title">{{ ap.title }}</div>
+                    @for (row of ap.rows; track $index) {
+                    <div class="apc-row"><span>{{ row.label }}</span><span>{{ row.value }}</span></div>
+                    }
+                </div>
+                }
+
+                <div class="sb-section-label">Medical History / Ticket</div>
+                @for (item of sb.history; track $index) {
+                <div class="sb-item">
+                    <span>{{ item.text }}</span>
+                </div>
+                }
+                @for (item of sb.ticketStatus; track $index) {
+                <div class="sb-item">
+                    <span>{{ item.text }}</span>
+                </div>
+                }
+
+                <div class="sb-note-card">
+                    <div class="sb-note-title">{{ sb.note.title }}</div>
+                    <div class="sb-note-text">{{ sb.note.text }}</div>
+                </div>
+                }
+            </p-card>
+
+            }
+        </aside>
+
+
+        <!-- Main -->
+        <div class="consultation-main">
+
+            <!-- Step Bar -->
+            @if (flowStarted()) {
+            <div class="step-bar">
+                @for (label of stepLabels(); track $index; let i = $index) {
+                @if (i > 0) {
+                <div class="step-line" [class.done]="isStepCompleted(i + 1)"></div>
+                }
+                <div class="step-item">
+                    <div class="step-dot" [class.active]="isStepActive(i + 1)" [class.done]="isStepCompleted(i + 1)"
+                        (click)="go(i + 1)">{{ i + 1 }}</div>
+                    <div class="step-label">{{ label }}</div>
+                </div>
+                }
+            </div>
+            }
+
+            <!-- ══ STEP 0 — Entry Type Selection ══ -->
+            @if (currentStep() === 0) {
+            <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:.25rem">Consultation Type</h2>
+            <p class="field-label mb-3">Select the consultation type — the system loads the correct steps automatically.
+            </p>
+
+            <div class="entry-grid mb-4">
+                <div class="entry-card" [class.selected-new]="entryType()==='new'" (click)="selectEntry('new')">
+                    <div class="entry-icon" style="color:#1AAD7A">+</div>
+                    <div class="entry-name">New Athlete</div>
+                    <div class="entry-desc">First visit — Full Blueprint. Data Map complete &amp; payment confirmed.
+                    </div>
+                    <div class="entry-sub" style="color:#1AAD7A">NEW_LEAD → BLUEPRINT</div>
+                </div>
+                <div class="entry-card" [class.selected-return]="entryType()==='return'"
+                    (click)="selectEntry('return')">
+                    <div class="entry-icon" style="color:#C9A84C">↩</div>
+                    <div class="entry-name">Returning Athlete</div>
+                    <div class="entry-desc">Previously graduated or file closed. Returns with new complaint.</div>
+                    <div class="entry-sub" style="color:#C9A84C">GRADUATED / CLOSED → RE-ENTRY</div>
+                </div>
+                <div class="entry-card" [class.selected-reassess]="entryType()==='reassess'"
+                    (click)="selectEntry('reassess')">
+                    <div class="entry-icon" style="color:#FC6B44">!</div>
+                    <div class="entry-name">Reassessment</div>
+                    <div class="entry-desc">Athlete on an active program — new injury or deterioration appeared.</div>
+                    <div class="entry-sub" style="color:#FC6B44">ACTIVE_PROGRAM → REASSESSMENT</div>
+                </div>
+            </div>
+
+            @if (entryType() === 'new') {
+            <div class="note-banner note-mint mb-3">
+                <strong>New Athlete — Full Blueprint:</strong> Exam → Assessment → Diagnosis → Path → Action.<br />
+                Data Map complete ✓ · Payment confirmed ✓
+            </div>
+            <div class="btn-row">
+                <p-button label="Start Consultation →" severity="success" (onClick)="startFlow()"></p-button>
+            </div>
+            }
+            @if (entryType() === 'return') {
+            <div class="note-banner note-gold mb-3">
+                <strong>Returning Athlete — Validity Check:</strong> System checks Data Map validity (12 months). If
+                valid:
+                discounted consultation without new Blueprint.
+            </div>
+            <div class="validity-badge valid mb-3">✓ Data Map Valid — Blueprint: Jan 2026 (3 months ago) — Valid until
+                Jan
+                2027</div>
+            <div class="note-banner note-mint mb-3">
+                <strong>Because Data Map is valid:</strong> 4,000 EGP fee waived. All prior clinical history is loaded
+                in
+                the sidebar.
+            </div>
+            <div class="btn-row">
+                <p-button label="Start Consultation — No Blueprint →" severity="success"
+                    (onClick)="startFlow()"></p-button>
+            </div>
+            }
+            @if (entryType() === 'reassess') {
+            <div class="note-banner note-coral mb-3">
+                <strong>Reassessment — Active Program:</strong> Athlete is in Phase 3 of ACL RTP. New shoulder injury
+                appeared during training. 4 paths available after assessment.
+            </div>
+            <div class="reassess-options-grid mb-3">
+                <div class="ropt"><strong style="color:#1AAD7A">A</strong> Edit current protocol</div>
+                <div class="ropt"><strong style="color:#F5A623">B</strong> Pause + Investigate</div>
+                <div class="ropt"><strong style="color:#FC6B44">C</strong> Replace protocol</div>
+                <div class="ropt"><strong style="color:#6B47FF">D</strong> Parallel protocol</div>
+            </div>
+            <div class="btn-row">
+                <p-button label="Start Reassessment →" severity="danger" (onClick)="startFlow()"></p-button>
+            </div>
+
+            }
+            }
+
+            <!-- ══ STEP 1 — Clinical Examination ══ -->
+            @if (currentStep() === 1) {
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title"> Clinical Examination</ng-template>
+                <div class="procedure-list mb-3">
+                    @for (p of procedures(); track p.id) {
+                    <div class="procedure-item">
+                        <div class="proc-num">{{ p.id }}</div>
+                        <textarea pTextarea [(ngModel)]="p.text" placeholder="Procedure description..." style="flex:1;resize:vertical;min-height:36px;padding:.5rem;border-radius:6px;
+                       border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                       font-family:inherit;font-size:.85rem;color:inherit;outline:none;"></textarea>
+                        <p-button icon="pi pi-trash" severity="danger" [text]="true"
+                            (onClick)="removeProcedure(p.id)"></p-button>
+                    </div>
+                    }
+                </div>
+                <p-button label="+ Add Procedure" [outlined]="true" severity="secondary" styleClass="w-full"
+                    (onClick)="addProcedure()"></p-button>
+            </p-card>
+
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title"> Initial Measurements</ng-template>
+                <div class="form-grid-3 mb-3">
+                    <div>
+                        <div class="field-label">VAS Pain <span class="req">*</span></div>
+                        <p-inputNumber [(ngModel)]="vasPain" [min]="0" [max]="10" placeholder="0-10" styleClass="w-full"
+                            class="w-full"></p-inputNumber>
+                    </div>
+                    <div>
+                        <div class="field-label">ROM Flexion</div>
+                        <input pInputText [(ngModel)]="romFlexion" placeholder="°" class="w-full" />
+                    </div>
+                    <div>
+                        <div class="field-label">ROM Extension</div>
+                        <input pInputText [(ngModel)]="romExtension" placeholder="°" class="w-full" />
+                    </div>
+                </div>
+                <div class="form-grid-3">
+                    <div>
+                        <div class="field-label">Quad LSI %</div>
+                        <input pInputText [(ngModel)]="quadLsi" placeholder="%" class="w-full" />
+                    </div>
+                    <div>
+                        <div class="field-label">Effusion</div>
+                        <p-select [options]="effusionOptions" [(ngModel)]="effusion" optionLabel="label"
+                            optionValue="value" styleClass="w-full" class="w-full" appendTo="body"></p-select>
+                    </div>
+                    <div>
+                        <div class="field-label">Asymmetry %</div>
+                        <input pInputText [(ngModel)]="asymmetry" placeholder="%" class="w-full" />
+                    </div>
+                </div>
+            </p-card>
+
+            <div class="btn-row">
+                <p-button label="Next — Assessment →" (onClick)="go(2)"></p-button>
+            </div>
+            }
+
+            <!-- -- STEP 2  Clinical Assessment (Doctor Form) -- -->
+            @if (currentStep() === 2) {
+
+            <!-- Clinical Complaint -->
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title"> Clinical Complaint</ng-template>
+                <div class="mb-3">
+                    <div class="field-label">Complaint in the athlete's words <span class="req">*</span></div>
+                    <textarea pTextarea [(ngModel)]="complaintWords"
+                        placeholder="Write the complaint exactly as the athlete described it..." style="width:100%;min-height:70px;padding:.55rem .7rem;border-radius:8px;
+                   border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                   font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <div class="field-label">Impact of the complaint on performance <span class="req">*</span></div>
+                    <div class="form-grid-3">
+                        <div
+                            style="background:var(--p-content-background);border:1px solid var(--p-content-border-color);border-radius:8px;padding:.75rem;text-align:center">
+                            <div class="field-label" style="justify-content:center;margin-bottom:.4rem">Training</div>
+                            <p-select [options]="impactOptions" [(ngModel)]="impactTraining" optionLabel="label"
+                                optionValue="value" placeholder="Select" styleClass="w-full" class="w-full"
+                                appendTo="body"></p-select>
+                        </div>
+                        <div
+                            style="background:var(--p-content-background);border:1px solid var(--p-content-border-color);border-radius:8px;padding:.75rem;text-align:center">
+                            <div class="field-label" style="justify-content:center;margin-bottom:.4rem">Competition
+                            </div>
+                            <p-select [options]="impactOptions" [(ngModel)]="impactCompetition" optionLabel="label"
+                                optionValue="value" placeholder="Select" styleClass="w-full" class="w-full"
+                                appendTo="body"></p-select>
+                        </div>
+                        <div
+                            style="background:var(--p-content-background);border:1px solid var(--p-content-border-color);border-radius:8px;padding:.75rem;text-align:center">
+                            <div class="field-label" style="justify-content:center;margin-bottom:.4rem">Daily Life</div>
+                            <p-select [options]="impactOptions" [(ngModel)]="impactDaily" optionLabel="label"
+                                optionValue="value" placeholder="Select" styleClass="w-full" class="w-full"
+                                appendTo="body"></p-select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div>
+                        <div class="field-label">When did the complaint start? <span class="req">*</span></div>
+                        <input pInputText [(ngModel)]="onsetDate" placeholder="e.g. 3 weeks ago / Jan 2026"
+                            class="w-full" />
+                    </div>
+                    <div>
+                        <div class="field-label">What aggravates the pain?</div>
+                        <input pInputText [(ngModel)]="aggravating"
+                            placeholder="e.g. Running, climbing, prolonged sitting" class="w-full" />
+                    </div>
+                </div>
+            </p-card>
+
+            <!-- Clinical Findings -->
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title"> Key Clinical Findings</ng-template>
+                <div class="mb-3">
+                    <div class="field-label">Dysfunctions and risk factors <span class="req">*</span></div>
+                    <textarea pTextarea [(ngModel)]="findingsMain"
+                        placeholder="e.g. Quad weakness 35%  ROM restriction 20 pain on weight-bearing..." style="width:100%;min-height:60px;padding:.55rem .7rem;border-radius:8px;
+                   border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                   font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                </div>
+                <div class="form-grid-2">
+                    <div>
+                        <div class="field-label">Observed strengths</div>
+                        <textarea pTextarea [(ngModel)]="findingsStrengths"
+                            placeholder="e.g. High endurance, good response to therapy..." style="width:100%;min-height:55px;padding:.55rem .7rem;border-radius:8px;
+                     border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                     font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                    </div>
+                    <div>
+                        <div class="field-label">Weaknesses and priorities</div>
+                        <textarea pTextarea [(ngModel)]="findingsWeaknesses"
+                            placeholder="e.g. Hamstring weakness, fear of movement..." style="width:100%;min-height:55px;padding:.55rem .7rem;border-radius:8px;
+                     border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                     font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                    </div>
+                </div>
+            </p-card>
+
+            <!-- Yellow Flag Score -->
+            <p-card styleClass="mb-3" [style]="yfAlert() ? {'border-color':'rgba(245,166,35,.4)'} : {}">
+                <ng-template pTemplate="title">
+                    <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+                        <span> Yellow Flag Score</span>
+                        <span [style.color]="yfAlert() ? '#F5A623' : '#3DD9A0'"
+                            style="font-size:1.1rem;font-weight:700">
+                            {{ yfScore() }} / 5
+                        </span>
+                    </div>
+                </ng-template>
+                <p class="field-label mb-3">Auto-alert if score reaches 3 or more. Internal only not visible to
+                    client.
+                </p>
+                <div style="display:flex;flex-direction:column;gap:.5rem">
+                    @for (item of yfItems; track $index; let i = $index) {
+                    <label style="cursor:pointer">
+                        <div style="display:flex;align-items:center;gap:.75rem;padding:.6rem .85rem;border-radius:8px;
+                          border:1px solid var(--p-content-border-color);background:var(--p-content-background);">
+                            <input type="checkbox" [checked]="yfFlags()[i]" (change)="toggleYfFlag(i)"
+                                style="width:16px;height:16px;accent-color:#F5A623;cursor:pointer;flex-shrink:0" />
+                            <div>
+                                <div style="font-size:.85rem;font-weight:500">{{ item.label }}</div>
+                                <div class="field-label" style="margin:0;font-size:.7rem">{{ item.sub }}</div>
+                            </div>
+                        </div>
+                    </label>
+                    }
+                </div>
+                @if (yfAlert()) {
+                <div class="note-banner note-amber mt-3">
+                    <strong>Yellow Flag Alert:</strong> This athlete needs intensive psychological follow-up.
+                    Recommend
+                    adding behavioural support to the rehab plan.
+                </div>
+                }
+            </p-card>
+
+            <!-- Behavioral Signals -->
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title">
+                    <div style="display:flex;align-items:center;justify-content:space-between;width:100%">
+                        <span> Behavioural Signals</span>
+                        <span style="font-size:0.9rem;font-weight:700;padding:2px 8px;border-radius:6px;
+                         background:rgba(107,71,255,.12);color:#9B7FFF">Internal only not visible to client</span>
+                    </div>
+                </ng-template>
+
+                <div class="mb-3">
+                    <div class="field-label">Emotional trigger why now?</div>
+                    <textarea pTextarea [(ngModel)]="emotionalTrigger"
+                        placeholder="e.g. Upcoming competition, coach pressure, specific event..." style="width:100%;min-height:55px;padding:.55rem .7rem;border-radius:8px;
+                   border:1px solid rgba(107,71,255,.2);background:var(--p-content-background);
+                   font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                </div>
+                <div class="form-grid-2 mb-3">
+                    <div>
+                        <div class="field-label">Experience with other providers</div>
+                        <textarea pTextarea [(ngModel)]="prevProvider"
+                            placeholder="e.g. Tried 3 doctors disappointed by slow progress..." style="width:100%;min-height:55px;padding:.55rem .7rem;border-radius:8px;
+                     border:1px solid rgba(107,71,255,.2);background:var(--p-content-background);
+                     font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                    </div>
+                    <div>
+                        <div class="field-label">Expectations &amp; biggest fear</div>
+                        <textarea pTextarea [(ngModel)]="fears"
+                            placeholder="e.g. Afraid of surgery / cost / slow recovery..." style="width:100%;min-height:55px;padding:.55rem .7rem;border-radius:8px;
+                     border:1px solid rgba(107,71,255,.2);background:var(--p-content-background);
+                     font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                    </div>
+                </div>
+                <div class="form-grid-2 mb-3">
+                    <div>
+                        <div class="field-label">Expected compliance index</div>
+                        <p-select [options]="complianceOptions" [(ngModel)]="compliance" optionLabel="label"
+                            optionValue="value" placeholder="Select" styleClass="w-full" class="w-full" appendTo="body"
+                            [style]="{'border-color':'rgba(107,71,255,.2)'}"></p-select>
+                    </div>
+                    <div>
+                        <div class="field-label">Initial Persona classification</div>
+                        <p-select [options]="personaOptions" [(ngModel)]="persona" optionLabel="label"
+                            optionValue="value" placeholder="Not specified" styleClass="w-full" class="w-full"
+                            appendTo="body" [style]="{'border-color':'rgba(107,71,255,.2)'}"></p-select>
+                    </div>
+                </div>
+                <div>
+                    <div class="field-label">Additional behavioural notes</div>
+                    <textarea pTextarea [(ngModel)]="behavioralNotes" placeholder="Informal signals from the session..."
+                        style="width:100%;min-height:45px;padding:.55rem .7rem;border-radius:8px;
+                   border:1px solid rgba(107,71,255,.2);background:var(--p-content-background);
+                   font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                </div>
+            </p-card>
+
+            <div class="btn-row">
+                <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
+                    (onClick)="go(1)"></p-button>
+                <p-button label="Next Diagnosis" icon="pi pi-arrow-right" iconPos="right" (onClick)="go(3)"></p-button>
+            </div>
+            }
+
+            <!-- -- STEP 3  Diagnosis -- -->
+            @if (currentStep() === 3) {
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title"> Diagnosis</ng-template>
+                <div class="mb-3">
+                    <div class="field-label">Diagnosis <span class="req">*</span></div>
+                    <input pInputText [(ngModel)]="diagnosisText" placeholder="e.g. Partial ACL Tear  Right Knee"
+                        class="w-full" style="font-weight:600" />
+                </div>
+                <div class="form-grid-2 mb-3">
+                    <div>
+                        <div class="field-label">Grade</div>
+                        <p-select [options]="gradeOptions" [(ngModel)]="diagnosisGrade" optionLabel="label"
+                            optionValue="value" styleClass="w-full" class="w-full" appendTo="body"></p-select>
+                    </div>
+                    <div>
+                        <div class="field-label">Phase</div>
+                        <p-select [options]="phaseOptions" [(ngModel)]="diagnosisPhase" optionLabel="label"
+                            optionValue="value" styleClass="w-full" class="w-full" appendTo="body"></p-select>
+                    </div>
+                </div>
+                <div>
+                    <div class="field-label">Clinical notes</div>
+                    <textarea pTextarea [(ngModel)]="clinicalNotes" placeholder="Exam details and findings..." style="width:100%;min-height:65px;padding:.55rem .7rem;border-radius:8px;
+                   border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                   font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                </div>
+            </p-card>
+
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title"> Therapeutic Goal</ng-template>
+                <div class="mb-3">
+                    <div class="field-label">Goal <span class="req">*</span></div>
+                    <input pInputText [(ngModel)]="goalText" placeholder="e.g. Return to Play  LSI > 90%"
+                        class="w-full" />
+                </div>
+                <div class="form-grid-2">
+                    <div>
+                        <div class="field-label">Expected duration</div>
+                        <input pInputText [(ngModel)]="expectedDuration" placeholder="e.g. 12-16 weeks"
+                            class="w-full" />
+                    </div>
+                    <div>
+                        <div class="field-label">Type</div>
+                        <p-select [options]="goalTypeOptions" [(ngModel)]="goalType" optionLabel="label"
+                            optionValue="value" styleClass="w-full" class="w-full" appendTo="body"></p-select>
+                    </div>
+                </div>
+            </p-card>
+
+            <div class="btn-row">
+                <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
+                    (onClick)="go(2)"></p-button>
+                <p-button label="Next Decision" icon="pi pi-arrow-right" iconPos="right" (onClick)="go(4)"></p-button>
+            </div>
+            }
+
+            <!-- -- STEP 4  Path Decision -- -->
+            @if (currentStep() === 4) {
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title">
+                    {{ entryType() === 'reassess' ? 'Reassessment Decision what happens to the active program?' :
+                    'Path
+                    Selection what is the next step?' }}
+                </ng-template>
+                <p class="field-label mb-3">Based on examination and diagnosis:</p>
+
+                <!-- Reassess paths -->
+                @if (entryType() === 'reassess') {
+                <div class="path-grid cols-2">
+                    <div class="path-card" [class.sel-A]="selectedReassessPath()==='A'" (click)="pickReassessPath('A')">
+                        <div class="pc-icon" style="color:#1AAD7A">
+                            <i class="pi pi-pen-to-square"></i>
+                        </div>
+                        <div class="pc-name">Edit Protocol</div>
+                        <div class="pc-desc">Injury is mild adjust exercises or add restrictions. Program continues
+                            without pause.</div>
+                    </div>
+                    <div class="path-card" [class.sel-B]="selectedReassessPath()==='B'" (click)="pickReassessPath('B')">
+                        <div class="pc-icon" style="color:#F5A623">||</div>
+                        <div class="pc-name">Pause + Investigate</div>
+                        <div class="pc-desc">Need investigation before deciding. Sessions frozen (not cancelled). Wallet
+                            balance unchanged.</div>
+                        <div class="pc-next" style="color:#F5A623">? PROGRAM_PAUSED</div>
+                    </div>
+                    <div class="path-card" [class.sel-C]="selectedReassessPath()==='C'" (click)="pickReassessPath('C')">
+                        <div class="pc-icon" style="color:#FC6B44">
+                            <i class="pi pi-arrow-up-right-and-arrow-down-left-from-center"></i>
+                        </div>
+                        <div class="pc-name">Replace Protocol</div>
+                        <div class="pc-desc">New injury takes over. Current protocol closed. Remaining credit
+                            transferred.
+                        </div>
+                        <!-- <div class="pc-next" style="color:#FC6B44">? S02 Protocol New</div> -->
+                    </div>
+                    <div class="path-card" [class.sel-D]="selectedReassessPath()==='D'" (click)="pickReassessPath('D')">
+                        <div class="pc-icon" style="color:#6B47FF">
+                            <i class="pi pi-arrow-right-arrow-left"></i>
+                        </div>
+                        <div class="pc-name">Parallel Protocol</div>
+                        <div class="pc-desc">New injury is unrelated. Two programs run in parallel (knee + shoulder).
+                        </div>
+                        <!-- <div class="pc-next" style="color:#6B47FF">? S02 + S04 parallel</div> -->
+                    </div>
+                </div>
+                @if (selectedReassessPath()) {
+                <div class="mt-3">
+                    @if (selectedReassessPath() === 'A') {
+                    <div class="note-banner note-mint">
+                        <strong>Edit Protocol:</strong> S02 opens in edit mode. Program continues. Change is logged in
+                        Audit
+                        Trail. Lead &amp; engineers are notified.
+                    </div>
+                    }
+                    @if (selectedReassessPath() === 'B') {
+                    <div class="note-banner note-amber mb-3">
+                        <strong>Pause:</strong> Status ? <span class="code-badge">PROGRAM_PAUSED</span>. Sessions
+                        frozen.
+                        After investigation, doctor decides resume / edit / replace.
+                    </div>
+                    <p-card>
+                        <ng-template pTemplate="title">Pause Details</ng-template>
+                        <div class="mb-3">
+                            <div class="field-label">Reason <span class="req">*</span></div>
+                            <textarea pTextarea [(ngModel)]="pauseReason"
+                                placeholder="e.g. New shoulder injury  needs MRI before deciding impact on knee protocol"
+                                style="width:100%;min-height:50px;padding:.55rem .7rem;border-radius:8px;
+                             border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                             font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                        </div>
+                        <div class="form-grid-2">
+                            <div>
+                                <div class="field-label">Investigation type</div>
+                                <p-select [options]="investigationTypeOptions" [(ngModel)]="investigationType"
+                                    optionLabel="label" optionValue="value" styleClass="w-full" class="w-full"
+                                    appendTo="body"></p-select>
+                            </div>
+                            <div>
+                                <div class="field-label">Expected pause duration</div>
+                                <p-select [options]="pauseDurationOptions" [(ngModel)]="pauseDuration"
+                                    optionLabel="label" optionValue="value" styleClass="w-full" class="w-full"
+                                    appendTo="body"></p-select>
+                            </div>
+                        </div>
+                    </p-card>
+                    }
+                    @if (selectedReassessPath() === 'C') {
+                    <div class="note-banner note-coral">
+                        <strong>Replace Protocol:</strong> Current protocol closed ? <span
+                            class="code-badge">REPLACED_BY_REASSESSMENT</span>. 18 remaining sessions transferred. S02
+                        opens
+                        for new protocol.
+                    </div>
+                    }
+                    @if (selectedReassessPath() === 'D') {
+                    <div class="note-banner note-purple">
+                        <strong>Parallel Protocol:</strong> Protocol 1 (knee) continues unchanged. Protocol 2 (shoulder)
+                        created alongside it. Total: 5 sessions/week. Lead assigns engineers for both.
+                    </div>
+                    }
+                </div>
+                }
+                }
+
+                <!-- New / Return paths -->
+                @if (entryType() !== 'reassess') {
+                <div class="path-grid cols-3">
+                    <div class="path-card" [class.sel-p1]="selectedPath()===1" (click)="pickPath(1)">
+                        <div class="pc-icon" style="color:#1AAD7A">
+                            <i class="pi pi-play"></i>
+                        </div>
+                        <div class="pc-name">Direct Blueprint</div>
+                        <div class="pc-desc">Diagnosis is clear start the protocol immediately.</div>
+                    </div>
+                    <div class="path-card" [class.sel-p2]="selectedPath()===2" (click)="pickPath(2)">
+                        <div class="pc-icon" style="color:#F5A623">
+                            <i class="pi pi-bullseye"></i>
+                        </div>
+                        <div class="pc-name">Internal Measurements</div>
+                        <div class="pc-desc">Need additional lab or force-plate tests first.</div>
+                    </div>
+                    <div class="path-card" [class.sel-p3]="selectedPath()===3" (click)="pickPath(3)">
+                        <div class="pc-icon" style="color:#FC6B44">
+                            <i class="pi pi-arrow-up-right">
+                            </i>
+                        </div>
+                        <div class="pc-name">External Referral</div>
+                        <div class="pc-desc">Need external imaging (MRI, X-Ray, CT).</div>
+                    </div>
+                </div>
+                @if (selectedPath()) {
+                <div class="mt-3">
+                    @if (selectedPath() === 1) {
+                    <div class="note-banner note-mint">
+                        <strong>Direct Blueprint:</strong> S02 opens with athlete data. Ticket status ? <span
+                            class="code-badge">CLIENT_APPROVED</span>
+                    </div>
+                    }
+                    @if (selectedPath() === 2) {
+                    <div class="note-banner note-amber mb-3">
+                        <strong>Internal Measurements:</strong> A measurement ticket is created for the engineer.
+                    </div>
+                    <p-card>
+                        <ng-template pTemplate="title">Measurement Details</ng-template>
+                        <div class="form-grid-2">
+                            <div>
+                                <div class="field-label">Type</div>
+                                <p-select [options]="measurementTypeOptions" [(ngModel)]="measurementType"
+                                    optionLabel="label" optionValue="value" styleClass="w-full" class="w-full"
+                                    appendTo="body"></p-select>
+                            </div>
+                            <div>
+                                <div class="field-label">Date</div>
+                                <input pInputText type="date" [(ngModel)]="measurementDate" class="w-full" />
+                            </div>
+                        </div>
+                    </p-card>
+                    }
+                    @if (selectedPath() === 3) {
+                    <div class="note-banner note-coral mb-3">
+                        <strong>External Referral:</strong> Athlete receives instructions via notifications.
+                        Auto-reminders on
+                        days 2,
+                        5, 10, 30.
+                    </div>
+                    <p-card>
+                        <ng-template pTemplate="title">Referral Details</ng-template>
+                        <div class="form-grid-2 mb-3">
+                            <div>
+                                <div class="field-label">Test</div>
+                                <p-select [options]="referralTestOptions" [(ngModel)]="referralTest" optionLabel="label"
+                                    optionValue="value" styleClass="w-full" class="w-full" appendTo="body"></p-select>
+                            </div>
+                            <div>
+                                <div class="field-label">Region</div>
+                                <input pInputText [(ngModel)]="referralRegion" placeholder="e.g. Right Shoulder"
+                                    class="w-full" />
+                            </div>
+                        </div>
+                        <div class="reminder-row">
+                            <div class="rem-item">
+                                <div class="rem-day" style="color:#F5A623">2</div>
+                                <div class="rem-lbl">Reminder</div>
+                            </div>
+                            <div class="rem-item">
+                                <div class="rem-day" style="color:#F5A623">5</div>
+                                <div class="rem-lbl">Reminder</div>
+                            </div>
+                            <div class="rem-item">
+                                <div class="rem-day" style="color:#FC6B44">10</div>
+                                <div class="rem-lbl">Escalate</div>
+                            </div>
+                            <div class="rem-item">
+                                <div class="rem-day" style="color:#E24B4A">30</div>
+                                <div class="rem-lbl">Cancel</div>
+                            </div>
+                        </div>
+                    </p-card>
+                    }
+                </div>
+                }
+                }
+            </p-card>
+
+            <div class="btn-row">
+                <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
+                    (onClick)="go(3)"></p-button>
+                @if (getDecisionConfirmVisible()) {
+                <p-button label="Confirm Path & Continue" severity="success" (onClick)="go(5)"></p-button>
+                }
+            </div>
+            }
+
+            <!-- -- STEP 5  Action / Confirmation -- -->
+            @if (currentStep() === 5) {
+
+            @if (entryType() === 'reassess') {
+            @if (selectedReassessPath() === 'A') {
+            <div class="confirm-box">
+                <div class="confirm-icon" style="color:#1AAD7A">~</div>
+                <div class="confirm-title">Protocol will open in Edit Mode</div>
+                <div class="confirm-desc">You can add restrictions, change exercises or add a recovery phase. Program
+                    continues without stopping. The change is logged in the Audit Trail.</div>
+                <div class="btn-row" style="justify-content:center">
+                    <p-button [label]="actionDone() ? '? Done' : 'Open Protocol Editor ?'"
+                        [severity]="actionDone() ? 'secondary' : 'success'" (onClick)="confirmAction()"
+                        [disabled]="actionDone()"></p-button>
+                </div>
+            </div>
+            <div class="note-banner note-mint mt-3">
+                <strong>What will happen:</strong> Protocol stays <span class="code-badge">ACTIVE_PROGRAM</span>. Edit
+                logged in Audit Trail. Lead and engineers notified of the change.
+            </div>
+            }
+            @if (selectedReassessPath() === 'B') {
+            <div class="confirm-box">
+                <div class="confirm-icon" style="color:#F5A623">||</div>
+                <div class="confirm-title">Program Paused</div>
+                <div class="confirm-desc">Sessions are frozen (not cancelled). You will receive a notification when the
+                    investigation is complete to make a final decision.</div>
+                <div class="btn-row" style="justify-content:center">
+                    <p-button [label]="actionDone() ? '? Done' : 'Confirm Pause ?'"
+                        [severity]="actionDone() ? 'secondary' : 'warn'" (onClick)="confirmAction()"
+                        [disabled]="actionDone()"></p-button>
+                </div>
+            </div>
+            <div class="note-banner note-amber mt-3">
+                <strong>What will happen:</strong> <span class="code-badge">ACTIVE_PROGRAM ? PROGRAM_PAUSED</span>.
+                Sessions
+                frozen. After investigation: doctor decides (resume / edit / replace).
+            </div>
+            }
+            @if (selectedReassessPath() === 'C') {
+            <div class="confirm-box">
+                <div class="confirm-icon" style="color:#FC6B44">?</div>
+                <div class="confirm-title">Current Protocol Closed New One Will Be Created</div>
+                <div class="confirm-desc">18 remaining sessions will be transferred. S02 opens to write the new
+                    protocol.
+                </div>
+                <div class="btn-row" style="justify-content:center">
+                    <p-button [label]="actionDone() ? '? Done' : 'Confirm Replacement &amp; Create Protocol ?'"
+                        [severity]="actionDone() ? 'secondary' : 'danger'" (onClick)="confirmAction()"
+                        [disabled]="actionDone()"></p-button>
+                </div>
+            </div>
+            <div class="note-banner note-coral mt-3">
+                <strong>What will happen:</strong> <span class="code-badge">ACTIVE_PROGRAM ?
+                    REPLACED_BY_REASSESSMENT</span>. credit_transfer_log: 18 sessions. S02 opens with athlete data.
+            </div>
+            }
+            @if (selectedReassessPath() === 'D') {
+            <div class="confirm-box">
+                <div class="confirm-icon" style="color:#6B47FF">?</div>
+                <div class="confirm-title">A Second Parallel Protocol Will Be Created</div>
+                <div class="confirm-desc">Both protocols will be active simultaneously. Lead assigns engineers for each.
+                </div>
+                <div class="btn-row" style="justify-content:center">
+                    <p-button [label]="actionDone() ? '? Done' : 'Create Parallel Protocol ?'"
+                        [severity]="actionDone() ? 'secondary' : 'info'" (onClick)="confirmAction()"
+                        [disabled]="actionDone()"></p-button>
+                </div>
+            </div>
+            <div class="note-banner note-purple mt-3">
+                <strong>What will happen:</strong> Protocol 1 stays ACTIVE. Protocol 2 created as DRAFT ? doctor writes
+                it ?
+                activated ? lead assigns engineers.
+            </div>
+            }
+            }
+
+            @if (entryType() !== 'reassess') {
+            @if (selectedPath() === 1) {
+            <div class="confirm-box">
+                <div class="confirm-icon" style="color:#1AAD7A">
+                    <i class="pi pi-thumbs-up"></i>
+                </div>
+                <div class="confirm-title">Ready to Write the Protocol</div>
+                <div class="confirm-desc">S02 opens with all athlete data pre-loaded.</div>
+                <div class="btn-row" style="justify-content:center">
+                    <p-button [label]="actionDone() ? 'Done' : 'Open Protocol Builder'"
+                        [severity]="actionDone() ? 'secondary' : 'success'" (onClick)="confirmAction()"
+                        [disabled]="actionDone()"></p-button>
+                </div>
+            </div>
+            <div class="note-banner note-mint mt-3">
+                <strong>What will happen:</strong> Ticket status ? <span class="code-badge">CLIENT_APPROVED</span> ? S02
+                opens.
+            </div>
+            }
+            @if (selectedPath() === 2) {
+            <div class="confirm-box">
+                <div class="confirm-icon" style="color:#F5A623">
+                    <i class="pi pi-bullseye"></i>
+                </div>
+                <div class="confirm-title">Measurement Ticket Created</div>
+                <div class="confirm-desc">Ticket appears in the engineer's interface. Doctor is notified when results
+                    are
+                    ready.</div>
+                <div class="btn-row" style="justify-content:center">
+                    <p-button [label]="actionDone() ? 'Done' : 'Confirm '"
+                        [severity]="actionDone() ? 'secondary' : 'warn'" (onClick)="confirmAction()"
+                        [disabled]="actionDone()"></p-button>
+                </div>
+            </div>
+            <div class="note-banner note-amber mt-3">
+                <strong>What will happen:</strong> <span class="code-badge">PENDING_INTERNAL</span> ? engineer measures
+                ?
+                notification to doctor.
+            </div>
+            }
+            @if (selectedPath() === 3) {
+            <div class="confirm-box">
+                <div class="confirm-icon" style="color:#FC6B44">
+                    <i class="pi pi-arrow-up-right"></i>
+                </div>
+                <div class="confirm-title">External Referral Ticket Created</div>
+                <div class="confirm-desc">Athlete receives instructions via SMS. Automated follow-up reminders will be
+                    sent.
+                </div>
+                <div class="btn-row" style="justify-content:center">
+                    <p-button [label]="actionDone() ? 'Done' : 'Confirm'"
+                        [severity]="actionDone() ? 'secondary' : 'danger'" (onClick)="confirmAction()"
+                        [disabled]="actionDone()"></p-button>
+                </div>
+            </div>
+            <div class="note-banner note-coral mt-3">
+                <strong>What will happen:</strong> <span class="code-badge">PENDING_EXTERNAL</span> ? Reminder day
+                2/5/10 ?
+                After upload: doctor notification.
+            </div>
+            }
+            }
+
+            <div class="btn-row mt-4">
+                <p-button label="Back" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
+                    (onClick)="go(4)"></p-button>
+            </div>
+            }
+
+        </div>
+    </div>
+</p-card>

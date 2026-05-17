@@ -10,18 +10,19 @@ export class ProtocolService {
             name: 'ACL Reconstruction – Standard',
             status: 'active',
             services: [],
-            weeks: 12,
-            totalSessions: 36,
+            weeks: null,
+            totalSessions: null,
             template: null,
             createdAt: '2026-04-20',
             createdBy: { id: 101, name: 'Dr. Sarah Mitchell', role: 'Physiotherapist' },
             phases: [
                 {
+                    id: 'phase-acl-1',
                     name: 'Acute & Protection Phase',
                     totalWeeks: 3,
-                    totalSessions: 9,
                     sessionsPerWeek: 3,
                     objective: 'Reduce swelling and pain, protect the graft, and restore basic ROM.',
+                    measurementSessionNums: [1, 3],
                     criteria: {
                         progressionCriteria: 'Pain ≤ 3/10 at rest, full passive knee extension, minimal effusion, independent ambulation with crutches',
                         regressionCriteria: 'Pain > 5/10, increased swelling post-session, or inability to complete 50% of sets',
@@ -35,11 +36,12 @@ export class ProtocolService {
                     },
                     weeks: [
                         {
+                            id: 'week-acl-1-1',
                             weekNumber: 1,
                             sessions: [
                                 {
+                                    id: 'session-acl-1-1',
                                     sessionNumber: 1,
-                                    applyMeasurements: true,
                                     sections: [
                                         {
                                             sectionName: 'Warm-Up',
@@ -100,8 +102,8 @@ export class ProtocolService {
                                     ]
                                 },
                                 {
+                                    id: 'session-acl-1-2',
                                     sessionNumber: 2,
-                                    applyMeasurements: false,
                                     sections: [
                                         {
                                             sectionName: 'Mobility',
@@ -128,8 +130,8 @@ export class ProtocolService {
                                     ]
                                 },
                                 {
+                                    id: 'session-acl-1-3',
                                     sessionNumber: 3,
-                                    applyMeasurements: true,
                                     sections: [
                                         {
                                             sectionName: 'Strengthening',
@@ -161,11 +163,12 @@ export class ProtocolService {
                     ]
                 },
                 {
+                    id: 'phase-acl-2',
                     name: 'Neuromuscular Control Phase',
                     totalWeeks: 4,
-                    totalSessions: 12,
                     sessionsPerWeek: 3,
                     objective: 'Restore neuromuscular control, improve proprioception, and begin closed-chain strengthening.',
+                    measurementSessionNums: [1],
                     criteria: {
                         progressionCriteria: 'Full active ROM, no post-exercise effusion, single-leg stance ≥ 30s, pain ≤ 2/10',
                         regressionCriteria: 'Effusion returning after sessions, pain > 4/10 during closed-chain exercises',
@@ -179,11 +182,12 @@ export class ProtocolService {
                     },
                     weeks: [
                         {
-                            weekNumber: 4,
+                            id: 'week-acl-2-1',
+                            weekNumber: 1,
                             sessions: [
                                 {
+                                    id: 'session-acl-2-1',
                                     sessionNumber: 1,
-                                    applyMeasurements: true,
                                     sections: [
                                         {
                                             sectionName: 'Proprioception',
@@ -226,11 +230,12 @@ export class ProtocolService {
                     ]
                 },
                 {
+                    id: 'phase-acl-3',
                     name: 'Return to Sport Phase',
                     totalWeeks: 5,
-                    totalSessions: 15,
                     sessionsPerWeek: 3,
                     objective: 'Restore full strength, power, and sport-specific movement patterns for safe return to play.',
+                    measurementSessionNums: [1],
                     criteria: {
                         progressionCriteria: 'Hamstring strength symmetry ≥ 90%, pain-free sprinting, successful agility tests, H:Q ratio ≥ 0.6',
                         regressionCriteria: 'Pain > 2/10 during sprinting, strength symmetry dropping below 85%, fear avoidance behavior',
@@ -244,11 +249,12 @@ export class ProtocolService {
                     },
                     weeks: [
                         {
-                            weekNumber: 8,
+                            id: 'week-acl-3-1',
+                            weekNumber: 1,
                             sessions: [
                                 {
+                                    id: 'session-acl-3-1',
                                     sessionNumber: 1,
-                                    applyMeasurements: true,
                                     sections: [
                                         {
                                             sectionName: 'Power Development',
@@ -286,36 +292,38 @@ export class ProtocolService {
             name: 'Rotator Cuff Recovery – Non-Surgical',
             status: 'draft',
             services: [],
-            weeks: 10,
-            totalSessions: 20,
+            weeks: null,
+            totalSessions: null,
             template: null,
             createdAt: '2026-05-01',
             createdBy: { id: 102, name: 'Dr. James Thornton', role: 'Sports Rehabilitator' },
             phases: [
                 {
+                    id: 'phase-rc-1',
                     name: 'Pain Management & Mobility Phase',
                     totalWeeks: 3,
-                    totalSessions: 6,
                     sessionsPerWeek: 2,
                     objective: 'Reduce pain and inflammation while restoring shoulder mobility and scapular control.',
+                    measurementSessionNums: [1],
                     criteria: {
-                        progressionCriteria: 'Hamstring strength symmetry ≥ 90%, pain-free sprinting, successful agility tests, H:Q ratio ≥ 0.6',
-                        regressionCriteria: 'Pain > 2/10 during sprinting, strength symmetry dropping below 85%, fear avoidance behavior',
-                        precautions: 'Gradual sprint progression, avoid maximum velocity sprinting until fully cleared',
+                        progressionCriteria: 'Pain ≤ 3/10 at rest, shoulder AROM ≥ 120° flexion, no night pain, scapular dyskinesis resolved',
+                        regressionCriteria: 'Pain > 5/10 post-session, increased crepitus, or inability to sleep on affected side',
+                        precautions: 'Avoid overhead loading, no resisted internal rotation above 60°, ice post-session if inflamed',
                         transitionCriteria: [
-                            { id: 1, metric: 'Hamstring strength symmetry', operator: '≥', value: 90, unit: '%' },
-                            { id: 2, metric: 'H:Q ratio', operator: '≥', value: 0.6, unit: 'ratio' },
-                            { id: 3, metric: 'Pain during sprint', operator: '=', value: 0, unit: '/10' },
-                            { id: 4, metric: 'Agility test completion', operator: '=', value: 1, unit: 'boolean' }
+                            { id: 1, metric: 'Pain at rest', operator: '≤', value: 3, unit: '/10' },
+                            { id: 2, metric: 'Shoulder AROM flexion', operator: '≥', value: 120, unit: '°' },
+                            { id: 3, metric: 'Night pain', operator: '=', value: 0, unit: 'boolean' },
+                            { id: 4, metric: 'Scapular dyskinesis', operator: '=', value: 0, unit: 'boolean' }
                         ]
                     },
                     weeks: [
                         {
+                            id: 'week-rc-1-1',
                             weekNumber: 1,
                             sessions: [
                                 {
+                                    id: 'session-rc-1-1',
                                     sessionNumber: 1,
-                                    applyMeasurements: true,
                                     sections: [
                                         {
                                             sectionName: 'Mobility',
@@ -380,29 +388,31 @@ export class ProtocolService {
                     ]
                 },
                 {
+                    id: 'phase-rc-2',
                     name: 'Strengthening & Endurance Phase',
                     totalWeeks: 4,
-                    totalSessions: 8,
                     sessionsPerWeek: 2,
                     objective: 'Strengthen rotator cuff and periscapular muscles, improve endurance and dynamic stability.',
+                    measurementSessionNums: [1],
                     criteria: {
-                        progressionCriteria: 'Hamstring strength symmetry ≥ 90%, pain-free sprinting, successful agility tests, H:Q ratio ≥ 0.6',
-                        regressionCriteria: 'Pain > 2/10 during sprinting, strength symmetry dropping below 85%, fear avoidance behavior',
-                        precautions: 'Gradual sprint progression, avoid maximum velocity sprinting until fully cleared',
+                        progressionCriteria: 'Pain ≤ 2/10 during resisted exercises, AROM full, ER/IR strength symmetry ≥ 75%',
+                        regressionCriteria: 'Pain > 4/10 during band exercises, loss of range achieved in Phase 1',
+                        precautions: 'Avoid overhead work above 90° until fully cleared, monitor for impingement symptoms',
                         transitionCriteria: [
-                            { id: 1, metric: 'Hamstring strength symmetry', operator: '≥', value: 90, unit: '%' },
-                            { id: 2, metric: 'H:Q ratio', operator: '≥', value: 0.6, unit: 'ratio' },
-                            { id: 3, metric: 'Pain during sprint', operator: '=', value: 0, unit: '/10' },
-                            { id: 4, metric: 'Agility test completion', operator: '=', value: 1, unit: 'boolean' }
+                            { id: 1, metric: 'Pain during resistance', operator: '≤', value: 2, unit: '/10' },
+                            { id: 2, metric: 'ER/IR strength symmetry', operator: '≥', value: 75, unit: '%' },
+                            { id: 3, metric: 'AROM flexion', operator: '≥', value: 160, unit: '°' },
+                            { id: 4, metric: 'Overhead impingement sign', operator: '=', value: 0, unit: 'boolean' }
                         ]
                     },
                     weeks: [
                         {
-                            weekNumber: 4,
+                            id: 'week-rc-2-1',
+                            weekNumber: 1,
                             sessions: [
                                 {
+                                    id: 'session-rc-2-1',
                                     sessionNumber: 1,
-                                    applyMeasurements: true,
                                     sections: [
                                         {
                                             sectionName: 'Rotator Cuff Strengthening',
@@ -434,29 +444,31 @@ export class ProtocolService {
                     ]
                 },
                 {
+                    id: 'phase-rc-3',
                     name: 'Functional Return Phase',
                     totalWeeks: 3,
-                    totalSessions: 6,
                     sessionsPerWeek: 2,
                     objective: 'Restore full overhead function and sport/work-specific shoulder mechanics.',
+                    measurementSessionNums: [1],
                     criteria: {
-                        progressionCriteria: 'Hamstring strength symmetry ≥ 90%, pain-free sprinting, successful agility tests, H:Q ratio ≥ 0.6',
-                        regressionCriteria: 'Pain > 2/10 during sprinting, strength symmetry dropping below 85%, fear avoidance behavior',
-                        precautions: 'Gradual sprint progression, avoid maximum velocity sprinting until fully cleared',
+                        progressionCriteria: 'Full pain-free AROM, ER/IR symmetry ≥ 90%, successful functional throwing or overhead test',
+                        regressionCriteria: 'Pain > 3/10 overhead, recurrence of impingement, strength regression > 15%',
+                        precautions: 'Gradual overhead loading, no ballistic throwing until final clearance',
                         transitionCriteria: [
-                            { id: 1, metric: 'Hamstring strength symmetry', operator: '≥', value: 90, unit: '%' },
-                            { id: 2, metric: 'H:Q ratio', operator: '≥', value: 0.6, unit: 'ratio' },
-                            { id: 3, metric: 'Pain during sprint', operator: '=', value: 0, unit: '/10' },
-                            { id: 4, metric: 'Agility test completion', operator: '=', value: 1, unit: 'boolean' }
+                            { id: 1, metric: 'Pain-free AROM', operator: '=', value: 1, unit: 'boolean' },
+                            { id: 2, metric: 'ER/IR strength symmetry', operator: '≥', value: 90, unit: '%' },
+                            { id: 3, metric: 'Overhead functional test', operator: '=', value: 1, unit: 'boolean' },
+                            { id: 4, metric: 'Subjective shoulder score', operator: '≥', value: 80, unit: '/100' }
                         ]
                     },
                     weeks: [
                         {
-                            weekNumber: 8,
+                            id: 'week-rc-3-1',
+                            weekNumber: 1,
                             sessions: [
                                 {
+                                    id: 'session-rc-3-1',
                                     sessionNumber: 1,
-                                    applyMeasurements: true,
                                     sections: [
                                         {
                                             sectionName: 'Overhead Loading',
@@ -494,18 +506,19 @@ export class ProtocolService {
             name: 'Hamstring Strain – Grade 2',
             status: 'archived',
             services: [],
-            weeks: 8,
-            totalSessions: 24,
+            weeks: null,
+            totalSessions: null,
             template: null,
             createdAt: '2026-03-15',
             createdBy: { id: 103, name: 'Dr. Layla Hassan', role: 'Physical Therapist' },
             phases: [
                 {
+                    id: 'phase-hs-1',
                     name: 'Acute Protection Phase',
                     totalWeeks: 2,
-                    totalSessions: 6,
                     sessionsPerWeek: 3,
                     objective: 'Minimize tissue damage, control inflammation, and maintain pain-free range of motion.',
+                    measurementSessionNums: [1],
                     criteria: {
                         progressionCriteria: 'Pain ≤ 2/10 during eccentric exercise, full active ROM, hamstring strength ≥ 70%, normal gait',
                         regressionCriteria: 'Pain > 4/10 during eccentric loading, strength deficit > 40% vs contralateral side',
@@ -519,11 +532,12 @@ export class ProtocolService {
                     },
                     weeks: [
                         {
+                            id: 'week-hs-1-1',
                             weekNumber: 1,
                             sessions: [
                                 {
+                                    id: 'session-hs-1-1',
                                     sessionNumber: 1,
-                                    applyMeasurements: true,
                                     sections: [
                                         {
                                             sectionName: 'Isometric Loading',
@@ -562,8 +576,8 @@ export class ProtocolService {
                                     ]
                                 },
                                 {
+                                    id: 'session-hs-1-2',
                                     sessionNumber: 2,
-                                    applyMeasurements: false,
                                     sections: [
                                         {
                                             sectionName: 'Mobility',
@@ -594,29 +608,31 @@ export class ProtocolService {
                     ]
                 },
                 {
+                    id: 'phase-hs-2',
                     name: 'Tissue Remodeling & Strength Phase',
                     totalWeeks: 3,
-                    totalSessions: 9,
                     sessionsPerWeek: 3,
                     objective: 'Promote collagen remodeling, restore eccentric strength, and improve tissue capacity.',
+                    measurementSessionNums: [1],
                     criteria: {
-                        progressionCriteria: 'Pain ≤ 2/10 during eccentric exercise, full active ROM, hamstring strength ≥ 70%, normal gait',
-                        regressionCriteria: 'Pain > 4/10 during eccentric loading, strength deficit > 40% vs contralateral side',
-                        precautions: 'Avoid maximal sprinting, no ballistic stretching, monitor soreness 24h post-session',
+                        progressionCriteria: 'Eccentric strength symmetry ≥ 80%, SLR pain-free at 70°, no 24h soreness > 3/10',
+                        regressionCriteria: 'Any sharp posterior thigh pain during loading, swelling, or 24h soreness > 5/10',
+                        precautions: 'Avoid maximal eccentric load until week 2, no sprinting, monitor 24h soreness response',
                         transitionCriteria: [
-                            { id: 1, metric: 'Pain during eccentric', operator: '≤', value: 2, unit: '/10' },
-                            { id: 2, metric: 'Hamstring strength symmetry', operator: '≥', value: 70, unit: '%' },
-                            { id: 3, metric: 'Active ROM', operator: '=', value: 1, unit: 'boolean' },
-                            { id: 4, metric: 'Gait pattern', operator: '=', value: 1, unit: 'boolean' }
+                            { id: 1, metric: 'Eccentric strength symmetry', operator: '≥', value: 80, unit: '%' },
+                            { id: 2, metric: 'SLR angle pain-free', operator: '≥', value: 70, unit: '°' },
+                            { id: 3, metric: '24h soreness', operator: '≤', value: 3, unit: '/10' },
+                            { id: 4, metric: 'Hamstring tightness (palpation)', operator: '=', value: 0, unit: 'boolean' }
                         ]
                     },
                     weeks: [
                         {
-                            weekNumber: 3,
+                            id: 'week-hs-2-1',
+                            weekNumber: 1,
                             sessions: [
                                 {
+                                    id: 'session-hs-2-1',
                                     sessionNumber: 1,
-                                    applyMeasurements: true,
                                     sections: [
                                         {
                                             sectionName: 'Eccentric Strengthening',
@@ -648,29 +664,31 @@ export class ProtocolService {
                     ]
                 },
                 {
+                    id: 'phase-hs-3',
                     name: 'Return to Sport Phase',
                     totalWeeks: 3,
-                    totalSessions: 9,
                     sessionsPerWeek: 3,
                     objective: 'Restore sprint mechanics, explosive power, and sport-specific movement confidence.',
+                    measurementSessionNums: [1],
                     criteria: {
-                        progressionCriteria: 'Pain ≤ 2/10 during eccentric exercise, full active ROM, hamstring strength ≥ 70%, normal gait',
-                        regressionCriteria: 'Pain > 4/10 during eccentric loading, strength deficit > 40% vs contralateral side',
-                        precautions: 'Avoid maximal sprinting, no ballistic stretching, monitor soreness 24h post-session',
+                        progressionCriteria: 'Hamstring strength symmetry ≥ 90%, pain-free sprint at 80% max, H:Q ratio ≥ 0.6',
+                        regressionCriteria: 'Any posterior thigh pain during sprinting, strength regression > 10%',
+                        precautions: 'Gradual sprint progression, no ballistic actions until fully cleared, warm-up mandatory',
                         transitionCriteria: [
-                            { id: 1, metric: 'Pain during eccentric', operator: '≤', value: 2, unit: '/10' },
-                            { id: 2, metric: 'Hamstring strength symmetry', operator: '≥', value: 70, unit: '%' },
-                            { id: 3, metric: 'Active ROM', operator: '=', value: 1, unit: 'boolean' },
-                            { id: 4, metric: 'Gait pattern', operator: '=', value: 1, unit: 'boolean' }
+                            { id: 1, metric: 'Hamstring strength symmetry', operator: '≥', value: 90, unit: '%' },
+                            { id: 2, metric: 'Pain during sprint', operator: '=', value: 0, unit: '/10' },
+                            { id: 3, metric: 'H:Q ratio', operator: '≥', value: 0.6, unit: 'ratio' },
+                            { id: 4, metric: 'Agility test', operator: '=', value: 1, unit: 'boolean' }
                         ]
                     },
                     weeks: [
                         {
-                            weekNumber: 6,
+                            id: 'week-hs-3-1',
+                            weekNumber: 1,
                             sessions: [
                                 {
+                                    id: 'session-hs-3-1',
                                     sessionNumber: 1,
-                                    applyMeasurements: true,
                                     sections: [
                                         {
                                             sectionName: 'Speed & Agility',
@@ -804,10 +822,9 @@ export class ProtocolService {
     // ── Phase helpers ────────────────────────────────────────────────────────
     createPhase(id: number): Phase {
         return {
-            id,
+            id: id.toString(),
             name: `Phase ${id}: New Phase`,
             totalWeeks: 0,
-            totalSessions: 0,
             sessionsPerWeek: 0,
             objective: '',
             criteria: this.createCriteria(),
@@ -927,7 +944,6 @@ export class ProtocolService {
         if (!week.sessions[sessionIndex]) {
             week.sessions[sessionIndex] = {
                 sessionNumber: sessionNum,
-                applyMeasurements: false,
                 sections: [
                     {
                         sectionName: 'Warm Up',

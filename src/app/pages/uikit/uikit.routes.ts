@@ -179,5 +179,10 @@ export default [
         path: 'protocol-config',
         data: { breadcrumb: 'Protocol Config' },
         loadComponent: () => import('./protocol-config/protocol-config.component').then(m => m.ProtocolConfigComponent)
+    },
+    {
+        path: 'consultation-type',
+        data: { breadcrumb: 'Consultation type' },
+        loadComponent: () => import('./consultation-screen/consultation-screen.component').then(m => m.ConsultationScreenComponent)
     }
 ] as Routes;

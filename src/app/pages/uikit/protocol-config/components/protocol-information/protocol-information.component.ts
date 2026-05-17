@@ -158,15 +158,12 @@ export class ProtocolInformationComponent implements OnInit {
         proto.template = template;
 
         const weeks = parseInt(template.duration);
-        proto.weeks = isNaN(weeks) ? null : weeks;
-
         const frequencyMatch = template.frequency.match(/(\d+)x/);
         const frequency = frequencyMatch ? parseInt(frequencyMatch[1]) : 0;
 
-        if (proto.weeks && frequency) {
-            proto.totalSessions = proto.weeks * frequency;
-        } else {
-            proto.totalSessions = null;
+        if (!isNaN(weeks) && frequency && proto.phases.length > 0) {
+            proto.phases[0].totalWeeks = weeks;
+            proto.phases[0].sessionsPerWeek = frequency;
         }
     }
 

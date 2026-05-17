@@ -6,7 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { ProtocolService } from '../../services/protocol.service';
-import { Phase } from '../../models/protocol.model';
+import { getPhaseSessionCount, getProtocolSessions, Phase } from '../../models/protocol.model';
 import { ReactiveFormsModule } from "@angular/forms";
 import { InputNumberModule } from "primeng/inputnumber";
 import { DropdownModule } from "primeng/dropdown";
@@ -30,6 +30,8 @@ export interface CriterionOption {
 export class PhasesAndCriteriaComponent {
     private protocolService = inject(ProtocolService);
     readonly protocol = this.protocolService.activeProtocol;
+    readonly getPhaseSessionCount = getPhaseSessionCount;
+    readonly getSessionNumbers = getProtocolSessions;
 
     private fb = inject(FormBuilder);
     form!: FormGroup;

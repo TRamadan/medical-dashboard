@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -11,7 +11,7 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { ProtocolService } from '../../services/protocol.service';
 import { MeasurementTemplatesService } from '../../../measurements-config/services/measurement-templates.service';
-import { Phase, Week, Exercise, Section, ExerciseType } from '../../models/protocol.model';
+import { Phase, Week, Exercise, Section, ExerciseType, isMeasurementSession, getPhaseSessionCount } from '../../models/protocol.model';
 
 @Component({
     selector: 'app-sessions-and-exercises',
@@ -23,7 +23,7 @@ import { Phase, Week, Exercise, Section, ExerciseType } from '../../models/proto
 export class SessionsAndExercisesComponent implements OnInit {
     private protocolService = inject(ProtocolService);
     private measurementTemplatesService = inject(MeasurementTemplatesService);
-
+    private cdr = inject(ChangeDetectorRef)
     readonly protocol = this.protocolService.activeProtocol;
     availableTemplates: any[] = [];
 
@@ -62,35 +62,46 @@ export class SessionsAndExercisesComponent implements OnInit {
 
     updateTotalSessions(phase: Phase): void {
         const totalWeeks = Math.max(0, Number(phase.totalWeeks) || 0);
-        const perWeek   = Math.max(0, Number(phase.sessionsPerWeek) || 0);
-        phase.totalSessions = totalWeeks * perWeek;
+        const perWeek = Math.max(0, Number(phase.sessionsPerWeek) || 0);
+        // phase.totalSessions removed — computed via getPhaseSessionCount(phase)
 
         // ── Trim or grow weeks ───────────────────────────────────────────────
         while (phase.weeks.length > totalWeeks) phase.weeks.pop();
         for (let wi = phase.weeks.length; wi < totalWeeks; wi++) {
-            phase.weeks.push({ weekNumber: wi + 1, sessions: [] });
+            phase.weeks.push({
+                id: crypto.randomUUID(),
+                weekNumber: wi + 1,
+                sessions: []
+            });
         }
 
         // ── Sync sessions inside every week ─────────────────────────────────
         for (let wi = 0; wi < totalWeeks; wi++) {
             const week = phase.weeks[wi];
+
             while (week.sessions.length > perWeek) week.sessions.pop();
+
             for (let si = week.sessions.length; si < perWeek; si++) {
                 const globalNum = wi * perWeek + si + 1;
-                const isMeasurement = phase.measurementSessionNums?.includes(globalNum) ?? false;
                 week.sessions.push({
+                    id: crypto.randomUUID(),
                     sessionNumber: globalNum,
-                    applyMeasurements: isMeasurement,
                     sections: [{ sectionName: 'Warm Up', time: '10 min', exercises: [] }]
                 });
             }
-            // Re-number sessions and re-sync applyMeasurements in case sessionsPerWeek changed
+
+            // Re-number sessions in case sessionsPerWeek changed
             for (let si = 0; si < perWeek; si++) {
                 const globalNum = wi * perWeek + si + 1;
                 week.sessions[si].sessionNumber = globalNum;
-                week.sessions[si].applyMeasurements = phase.measurementSessionNums?.includes(globalNum) ?? false;
             }
         }
+
+        // ── Clean up measurementSessionNums that no longer exist ────────────
+        const totalSessions = getPhaseSessionCount(phase);
+        phase.measurementSessionNums = phase.measurementSessionNums.filter(
+            n => n >= 1 && n <= totalSessions
+        );
 
         // ── Reset per-week tab selection if the current tab no longer exists ──
         for (const week of phase.weeks) {
@@ -107,18 +118,11 @@ export class SessionsAndExercisesComponent implements OnInit {
 
     // ── Session mode ─────────────────────────────────────────────────────────
     getSessionMode(phase: Phase, sessionNum: number): 'exercises' | 'measurements' {
-        this.protocolService.ensureSessionData(phase, sessionNum);
-        const session = phase.weeks
-            .flatMap(w => w.sessions)
-            .find(s => s.sessionNumber === sessionNum);
-        return session?.applyMeasurements ? 'measurements' : 'exercises';
+        return phase.measurementSessionNums.includes(sessionNum) ? 'measurements' : 'exercises';
     }
 
     isSessionPredefined(phase: Phase, sessionNum: number): boolean {
-        return phase.weeks
-            .flatMap(w => w.sessions)
-            .find(s => s.sessionNumber === sessionNum)
-            ?.applyMeasurements ?? false;
+        return isMeasurementSession(phase, sessionNum);
     }
 
     // ── Sections ─────────────────────────────────────────────────────────────
@@ -155,17 +159,14 @@ export class SessionsAndExercisesComponent implements OnInit {
     // ── Measurement templates ────────────────────────────────────────────────
     setSessionMeasurementTemplate(phase: Phase, sessionNum: number, template: { id: number; name: string } | null): void {
         this.protocolService.ensureSessionData(phase, sessionNum);
-        const session = phase.weeks
-            .flatMap(w => w.sessions)
-            .find(s => s.sessionNumber === sessionNum);
 
-        if (!session) return;
+        const isCurrentlySelected = phase.measurementSessionNums.includes(sessionNum);
 
-        if (template && session.applyMeasurements) {
-            session.applyMeasurements = false;
-        } else {
-            session.applyMeasurements = true;
-        }
+        phase.measurementSessionNums = isCurrentlySelected
+            ? phase.measurementSessionNums.filter(n => n !== sessionNum)
+            : [...phase.measurementSessionNums, sessionNum];
+
+        this.cdr.markForCheck();
     }
 
     // ── Validation ───────────────────────────────────────────────────────────
@@ -180,10 +181,7 @@ export class SessionsAndExercisesComponent implements OnInit {
     }
 
     isSessionMeasurementSelected(phase: Phase, sessionNum: number, template: { id: number; name: string }): boolean {
-        const session = phase.weeks
-            .flatMap(w => w.sessions)
-            .find(s => s.sessionNumber === sessionNum);
-        return session?.applyMeasurements === true;
+        return phase.measurementSessionNums.includes(sessionNum);
     }
 
 

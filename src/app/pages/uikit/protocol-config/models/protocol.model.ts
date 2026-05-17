@@ -1,3 +1,4 @@
+
 export interface SetData {
     repetitions: number;
     intensity: string;
@@ -10,6 +11,7 @@ export interface ProgressionRule {
     incrementAmount: number;
     progressionCondition: string;
 }
+
 
 export interface BaseExercise {
     type: 'exercise' | 'manual';
@@ -33,29 +35,28 @@ export interface ManualType extends BaseExercise {
 
 export type Exercise = ExerciseType | ManualType;
 
+
 export interface Section {
     sectionName: string;
     time?: string;
     exercises: Exercise[];
 }
 
+
 export interface Session {
+    id?: string;
     sessionNumber: number;
-    applyMeasurements: boolean;
     sections: Section[];
 }
 
+
+
 export interface Week {
+    id?: string;
     weekNumber: number;
     sessions: Session[];
 }
 
-export interface PhaseCriteria {
-    progressionCriteria: string;
-    regressionCriteria: string;
-    precautions: string;
-    transitionCriteria: TransitionCriterion[];
-}
 
 export interface TransitionCriterion {
     id: number;
@@ -65,19 +66,40 @@ export interface TransitionCriterion {
     unit: string;
 }
 
+export interface PhaseCriteria {
+    progressionCriteria: string;
+    regressionCriteria: string;
+    precautions: string;
+    transitionCriteria: TransitionCriterion[];
+}
+
+
 export interface Phase {
-    id?: number;
+    id: string;
     name: string;
-    selectedSessionTab?: number;
     totalWeeks: number;
-    totalSessions: number;
     sessionsPerWeek: number;
     objective: string;
     criteria: PhaseCriteria;
     weeks: Week[];
-    /** Session numbers (1-based) that should default to Measurements mode */
-    measurementSessionNums?: number[];
+    measurementSessionNums: number[];
+    selectedSessionTab?: number;
 }
+
+
+export interface Protocol {
+    id: number;
+    name: string;
+    status: 'draft' | 'active' | 'archived';
+    services: ServiceItem[];
+    weeks: null;
+    totalSessions: null;
+    template: ProtocolTemplate | null;
+    phases: Phase[];
+    createdAt: string;
+    createdBy: CreatedBy;
+}
+
 
 export interface CreatedBy {
     id: number;
@@ -102,19 +124,6 @@ export interface ProtocolTemplate {
     phases: string;
 }
 
-export interface Protocol {
-    id: number;
-    name: string;
-    status: 'draft' | 'active' | 'archived';
-    services: ServiceItem[];
-    weeks: number | null;
-    totalSessions: number | null;
-    template: ProtocolTemplate | null;
-    phases: Phase[];
-    createdAt: string;
-    createdBy: CreatedBy;
-}
-
 export interface FittVpCard {
     letter: string;
     titleEn: string;
@@ -130,3 +139,33 @@ export interface CertItem {
     tag: string;
     checked: boolean;
 }
+
+
+export const getPhaseSessionCount = (phase: Phase): number =>
+    phase.totalWeeks * phase.sessionsPerWeek;
+
+
+export const getProtocolWeeks = (protocol: Protocol): number =>
+    protocol.phases.reduce((sum, p) => sum + p.totalWeeks, 0);
+
+
+export const getProtocolSessions = (protocol: Protocol): number =>
+    protocol.phases.reduce((sum, p) => sum + getPhaseSessionCount(p), 0);
+
+
+export const isMeasurementSession = (
+    phase: Phase,
+    sessionNumber: number,
+): boolean => phase.measurementSessionNums.includes(sessionNumber);
+
+
+export const toAbsoluteWeek = (
+    protocol: Protocol,
+    phaseIndex: number,
+    relativeWeekNumber: number,
+): number => {
+    const offset = protocol.phases
+        .slice(0, phaseIndex)
+        .reduce((sum, p) => sum + p.totalWeeks, 0);
+    return offset + relativeWeekNumber;
+};
