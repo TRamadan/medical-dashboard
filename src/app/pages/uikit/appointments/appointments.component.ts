@@ -19,6 +19,8 @@ import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { TooltipModule } from 'primeng/tooltip';
+import { CheckboxModule } from 'primeng/checkbox';
 import { TableColumn, TableComponent } from '../../../shared/table/table.component';
 import { Appointment } from './models/appointment';
 import { BookingFormComponent } from './booking-form/booking-form.component';
@@ -29,6 +31,10 @@ import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { BadgeModule } from 'primeng/badge';
 import { AppointmentsDetailsComponent } from './appointments-details/appointments-details.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { SliderModule } from 'primeng/slider';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { CardModule } from 'primeng/card';
+import { ContactUsComponent } from '../contact-us/contact-us.component';
 @Component({
     selector: 'app-appointments',
     standalone: true,
@@ -57,7 +63,13 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
         DatePickerModule,
         BadgeModule,
         AppointmentsDetailsComponent,
-        PaginatorModule
+        PaginatorModule,
+        TooltipModule,
+        CheckboxModule,
+        SliderModule,
+        SelectButtonModule,
+        CardModule,
+        ContactUsComponent
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './appointments.component.html',
@@ -104,6 +116,8 @@ export class AppointmentsComponent implements OnInit {
     completedAppointmentsCount: number = 0;
 
     @ViewChild('dt') dt!: Table;
+    @ViewChild('isPaidTemplate', { static: true }) isPaidTemplate!: any;
+    
     tableHeaders: TableColumn[] = [];
     tableActions: any[] = [];
     globalFilterFields: string[] = [];
@@ -132,6 +146,7 @@ export class AppointmentsComponent implements OnInit {
             { field: 'locationNameEn', label: 'Location', type: 'text' },
             { field: 'startTime', label: 'Start time', type: 'time' },
             { field: 'endTime', label: 'End time', type: 'time' },
+            { field: 'isPaid', label: 'Is Paid', type: 'custom', customTemplate: this.isPaidTemplate },
             { field: 'status', label: 'Status', type: 'status' }
         ];
         this.tableHeaders.forEach((h) => this.globalFilterFields.push(h.field));
@@ -378,11 +393,19 @@ export class AppointmentsComponent implements OnInit {
         if (!this.selectedAppointment || this.selectedStatusId === null) return;
         this._appointmentService.updateAppointmentStatus(this.selectedAppointment.id, this.selectedStatusId).subscribe({
             next: (res: any) => {
-                this.messageService.add({
-                    severity: 'success',
-                    summary: 'Status Updated',
-                    detail: `Appointment status changed to ${this.getStatusLabel(this.selectedStatusId)}`
-                });
+                if (this.selectedStatusId === 1) {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Appointment Confirmed',
+                        detail: 'A mail has been sent to the user and the appointment confirmed successfully.'
+                    });
+                } else {
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Status Updated',
+                        detail: `Appointment status changed to ${this.getStatusLabel(this.selectedStatusId)}`
+                    });
+                }
                 this.loadUrgentAppointments();
                 if (typeof this.selectedCard === 'number') {
                     this.loadAppointments(this.selectedCard);
@@ -413,8 +436,117 @@ export class AppointmentsComponent implements OnInit {
     displayCompletePatientInfoDialog: boolean = false;
     currentPatientRow: any = null;
 
+    // ── Dropdown Options ──────────────────────────────────────────
+    genderOptions = [{ label: 'ذكر', value: 'male' }, { label: 'أنثى', value: 'female' }];
+
+    competitiveLevelOptions = [
+        { label: 'ترفيهي', value: 'recreational' },
+        { label: 'هاوي', value: 'amateur' },
+        { label: 'شبه محترف', value: 'semi_pro' },
+        { label: 'محترف', value: 'professional' },
+        { label: 'منتخب وطني', value: 'national' }
+    ];
+
+    activityLevelOptions = [
+        { label: 'لا أندرب أقل من 3 مرات', value: 'low' },
+        { label: '3-5 مرات أسبوعياً', value: 'moderate' },
+        { label: 'أكثر من 5 مرات أسبوعياً', value: 'high' }
+    ];
+
+    sleepQualityOptions = [
+        { label: 'جيد', value: 'good' },
+        { label: 'متوسط', value: 'average' },
+        { label: 'سيئ', value: 'poor' }
+    ];
+
+    performanceEngineerOptions = [
+        { label: 'مهندس 1', value: '1' },
+        { label: 'مهندس 2', value: '2' }
+    ];
+
+    decisionInfluencers = [
+        { label: 'أنا', value: 'self' },
+        { label: 'وحدي', value: 'alone' },
+        { label: 'الزوج / الزوجة', value: 'spouse' },
+        { label: 'أحد الوالدين', value: 'parent' },
+        { label: 'المدرب', value: 'coach' },
+        { label: 'النادي', value: 'club' },
+        { label: 'الطبيب', value: 'doctor' }
+    ];
+
+    previousTestsOptions = [
+        { label: 'تحاليل', value: 'lab' },
+        { label: 'لا يوجد أخرى', value: 'none' }
+    ];
+
+    previousTreatmentOptions = [
+        { label: 'راحة', value: 'rest' },
+        { label: 'تدليك', value: 'massage' },
+        { label: 'أدوية', value: 'medication' },
+        { label: 'حقن', value: 'injection' },
+        { label: 'علاج طبيعي', value: 'physio' },
+        { label: 'جراحة', value: 'surgery' },
+        { label: 'لا يوجد أخرى', value: 'none' }
+    ];
+
+    chronicConditionsOptions = [
+        { label: 'القلب', value: 'heart' },
+        { label: 'السكر', value: 'diabetes' },
+        { label: 'الضغط', value: 'bp' },
+        { label: 'الروماتيزم', value: 'rheumatism' },
+        { label: 'الغدة', value: 'thyroid' },
+        { label: 'أريو', value: 'anemia' },
+        { label: 'لا يوجد أخرى', value: 'none' }
+    ];
+
+    familyHistoryOptions = [
+        { label: 'سرطان', value: 'cancer' },
+        { label: 'أمراض قلب', value: 'heart' },
+        { label: 'السكرة المبكرة', value: 'diabetes' },
+        { label: 'الروماتيزم', value: 'rheumatism' },
+        { label: 'لا يوجد', value: 'none' }
+    ];
+
+    // ── Patient Form Model ────────────────────────────────────────
+    patientForm: any = {
+        // Personal
+        fullName: '', dateOfBirth: null, gender: null,
+        weight: 70, height: 170,
+        phone: '', phoneConfirm: '',
+        emergencyPhone: '', emergencyRelation: '',
+        bookingForSelf: null,
+        decisionInfluencers: [],
+        // Athletic
+        sport: '', club: '', team: '', center: '', role: '',
+        practiceYears: 0, competitiveLevel: null,
+        goal90Days: '', activityLevel: null,
+        // Injury
+        currentPain: 0, maxPain: 0, painEffectOnSport: 0,
+        injuryDate: null, injuryCircumstances: '',
+        injuryRelatedToSport: null, seenDoctor: null,
+        previousTests: [], previousTreatment: [],
+        avoidMovements: null,
+        // Medical
+        chronicConditions: [], familyHistory: [],
+        previousInjuries: [{ area: '', type: '', date: '', healed: '' }],
+        surgeries: [{ type: '', part: '', year: '' }],
+        regularMedications: [{ name: '', dose: '', reason: '' }],
+        allergies: '',
+        // Lifestyle
+        jobTitle: '', workNature: '',
+        highWorkStress: null,
+        sleepQuality: null,
+        usesKinesio: null,
+        recoveryExpectation: 5,
+        // Consent
+        dataConsent: false,
+        consentFullName: '', consentDate: null,
+        performanceEngineer: null
+    };
+
     openCompletePatientInfo(row: any) {
         this.currentPatientRow = row;
+        this.patientForm.fullName = row.patientNameEn || '';
         this.displayCompletePatientInfoDialog = true;
     }
 

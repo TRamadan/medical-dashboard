@@ -218,13 +218,27 @@
     </ng-template>
 </p-dialog>
 
+<!-- Template for Is Paid Column -->
+<ng-template #isPaidTemplate let-row>
+    <div class="flex justify-center">
+        <p-checkbox [(ngModel)]="row.isPaid" [binary]="true"></p-checkbox>
+    </div>
+</ng-template>
+
 <!-- here is the dialog needed to show the status for update the selected appointment-->
 <p-dialog header="Change Appointment Status" [(visible)]="displayStatusDialog" [modal]="true"
     [style]="{ width: '700px' }" [closable]="false">
-    <div class="flex flex-wrap gap-3 justify-center mt-3">
+
+    <div class="flex flex-wrap gap-3 justify-center mt-4">
         <div class="flex flex-wrap justify-center gap-4 mt-3">
-            <div *ngFor="let status of statuses" (click)="selectedStatusId = status.id" class="status-card"
-                [ngClass]="{ selected: selectedStatusId === status.id }">
+            <div *ngFor="let status of statuses"
+                (click)="status.id === 1 && !selectedAppointment?.isPaid ? null : selectedStatusId = status.id"
+                class="status-card" [ngClass]="{ 
+                    'selected': selectedStatusId === status.id,
+                    'opacity-50 cursor-not-allowed': status.id === 1 && !selectedAppointment?.isPaid 
+                }"
+                [pTooltip]="status.id === 1 && !selectedAppointment?.isPaid ? 'The athlete should pay first before confirm' : ''"
+                tooltipPosition="top">
                 <div class="flex flex-col items-center justify-center gap-2">
                     <div class="icon-circle" [ngClass]="'bg-' + status.color + '-100 text-' + status.color + '-600'">
                         <i class="pi pi-check-circle text-xl"></i>
@@ -236,36 +250,392 @@
     </div>
 
     <ng-template pTemplate="footer">
-        <button pButton label="Cancel" icon="pi pi-times" class="p-button-text" (click)="cancelStatusChange()"></button>
-        <button pButton label="Save" icon="pi pi-check" [disabled]="selectedStatusId === null"
-            (click)="confirmStatusChange()"></button>
+        <div class="flex w-full items-center justify-end">
+            <div class="flex gap-2">
+                <button pButton label="Cancel" icon="pi pi-times" class="p-button-text"
+                    (click)="cancelStatusChange()"></button>
+                <button pButton label="Save" icon="pi pi-check" [disabled]="selectedStatusId === null"
+                    (click)="confirmStatusChange()"></button>
+            </div>
+        </div>
     </ng-template>
 </p-dialog>
 
 <!-- Complete Patient Info Dialog -->
-<p-dialog header="Complete Patient Information" [(visible)]="displayCompletePatientInfoDialog" [modal]="true"
-    [style]="{ width: '450px' }" [draggable]="false" [resizable]="false" (onHide)="closePatientInfoDialog()">
-    <div class="flex flex-col gap-4 mt-3" *ngIf="currentPatientRow">
-        <p class="text-sm text-gray-500 mb-2">Please complete the required information for anonymous patient records.</p>
-        <div class="flex flex-col gap-2">
-            <label class="font-medium text-gray-700">Patient Full Name</label>
-            <input pInputText type="text" [(ngModel)]="currentPatientRow.patientNameEn" placeholder="John Doe" />
-        </div>
-        <div class="flex flex-col gap-2">
-            <label class="font-medium text-gray-700">Phone Number</label>
-            <input pInputText type="text" placeholder="+1 (555) 000-0000" />
-        </div>
-        <div class="flex flex-col gap-2">
-            <label class="font-medium text-gray-700">Email Address</label>
-            <input pInputText type="email" placeholder="patient@example.com" />
-        </div>
-        <div class="flex flex-col gap-2">
-            <label class="font-medium text-gray-700">Emergency Contact</label>
-            <input pInputText type="text" placeholder="Name or number" />
-        </div>
+<p-dialog header="استمارة بيانات المريض" [(visible)]="displayCompletePatientInfoDialog" [modal]="true"
+    [style]="{ width: '90vw', maxWidth: '900px' }" [draggable]="false" [resizable]="false"
+    [contentStyle]="{ 'max-height': '75vh', 'overflow-y': 'auto' }" (onHide)="closePatientInfoDialog()" dir="rtl">
+    <div *ngIf="currentPatientRow" class="p-fluid flex flex-col gap-4">
+
+        <!-- Section 1: الملف الشخصي -->
+        <p-card>
+            <ng-template pTemplate="title">
+                <div class="form-section-header p-3 border-round">
+                    <span class="font-bold text-primary text-lg">القسم — الملف الشخصي</span>
+                </div>
+            </ng-template>
+            <div class="formgrid grid">
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">الاسم الكامل</label>
+                    <small class="text-500 block mb-2">من بيانات الحجز</small>
+                    <input pInputText [(ngModel)]="patientForm.fullName" class="w-full" />
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">تاريخ الميلاد</label>
+                    <small class="text-500 block mb-2">من الحجز</small>
+                    <p-datepicker [(ngModel)]="patientForm.dateOfBirth" styleClass="w-full" [showIcon]="true"
+                        appendTo="body" />
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">الجنس</label>
+                    <small class="text-500 block mb-2">ملاحظة: ذكر، أنثى</small>
+                    <p-dropdown [options]="genderOptions" [(ngModel)]="patientForm.gender" placeholder="اختيار واحد"
+                        styleClass="w-full" appendTo="body" />
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">الوزن كجم / الطول سم</label>
+                    <small class="text-500 block mb-2">الوزن: 30–300 &nbsp;|&nbsp; الطول: 100–214</small>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <span class="text-sm text-500">وزن: <b>{{patientForm.weight}}</b></span>
+                            <p-slider [(ngModel)]="patientForm.weight" [min]="30" [max]="300"
+                                styleClass="w-full mt-2" />
+                        </div>
+                        <div class="flex-1">
+                            <span class="text-sm text-500">طول: <b>{{patientForm.height}}</b></span>
+                            <p-slider [(ngModel)]="patientForm.height" [min]="100" [max]="214"
+                                styleClass="w-full mt-2" />
+                        </div>
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">رقم الموبايل / تأكيد</label>
+                    <div class="flex gap-2">
+                        <input pInputText [(ngModel)]="patientForm.phone" placeholder="رقم الموبايل" class="flex-1" />
+                        <input pInputText [(ngModel)]="patientForm.phoneConfirm" placeholder="تأكيد" class="flex-1" />
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">رقم الطوارئ / الصلة</label>
+                    <div class="flex gap-2">
+                        <input pInputText [(ngModel)]="patientForm.emergencyPhone" placeholder="رقم الطوارئ"
+                            class="flex-1" />
+                        <input pInputText [(ngModel)]="patientForm.emergencyRelation" placeholder="الصلة"
+                            class="flex-1" />
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">هل الحجز لك شخصياً؟</label>
+                    <div class="flex gap-4 mt-2">
+                        <div class="flex align-items-center gap-2"><p-radioButton name="bookSelf" [value]="true"
+                                [(ngModel)]="patientForm.bookingForSelf" inputId="bsY"></p-radioButton><label
+                                for="bsY">نعم</label></div>
+                        <div class="flex align-items-center gap-2"><p-radioButton name="bookSelf" [value]="false"
+                                [(ngModel)]="patientForm.bookingForSelf" inputId="bsN"></p-radioButton><label
+                                for="bsN">لا</label></div>
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">من يؤثر في قرار الاشتراك؟</label>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        <div *ngFor="let opt of decisionInfluencers" class="flex align-items-center gap-1">
+                            <p-checkbox name="decInf" [value]="opt.value" [(ngModel)]="patientForm.decisionInfluencers"
+                                [inputId]="'di_'+opt.value"></p-checkbox>
+                            <label [for]="'di_'+opt.value">{{opt.label}}</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </p-card>
+
+        <!-- Section 2: البروفايل الرياضي -->
+        <p-card>
+            <ng-template pTemplate="title">
+                <div class="form-section-header p-3 border-round">
+                    <span class="font-bold text-primary text-lg">القسم — البروفايل الرياضي</span>
+                </div>
+            </ng-template>
+            <div class="formgrid grid">
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">الرياضة / الرياضات</label>
+                    <input pInputText [(ngModel)]="patientForm.sport" placeholder="نص حر" class="w-full" />
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">النادي / الدور</label>
+                    <div class="flex gap-2">
+                        <input pInputText [(ngModel)]="patientForm.club" placeholder="النادي" class="flex-1" />
+                        <input pInputText [(ngModel)]="patientForm.role" placeholder="الدور" class="flex-1" />
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">سنوات الممارسة: <b>{{patientForm.practiceYears}}</b></label>
+                    <small class="text-500 block mb-2">المدى: 0–30 سنة</small>
+                    <p-slider [(ngModel)]="patientForm.practiceYears" [min]="0" [max]="30" styleClass="w-full" />
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">المستوى التنافسي</label>
+                    <p-dropdown [options]="competitiveLevelOptions" [(ngModel)]="patientForm.competitiveLevel"
+                        placeholder="اختيار واحد" styleClass="w-full" appendTo="body" />
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">الهدف بعد 90 يوماً</label>
+                    <input pInputText [(ngModel)]="patientForm.goal90Days" placeholder="نص حر" class="w-full" />
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">مستوى النشاط البدني الحالي</label>
+                    <p-dropdown [options]="activityLevelOptions" [(ngModel)]="patientForm.activityLevel"
+                        placeholder="اختيار واحد" styleClass="w-full" appendTo="body" />
+                </div>
+            </div>
+        </p-card>
+
+        <!-- Section 3: بروفايل الإصابة -->
+        <p-card>
+            <ng-template pTemplate="title">
+                <div class="form-section-header p-3 border-round">
+                    <span class="font-bold text-primary text-lg">القسم — بروفايل الإصابة</span>
+                </div>
+            </ng-template>
+            <div class="formgrid grid">
+                <div class="field col-12 md:col-4 mb-4">
+                    <label class="font-bold mb-2 block">مستوى الألم الحالي:
+                        <b>{{patientForm.currentPain}}</b>/10</label>
+                    <p-slider [(ngModel)]="patientForm.currentPain" [min]="0" [max]="10" styleClass="w-full mt-2" />
+                </div>
+                <div class="field col-12 md:col-4 mb-4">
+                    <label class="font-bold mb-2 block">أقصى ألم: <b>{{patientForm.maxPain}}</b>/10</label>
+                    <p-slider [(ngModel)]="patientForm.maxPain" [min]="0" [max]="10" styleClass="w-full mt-2" />
+                </div>
+                <div class="field col-12 md:col-4 mb-4">
+                    <label class="font-bold mb-2 block">تأثير الألم على الرياضة:
+                        <b>{{patientForm.painEffectOnSport}}</b>/10</label>
+                    <p-slider [(ngModel)]="patientForm.painEffectOnSport" [min]="0" [max]="10"
+                        styleClass="w-full mt-2" />
+                </div>
+
+                <!-- Injury Location Map -->
+                <div class="field col-12 mb-4">
+                    <label class="font-bold mb-2 block">خريطة موقع الإصابة</label>
+                    <small class="text-500 block mb-2">حدد موقع الإصابة على الجسم</small>
+                    <app-contact-us></app-contact-us>
+                </div>
+
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">تاريخ الإصابة / بداية الأعراض</label>
+                    <p-datepicker [(ngModel)]="patientForm.injuryDate" styleClass="w-full" [showIcon]="true"
+                        appendTo="body" />
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">ظروف الإصابة / آلية الحدوث</label>
+                    <input pInputText [(ngModel)]="patientForm.injuryCircumstances" placeholder="نص حر"
+                        class="w-full" />
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">هل الإصابة مرتبطة بالنشاط الرياضي؟</label>
+                    <div class="flex gap-4 mt-2">
+                        <div class="flex align-items-center gap-2"><p-radioButton name="injSport" [value]="true"
+                                [(ngModel)]="patientForm.injuryRelatedToSport" inputId="isY"></p-radioButton><label
+                                for="isY">نعم</label></div>
+                        <div class="flex align-items-center gap-2"><p-radioButton name="injSport" [value]="false"
+                                [(ngModel)]="patientForm.injuryRelatedToSport" inputId="isN"></p-radioButton><label
+                                for="isN">لا</label></div>
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">هل عرضت على طبيب؟</label>
+                    <div class="flex gap-4 mt-2">
+                        <div class="flex align-items-center gap-2"><p-radioButton name="seenDoc" [value]="true"
+                                [(ngModel)]="patientForm.seenDoctor" inputId="sdY"></p-radioButton><label
+                                for="sdY">نعم</label></div>
+                        <div class="flex align-items-center gap-2"><p-radioButton name="seenDoc" [value]="false"
+                                [(ngModel)]="patientForm.seenDoctor" inputId="sdN"></p-radioButton><label
+                                for="sdN">لا</label></div>
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">الفحوصات المجراة</label>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        <div *ngFor="let opt of previousTestsOptions" class="flex align-items-center gap-1">
+                            <p-checkbox name="prevTests" [value]="opt.value" [(ngModel)]="patientForm.previousTests"
+                                [inputId]="'pt_'+opt.value"></p-checkbox>
+                            <label [for]="'pt_'+opt.value">{{opt.label}}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">العلاج السابق</label>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        <div *ngFor="let opt of previousTreatmentOptions" class="flex align-items-center gap-1">
+                            <p-checkbox name="prevTreat" [value]="opt.value" [(ngModel)]="patientForm.previousTreatment"
+                                [inputId]="'ptr_'+opt.value"></p-checkbox>
+                            <label [for]="'ptr_'+opt.value">{{opt.label}}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="field col-12 mb-4">
+                    <label class="font-bold mb-2 block">هل تتجنب حركات خوفاً من الألم؟</label>
+                    <div class="flex gap-4 mt-2">
+                        <div class="flex align-items-center gap-2"><p-radioButton name="avoidMov" [value]="true"
+                                [(ngModel)]="patientForm.avoidMovements" inputId="amY"></p-radioButton><label
+                                for="amY">نعم</label></div>
+                        <div class="flex align-items-center gap-2"><p-radioButton name="avoidMov" [value]="false"
+                                [(ngModel)]="patientForm.avoidMovements" inputId="amN"></p-radioButton><label
+                                for="amN">لا</label></div>
+                    </div>
+                </div>
+            </div>
+        </p-card>
+
+        <!-- Section 4: التاريخ الطبي -->
+        <p-card>
+            <ng-template pTemplate="title">
+                <div class="form-section-header p-3 border-round">
+                    <span class="font-bold text-primary text-lg">القسم — التاريخ الطبي</span>
+                </div>
+            </ng-template>
+            <div class="formgrid grid">
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">الحالات الطبية المزمنة</label>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        <div *ngFor="let opt of chronicConditionsOptions" class="flex align-items-center gap-1">
+                            <p-checkbox name="chronic" [value]="opt.value" [(ngModel)]="patientForm.chronicConditions"
+                                [inputId]="'cc_'+opt.value"></p-checkbox>
+                            <label [for]="'cc_'+opt.value">{{opt.label}}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">تاريخ عائلي</label>
+                    <div class="flex flex-wrap gap-3 mt-2">
+                        <div *ngFor="let opt of familyHistoryOptions" class="flex align-items-center gap-1">
+                            <p-checkbox name="famHist" [value]="opt.value" [(ngModel)]="patientForm.familyHistory"
+                                [inputId]="'fh_'+opt.value"></p-checkbox>
+                            <label [for]="'fh_'+opt.value">{{opt.label}}</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">إصابات سابقة</label>
+                    <div *ngFor="let inj of patientForm.previousInjuries" class="flex gap-2 mb-2">
+                        <input pInputText [(ngModel)]="inj.area" placeholder="المنطقة" class="flex-1" />
+                        <input pInputText [(ngModel)]="inj.type" placeholder="طبيعة الإصابة" class="flex-1" />
+                        <input pInputText [(ngModel)]="inj.date" placeholder="السنة" style="width:80px" />
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">عمليات جراحية</label>
+                    <div *ngFor="let s of patientForm.surgeries" class="flex gap-2 mb-2">
+                        <input pInputText [(ngModel)]="s.type" placeholder="نوع العملية" class="flex-1" />
+                        <input pInputText [(ngModel)]="s.part" placeholder="الجزء" class="flex-1" />
+                        <input pInputText [(ngModel)]="s.year" placeholder="السنة" style="width:80px" />
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">أدوية دورية</label>
+                    <div *ngFor="let m of patientForm.regularMedications" class="flex gap-2 mb-2">
+                        <input pInputText [(ngModel)]="m.name" placeholder="الاسم" class="flex-1" />
+                        <input pInputText [(ngModel)]="m.dose" placeholder="الجرعة" class="flex-1" />
+                        <input pInputText [(ngModel)]="m.reason" placeholder="السبب" class="flex-1" />
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">حساسية أطعمة / مواد / أدوية</label>
+                    <input pInputText [(ngModel)]="patientForm.allergies" placeholder="نص حر" class="w-full" />
+                </div>
+            </div>
+        </p-card>
+
+        <!-- Section 5: نمط الحياة -->
+        <p-card>
+            <ng-template pTemplate="title">
+                <div class="form-section-header p-3 border-round">
+                    <span class="font-bold text-primary text-lg">القسم — نمط الحياة والعوامل النفسية الاجتماعية</span>
+                </div>
+            </ng-template>
+            <div class="formgrid grid">
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">الوظيفة / طبيعة العمل</label>
+                    <div class="flex gap-2">
+                        <input pInputText [(ngModel)]="patientForm.jobTitle" placeholder="الوظيفة" class="flex-1" />
+                        <input pInputText [(ngModel)]="patientForm.workNature" placeholder="طبيعة العمل"
+                            class="flex-1" />
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">هل يوجد ضغط نفسي عال في العمل؟</label>
+                    <div class="flex gap-4 mt-2">
+                        <div class="flex align-items-center gap-2"><p-radioButton name="stress" [value]="true"
+                                [(ngModel)]="patientForm.highWorkStress" inputId="wsY"></p-radioButton><label
+                                for="wsY">نعم</label></div>
+                        <div class="flex align-items-center gap-2"><p-radioButton name="stress" [value]="false"
+                                [(ngModel)]="patientForm.highWorkStress" inputId="wsN"></p-radioButton><label
+                                for="wsN">لا</label></div>
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">جودة النوم</label>
+                    <p-dropdown [options]="sleepQualityOptions" [(ngModel)]="patientForm.sleepQuality"
+                        placeholder="اختيار واحد" styleClass="w-full" appendTo="body" />
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">استخدام الكيموليات</label>
+                    <div class="flex gap-4 mt-2">
+                        <div class="flex align-items-center gap-2"><p-radioButton name="kinesio" [value]="true"
+                                [(ngModel)]="patientForm.usesKinesio" inputId="kiY"></p-radioButton><label
+                                for="kiY">نعم</label></div>
+                        <div class="flex align-items-center gap-2"><p-radioButton name="kinesio" [value]="false"
+                                [(ngModel)]="patientForm.usesKinesio" inputId="kiN"></p-radioButton><label
+                                for="kiN">لا</label></div>
+                    </div>
+                </div>
+                <div class="field col-12 mb-4">
+                    <label class="font-bold mb-2 block">مدى توقعك للتعافي:
+                        <b>{{patientForm.recoveryExpectation}}</b>/10</label>
+                    <small class="text-500 block mb-3">1 = لن تتحسن أبداً — 10 = التعافي الكامل</small>
+                    <p-slider [(ngModel)]="patientForm.recoveryExpectation" [min]="1" [max]="10" styleClass="w-full" />
+                </div>
+            </div>
+        </p-card>
+
+        <!-- Section 6: الإقرار والموافقة -->
+        <p-card>
+            <ng-template pTemplate="title">
+                <div class="form-section-header p-3 border-round">
+                    <span class="font-bold text-primary text-lg">القسم — الإقرار والموافقة</span>
+                </div>
+            </ng-template>
+            <div class="formgrid grid">
+                <div class="field col-12 mb-4">
+                    <label class="font-bold mb-2 block">موافقة على المعالجة وحفظ البيانات</label>
+                    <small class="text-500 block mb-2">يشمل استخدام البيانات رقمياً</small>
+                    <div class="flex align-items-center gap-2 mt-2">
+                        <p-checkbox [(ngModel)]="patientForm.dataConsent" [binary]="true"
+                            inputId="consent"></p-checkbox>
+                        <label for="consent">أوافق على المعالجة وحفظ البيانات</label>
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">الاسم الثلاثي / التاريخ</label>
+                    <div class="flex gap-2">
+                        <input pInputText [(ngModel)]="patientForm.consentFullName" placeholder="الاسم الثلاثي"
+                            class="flex-1" />
+                        <p-datepicker [(ngModel)]="patientForm.consentDate" styleClass="flex-1" [showIcon]="true"
+                            appendTo="body" />
+                    </div>
+                </div>
+                <div class="field col-12 md:col-6 mb-4">
+                    <label class="font-bold mb-2 block">مهندس الأداء المسؤول</label>
+                    <p-dropdown [options]="performanceEngineerOptions" [(ngModel)]="patientForm.performanceEngineer"
+                        placeholder="من قائمة الفريق" styleClass="w-full" appendTo="body" />
+                </div>
+            </div>
+        </p-card>
+
     </div>
+
     <ng-template pTemplate="footer">
-        <p-button icon="pi pi-times" (click)="closePatientInfoDialog()" label="Cancel" styleClass="p-button-text"></p-button>
-        <p-button icon="pi pi-check" (click)="savePatientInfo()" label="Save"></p-button>
+        <p-button icon="pi pi-times" (click)="closePatientInfoDialog()" label="إلغاء"
+            styleClass="p-button-text"></p-button>
+        <p-button icon="pi pi-check" (click)="savePatientInfo()" label="حفظ"></p-button>
     </ng-template>
 </p-dialog>

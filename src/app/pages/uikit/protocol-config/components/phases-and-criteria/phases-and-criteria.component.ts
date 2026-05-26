@@ -60,16 +60,27 @@ export class PhasesAndCriteriaComponent {
     }
 
     addPhase(): void {
-        const proto = this.protocol();
-        if (!proto) return;
-        const nextId = proto.phases.length + 1;
-        proto.phases.push(this.protocolService.createPhase(nextId));
+        this.protocolService.activeProtocol.update(proto => {
+            if (!proto) return proto;
+            const nextId = proto.phases.length + 1;
+            const newPhase = this.protocolService.createPhase(nextId);
+            return {
+                ...proto,
+                phases: [...proto.phases, newPhase]
+            };
+        });
     }
 
     removePhase(index: number): void {
-        const proto = this.protocol();
-        if (!proto || index <= 0) return;
-        proto.phases.splice(index, 1);
+        this.protocolService.activeProtocol.update(proto => {
+            if (!proto || index <= 0) return proto;
+            const newPhases = [...proto.phases];
+            newPhases.splice(index, 1);
+            return {
+                ...proto,
+                phases: newPhases
+            };
+        });
     }
 
     getSessionsArray(count: number | string | null | undefined): number[] {
@@ -79,13 +90,24 @@ export class PhasesAndCriteriaComponent {
     /** Per-phase Set of selected session numbers — keeps Phase model clean */
 
     toggleSessionSelection(phase: Phase, sessionNum: number): void {
-        if (!phase.measurementSessionNums) phase.measurementSessionNums = [];
-        const idx = phase.measurementSessionNums.indexOf(sessionNum);
-        if (idx > -1) {
-            phase.measurementSessionNums.splice(idx, 1);
-        } else {
-            phase.measurementSessionNums.push(sessionNum);
-        }
+        this.protocolService.activeProtocol.update(proto => {
+            if (!proto) return proto;
+
+            // Find the phase in the signal's data to ensure we're updating the right object
+            const targetPhase = proto.phases.find(p => p.id === phase.id);
+            if (!targetPhase) return proto;
+
+            if (!targetPhase.measurementSessionNums) targetPhase.measurementSessionNums = [];
+
+            const idx = targetPhase.measurementSessionNums.indexOf(sessionNum);
+            if (idx > -1) {
+                targetPhase.measurementSessionNums = targetPhase.measurementSessionNums.filter(n => n !== sessionNum);
+            } else {
+                targetPhase.measurementSessionNums = [...targetPhase.measurementSessionNums, sessionNum];
+            }
+
+            return { ...proto };
+        });
     }
 
     isSessionSelected(phase: Phase, sessionNum: number): boolean {

@@ -1,0 +1,247 @@
+:host {
+  --navy: #0b0d26;
+  --navy2: #121428;
+  --navy3: #191b36;
+  --navy4: #20233f;
+  --navy5: #272a4a;
+  --border: #252850;
+  --border2: #2f3360;
+  --mint2: #3dd9a0;
+  --mint3: #1aad7a;
+  --mint4: #0e7a55;
+  --coral: #fc6b44;
+  --purple: #6b47ff;
+  --purple2: #9b7fff;
+  --gold: #c9a84c;
+  --gold2: #a8872e;
+  --gold3: #f5d580;
+  --amber: #f5a623;
+  --red: #e24b4a;
+  --white: #eeeef8;
+  --dim: #b8b9d4;
+  --grey: #7a7fa8;
+  --grey2: #555880;
+  --font: 'IBM Plex Sans Arabic', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+.sect {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--grey2);
+  text-transform: uppercase;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 14px;
+}
+
+.note {
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 11px;
+  color: var(--grey);
+  line-height: 1.7;
+  border-right: 3px solid;
+  margin-bottom: 12px;
+}
+
+.n-mint {
+  background: rgba(29, 158, 117, 0.05);
+  border-color: var(--mint3);
+}
+
+.note strong {
+  color: var(--white);
+}
+
+.path-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 700px) {
+  .path-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.larger-bold-black {
+  font-size: 13px !important;
+  font-weight: bold !important;
+  color: #000000 !important;
+}
+
+.bold-black {
+  font-weight: bold !important;
+  color: #000000 !important;
+}
+
+.path-card-wrapper {
+  display: block;
+  cursor: pointer;
+  transition: transform 0.2s;
+  position: relative;
+}
+
+.path-card-wrapper:hover {
+  transform: translateY(-2px);
+}
+
+:host ::ng-deep .path-card-wrapper .p-card {
+  background: transparent;
+  border: 1px solid var(--border);
+  box-shadow: none;
+  height: 100%;
+}
+
+:host ::ng-deep .path-card-wrapper .p-card-body {
+  padding: 16px;
+}
+
+.path-card-wrapper.selected {
+  border: 1px solid var(--mint2);
+  border-radius: 13px;
+}
+
+:host ::ng-deep .path-card-wrapper.selected .p-card {
+  border-color: var(--mint2);
+  background: rgba(29, 158, 117, 0.06);
+}
+
+.pc-icon {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.pc-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 4px;
+}
+
+.pc-desc {
+  font-size: 11px;
+  color: var(--grey);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+.pc-price {
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: var(--mint2);
+}
+
+.val-purple { color: var(--purple2); }
+.val-coral { color: var(--coral); }
+
+.price-unit {
+  font-size: 10px;
+  color: var(--grey);
+  font-weight: 400;
+}
+
+.pc-rec {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(29, 158, 117, 0.15);
+  color: var(--mint2);
+}
+
+.divlbl {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 16px 0 12px;
+}
+
+.divlbl::before, .divlbl::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.dl-t {
+  font-size: 10px;
+  color: var(--grey2);
+  white-space: nowrap;
+}
+
+.dec-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 600px) {
+  .dec-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.dec-btn {
+  border-radius: 10px;
+  padding: 12px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.18s;
+  border: 1px solid var(--border2);
+  background: var(--navy3);
+}
+
+.db-icon {
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+
+.db-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.db-sub {
+  font-size: 9px;
+  color: var(--grey);
+  margin-top: 2px;
+}
+
+.ann {
+  background: rgba(107, 71, 255, 0.06);
+  border: 1px solid rgba(107, 71, 255, 0.2);
+  border-radius: 9px;
+  padding: 11px 14px;
+  font-size: 11px;
+  color: var(--grey);
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+.ann-t {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--purple2);
+  letter-spacing: 0.06em;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.ann code {
+  background: var(--navy4);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--purple2);
+}

@@ -1,0 +1,157 @@
+<div class="panel" id="tab-measurements">
+    <div class="sect">تطور المؤشرات — القياسات الدورية</div>
+
+    <p-card styleClass="mb-4">
+        <ng-template pTemplate="header">
+            <div class="card-title-header px-3 pt-3">
+                <span style="font-size:12px;font-weight:600;color:var(--white);">القياس الموضوعي — آخر قياسان</span>
+            </div>
+        </ng-template>
+
+        <div class="mc-container">
+            <!-- ROM Flexion -->
+            <div class="mc-bar-row">
+                <div class="mc-label">ROM ثني</div>
+                <div class="mc-bar-wrap">
+                    <div class="mc-bar-bg"></div>
+                    <div class="mc-bar-fill pf-teal" style="width:79%;background:var(--mint3);"></div>
+                    <div class="mc-bar-target" style="right:86%;"></div>
+                </div>
+                <div class="mc-val">١١٥°</div>
+                <div class="mc-unit">/ ١٤٥° هدف</div>
+            </div>
+            <p-divider></p-divider>
+
+            <!-- ROM Extension -->
+            <div class="mc-bar-row">
+                <div class="mc-label">ROM مد</div>
+                <div class="mc-bar-wrap">
+                    <div class="mc-bar-bg"></div>
+                    <div class="mc-bar-fill" style="width:97%;background:var(--mint3);"></div>
+                </div>
+                <div class="mc-val">−٣°</div>
+                <div class="mc-unit">✓ كامل</div>
+            </div>
+            <p-divider></p-divider>
+
+            <!-- Quad Strength -->
+            <div class="mc-bar-row">
+                <div class="mc-label">Quad Strength</div>
+                <div class="mc-bar-wrap">
+                    <div class="mc-bar-bg"></div>
+                    <div class="mc-bar-fill" style="width:68%;background:var(--amber);"></div>
+                    <div class="mc-bar-target" style="right:75%;"></div>
+                </div>
+                <div class="mc-val">١٦٢N</div>
+                <div class="mc-unit">/ ٢٣٨N سليم</div>
+            </div>
+            <p-divider></p-divider>
+
+            <!-- LSI Strength -->
+            <div class="mc-bar-row">
+                <div class="mc-label">LSI القوة</div>
+                <div class="mc-bar-wrap">
+                    <div class="mc-bar-bg"></div>
+                    <div class="mc-bar-fill" style="width:68%;background:var(--amber);"></div>
+                    <div class="mc-bar-target" style="right:70%;"></div>
+                </div>
+                <div class="mc-val" style="color:var(--amber);">٦٨٪</div>
+                <div class="mc-unit">الهدف ≥ ٧٠٪</div>
+            </div>
+            <p-divider></p-divider>
+
+            <!-- Hop Test -->
+            <div class="mc-bar-row" style="border-bottom: none;">
+                <div class="mc-label">Hop Test</div>
+                <div class="mc-bar-wrap">
+                    <div class="mc-bar-bg"></div>
+                    <div class="mc-bar-fill" style="width:55%;background:var(--coral2);"></div>
+                    <div class="mc-bar-target" style="right:90%;"></div>
+                </div>
+                <div class="mc-val" style="color:var(--coral);">٨٢٪</div>
+                <div class="mc-unit">الهدف ≥ ٩٠٪</div>
+            </div>
+        </div>
+
+        <ng-template pTemplate="footer">
+            <div class="mc-legend-professional">
+                <p-tag severity="success" value="طبيعي" [rounded]="true" icon="pi pi-check-circle"></p-tag>
+                <p-tag severity="warn" value="يقترب من الهدف" [rounded]="true" icon="pi pi-info-circle"></p-tag>
+                <p-tag severity="danger" value="أقل من الهدف" [rounded]="true" icon="pi pi-exclamation-triangle"></p-tag>
+                <div class="target-marker-legend">
+                    <div class="marker-line"></div>
+                    <span>حد المرحلة التالية</span>
+                </div>
+            </div>
+        </ng-template>
+    </p-card>
+
+    <div class="divlbl">
+        <div class="dl-t">Wellness وsRPE — آخر ٧ أيام</div>
+    </div>
+    <div class="two">
+        <p-card>
+            <div style="font-size:11px;font-weight:600;color:var(--white);margin-bottom:9px;">Wellness (Hooper Index)
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;align-items:center;gap:8px;font-size:11px;">
+                    <span style="color:var(--grey);width:55px;">النوم</span>
+                    <div style="flex:1;height:6px;background:var(--navy5);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:71%;background:var(--mint3);border-radius:3px;"></div>
+                    </div>
+                    <span style="color:var(--mint2);font-family:var(--mono);font-weight:600;">٥.٠</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:11px;">
+                    <span style="color:var(--grey);width:55px;">الإجهاد</span>
+                    <div style="flex:1;height:6px;background:var(--navy5);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:43%;background:var(--amber);border-radius:3px;"></div>
+                    </div>
+                    <span style="color:var(--amber);font-family:var(--mono);font-weight:600;">٣.٠</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:11px;">
+                    <span style="color:var(--grey);width:55px;">المزاج</span>
+                    <div style="flex:1;height:6px;background:var(--navy5);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:78%;background:var(--mint3);border-radius:3px;"></div>
+                    </div>
+                    <span style="color:var(--mint2);font-family:var(--mono);font-weight:600;">٥.٥</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:11px;">
+                    <span style="color:var(--grey);width:55px;">العضلات</span>
+                    <div style="flex:1;height:6px;background:var(--navy5);border-radius:3px;overflow:hidden;">
+                        <div style="height:100%;width:50%;background:var(--amber);border-radius:3px;"></div>
+                    </div>
+                    <span style="color:var(--amber);font-family:var(--mono);font-weight:600;">٣.٥</span>
+                </div>
+            </div>
+        </p-card>
+
+        <p-card>
+            <div style="font-size:11px;font-weight:600;color:var(--white);margin-bottom:9px;">sRPE — Training Load</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+                    <span style="color:var(--grey);">ج٧ — ٢٦ مارس</span>
+                    <span class="badge b-amber">sRPE ٦ · TL ١٨٠</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+                    <span style="color:var(--grey);">ج٦ — ٢٤ مارس</span>
+                    <span class="badge b-teal">sRPE ٤ · TL ١٢٠</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+                    <span style="color:var(--grey);">ج٥ — ٢٢ مارس</span>
+                    <span class="badge b-teal">sRPE ٣ · TL ٩٠</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;">
+                    <span style="color:var(--grey);">ج٤ — ١٩ مارس</span>
+                    <span class="badge b-amber">sRPE ٥ · TL ١٥٠</span>
+                </div>
+            </div>
+            <p-divider></p-divider>
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+                <span style="font-size:11px;color:var(--grey);">متوسط TL / جلسة</span>
+                <span
+                    style="font-size:14px;font-weight:700;color:var(--white);font-family:var(--mono);border:1px solid var(--border);padding:2px 8px;border-radius:4px;background:var(--navy2);">١٣٥
+                    AU</span>
+            </div>
+        </p-card>
+    </div>
+</div>

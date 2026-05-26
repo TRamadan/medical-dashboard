@@ -1,0 +1,200 @@
+:root {
+  --navy: #0B0D26;
+  --navy2: #121428;
+  --navy3: #191B36;
+  --navy4: #20233F;
+  --navy5: #272A4A;
+  --border: #252850;
+  --border2: #2F3360;
+  --mint2: #3DD9A0;
+  --mint3: #1AAD7A;
+  --mint4: #0E7A55;
+  --coral: #FC6B44;
+  --purple: #6B47FF;
+  --purple2: #9B7FFF;
+  --gold: #C9A84C;
+  --gold2: #A8872E;
+  --gold3: #F5D580;
+  --amber: #F5A623;
+  --red: #E24B4A;
+  --white: #EEEEF8;
+  --dim: #B8B9D4;
+  --grey: #7A7FA8;
+  --grey2: #555880;
+}
+
+.legacy-launch-container {
+  background: var(--navy);
+  color: var(--white);
+  min-height: 100vh;
+  direction: rtl;
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+}
+
+.topbar {
+  background: var(--navy2);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin: -2rem -2rem 2rem -2rem;
+  width: calc(100% + 4rem);
+}
+
+.tb-logo {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tb-logo svg {
+  width: 100%;
+  height: 100%;
+}
+
+.tb-brand {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .07em;
+}
+
+.tb-sep {
+  color: var(--border2);
+  margin: 0 5px;
+}
+
+.tb-crumb {
+  font-size: 11px;
+  color: var(--grey);
+}
+
+.tb-current {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--white);
+}
+
+.tb-right {
+  margin-right: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 14px;
+  border: 1px solid;
+  animation: pg 2s ease-in-out infinite;
+}
+
+.sb-grad {
+  background: rgba(201, 168, 76, .12);
+  color: var(--gold);
+  border-color: rgba(201, 168, 76, .3);
+}
+
+@keyframes pg {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(201, 168, 76, 0)
+  }
+
+  50% {
+    box-shadow: 0 0 0 4px rgba(201, 168, 76, .15)
+  }
+}
+
+.body-wrap {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  min-height: calc(100vh - 190px);
+}
+
+@media (max-width: 900px) {
+  .body-wrap {
+    grid-template-columns: 1fr;
+  }
+}
+
+.main-col {
+  padding: 22px 28px;
+}
+
+/* Custom styles for PrimeNG TabView to match the design */
+:host ::ng-deep .p-tabview {
+  background: transparent;
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav {
+  background: var(--navy2);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  gap: 0;
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background: transparent;
+  color: var(--white);
+  border-color: var(--gold);
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+  background: transparent;
+  color: var(--grey);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 11px 16px;
+  border-width: 0 0 2px 0;
+  transition: all .15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav li:nth-child(1) .p-tabview-nav-link::before {
+  background: var(--gold);
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav li:nth-child(2) .p-tabview-nav-link::before {
+  background: var(--mint3);
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav li:nth-child(3) .p-tabview-nav-link::before {
+  background: var(--purple2);
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav li:nth-child(4) .p-tabview-nav-link::before {
+  background: var(--gold);
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav li:nth-child(5) .p-tabview-nav-link::before {
+  background: var(--coral);
+}
+
+:host ::ng-deep .p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
+  background: transparent;
+  color: var(--dim);
+}
+
+:host ::ng-deep .p-tabview .p-tabview-panels {
+  background: transparent;
+  padding: 0;
+}

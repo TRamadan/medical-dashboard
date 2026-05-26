@@ -1,0 +1,67 @@
+<div class="legacy-launch-container">
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="tb-logo">
+      <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M256 464L435.26 361.3V155.82L256 53.12L76.74 155.82V361.3L256 464Z"
+          fill="#3DD9A0" />
+        <path
+          d="M256 464L435.26 361.3V155.82L256 53.12L76.74 155.82V361.3L256 464Z"
+          stroke="#3DD9A0" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M256 360V152" stroke="#0B0D26" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M168 208L256 152L344 208" stroke="#0B0D26" stroke-width="48" stroke-linecap="round"
+          stroke-linejoin="round" />
+        <path d="M168 304L256 360L344 304" stroke="#0B0D26" stroke-width="48" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+    </div>
+    <div class="tb-brand">TSD</div>
+    <div class="tb-sep">/</div>
+    <div class="tb-crumb">الملفات</div>
+    <div class="tb-sep">/</div>
+    <div class="tb-crumb">هاني سالم</div>
+    <div class="tb-sep">/</div>
+    <div class="tb-current">Legacy Launch</div>
+
+    <div class="tb-right">
+      <div class="status-badge sb-grad">
+        {{ status() === 'GRADUATION_READY' ? 'GRADUATION READY' : status() }}
+      </div>
+    </div>
+  </div>
+
+  <div class="body-wrap">
+    <!-- Main Content -->
+    <div class="main-col">
+      <app-launch-hero></app-launch-hero>
+      
+      <p-tabview>
+        <p-tabPanel header="مقارنة قبل/بعد">
+          <app-comparison-tab></app-comparison-tab>
+        </p-tabPanel>
+        
+        <p-tabPanel header="ملخص البرنامج">
+          <app-summary-tab></app-summary-tab>
+        </p-tabPanel>
+        
+        <p-tabPanel header="المسار القادم">
+          <app-next-path-tab></app-next-path-tab>
+        </p-tabPanel>
+        
+        <p-tabPanel header="Moment of Victory">
+          <app-victory-tab></app-victory-tab>
+        </p-tabPanel>
+        
+        <p-tabPanel header="تأكيد التخرج">
+          <app-confirm-tab></app-confirm-tab>
+        </p-tabPanel>
+      </p-tabview>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-col">
+      <app-launch-sidebar></app-launch-sidebar>
+    </div>
+  </div>
+</div>

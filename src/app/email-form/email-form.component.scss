@@ -1,0 +1,35 @@
+:host {
+  display: block;
+  font-family: 'Inter', 'Tajawal', sans-serif;
+}
+
+::ng-deep .email-form-card {
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  padding: 1rem;
+
+  .p-card-body {
+    padding: 1.5rem;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.text-primary {
+  color: var(--primary-color);
+}

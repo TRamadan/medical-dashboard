@@ -46,10 +46,12 @@
           @if (n.primaryAction || n.secondaryAction) {
           <div class="dc-notif__actions">
             @if (n.secondaryAction) {
-            <p-button [label]="n.secondaryAction" size="small" severity="danger" [outlined]="true"></p-button>
+            <p-button [label]="n.secondaryAction" size="small" severity="danger" [outlined]="true"
+              (onClick)="handleAction(n.secondaryAction, n)"></p-button>
             }
             @if (n.primaryAction) {
-            <p-button [label]="n.primaryAction" size="small" [outlined]="true"></p-button>
+            <p-button [label]="n.primaryAction" size="small" [outlined]="true"
+              (onClick)="handleAction(n.primaryAction, n)"></p-button>
             }
           </div>
           }

@@ -1,0 +1,55 @@
+<div class="panel" id="tab-surveys">
+    <div class="sect">Wellness اليومي — آخر ٥ أيام</div>
+    <div class="note n-mint" style="margin-bottom:14px;font-size:10px;">
+        معدل الاستجابة: ١٠٠٪ — الرياضي يملأ Wellness يومياً. <strong>ممتاز.</strong>
+    </div>
+
+    <div class="sect" style="margin-top:20px;">NPS الشهري</div>
+
+    <p-card styleClass="mb-3">
+        <ng-template pTemplate="header">
+            <div class="svi-head px-3 pt-3">
+                <div class="svi-name">NPS — Clarity Score — مارس ٢٠٢٦</div>
+                <div class="svi-date">٢٣ مارس · أسبوع ٢</div>
+            </div>
+        </ng-template>
+
+        <div style="display:flex;align-items:center;gap:15px;margin-bottom:12px;">
+            <div class="text-center" style="min-width: 80px;">
+                <div class="nps-score nps-promo">٨.٥</div>
+                <p-tag severity="success" value="Promoter" [rounded]="true" styleClass="text-xs"></p-tag>
+            </div>
+            <div style="flex:1;">
+                <div class="svi-q">ما الذي أعجبك في البرنامج؟</div>
+                <div class="svi-a">"الفريق محترف جداً والتقدم واضح في الحركة."</div>
+            </div>
+        </div>
+        <p-divider></p-divider>
+        <div>
+            <div class="svi-q">ما الذي تتمنى تحسينه؟</div>
+            <div class="svi-a">"أتمنى معرفة جدول المواعيد أسبوع كامل مسبقاً."</div>
+        </div>
+    </p-card>
+
+    <div class="sect" style="margin-top:20px;">Post-Blueprint Survey</div>
+
+    <p-card styleClass="mb-3">
+        <ng-template pTemplate="header">
+            <div class="svi-head px-3 pt-3">
+                <div class="svi-name">ما بعد تقرير Blueprint</div>
+                <div class="svi-date">١٦ مارس · ٢٤ ساعة بعد التقرير</div>
+            </div>
+        </ng-template>
+
+        <div class="svi-q" style="margin-bottom:6px;">كيف وجدت جلسة البلوبرينت؟</div>
+        <div class="svi-a">"تجربة مختلفة تماماً — للأول مرة حد يشرحلي جسمي بالأرقام."</div>
+
+        <ng-template pTemplate="footer">
+            <div class="flex align-items-center justify-content-between p-2"
+                style="background: rgba(255,255,255,0.02); border-radius: 4px;">
+                <span style="font-size:11px;color:var(--grey);">تقييم الجلسة العام:</span>
+                <span class="badge b-teal">٤.٨ / ٥</span>
+            </div>
+        </ng-template>
+    </p-card>
+</div>

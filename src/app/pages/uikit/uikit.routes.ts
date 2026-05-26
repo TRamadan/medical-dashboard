@@ -184,5 +184,20 @@ export default [
         path: 'consultation-type',
         data: { breadcrumb: 'Consultation type' },
         loadComponent: () => import('./consultation-screen/consultation-screen.component').then(m => m.ConsultationScreenComponent)
+    },
+    {
+        path: 'email-form',
+        data: { breadcrumb: 'Email Form' },
+        loadComponent: () => import('../../email-form/email-form.component').then(m => m.EmailFormComponent)
+    },
+    {
+        path: 'athleteprofile',
+        data: { breadcrumb: 'Athlete Profile' },
+        loadComponent: () => import('./athelete-profile/athelete-profile.component').then(m => m.AtheleteProfileComponent)
+    },
+    {
+        path: 'legacy-launch',
+        data: { breadcrumb: 'Legacy Launch' },
+        loadComponent: () => import('./legacy-launch/legacy-launch.component').then(m => m.LegacyLaunchComponent)
     }
 ] as Routes;

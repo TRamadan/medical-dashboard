@@ -1,0 +1,130 @@
+<div class="profile-container">
+    <!-- Header Section -->
+    <header class="profile-header" role="banner">
+        <div class="athlete-info">
+            <p-avatar [label]="athlete().initials" size="xlarge" shape="circle" aria-label="Athlete Avatar"
+                [style]="{'background-color': 'var(--primary-color)', 'color': '#ffffff', 'font-size': '1.5rem', 'width': '80px', 'height': '80px'}">
+            </p-avatar>
+            <div class="athlete-details">
+                <h1>{{ athlete().name }}</h1>
+                <div class="athlete-meta" aria-label="Athlete Basic Information">
+                    <span>{{ athlete().age }} سنة - {{ athlete().gender }}</span>
+                    <span>•</span>
+                    <span>{{ athlete().type }}</span>
+                    <span>•</span>
+                    <span>{{ athlete().branch }}</span>
+                    <span>•</span>
+                    <span>مشترك منذ {{ athlete().joinedDate }}</span>
+                </div>
+                <div class="athlete-tags">
+                    <p-tag [value]="athlete().status" severity="success" [rounded]="true"></p-tag>
+                    <p-tag [value]="athlete().phase" severity="warn" [rounded]="true"></p-tag>
+                    <p-tag [value]="athlete().session" severity="info" [rounded]="true"></p-tag>
+                    <p-tag [value]="'NPS: ' + athlete().nps" severity="secondary" [rounded]="true"></p-tag>
+                </div>
+            </div>
+        </div>
+        <div class="header-actions" aria-label="Page Actions">
+            <p-button label="الدكتور" severity="secondary" [outlined]="true" size="small"
+                ariaLabel="Doctor Contact"></p-button>
+            <p-button label="قائد الفريق" severity="secondary" [outlined]="true" size="small"
+                ariaLabel="Team Leader Contact"></p-button>
+            <p-button label="المدرب" severity="secondary" [outlined]="true" size="small"
+                ariaLabel="Coach Contact"></p-button>
+            <p-button label="إجراء سريع" icon="pi pi-bolt" severity="success" ariaLabel="Quick Action"></p-button>
+        </div>
+    </header>
+
+    <!-- Stats Grid (Shared) -->
+    <div class="stats-grid mt-4">
+        @for (stat of stats(); track stat.label) {
+        <div class="stat-card" [style]="{'--stat-color': stat.color}">
+            <div class="stat-header">
+                <span class="stat-label">{{ stat.label }}</span>
+                <span class="stat-value" [style]="{color: stat.color}">%{{ stat.value }}</span>
+            </div>
+            <p-progressBar [value]="stat.value > 100 ? 100 : stat.value" [showValue]="false"
+                [style]="{height: '8px', borderRadius: '4px'}"></p-progressBar>
+            <div class="stat-footer">
+                <span class="stat-target">{{ stat.target }}</span>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-section mt-4">
+        <p-tabView>
+            <p-tabPanel header="نظرة عامة" leftIcon="pi pi-home">
+                <div class="overview-layout mt-4">
+                    <app-profile-summary-side></app-profile-summary-side>
+                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
+                </div>
+            </p-tabPanel>
+
+            <p-tabPanel header="الإصابة والتاريخ" leftIcon="pi pi-history">
+                <div class="overview-layout mt-4">
+                    <app-injury-history></app-injury-history>
+                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
+                </div>
+
+            </p-tabPanel>
+
+            <p-tabPanel header="البرنامج والخطة" leftIcon="pi pi-map">
+                <div class="overview-layout mt-4">
+                    <app-program-plan></app-program-plan>
+                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
+                </div>
+                <!-- <div class="main-layout mt-4">
+                    <app-profile-summary-side></app-profile-summary-side>
+                    <main class="content-area">
+                        <app-program-plan></app-program-plan>
+                    </main>
+                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
+                </div> -->
+            </p-tabPanel>
+
+            <p-tabPanel header="القياسات والبيانات" leftIcon="pi pi-chart-bar">
+                <div class="overview-layout mt-4">
+                    <app-measurements-data></app-measurements-data>
+                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
+                </div>
+                <!-- <div class="main-layout mt-4">
+                    <app-profile-summary-side></app-profile-summary-side>
+                    <main class="content-area">
+                        <app-measurements-data></app-measurements-data>
+                    </main>
+                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
+                </div> -->
+            </p-tabPanel>
+
+            <p-tabPanel header="سجل الجلسات" leftIcon="pi pi-list">
+                <div class="overview-layout mt-4">
+                    <app-session-log [sessions]="sessions()"></app-session-log>
+                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
+                </div>
+                <!-- <div class="main-layout mt-4">
+                    <app-profile-summary-side></app-profile-summary-side>
+                    <main class="content-area">
+                        <app-session-log [sessions]="sessions()"></app-session-log>
+                    </main>
+                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
+                </div> -->
+            </p-tabPanel>
+
+            <p-tabPanel header="الاستبيانات" leftIcon="pi pi-file-edit">
+                <div class="overview-layout mt-4">
+                    <app-surveys></app-surveys>
+                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
+                </div>
+                <!-- <div class="main-layout mt-4">
+                    <app-profile-summary-side></app-profile-summary-side>
+                    <main class="content-area">
+                        <app-surveys></app-surveys>
+                    </main>
+                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
+                </div> -->
+            </p-tabPanel>
+        </p-tabView>
+    </div>
+</div>

@@ -1,0 +1,184 @@
+.profile-container {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    direction: rtl;
+    font-family: 'Inter', 'Outfit', sans-serif;
+}
+
+/* Header Section */
+.profile-header {
+    background: var(--surface-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--surface-border);
+}
+
+.athlete-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.athlete-details h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-color);
+}
+
+.athlete-meta {
+    display: flex;
+    gap: 1rem;
+    color: var(--text-color-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.athlete-tags {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Stats Row */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+
+.stat-card {
+    background: var(--surface-card);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid var(--surface-border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-shadow);
+}
+
+.stat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--text-color-secondary);
+    font-weight: 500;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.stat-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.stat-target {
+    font-size: 0.75rem;
+    color: var(--text-color-secondary);
+    font-weight: 500;
+}
+
+/* Per-card dynamic progress bar color */
+.stat-card ::ng-deep .p-progressbar-value {
+    background: var(--stat-color, var(--primary-color));
+    border-radius: 4px;
+}
+
+.stat-card ::ng-deep .p-progressbar {
+    background: var(--surface-border);
+    border-radius: 4px;
+}
+
+/* Main Content Layout */
+.main-layout {
+    display: grid;
+    grid-template-columns: 330px 1fr 280px;
+    gap: 1.5rem;
+}
+
+.overview-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 1.5rem;
+}
+
+/* Content Area */
+.content-area {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+@media (max-width: 1200px) {
+    .main-layout, .overview-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .main-layout > *, .overview-layout > * {
+        order: 2;
+    }
+
+    .main-layout .content-area, 
+    .overview-layout app-profile-summary-side,
+    .overview-layout app-injury-history,
+    .overview-layout app-program-plan,
+    .overview-layout app-measurements-data,
+    .overview-layout app-session-log,
+    .overview-layout app-surveys {
+        order: 1; /* Content first on mobile */
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 1rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+
+    .athlete-info {
+        flex-direction: column;
+    }
+
+    .athlete-meta {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+}

@@ -1,0 +1,62 @@
+<div class="tab-nextpath">
+  <div class="sect">توصية المسار — Shield Handover</div>
+  <div class="note n-mint reco-box">
+    <strong class="larger-bold-black">توصية الدكتور:</strong>
+    <span class="bold-black">البرنامج الأنسب هو Resilient Athlete — بروتوكول وقائي يضمن عدم الانتكاسة.</span>
+  </div>
+  
+  <div class="path-grid">
+    <p-card class="path-card-wrapper" [class.selected]="selectedPath() === 'shield'" (click)="selectPath('shield')">
+      <div class="pc-rec">✓ موصى به</div>
+      <div class="pc-icon">🛡</div>
+      <div class="pc-name">Resilient Athlete</div>
+      <div class="pc-desc">وقاية طويلة الأمد ومنع الانتكاسة. ٢ جلسة / أسبوع.</div>
+      <div class="pc-price">١٢,٠٠٠ <span class="price-unit">جنيه / شهر</span></div>
+    </p-card>
+    
+    <p-card class="path-card-wrapper" [class.selected]="selectedPath() === 'peak'" (click)="selectPath('peak')">
+      <div class="pc-icon">⚡</div>
+      <div class="pc-name">Peak Performance</div>
+      <div class="pc-desc">هندسة أداء متقدمة. تطوير القوة والسرعة. ٣ جلسات / أسبوع.</div>
+      <div class="pc-price val-purple">١٨,٠٠٠ <span class="price-unit">جنيه / شهر</span></div>
+    </p-card>
+    
+    <p-card class="path-card-wrapper" [class.selected]="selectedPath() === 'recharger'" (click)="selectPath('recharger')">
+      <div class="pc-icon">🔋</div>
+      <div class="pc-name">Recharger</div>
+      <div class="pc-desc">صيانة دورية خفيفة. جلسة أسبوعياً للحفاظ على المكتسبات.</div>
+      <div class="pc-price val-coral">٦,٠٠٠ <span class="price-unit">جنيه / شهر</span></div>
+    </p-card>
+  </div>
+
+  <div class="divlbl"><div class="dl-t">قرار الرياضي</div></div>
+  
+  <div class="dec-grid">
+    <div class="dec-btn db-renew">
+      <div class="db-icon">✅</div>
+      <div class="db-label">تجديد</div>
+      <div class="db-sub">يستمر في TSD</div>
+    </div>
+    <div class="dec-btn db-pause">
+      <div class="db-icon">⏸</div>
+      <div class="db-label">إيقاف مؤقت</div>
+      <div class="db-sub">يعود لاحقاً</div>
+    </div>
+    <div class="dec-btn db-transfer">
+      <div class="db-icon">🔄</div>
+      <div class="db-label">تحويل فرع</div>
+      <div class="db-sub">فرع آخر</div>
+    </div>
+    <div class="dec-btn db-exit">
+      <div class="db-icon">🚪</div>
+      <div class="db-label">إنهاء</div>
+      <div class="db-sub">لا يستمر</div>
+    </div>
+  </div>
+
+  <div class="ann">
+    <div class="ann-t">Status Transitions — للمطور</div>
+    <code>GRADUATED</code> → <code>LEGACY_ACTIVE</code> (renew) | <code>LEGACY_PAUSED</code> (pause/transfer) | <code>CLOSED</code> (exit)<br/>
+    عند renew: <code>protocol.new_draft</code> + إشعار أدمن للحجز.
+  </div>
+</div>

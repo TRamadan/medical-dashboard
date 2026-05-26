@@ -36,6 +36,9 @@ export class SessionsAndExercisesComponent implements OnInit {
             next: (data) => { this.availableTemplates = data; },
             error: (err) => console.error('Failed to load measurement templates', err)
         });
+
+        // Initialize session data for all phases
+        this.phases.forEach(phase => this.updateTotalSessions(phase));
     }
 
     // ── Session helpers ──────────────────────────────────────────────────────
@@ -61,58 +64,64 @@ export class SessionsAndExercisesComponent implements OnInit {
     }
 
     updateTotalSessions(phase: Phase): void {
-        const totalWeeks = Math.max(0, Number(phase.totalWeeks) || 0);
-        const perWeek = Math.max(0, Number(phase.sessionsPerWeek) || 0);
-        // phase.totalSessions removed — computed via getPhaseSessionCount(phase)
+        this.protocolService.activeProtocol.update(proto => {
+            if (!proto) return proto;
+            const targetPhase = proto.phases.find(p => p.id === phase.id);
+            if (!targetPhase) return proto;
 
-        // ── Trim or grow weeks ───────────────────────────────────────────────
-        while (phase.weeks.length > totalWeeks) phase.weeks.pop();
-        for (let wi = phase.weeks.length; wi < totalWeeks; wi++) {
-            phase.weeks.push({
-                id: crypto.randomUUID(),
-                weekNumber: wi + 1,
-                sessions: []
-            });
-        }
+            const totalWeeks = Math.max(0, Number(targetPhase.totalWeeks) || 0);
+            const perWeek = Math.max(0, Number(targetPhase.sessionsPerWeek) || 0);
 
-        // ── Sync sessions inside every week ─────────────────────────────────
-        for (let wi = 0; wi < totalWeeks; wi++) {
-            const week = phase.weeks[wi];
-
-            while (week.sessions.length > perWeek) week.sessions.pop();
-
-            for (let si = week.sessions.length; si < perWeek; si++) {
-                const globalNum = wi * perWeek + si + 1;
-                week.sessions.push({
+            // ── Trim or grow weeks ───────────────────────────────────────────────
+            while (targetPhase.weeks.length > totalWeeks) targetPhase.weeks.pop();
+            for (let wi = targetPhase.weeks.length; wi < totalWeeks; wi++) {
+                targetPhase.weeks.push({
                     id: crypto.randomUUID(),
-                    sessionNumber: globalNum,
-                    sections: [{ sectionName: 'Warm Up', time: '10 min', exercises: [] }]
+                    weekNumber: wi + 1,
+                    sessions: []
                 });
             }
 
-            // Re-number sessions in case sessionsPerWeek changed
-            for (let si = 0; si < perWeek; si++) {
-                const globalNum = wi * perWeek + si + 1;
-                week.sessions[si].sessionNumber = globalNum;
+            // ── Sync sessions inside every week ─────────────────────────────────
+            for (let wi = 0; wi < totalWeeks; wi++) {
+                const week = targetPhase.weeks[wi];
+                while (week.sessions.length > perWeek) week.sessions.pop();
+                for (let si = week.sessions.length; si < perWeek; si++) {
+                    const globalNum = wi * perWeek + si + 1;
+                    week.sessions.push({
+                        id: crypto.randomUUID(),
+                        sessionNumber: globalNum,
+                        sections: [{ sectionName: 'Warm Up', time: '10 min', exercises: [] }]
+                    });
+                }
+                // Re-number sessions
+                for (let si = 0; si < perWeek; si++) {
+                    const globalNum = wi * perWeek + si + 1;
+                    week.sessions[si].sessionNumber = globalNum;
+                }
             }
-        }
 
-        // ── Clean up measurementSessionNums that no longer exist ────────────
-        const totalSessions = getPhaseSessionCount(phase);
-        phase.measurementSessionNums = phase.measurementSessionNums.filter(
-            n => n >= 1 && n <= totalSessions
-        );
-
-        // ── Reset per-week tab selection if the current tab no longer exists ──
-        for (const week of phase.weeks) {
-            const key = this.weekTabKey(phase, week);
-            const current = this.selectedSessionTabs.get(key) ?? 0;
-            const weekNums = week.sessions.map(s => s.sessionNumber);
-            if (current === 0 || !weekNums.includes(current)) {
-                const first = week.sessions[0]?.sessionNumber;
-                if (first != null) this.selectedSessionTabs.set(key, first);
+            // ── Clean up measurementSessionNums ─────────────────────────────────
+            const totalSessions = getPhaseSessionCount(targetPhase);
+            if (totalSessions > 0) {
+                targetPhase.measurementSessionNums = (targetPhase.measurementSessionNums || []).filter(
+                    n => n >= 1 && n <= totalSessions
+                );
             }
-        }
+
+            // ── Reset per-week tab selection ───────────────────────────────────
+            for (const week of targetPhase.weeks) {
+                const key = this.weekTabKey(targetPhase, week);
+                const current = this.selectedSessionTabs.get(key) ?? 0;
+                const weekNums = week.sessions.map(s => s.sessionNumber);
+                if (current === 0 || !weekNums.includes(current)) {
+                    const first = week.sessions[0]?.sessionNumber;
+                    if (first != null) this.selectedSessionTabs.set(key, first);
+                }
+            }
+
+            return { ...proto };
+        });
     }
 
 
@@ -158,14 +167,23 @@ export class SessionsAndExercisesComponent implements OnInit {
 
     // ── Measurement templates ────────────────────────────────────────────────
     setSessionMeasurementTemplate(phase: Phase, sessionNum: number, template: { id: number; name: string } | null): void {
-        this.protocolService.ensureSessionData(phase, sessionNum);
+        this.protocolService.activeProtocol.update(proto => {
+            if (!proto) return proto;
+            const targetPhase = proto.phases.find(p => p.id === phase.id);
+            if (!targetPhase) return proto;
 
-        const isCurrentlySelected = phase.measurementSessionNums.includes(sessionNum);
+            this.protocolService.ensureSessionData(targetPhase, sessionNum);
 
-        phase.measurementSessionNums = isCurrentlySelected
-            ? phase.measurementSessionNums.filter(n => n !== sessionNum)
-            : [...phase.measurementSessionNums, sessionNum];
+            const isCurrentlySelected = targetPhase.measurementSessionNums.includes(sessionNum);
+            if (isCurrentlySelected) {
+                // If already selected, maybe we just want to keep it selected but ensure it is indeed in the list
+                // (In a real app, you'd also save the template ID here)
+            } else {
+                targetPhase.measurementSessionNums = [...targetPhase.measurementSessionNums, sessionNum];
+            }
 
+            return { ...proto };
+        });
         this.cdr.markForCheck();
     }
 

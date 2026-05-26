@@ -191,7 +191,8 @@
               [label]="followedUpTickets().has(t.id) ? 'Followed up' : btn.label">
             </p-button>
             } @else {
-            <p-button size="small" [severity]="btn.style === 'purple' ? 'help' : 'primary'" [label]="btn.label">
+            <p-button size="small" [severity]="btn.style === 'purple' ? 'help' : 'primary'" [label]="btn.label"
+              (onClick)="handleAction(btn.type, t)">
             </p-button>
             }
             }

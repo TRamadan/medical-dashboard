@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from "primeng/card";
 type NotifLevel = 'critical' | 'warning' | 'info' | 'success' | 'protocol';
@@ -24,6 +25,8 @@ interface Notification {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NotificationsAlertsComponent {
+  private readonly router = inject(Router);
+
 
   notifications = signal<Notification[]>([
     {
@@ -83,4 +86,18 @@ export class NotificationsAlertsComponent {
     success: { color: '#34d399', bg: 'rgba(16,185,129,0.1)', border: 'rgba(16,185,129,0.3)' },
     protocol: { color: '#a855f7', bg: 'rgba(168,85,247,0.1)', border: 'rgba(168,85,247,0.3)' }
   };
+
+  handleAction(actionText: string | undefined, notification: Notification): void {
+    if (!actionText) return;
+
+    if (actionText.includes('Athlete Profile') || actionText.includes('Session Log') || actionText.includes('View Report')) {
+      this.goToAthleteProfile();
+    } else {
+      console.log(`Action: ${actionText} on notification ${notification.id}`);
+    }
+  }
+
+  goToAthleteProfile(): void {
+    this.router.navigate(['/uikit/athleteprofile']);
+  }
 }

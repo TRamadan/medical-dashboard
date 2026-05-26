@@ -1,0 +1,169 @@
+:host {
+  --navy: #0b0d26;
+  --navy2: #121428;
+  --navy3: #191b36;
+  --navy4: #20233f;
+  --navy5: #272a4a;
+  --border: #252850;
+  --border2: #2f3360;
+  --mint2: #3dd9a0;
+  --mint3: #1aad7a;
+  --mint4: #0e7a55;
+  --coral: #fc6b44;
+  --purple: #6b47ff;
+  --purple2: #9b7fff;
+  --gold: #c9a84c;
+  --gold2: #a8872e;
+  --gold3: #f5d580;
+  --amber: #f5a623;
+  --red: #e24b4a;
+  --white: #eeeef8;
+  --dim: #b8b9d4;
+  --grey: #7a7fa8;
+  --grey2: #555880;
+  --font: 'IBM Plex Sans Arabic', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+.launch-sidebar {
+  padding: 0;
+}
+
+.sidebar-section {
+  margin-bottom: 18px;
+}
+
+.qs-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--grey);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.status-box {
+  background: rgba(201, 168, 76, 0.08);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 9px;
+  padding: 11px 13px;
+  text-align: center;
+}
+
+.status-text {
+  font-size: 10px;
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.status-date {
+  font-size: 10px;
+  color: var(--grey);
+}
+
+.criteria-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.criteria-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.bg-mint { background: var(--mint3); }
+.bg-gold { background: var(--gold); }
+.bg-border { background: var(--border2); }
+
+.criteria-label {
+  color: var(--dim);
+}
+
+.criteria-val {
+  font-family: var(--mono);
+  margin-right: auto;
+}
+
+.val-mint { color: var(--mint2); }
+.val-gold { color: var(--gold); }
+.val-grey { color: var(--grey); }
+
+.bold-black {
+  font-weight: bold !important;
+  color: #000000 !important;
+}
+
+.notification-card {
+  margin-bottom: 8px;
+  display: block;
+}
+
+:host ::ng-deep .notification-card .p-card {
+  background: transparent;
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+
+:host ::ng-deep .notification-card .p-card-body {
+  padding: 11px 13px;
+}
+
+.np-role {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  display: inline-block;
+}
+
+.nr-doctor {
+  background: rgba(29, 158, 117, 0.12);
+  color: var(--mint2);
+}
+
+.nr-tl {
+  background: rgba(107, 71, 255, 0.12);
+  color: var(--purple2);
+}
+
+.np-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 3px;
+}
+
+.np-body {
+  font-size: 10px;
+  color: var(--grey);
+  line-height: 1.5;
+}
+
+.athlete-footer-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 10px;
+  color: var(--grey);
+  line-height: 1.7;
+}
+
+.afc-title {
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 3px;
+}

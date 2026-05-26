@@ -241,5 +241,15 @@ export class AppMenu {
                 }
             ]
         });
+        this.model.push({
+            label: 'Athlete Management',
+            items: [
+                {
+                    label: 'Athlete Profile',
+                    icon: 'pi pi-fw pi-user',
+                    routerLink: ['/uikit/athleteprofile']
+                }
+            ]
+        });
     }
 }

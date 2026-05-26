@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { BadgeModule } from 'primeng/badge';
@@ -55,6 +56,8 @@ interface AllTicketRow {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PendingTicketsComponent {
+  private readonly router = inject(Router);
+
 
   activeTab = signal<PtTab>('waiting');
 
@@ -313,7 +316,7 @@ export class PendingTicketsComponent {
       quote: 'Exercises are not suited for my level',
       meta: 'Appointment on Friday • 3 hours ago',
       actions: [
-        { label: 'View Athlete Profile', style: 'purple' },
+        { label: 'View Athlete Profile', style: 'purple', type: ActionType.VIEW_PROFILE },
         { label: 'Add follow up mark', style: 'warning', id: 'followup' }
       ]
     },
@@ -326,7 +329,7 @@ export class PendingTicketsComponent {
       quote: 'Feeling increased fatigue and seeing no difference',
       meta: 'Attendance 70% this month • 1 day ago',
       actions: [
-        { label: 'View Session Log', style: 'purple' },
+        { label: 'View Session Log', style: 'purple', type: ActionType.VIEW_PROFILE },
         { label: 'Add follow up mark', style: 'warning', id: 'followup' }
       ]
     }
@@ -524,8 +527,12 @@ export class PendingTicketsComponent {
 
   // ─── Action Handler ───────────────────────────────────────────────────────────
 
-  handleAction(type: ActionType, ticket: Ticket): void {
-    console.log(`Action: ${type} on ticket #${ticket.id}`);
+  handleAction(type: ActionType | string, ticket?: any): void {
+    if (type === ActionType.VIEW_PROFILE) {
+      this.goToAthleteProfile();
+      return;
+    }
+    console.log(`Action: ${type} on ticket #${ticket?.id}`);
     // dispatch or route based on type
   }
 
@@ -535,5 +542,9 @@ export class PendingTicketsComponent {
     // handle per-label toggle from defer_options.notify
   }
 
+  goToAthleteProfile(): void {
+    debugger
+    this.router.navigate(['/uikit/athleteprofile']);
+  }
 
 }

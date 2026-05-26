@@ -1,0 +1,121 @@
+<p-card styleClass="email-form-card" dir="rtl">
+  <ng-template pTemplate="title">
+    <div class="form-title pb-3 border-bottom-1 border-300 mb-4">
+      <h2 class="m-0 text-2xl font-bold text-primary">نموذج البريد الإلكتروني</h2>
+    </div>
+  </ng-template>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="p-fluid">
+    
+    <!-- Section 1 -->
+    <p-card styleClass="mb-4 shadow-1">
+      <div class="flex gap-4 w-full">
+        <!-- Question 1: Main Goal -->
+        <div class="field flex-1 mb-0">
+          <label class="block mb-2 font-bold text-700">ما هدفك الرئيسي من الزيارة؟</label>
+          <div class="text-sm text-500 mb-3">مسار الخدمة :يغذي</div>
+          <p-dropdown 
+            [options]="mainGoalOptions" 
+            formControlName="mainGoal" 
+            placeholder="اختر هدفك الرئيسي"
+            styleClass="w-full">
+          </p-dropdown>
+          @if (form.get('mainGoal')?.invalid && form.get('mainGoal')?.touched) {
+            <small class="p-error block mt-1">هذا الحقل مطلوب.</small>
+          }
+        </div>
+
+        <!-- Question 2: Sport -->
+        <div class="field flex-1 mb-0">
+          <label class="block mb-2 font-bold text-700">ما الرياضة التي تمارسها؟</label>
+          <div class="text-sm text-500 mb-3">نص حر</div>
+          <input pInputText id="sport" formControlName="sport" placeholder="أدخل نوع الرياضة" class="w-full" />
+          @if (form.get('sport')?.invalid && form.get('sport')?.touched) {
+            <small class="p-error block mt-1">هذا الحقل مطلوب.</small>
+          }
+        </div>
+      </div>
+    </p-card>
+
+    <!-- Section 2 -->
+    <p-card styleClass="mb-4 shadow-1">
+      <div class="flex gap-4 w-full">
+        <!-- Question 3: Problem Duration -->
+        <div class="field flex-1 mb-0">
+          <label class="block mb-2 font-bold text-700">منذ متى والمشكلة موجودة؟</label>
+          <div class="text-sm text-500 mb-3">اختر المدة التقريبية</div>
+          <p-dropdown 
+            [options]="problemDurationOptions" 
+            formControlName="problemDuration" 
+            placeholder="اختر مدة المشكلة"
+            styleClass="w-full">
+          </p-dropdown>
+          @if (form.get('problemDuration')?.invalid && form.get('problemDuration')?.touched) {
+            <small class="p-error block mt-1">هذا الحقل مطلوب.</small>
+          }
+        </div>
+
+        <!-- Question 4: Tried Treatment Before? -->
+        <div class="field flex-1 mb-0">
+          <label class="block mb-2 font-bold text-700">هل جربت علاجا سابقا لهذه المشكلة؟</label>
+          <div class="text-sm text-500 mb-3">ملاحظة: أولي يغذي</div>
+          <div class="flex gap-4">
+            <div class="flex align-items-center gap-2">
+              <p-radioButton name="triedTreatment" [value]="true" formControlName="triedTreatment" inputId="triedYes"></p-radioButton>
+              <label for="triedYes" class="cursor-pointer">نعم</label>
+            </div>
+            <div class="flex align-items-center gap-2">
+              <p-radioButton name="triedTreatment" [value]="false" formControlName="triedTreatment" inputId="triedNo"></p-radioButton>
+              <label for="triedNo" class="cursor-pointer">لا</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Question 4.1: If Yes, treatment details -->
+      @if (form.get('triedTreatment')?.value === true) {
+        <div class="field mt-4 mb-0 fade-in border-top-1 surface-border pt-4 w-full">
+          <label class="block mb-2 font-bold text-700">تفاصيل العلاج السابق (حقل نص حر)</label>
+          <input pInputText id="treatmentDetails" formControlName="treatmentDetails" placeholder="أدخل تفاصيل العلاج" class="w-full" />
+        </div>
+      }
+    </p-card>
+
+    <!-- Section 3 -->
+    <p-card styleClass="mb-4 shadow-1">
+      <div class="formgrid grid">
+        <!-- Question 5: How did you know -->
+        <div class="field col-12 mb-0">
+          <label class="block mb-2 font-bold text-700">كيف عرفت عن مختبر الأداء؟</label>
+          <div class="flex flex-wrap gap-4 mt-3 bg-white p-3 border-round border-1 surface-border">
+            @for (option of howDidYouKnowOptions; track option.value) {
+              <div class="flex align-items-center gap-2">
+                <p-checkbox 
+                  name="howDidYouKnow" 
+                  [value]="option.value" 
+                  formControlName="howDidYouKnow" 
+                  [inputId]="'know_' + option.value">
+                </p-checkbox>
+                <label [for]="'know_' + option.value" class="cursor-pointer">{{option.label}}</label>
+              </div>
+            }
+          </div>
+          @if (form.get('howDidYouKnow')?.invalid && form.get('howDidYouKnow')?.touched) {
+            <small class="p-error block mt-2">يرجى اختيار خيار واحد على الأقل.</small>
+          }
+        </div>
+      </div>
+    </p-card>
+
+    <!-- Actions -->
+    <div class="flex justify-content-end mt-4 pt-4 border-top-1 border-300">
+      <p-button 
+        label="إرسال النموذج" 
+        icon="pi pi-send" 
+        [loading]="isSubmitting()" 
+        type="submit"
+        styleClass="p-button-primary px-5 py-2 border-round-xl">
+      </p-button>
+    </div>
+  </form>
+</p-card>
