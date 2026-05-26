@@ -6,7 +6,6 @@ import { RatingModule } from 'primeng/rating';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
-
 @Component({
   selector: 'app-session-log',
   standalone: true,
