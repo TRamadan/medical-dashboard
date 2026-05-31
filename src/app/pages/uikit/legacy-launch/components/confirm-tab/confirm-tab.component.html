@@ -1,4 +1,4 @@
-<div class="tab-confirm">
+<div class="confirm-panel">
   <div class="sect">Gate التخرج — Doctor Confirmation</div>
   <div class="note n-mint">
     <strong>Gate حرج:</strong> لا يمكن تأكيد التخرج إلا بعد مراجعة القائمة كاملة.
@@ -7,32 +7,44 @@
   <div class="confirm-gate">
     <div class="cg-title">قائمة التخرج — Graduation Checklist</div>
     <div class="cg-checks">
-      <label class="cg-check">
-        <input type="checkbox"/> مراجعة جميع القياسات الختامية ✓
+      <label class="cg-check" [class.done]="checks().chk1">
+        <input type="checkbox" [(ngModel)]="checks().chk1" (change)="updateChecks()"/> مراجعة جميع القياسات الختامية ✓
       </label>
-      <label class="cg-check">
-        <input type="checkbox"/> تأكيد اجتياز معايير العودة (LSI ≥ 90٪ + Hop ≥ 90٪ + VAS ≤ 2) ✓
+      <label class="cg-check" [class.done]="checks().chk2">
+        <input type="checkbox" [(ngModel)]="checks().chk2" (change)="updateChecks()"/> تأكيد اجتياز معايير العودة (LSI ≥ 90٪ + Hop ≥ 90٪ + VAS ≤ 2) ✓
       </label>
-      <label class="cg-check">
-        <input type="checkbox"/> تسجيل ملاحظات التخرج في Tab "مقارنة قبل/بعد" ✓
+      <label class="cg-check" [class.done]="checks().chk3">
+        <input type="checkbox" [(ngModel)]="checks().chk3" (change)="updateChecks()"/> تسجيل ملاحظات التخرج في Tab "مقارنة قبل/بعد" ✓
       </label>
-      <label class="cg-check">
-        <input type="checkbox"/> تحديد المسار القادم في Tab "المسار القادم" ✓
+      <label class="cg-check" [class.done]="checks().chk4">
+        <input type="checkbox" [(ngModel)]="checks().chk4" (change)="updateChecks()"/> تحديد المسار القادم في Tab "المسار القادم" ✓
       </label>
-      <label class="cg-check">
-        <input type="checkbox"/> تسجيل قرار الرياضي (تجديد / إيقاف / إنهاء) ✓
+      <label class="cg-check" [class.done]="checks().chk5">
+        <input type="checkbox" [(ngModel)]="checks().chk5" (change)="updateChecks()"/> تسجيل قرار الرياضي (تجديد / إيقاف / إنهاء) ✓
       </label>
     </div>
-    
-    <div class="confirm-actions">
-      <div class="confirm-info">
-        بالضغط ستتحول الحالة من <span class="status-ready">GRADUATION_READY</span> إلى <span class="status-graduated">GRADUATED</span> وتُرسَل الإشعارات تلقائياً.
+
+    @if (allChecked() && !graduated()) {
+      <div class="confirm-actions">
+        <div class="confirm-info">
+          بالضغط ستتحول الحالة من <span class="gold-mono">GRADUATION_READY</span> إلى <span class="mint-mono">GRADUATED</span> وتُرسَل الإشعارات تلقائياً.
+        </div>
+        <div class="action-buttons">
+          <button class="btn-ghost">معاينة الإشعارات</button>
+          <button class="btn-gold flex-btn" (click)="confirmGraduation()">🏆 تأكيد تخرج هاني سالم ←</button>
+        </div>
       </div>
-      <div class="action-buttons">
-        <button class="btn-ghost">معاينة الإشعارات</button>
-        <button class="btn-gold">🏆 تأكيد تخرج هاني سالم ←</button>
+    }
+
+    @if (graduated()) {
+      <div class="graduated-state">
+        <div class="grad-emoji">🎓</div>
+        <div class="grad-title">تم تأكيد التخرج</div>
+        <div class="grad-sub">
+          حالة التكت: <span class="mint-mono">GRADUATED</span> · تم إرسال ٣ إشعارات · اليوم
+        </div>
       </div>
-    </div>
+    }
   </div>
 
   <div class="ann">

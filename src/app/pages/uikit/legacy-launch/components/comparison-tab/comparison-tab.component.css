@@ -1,39 +1,34 @@
-:host {
-  --navy: #0b0d26;
-  --navy2: #121428;
-  --navy3: #191b36;
-  --navy4: #20233f;
-  --navy5: #272a4a;
-  --border: #252850;
-  --border2: #2f3360;
-  --mint2: #3dd9a0;
-  --mint3: #1aad7a;
-  --mint4: #0e7a55;
-  --coral: #fc6b44;
-  --purple: #6b47ff;
-  --purple2: #9b7fff;
-  --gold: #c9a84c;
-  --gold2: #a8872e;
-  --gold3: #f5d580;
-  --amber: #f5a623;
-  --red: #e24b4a;
-  --white: #eeeef8;
-  --dim: #b8b9d4;
-  --grey: #7a7fa8;
-  --grey2: #555880;
-  --font: 'IBM Plex Sans Arabic', sans-serif;
-  --mono: 'IBM Plex Mono', monospace;
+.comparison-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.bold-black-section-title {
+  color: #000000 !important;
+  font-weight: bold !important;
+  font-size: 15px;
+  margin-bottom: 12px;
+  display: block;
 }
 
 .sect {
   font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: .1em;
   color: var(--grey2);
   text-transform: uppercase;
   padding-bottom: 7px;
   border-bottom: 1px solid var(--border);
   margin-bottom: 14px;
+}
+
+/* Larger variant used for main section headings */
+.sect-title {
+  font-size: 14px;
+  letter-spacing: .04em;
+  text-transform: none;
+  font-weight: 700;
+  color: var(--white);
 }
 
 .card {
@@ -49,7 +44,7 @@
   align-items: center;
   gap: 0;
   padding: 10px 0;
-  border-bottom: 1px solid rgba(37, 40, 80, 0.5);
+  border-bottom: 1px solid rgba(37, 40, 80, .5);
 }
 
 .ba-row:last-child {
@@ -57,9 +52,6 @@
 }
 
 .ba-hdr {
-  display: flex;
-  align-items: center;
-  gap: 0;
   padding: 6px 0 8px;
   border-bottom: 1px solid var(--border);
 }
@@ -71,25 +63,16 @@
   flex-shrink: 0;
 }
 
-.hdr-label {
+.header-label {
   font-size: 10px;
   font-weight: 600;
   color: var(--grey2);
 }
 
-.ba-before, .ba-after {
+.ba-before,
+.ba-after {
   flex: 1;
   text-align: center;
-}
-
-.hdr-before {
-  font-size: 10px;
-  color: var(--grey2);
-}
-
-.hdr-after {
-  font-size: 10px;
-  color: var(--mint2);
 }
 
 .ba-arrow {
@@ -99,7 +82,7 @@
   padding: 0 8px;
 }
 
-.hdr-arrow {
+.hidden-arrow {
   opacity: 0;
 }
 
@@ -108,11 +91,6 @@
   font-weight: 700;
   font-family: var(--mono);
 }
-
-.val-grey { color: var(--grey); }
-.val-mint { color: var(--mint2); }
-.val-amber { color: var(--amber); }
-.val-red { color: var(--red); }
 
 .ba-sub {
   font-size: 9px;
@@ -130,12 +108,12 @@
 }
 
 .imp-great {
-  background: rgba(201, 168, 76, 0.12);
+  background: rgba(201, 168, 76, .12);
   color: var(--gold);
 }
 
 .imp-good {
-  background: rgba(29, 158, 117, 0.12);
+  background: rgba(29, 158, 117, .12);
   color: var(--mint2);
 }
 
@@ -150,35 +128,12 @@
 }
 
 .n-gold {
-  background: rgba(201, 168, 76, 0.05);
+  background: rgba(201, 168, 76, .05);
   border-color: var(--gold);
 }
 
 .note strong {
   color: var(--white);
-}
-
-.comparison-card {
-  margin-bottom: 12px;
-}
-
-:host ::ng-deep .comparison-card .p-card {
-  background: transparent;
-  border: 1px solid var(--border);
-  box-shadow: none;
-}
-
-:host ::ng-deep .comparison-card .p-card-body {
-  padding: 15px 17px;
-}
-
-.doctor-summary, .doctor-notes-title {
-  font-weight: bold;
-  color: #000000 !important;
-}
-
-.note.doctor-summary strong {
-  color: #000000 !important;
 }
 
 .fld {
@@ -191,25 +146,54 @@
   margin-bottom: 5px;
 }
 
+/* Slightly larger label for prominent fields */
+.fld-lbl-lg {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--dim);
+}
+
 .textarea {
-  background: var(--navy4);
-  border: 1px solid var(--border2);
+  border: 1px solid #000000;
   border-radius: 8px;
-  padding: 9px 11px;
-  font-size: 11px;
+  padding: 12px 14px;
+  font-size: 12px;
   color: var(--dim);
   width: 100%;
   font-family: var(--font);
-  resize: vertical;
-  min-height: 80px;
+  resize: none;
+  /* height driven by rows attribute — no extra blank space */
+  min-height: unset;
+  line-height: 1.7;
+  box-sizing: border-box;
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color .15s;
+  overflow-y: auto;
 }
 
 .textarea:focus {
   border-color: var(--gold);
 }
 
-.textarea.no-bg {
-  background: transparent !important;
+/* Override for auto-height behaviour */
+.textarea-auto {
+  resize: vertical;
+  min-height: unset;
+  height: auto;
+}
+
+.mint-text {
+  color: var(--mint2);
+}
+
+.grey-text {
+  color: var(--grey);
+}
+
+.amber-text {
+  color: var(--amber);
+}
+
+.red-text {
+  color: var(--red);
 }

@@ -1,34 +1,12 @@
-:host {
-  --navy: #0b0d26;
-  --navy2: #121428;
-  --navy3: #191b36;
-  --navy4: #20233f;
-  --navy5: #272a4a;
-  --border: #252850;
-  --border2: #2f3360;
-  --mint2: #3dd9a0;
-  --mint3: #1aad7a;
-  --mint4: #0e7a55;
-  --coral: #fc6b44;
-  --purple: #6b47ff;
-  --purple2: #9b7fff;
-  --gold: #c9a84c;
-  --gold2: #a8872e;
-  --gold3: #f5d580;
-  --amber: #f5a623;
-  --red: #e24b4a;
-  --white: #eeeef8;
-  --dim: #b8b9d4;
-  --grey: #7a7fa8;
-  --grey2: #555880;
-  --font: 'IBM Plex Sans Arabic', sans-serif;
-  --mono: 'IBM Plex Mono', monospace;
+.victory-panel {
+  display: flex;
+  flex-direction: column;
 }
 
 .sect {
   font-size: 9px;
   font-weight: 600;
-  letter-spacing: 0.1em;
+  letter-spacing: .1em;
   color: var(--grey2);
   text-transform: uppercase;
   padding-bottom: 7px;
@@ -47,7 +25,7 @@
 }
 
 .n-gold {
-  background: rgba(201, 168, 76, 0.05);
+  background: rgba(201, 168, 76, .05);
   border-color: var(--gold);
 }
 
@@ -56,8 +34,8 @@
 }
 
 .victory-section {
-  background: linear-gradient(135deg, rgba(201, 168, 76, 0.08), rgba(107, 71, 255, 0.05));
-  border: 1px solid rgba(201, 168, 76, 0.2);
+  background: linear-gradient(135deg, rgba(201, 168, 76, .08), rgba(107, 71, 255, .05));
+  border: 1px solid rgba(201, 168, 76, .2);
   border-radius: 14px;
   padding: 22px;
   text-align: center;
@@ -66,7 +44,7 @@
 .vs-trophy {
   font-size: 44px;
   margin-bottom: 10px;
-  filter: drop-shadow(0 0 16px rgba(201, 168, 76, 0.4));
+  filter: drop-shadow(0 0 16px rgba(201, 168, 76, .4));
 }
 
 .vs-title {
@@ -81,10 +59,6 @@
   color: var(--dim);
   line-height: 1.6;
   margin-bottom: 16px;
-}
-
-.gold-text {
-  color: var(--gold);
 }
 
 .vs-actions {
@@ -104,12 +78,17 @@
   cursor: pointer;
   border: none;
   font-family: var(--font);
-  box-shadow: 0 4px 16px rgba(201, 168, 76, 0.2);
-  transition: opacity 0.15s;
+  box-shadow: 0 4px 16px rgba(201, 168, 76, .2);
+  transition: opacity .15s;
 }
 
-.btn-gold:hover {
-  opacity: 0.88;
+.btn-gold:hover:not(:disabled) {
+  opacity: .88;
+}
+
+.btn-gold:disabled {
+  opacity: .6;
+  cursor: default;
 }
 
 .btn-ghost {
@@ -121,6 +100,16 @@
   color: var(--grey);
   cursor: pointer;
   font-family: var(--font);
+}
+
+.victory-sent-banner {
+  background: rgba(29, 158, 117, .08);
+  border: 1px solid rgba(29, 158, 117, .25);
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 12px;
+  color: var(--mint2);
+  margin-top: 12px;
 }
 
 .divlbl {
@@ -143,26 +132,20 @@
   white-space: nowrap;
 }
 
-.card {
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 15px 17px;
-  margin-bottom: 12px;
-}
-
-.whatsapp-card {
+.ws-card {
   background: var(--navy4);
-  border-color: rgba(29, 158, 117, 0.2);
+  border: 1px solid rgba(29, 158, 117, .2);
+  border-radius: 12px;
+  padding: 15px;
 }
 
-.wa-header {
+.ws-header {
   font-size: 10px;
   color: var(--grey);
   margin-bottom: 8px;
 }
 
-.wa-bubble {
+.ws-bubble {
   background: #1a3a2a;
   border-radius: 12px 12px 12px 4px;
   padding: 13px 15px;
@@ -170,50 +153,44 @@
   color: #e8fde8;
   line-height: 1.7;
   max-width: 340px;
-  text-align: right;
 }
 
-.wa-link {
+.ws-link {
   color: var(--mint2);
   text-decoration: underline;
 }
 
-.wa-footer {
+.ws-footer {
   font-size: 10px;
   color: var(--grey);
   margin-top: 8px;
 }
 
-.two {
+.actions-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  margin-top: 12px;
 }
 
-.mt-12 { margin-top: 12px; }
+.card {
+  background: var(--navy3);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 15px 17px;
+}
 
-.clickable-card {
+.card.clickable {
   cursor: pointer;
-  transition: border-color 0.2s;
+  transition: border-color .2s;
 }
 
-.clickable-card:hover {
-  border-color: rgba(201, 168, 76, 0.3);
+.card.clickable:hover {
+  border-color: rgba(201, 168, 76, .3);
 }
 
-.card-icon {
-  font-size: 16px;
-  margin-bottom: 6px;
-}
+.card-icon { font-size: 16px; margin-bottom: 6px; }
+.card-label { font-size: 12px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
+.card-sub { font-size: 10px; color: var(--grey); }
 
-.card-action-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--white);
-  margin-bottom: 3px;
-}
-
-.card-action-desc {
-  font-size: 10px;
-  color: var(--grey);
-}
+.gold-text { color: var(--gold); }

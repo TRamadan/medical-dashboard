@@ -1,77 +1,46 @@
-:host {
-  --navy: #0b0d26;
-  --navy2: #121428;
-  --navy3: #191b36;
-  --navy4: #20233f;
-  --navy5: #272a4a;
-  --border: #252850;
-  --border2: #2f3360;
-  --mint2: #3dd9a0;
-  --mint3: #1aad7a;
-  --mint4: #0e7a55;
-  --coral: #fc6b44;
-  --purple: #6b47ff;
-  --purple2: #9b7fff;
-  --gold: #c9a84c;
-  --gold2: #a8872e;
-  --gold3: #f5d580;
-  --amber: #f5a623;
-  --red: #e24b4a;
-  --white: #eeeef8;
-  --dim: #b8b9d4;
-  --grey: #7a7fa8;
-  --grey2: #555880;
-  --font: 'IBM Plex Sans Arabic', sans-serif;
-  --mono: 'IBM Plex Mono', monospace;
+.bold-black-section-title {
+  color: #000000 !important;
+  font-weight: bold !important;
+  font-size: 15px;
+  margin-bottom: 12px;
+  display: block;
 }
 
-.sect {
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: var(--grey2);
-  text-transform: uppercase;
-  padding-bottom: 7px;
-  border-bottom: 1px solid var(--border);
+:host ::ng-deep .summary-section-card.p-card {
+  background: var(--navy3) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .18) !important;
   margin-bottom: 14px;
 }
 
-.two {
+:host ::ng-deep .summary-section-card .p-card-body {
+  padding: 15px 17px !important;
+}
+
+.summary-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
 @media (max-width: 680px) {
-  .two {
+  .two-col {
     grid-template-columns: 1fr;
   }
 }
 
-.large-title {
-  font-size: 13px !important;
-}
-
-.bold-black {
-  font-weight: bold !important;
-  color: #000000 !important;
-}
-
-.summary-card, .timeline-card-wrapper {
-  display: block;
-  margin-bottom: 12px;
-}
-
-:host ::ng-deep .summary-card .p-card,
-:host ::ng-deep .timeline-card-wrapper .p-card {
-  background: transparent;
+.card {
+  background: var(--navy3);
   border: 1px solid var(--border);
-  box-shadow: none;
-}
-
-:host ::ng-deep .summary-card .p-card-body,
-:host ::ng-deep .timeline-card-wrapper .p-card-body {
+  border-radius: 12px;
   padding: 15px 17px;
+  margin-bottom: 12px;
 }
 
 .card-title {
@@ -96,29 +65,33 @@
   color: var(--grey);
 }
 
-.pr-val {
-  font-family: var(--mono);
+/* PrimeNG ProgressBar overrides
+   styleClass adds the class directly to the inner .p-progressbar div,
+   so we target it directly (not as a parent). */
+:host ::ng-deep .p-progressbar {
+  height: 7px !important;
+  border-radius: 4px !important;
+  background: #e5e7eb !important; /* light grey track visible on all backgrounds */
+  overflow: hidden !important;
 }
 
-.val-mint { color: var(--mint2); }
-.val-purple { color: var(--purple2); }
-.val-gold { color: var(--gold); }
-
-.prog {
-  height: 6px;
-  background: var(--navy5);
-  border-radius: 3px;
-  overflow: hidden;
+/* Mint — Swarm Sessions & Attendance */
+:host ::ng-deep .pb-mint.p-progressbar .p-progressbar-value,
+:host ::ng-deep .pb-mint.p-progressbar .p-progressbar-value-animate {
+  background: #1d9e75 !important;
 }
 
-.prog-fill {
-  height: 100%;
-  border-radius: 3px;
+/* Purple — Solo Sessions */
+:host ::ng-deep .pb-purple.p-progressbar .p-progressbar-value,
+:host ::ng-deep .pb-purple.p-progressbar .p-progressbar-value-animate {
+  background: #6b47ff !important;
 }
 
-.pf-mint { background: var(--mint3); }
-.pf-purple { background: var(--purple); }
-.pf-gold { background: linear-gradient(90deg, var(--gold2), var(--gold3)); }
+/* Gold — Measurement sessions */
+:host ::ng-deep .pb-gold.p-progressbar .p-progressbar-value,
+:host ::ng-deep .pb-gold.p-progressbar .p-progressbar-value-animate {
+  background: linear-gradient(90deg, #c9a84c, #e0c060) !important;
+}
 
 .stats-list {
   display: flex;
@@ -132,14 +105,8 @@
   font-size: 11px;
 }
 
-.stat-label {
-  color: var(--grey);
-}
-
-.stat-val {
-  color: var(--white);
-  font-family: var(--mono);
-}
+.stat-label { color: var(--grey); }
+.stat-val { color: var(--white); }
 
 .timeline-card {
   padding: 14px 16px;
@@ -173,17 +140,14 @@
   margin-top: 4px;
 }
 
-.bg-mint { background: var(--mint3); }
-.bg-gold { background: var(--gold); }
-.gold-glow { box-shadow: 0 0 8px rgba(201, 168, 76, 0.5); }
-
 .ptc {
   flex: 1;
   width: 2px;
+  background: var(--border);
   margin: 3px 0;
 }
 
-.border-mint { background: rgba(29, 158, 117, 0.3); }
+.line-mint { background: rgba(29, 158, 117, .3); }
 
 .pti:last-child .ptc {
   display: none;
@@ -212,8 +176,6 @@
   margin-top: 4px;
 }
 
-.gold-text { color: var(--gold); }
-
 .badge {
   display: inline-block;
   padding: 2px 8px;
@@ -222,14 +184,23 @@
   font-weight: 600;
 }
 
-.b-mint {
-  background: rgba(29, 158, 117, 0.12);
-  color: var(--mint2);
-  border: 1px solid rgba(29, 158, 117, 0.22);
+.b-gold {
+  background: rgba(201, 168, 76, .12);
+  color: var(--gold);
+  border: 1px solid rgba(201, 168, 76, .22);
 }
 
-.b-gold {
-  background: rgba(201, 168, 76, 0.12);
-  color: var(--gold);
-  border: 1px solid rgba(201, 168, 76, 0.22);
+.b-mint {
+  background: rgba(29, 158, 117, .12);
+  color: var(--mint2);
+  border: 1px solid rgba(29, 158, 117, .22);
 }
+
+.bg-mint3 { background: var(--mint3); }
+.bg-gold { background: var(--gold); }
+.glow-gold { box-shadow: 0 0 8px rgba(201, 168, 76, .5); }
+
+.mint-text { color: var(--mint2); }
+.purple-text { color: var(--purple2); }
+.gold-text { color: var(--gold); }
+.mono { font-family: var(--mono); }

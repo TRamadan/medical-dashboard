@@ -1,4 +1,4 @@
-<div class="tab-victory">
+<div class="victory-panel">
   <div class="sect">Moment of Victory — لحظة الانتصار</div>
   <div class="note n-gold">
     <strong>في Lab OS:</strong> لحظة مُصمَّمة — "Validate the Data" Card. أعلى حالة عاطفية للرياضي = أفضل وقت لـ Google Review.
@@ -8,37 +8,52 @@
     <div class="vs-trophy">🏆</div>
     <div class="vs-title">مبروك هاني — أنجزت إرثك</div>
     <div class="vs-desc">
-      من ألم ركبة شديد وROM ٨٥° إلى LSI ٩٢٪ واجتياز Hop Test بـ ٩٤٪.<br/>هذا ليس تعافياً — هذا هندسة جسم من جديد.<br/><br/>
+      من ألم ركبة شديد وROM 85° إلى LSI 92% واجتياز Hop Test بـ 94%.<br/>
+      هذا ليس تعافياً — هذا هندسة جسم من جديد.<br/><br/>
       <strong class="gold-text">٣٦ جلسة · ٢٤ أسبوع · إرث مكتمل.</strong>
     </div>
+    
     <div class="vs-actions">
-      <button class="btn-gold">🌟 إرسال لحظة الانتصار للرياضي</button>
-      <button class="btn-ghost">معاينة البطاقة</button>
+      <button class="btn-gold" (click)="triggerVictory()" [disabled]="victorySent()">
+        @if (victorySent()) { ✓ تم الإرسال } @else { 🌟 إرسال لحظة الانتصار للرياضي }
+      </button>
+      <button class="btn-ghost" (click)="previewCard()">معاينة البطاقة</button>
     </div>
+    
+    @if (victorySent()) {
+      <div class="victory-sent-banner">
+        ✓ تم الإرسال — الرياضي تلقّى رسالة WhatsApp مع رابط Google Review وملخص إنجازاته.
+      </div>
+    }
   </div>
 
   <div class="divlbl"><div class="dl-t">WhatsApp Preview</div></div>
   
-  <div class="card whatsapp-card">
-    <div class="wa-header">رسالة WhatsApp — هاني سالم</div>
-    <div class="wa-bubble">
-      🏆 <strong>مبروك يا هاني!</strong><br/><br/>رحلتك في The Sports Doctor Lab اكتملت.<br/><br/>
-      📊 <strong>أرقامك:</strong><br/>• LSI: ٤٥٪ → <strong>٩٢٪</strong><br/>• الألم: ٧/١٠ → <strong>١/١٠</strong><br/>• Hop Test: ٦٢٪ → <strong>٩٤٪</strong><br/><br/>
-      ساعدنا يساعد رياضيين زيّك:<br/><span class="wa-link">⭐ اكتب تقييمك هنا</span>
+  <div class="ws-card">
+    <div class="ws-header">رسالة WhatsApp — هاني سالم</div>
+    <div class="ws-bubble">
+      🏆 <strong>مبروك يا هاني!</strong><br/><br/>
+      رحلتك في The Sports Doctor Lab اكتملت.<br/><br/>
+      📊 <strong>أرقامك:</strong><br/>
+      • LSI: ٤٥٪ → <strong>٩٢٪</strong><br/>
+      • الألم: ٧/١٠ → <strong>١/١٠</strong><br/>
+      • Hop Test: ٦٢٪ → <strong>٩٤٪</strong><br/><br/>
+      ساعدنا يساعد رياضيين زيّك:<br/>
+      <span class="ws-link">⭐ اكتب تقييمك هنا</span>
     </div>
-    <div class="wa-footer">الرابط ينتهي بعد ٤٨ ساعة</div>
+    <div class="ws-footer">الرابط ينتهي بعد ٤٨ ساعة</div>
   </div>
 
-  <div class="two mt-12">
-    <div class="card clickable-card">
+  <div class="actions-grid">
+    <div class="card clickable" (click)="exportPdf()">
       <div class="card-icon">📄</div>
-      <div class="card-action-title">تصدير التقرير النهائي PDF</div>
-      <div class="card-action-desc">ملخص كامل للرياضي بكل القياسات والمراحل</div>
+      <div class="card-label">تصدير التقرير النهائي PDF</div>
+      <div class="card-sub">ملخص كامل للرياضي بكل القياسات والمراحل</div>
     </div>
-    <div class="card clickable-card">
+    <div class="card clickable" (click)="updatePersona()">
       <div class="card-icon">🎯</div>
-      <div class="card-action-title">تحديث Persona Intelligence</div>
-      <div class="card-action-desc">إرسال بيانات الحالة لتحليل المسارات</div>
+      <div class="card-label">تحديث Persona Intelligence</div>
+      <div class="card-sub">إرسال بيانات الحالة لتحليل المسارات</div>
     </div>
   </div>
 </div>

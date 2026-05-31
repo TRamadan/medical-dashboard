@@ -21,6 +21,8 @@
   --dim: #B8B9D4;
   --grey: #7A7FA8;
   --grey2: #555880;
+  --font: 'IBM Plex Sans Arabic', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
 }
 
 .legacy-launch-container {
@@ -28,7 +30,7 @@
   color: var(--white);
   min-height: 100vh;
   direction: rtl;
-  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  font-family: var(--font);
 }
 
 .topbar {
@@ -41,21 +43,21 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  margin: -2rem -2rem 2rem -2rem;
-  width: calc(100% + 4rem);
 }
 
 .tb-logo {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
+  background: linear-gradient(135deg, #1AAD7A, #0E7A55);
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .tb-logo svg {
-  width: 100%;
-  height: 100%;
+  width: 14px;
+  height: 14px;
 }
 
 .tb-brand {
@@ -102,6 +104,13 @@
   border-color: rgba(201, 168, 76, .3);
 }
 
+.sb-mint {
+  background: rgba(29, 158, 117, .12);
+  color: var(--mint2);
+  border-color: rgba(29, 158, 117, .3);
+  animation: none;
+}
+
 @keyframes pg {
 
   0%,
@@ -118,6 +127,7 @@
   display: grid;
   grid-template-columns: 1fr 320px;
   min-height: calc(100vh - 190px);
+  background: white;
 }
 
 @media (max-width: 900px) {
@@ -127,41 +137,58 @@
 }
 
 .main-col {
-  padding: 22px 28px;
+  padding: 0;
+  /* Tabs handle their own padding in reference */
 }
 
-/* Custom styles for PrimeNG TabView to match the design */
-:host ::ng-deep .p-tabview {
+.sidebar-col {
+  background: white;
+  border-right: 5px solid #010657;
+  padding: 22px 16px;
+  border-radius: 20px;
+  margin-top: 20px;
+  margin-right: 18px;
+}
+
+.legacy-footer {
+  text-align: center;
+  padding: 12px 28px;
+  color: var(--grey2);
+  font-size: 10px;
+  border-top: 1px solid var(--border);
+  background: var(--navy2);
+}
+
+/* Custom styles for PrimeNG TabView to match the reference precisely */
+:host ::ng-deep .legacy-tabs.p-tabview {
   background: transparent;
 }
 
-:host ::ng-deep .p-tabview .p-tabview-nav {
+:host ::ng-deep .legacy-tabs.p-tabview .p-tabview-nav {
   background: var(--navy2);
   border-bottom: 1px solid var(--border);
   padding: 0 28px;
+  display: flex;
   gap: 0;
+  overflow-x: auto;
 }
 
-:host ::ng-deep .p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
-  background: transparent;
-  color: var(--white);
-  border-color: var(--gold);
-}
-
-:host ::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link {
+:host ::ng-deep .legacy-tabs.p-tabview .p-tabview-nav li .p-tabview-nav-link {
   background: transparent;
   color: var(--grey);
   font-size: 12px;
   font-weight: 500;
-  padding: 11px 16px;
+  padding: 12px 16px;
   border-width: 0 0 2px 0;
+  border-color: transparent;
   transition: all .15s;
   display: flex;
   align-items: center;
   gap: 6px;
+  white-space: nowrap;
 }
 
-:host ::ng-deep .p-tabview .p-tabview-nav li .p-tabview-nav-link::before {
+:host ::ng-deep .legacy-tabs.p-tabview .p-tabview-nav li .p-tabview-nav-link::before {
   content: '';
   width: 6px;
   height: 6px;
@@ -169,32 +196,39 @@
   flex-shrink: 0;
 }
 
-:host ::ng-deep .p-tabview .p-tabview-nav li:nth-child(1) .p-tabview-nav-link::before {
+:host ::ng-deep .legacy-tabs.p-tabview .p-tabview-nav li:nth-child(1) .p-tabview-nav-link::before {
   background: var(--gold);
 }
 
-:host ::ng-deep .p-tabview .p-tabview-nav li:nth-child(2) .p-tabview-nav-link::before {
+:host ::ng-deep .legacy-tabs.p-tabview .p-tabview-nav li:nth-child(2) .p-tabview-nav-link::before {
   background: var(--mint3);
 }
 
-:host ::ng-deep .p-tabview .p-tabview-nav li:nth-child(3) .p-tabview-nav-link::before {
+:host ::ng-deep .legacy-tabs.p-tabview .p-tabview-nav li:nth-child(3) .p-tabview-nav-link::before {
   background: var(--purple2);
 }
 
-:host ::ng-deep .p-tabview .p-tabview-nav li:nth-child(4) .p-tabview-nav-link::before {
+:host ::ng-deep .legacy-tabs.p-tabview .p-tabview-nav li:nth-child(4) .p-tabview-nav-link::before {
   background: var(--gold);
 }
 
-:host ::ng-deep .p-tabview .p-tabview-nav li:nth-child(5) .p-tabview-nav-link::before {
+:host ::ng-deep .legacy-tabs.p-tabview .p-tabview-nav li:nth-child(5) .p-tabview-nav-link::before {
   background: var(--coral);
 }
 
-:host ::ng-deep .p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
+:host ::ng-deep .legacy-tabs.p-tabview .p-tabview-nav li.p-highlight .p-tabview-nav-link {
+  background: transparent;
+  color: var(--white);
+  border-color: var(--gold);
+}
+
+:host ::ng-deep .legacy-tabs.p-tabview .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link {
   background: transparent;
   color: var(--dim);
 }
 
-:host ::ng-deep .p-tabview .p-tabview-panels {
+:host ::ng-deep .legacy-tabs.p-tabview .p-tabview-panels {
   background: transparent;
-  padding: 0;
+  padding: 22px 28px;
+  /* Panel padding from reference */
 }

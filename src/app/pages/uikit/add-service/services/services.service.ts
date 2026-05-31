@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Services } from '../models/services';
 
 @Injectable({
@@ -22,7 +22,9 @@ export class ServicesService {
      * READ: Retrieves all services from the backend.
      */
     getServices(): Observable<Services[]> {
-        return this.http.get<Services[]>(this.apiUrl);
+        return this.http.get<{ data: Services[] }>(this.apiUrl).pipe(
+            map(response => response.data)
+        );
     }
 
     /**

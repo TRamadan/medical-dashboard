@@ -1,109 +1,80 @@
-<div class="tab-summary">
-  <div class="sect large-title bold-black">إحصائيات البرنامج الكاملة</div>
-  
-  <div class="two">
-    <p-card class="summary-card">
+<div class="summary-panel">
+  <div class="bold-black-section-title">إحصائيات البرنامج الكاملة</div>
+  <div class="two-col">
+    <p-card styleClass="summary-section-card" role="region" aria-label="توزيع الجلسات">
       <div class="card-title">توزيع الجلسات</div>
+
       <div class="prog-row">
         <div class="pr-head">
           <span class="pr-label">Swarm Sessions</span>
-          <span class="pr-val val-mint">٢٨</span>
+          <span class="mint-text mono">٢٨</span>
         </div>
-        <div class="prog"><div class="prog-fill pf-mint" style="width:78%;"></div></div>
+        <p-progressBar [value]="78" [showValue]="false" styleClass="pb-mint"></p-progressBar>
       </div>
+
       <div class="prog-row">
         <div class="pr-head">
           <span class="pr-label">Solo Sessions</span>
-          <span class="pr-val val-purple">٦</span>
+          <span class="purple-text mono">٦</span>
         </div>
-        <div class="prog"><div class="prog-fill pf-purple" style="width:17%;"></div></div>
+        <p-progressBar [value]="17" [showValue]="false" styleClass="pb-purple"></p-progressBar>
       </div>
+
       <div class="prog-row">
         <div class="pr-head">
           <span class="pr-label">جلسات قياسات</span>
-          <span class="pr-val val-gold">٢</span>
+          <span class="gold-text mono">٢</span>
         </div>
-        <div class="prog"><div class="prog-fill pf-gold" style="width:5%;"></div></div>
+        <p-progressBar [value]="5" [showValue]="false" styleClass="pb-gold"></p-progressBar>
       </div>
+
       <div class="prog-row">
         <div class="pr-head">
           <span class="pr-label">معدل الحضور</span>
-          <span class="pr-val val-mint">٩٤٪</span>
+          <span class="mint-text mono">٩٤٪</span>
         </div>
-        <div class="prog"><div class="prog-fill pf-mint" style="width:94%;"></div></div>
+        <p-progressBar [value]="94" [showValue]="false" styleClass="pb-mint"></p-progressBar>
       </div>
     </p-card>
 
-    <p-card class="summary-card">
+    <p-card styleClass="summary-section-card" role="region" aria-label="متوسطات الأداء">
       <div class="card-title">متوسطات الأداء</div>
       <div class="stats-list">
-        <div class="stat-item">
-          <span class="stat-label">متوسط sRPE</span>
-          <span class="stat-val">٤.٢ / ١٠</span>
+        <div class="stat-item"><span class="stat-label">متوسط sRPE</span><span class="stat-val mono">٤.٢ / ١٠</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">متوسط Wellness</span>
-          <span class="stat-val">٤.٨ / ٧</span>
+        <div class="stat-item"><span class="stat-label">متوسط Wellness</span><span class="stat-val mono">٤.٨ / ٧</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">NPS الأخير</span>
-          <span class="stat-val val-mint">٨.٩</span>
+        <div class="stat-item"><span class="stat-label">NPS الأخير</span><span
+            class="stat-val mint-text mono">٨.٩</span></div>
+        <div class="stat-item"><span class="stat-label">تعديلات البروتوكول</span><span class="stat-val mono">٤</span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">تعديلات البروتوكول</span>
-          <span class="stat-val">٤</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">حوادث إحلال</span>
-          <span class="stat-val val-mint">٠</span>
+        <div class="stat-item"><span class="stat-label">حوادث إحلال</span><span class="stat-val mint-text mono">٠</span>
         </div>
       </div>
     </p-card>
   </div>
 
-  <div class="sect">مراحل البرنامج — التسلسل الزمني</div>
-  <p-card class="timeline-card-wrapper">
+  <div class="bold-black-section-title">مراحل البرنامج — التسلسل الزمني</div>
+  <p-card styleClass="summary-section-card" role="region" aria-label="مراحل البرنامج — التسلسل الزمني">
     <div class="phase-tl">
-      <div class="pti">
-        <div class="ptlw"><div class="ptd bg-mint"></div><div class="ptc border-mint"></div></div>
-        <div class="ptcontent">
-          <div class="ptphase">المرحلة ١ — هندسة الألم <span class="badge b-mint">مكتملة</span></div>
-          <div class="ptmeta">١٢ جلسة · ٤ أسابيع</div>
-          <div class="ptcrit">VAS ≤ ٣ ✓ · ROM مد كامل ✓</div>
+      @for (phase of phases(); track phase.name) {
+        <div class="pti">
+          <div class="ptlw">
+            <div class="ptd" [class]="phase.dotClass"></div>
+            @if (phase.hasLine) {
+              <div class="ptc line-mint"></div>
+            }
+          </div>
+          <div class="ptcontent">
+            <div class="ptphase">
+              {{ phase.name }}
+              <span class="badge" [class]="phase.badgeClass">{{ phase.badgeText }}</span>
+            </div>
+            <div class="ptmeta">{{ phase.meta }}</div>
+            <div [class]="phase.critClass">{{ phase.criteria }}</div>
+          </div>
         </div>
-      </div>
-      <div class="pti">
-        <div class="ptlw"><div class="ptd bg-mint"></div><div class="ptc border-mint"></div></div>
-        <div class="ptcontent">
-          <div class="ptphase">المرحلة ٢ — هندسة الحركة <span class="badge b-mint">مكتملة</span></div>
-          <div class="ptmeta">٩ جلسات · ٣ أسابيع</div>
-          <div class="ptcrit">LSI ≥ ٧٠٪ ✓ · Quad ≥ ١٤٠N ✓</div>
-        </div>
-      </div>
-      <div class="pti">
-        <div class="ptlw"><div class="ptd bg-mint"></div><div class="ptc border-mint"></div></div>
-        <div class="ptcontent">
-          <div class="ptphase">المرحلة ٣ — بناء القوة <span class="badge b-mint">مكتملة</span></div>
-          <div class="ptmeta">٦ جلسات · ٣ أسابيع</div>
-          <div class="ptcrit">LSI ≥ ٨٠٪ ✓ · Hop ≥ ٨٠٪ ✓</div>
-        </div>
-      </div>
-      <div class="pti">
-        <div class="ptlw"><div class="ptd bg-mint"></div><div class="ptc border-mint"></div></div>
-        <div class="ptcontent">
-          <div class="ptphase">المرحلة ٤ — إعادة التدريب <span class="badge b-mint">مكتملة</span></div>
-          <div class="ptmeta">٦ جلسات · ٧ أسابيع</div>
-          <div class="ptcrit">LSI ≥ ٩٠٪ ✓ · Hop ≥ ٩٠٪ ✓</div>
-        </div>
-      </div>
-      <div class="pti">
-        <div class="ptlw"><div class="ptd bg-gold gold-glow"></div></div>
-        <div class="ptcontent">
-          <div class="ptphase">المرحلة ٥ — العودة للملاعب <span class="badge b-gold">✓ مكتملة</span></div>
-          <div class="ptmeta">٣ جلسات + قياسات ختامية · ٧ أسابيع</div>
-          <div class="ptcrit gold-text">LSI ٩٢٪ ✓ · Hop ٩٤٪ ✓ · VAS ١ ✓</div>
-        </div>
-      </div>
+      }
     </div>
   </p-card>
 </div>

@@ -442,7 +442,7 @@ export class WorkingHoursComponent implements OnInit {
         if (firstSlot) {
             locationId = firstSlot.locationId ?? 0;
             const slotServiceId = firstSlot.serviceId;
-            
+
             if (Array.isArray(slotServiceId)) {
                 serviceIds = slotServiceId
                     .filter((node: any) => node.key && node.key.toString().startsWith('srv-'))

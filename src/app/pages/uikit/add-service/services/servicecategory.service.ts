@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { Servicecategory } from '../models/servicecategory';
 
 @Injectable({
@@ -22,7 +22,9 @@ export class ServicecategoryService {
      * READ: Retrieves all service categories from the backend.
      */
     getServiceCategories(): Observable<Servicecategory[]> {
-        return this.http.get<Servicecategory[]>(this.apiUrl);
+        return this.http.get<{ data: Servicecategory[] }>(this.apiUrl).pipe(
+            map(response => response.data)
+        );
     }
 
     /**

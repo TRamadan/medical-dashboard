@@ -361,8 +361,8 @@ export class AddServiceComponent implements OnInit {
      */
     getAllCategories(): void {
         this.serviceCategoryService.getServiceCategories().subscribe({
-            next: (response: any) => {
-                this.data = response.data;
+            next: (response: Servicecategory[]) => {
+                this.data = response;
             },
             error: () => {
                 this.messageService.add({

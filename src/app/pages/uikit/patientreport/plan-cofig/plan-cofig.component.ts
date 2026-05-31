@@ -7,6 +7,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { InputTextarea } from 'primeng/inputtextarea';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ServicecategoryService } from '../../add-service/services/servicecategory.service';
+import { Servicecategory } from '../../add-service/models/servicecategory';
 
 @Component({
     selector: 'app-plan-cofig',
@@ -208,9 +209,8 @@ export class PlanCofigComponent implements OnInit {
 
     loadServiceCategories() {
         this.serviceCategoryService.getServiceCategories().subscribe({
-            next: (data: any) => {
-                debugger
-                this.serviceCategories = data.data.map((item: any) => ({ ...item, selected: false }));
+            next: (data: Servicecategory[]) => {
+                this.serviceCategories = data.map((item: any) => ({ ...item, selected: false }));
             },
             error: (err) => console.error('Failed to load service categories', err)
         });
