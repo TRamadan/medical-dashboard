@@ -57,7 +57,12 @@
   <div class="reason-wrap">
     <div class="fld">
       <div class=" bold-black-section-title">{{ reasonLabel() }}</div>
+      @if (decision() === 'transfer') {
+      <p-select [options]="locations()" optionLabel="nameEn" optionValue="id" [filter]="true"
+        placeholder="اختر الفرع..." [(ngModel)]="selectedLocationId" styleClass="w-full"></p-select>
+      } @else {
       <textarea class="textarea" [placeholder]="reasonPlaceholder()"></textarea>
+      }
     </div>
   </div>
   }

@@ -4,21 +4,31 @@ import { ServicesService } from '../../../add-service/services/services.service'
 import { Services } from '../../../add-service/models/services';
 import { CardModule } from "primeng/card";
 import { CommonModule } from '@angular/common';
+import { LocationService } from '../../../add-location/services/location.service';
+import { SelectModule } from 'primeng/select';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-next-path-tab',
   standalone: true,
-  imports: [CardModule, CommonModule],
+  imports: [CardModule, CommonModule, SelectModule, FormsModule],
   templateUrl: './next-path-tab.component.html',
   styleUrl: './next-path-tab.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NextPathTabComponent {
   private servicesService = inject(ServicesService);
+  private locationService = inject(LocationService);
 
   services = toSignal(this.servicesService.getServices(), {
     initialValue: [] as Services[]
   });
+
+  locations = toSignal(this.locationService.getLocations(), {
+    initialValue: [] as any[]
+  });
+
+  selectedLocationId = signal<number | null>(null);
 
 
   selectedPathId = signal<number | null>(null);
