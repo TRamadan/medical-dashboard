@@ -1,6 +1,9 @@
 .victory-panel {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .sect {
@@ -22,6 +25,9 @@
   line-height: 1.7;
   border-right: 3px solid;
   margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
 }
 
 .n-gold {
@@ -39,12 +45,20 @@
   border-radius: 14px;
   padding: 22px;
   text-align: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .vs-trophy {
   font-size: 44px;
   margin-bottom: 10px;
   filter: drop-shadow(0 0 16px rgba(201, 168, 76, .4));
+}
+
+@media (max-width: 768px) {
+  .vs-trophy {
+    font-size: 32px;
+  }
 }
 
 .vs-title {
@@ -119,7 +133,8 @@
   margin: 16px 0 12px;
 }
 
-.divlbl::before, .divlbl::after {
+.divlbl::before,
+.divlbl::after {
   content: '';
   flex: 1;
   height: 1px;
@@ -173,6 +188,13 @@
   margin-top: 12px;
 }
 
+@media (max-width: 768px) {
+  .actions-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
 .card {
   background: var(--navy3);
   border: 1px solid var(--border);
@@ -189,8 +211,111 @@
   border-color: rgba(201, 168, 76, .3);
 }
 
-.card-icon { font-size: 16px; margin-bottom: 6px; }
-.card-label { font-size: 12px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
-.card-sub { font-size: 10px; color: var(--grey); }
+.card-icon {
+  font-size: 16px;
+  margin-bottom: 6px;
+}
 
-.gold-text { color: var(--gold); }
+.card-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--white);
+  margin-bottom: 3px;
+}
+
+.card-sub {
+  font-size: 10px;
+  color: var(--grey);
+  text-align: right;
+}
+
+.action-card-content {
+  padding: 10px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: right;
+}
+
+::ng-deep .action-p-button {
+  height: 100% !important;
+  display: flex !important;
+}
+
+::ng-deep .action-p-button.p-button {
+  padding: 8px !important;
+  border-radius: 12px !important;
+  background: var(--navy3) !important;
+  border: 1px solid var(--border) !important;
+  transition: all 0.2s !important;
+}
+
+::ng-deep .action-p-button.p-button-success {
+  border-color: var(--mint3) !important;
+  background: rgba(29, 158, 117, 0.08) !important;
+}
+
+::ng-deep .action-p-button.p-button:hover {
+  border-color: rgba(201, 168, 76, .3) !important;
+  transform: translateY(-2px);
+}
+
+.gold-text {
+  color: var(--gold);
+}
+
+/* ========================================
+   MOBILE — Professional Light Theme
+   ======================================== */
+@media (max-width: 768px) {
+  .actions-grid { grid-template-columns: 1fr; gap: 10px; }
+  .vs-trophy    { font-size: 36px; }
+  .victory-section { padding: 18px 14px; }
+}
+
+@media (max-width: 480px) {
+  /* Victory hero section: white on mobile */
+  .victory-section {
+    background: linear-gradient(135deg, rgba(201,168,76,.06), rgba(107,71,255,.04)) !important;
+    border-color: #e2c96e !important;
+    border-radius: 12px;
+    padding: 16px 12px;
+  }
+
+  .vs-title { font-size: 14px; color: #8a6a10; }
+  .vs-desc  { font-size: 11px; color: #555577; }
+
+  /* Action buttons: full-width stacked */
+  .vs-actions { flex-direction: column; gap: 8px; }
+  .btn-gold, .btn-ghost {
+    width: 100%;
+    text-align: center;
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+
+  /* Action cards: white surface */
+  ::ng-deep .action-p-button.p-button {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+  }
+  ::ng-deep .action-p-button.p-button-success {
+    border-color: var(--mint3) !important;
+    background: rgba(29,158,117,0.06) !important;
+  }
+
+  .card-label { font-size: 13px; color: #1a202c !important; }
+  .card-sub   { color: #718096 !important; }
+
+  /* Note: light colours */
+  .note { font-size: 10px; }
+
+  /* Sent banner */
+  .victory-sent-banner {
+    font-size: 11px;
+    background: rgba(29,158,117,0.06) !important;
+    border-color: rgba(29,158,117,0.2) !important;
+    color: #1d7a57 !important;
+  }
+}

@@ -23,6 +23,14 @@
   padding: 22px 28px;
   position: relative;
   overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .grad-hero {
+    padding: 16px 14px;
+  }
 }
 
 .gh-bg {
@@ -38,6 +46,24 @@
   display: flex;
   align-items: flex-start;
   gap: 18px;
+}
+
+@media (max-width: 768px) {
+  .gh-content {
+    flex-direction: column-reverse;
+    align-items: center;
+    text-align: center;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .gh-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
 }
 
 .gh-info {
@@ -58,6 +84,12 @@
   font-weight: 700;
   color: #1a1a2e;
   margin-bottom: 3px;
+}
+
+@media (max-width: 768px) {
+  .gh-name {
+    font-size: 18px;
+  }
 }
 
 .gh-sub {
@@ -104,9 +136,16 @@
   margin-top: 14px;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 768px) {
   .gh-stats {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .gh-stats {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -131,6 +170,15 @@
   margin-top: 2px;
 }
 
+@media (max-width: 480px) {
+  .gs {
+    padding: 8px;
+  }
+  .gs-val {
+    font-size: 18px;
+  }
+}
+
 .gh-victory-wrap {
   flex-shrink: 0;
   text-align: center;
@@ -140,6 +188,58 @@
   font-size: 52px;
   filter: drop-shadow(0 0 16px rgba(201, 168, 76, .4));
 }
+
+/* ========================================
+   MOBILE — Professional Light Theme
+   ======================================== */
+@media (max-width: 480px) {
+  /* Hero card: white surface */
+  :host ::ng-deep .grad-hero-card.p-card {
+    border-radius: 12px !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08) !important;
+  }
+
+  .grad-hero {
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0;
+    padding: 16px 14px;
+  }
+
+  /* Reverse order: trophy on top, info below */
+  .gh-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+  }
+
+  /* Typography */
+  .gh-label { font-size: 9px; letter-spacing: .08em; color: #b8932a; }
+  .gh-name  { font-size: 17px; font-weight: 700; color: #1a202c !important; }
+  .gh-sub   { font-size: 11px; color: #718096 !important; }
+
+  /* Tags: centered row */
+  .gh-tags  { justify-content: center; }
+
+  /* Trophy smaller */
+  .gh-trophy { font-size: 36px; }
+
+  /* Stats: 2 columns */
+  .gh-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .gs {
+    background: #f7fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    padding: 8px 10px;
+  }
+
+  .gs-val { font-size: 18px; }
+  .gs-lbl { font-size: 9px; }
+}
+
 
 .gh-victory-label {
   font-size: 10px;

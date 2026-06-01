@@ -1,6 +1,9 @@
 .nextpath-panel {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .bold-black-section-title {
@@ -9,6 +12,13 @@
   font-size: 15px;
   margin-bottom: 12px;
   display: block;
+}
+
+@media (max-width: 480px) {
+  .bold-black-section-title {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
 }
 
 .sect {
@@ -30,6 +40,9 @@
   line-height: 1.7;
   border-right: 3px solid;
   margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
 }
 
 .n-mint {
@@ -143,6 +156,15 @@
   margin-bottom: 10px;
 }
 
+@media (max-width: 480px) {
+  .pc-desc {
+    font-size: 10px;
+  }
+  .pc-icon {
+    font-size: 20px;
+  }
+}
+
 .pc-price {
   font-size: 14px;
   font-weight: 700;
@@ -182,11 +204,7 @@
   gap: 8px;
 }
 
-@media (max-width: 600px) {
-  .dec-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
+/* Media Queries moved to bottom */
 
 .dec-btn {
   border-radius: 10px;
@@ -269,11 +287,14 @@
   font-size: 11px;
   color: var(--dim);
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   font-family: var(--font);
   resize: vertical;
   min-height: 80px;
   outline: none;
   transition: border-color .15s;
+  word-break: break-word;
 }
 
 .textarea:focus {
@@ -289,6 +310,9 @@
   color: var(--grey);
   line-height: 1.6;
   margin-top: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
 }
 
 .ann-t {
@@ -328,4 +352,64 @@
 
 .coral-text {
   color: var(--coral);
+}
+
+/* ========================================
+   MOBILE — Professional Light Theme
+   ======================================== */
+@media (max-width: 1024px) {
+  .path-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  /* Keep 2 columns on phones — matches the reference image */
+  .path-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .dec-grid  { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  /* Path cards: 2 per row, white surface */
+  .path-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .path-grid ::ng-deep .p-card {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+  }
+  .path-grid ::ng-deep p-card.card-selected .p-card {
+    border-color: var(--mint3) !important;
+    background: rgba(29, 158, 117, 0.06) !important;
+  }
+
+  /* Card content: compact for 2-col layout */
+  .path-card {
+    padding: 0;
+  }
+  .path-grid ::ng-deep .p-card-body {
+    padding: 10px 8px !important;
+  }
+  .pc-icon { font-size: 20px; margin-bottom: 5px; }
+  .pc-name { font-size: 11px; color: #1a202c !important; }
+  .pc-price { font-size: 12px; }
+  .pc-desc { display: none; } /* Hide desc to keep cards compact in 2-col */
+  .pc-rec  { font-size: 8px; padding: 1px 5px; }
+
+  /* Decision grid: 2 columns */
+  .dec-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Decision buttons: light theme */
+  .dec-btn {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    padding: 12px 6px;
+  }
+  .db-icon  { font-size: 18px; }
+  .db-label { color: #1a202c !important; font-size: 10px; }
+  .db-sub   { color: #718096 !important; }
+
+  /* Notes: readable */
+  .note { font-size: 10px; }
+  .bold-black-section-title { font-size: 13px; margin-bottom: 8px; }
 }

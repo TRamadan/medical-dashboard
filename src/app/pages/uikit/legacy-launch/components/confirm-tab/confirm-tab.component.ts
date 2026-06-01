@@ -1,9 +1,12 @@
 import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
+import { CheckboxModule } from 'primeng/checkbox';
+
 @Component({
   selector: 'app-confirm-tab',
-  imports: [FormsModule],
+  standalone: true,
+  imports: [FormsModule, CheckboxModule],
   templateUrl: './confirm-tab.component.html',
   styleUrl: './confirm-tab.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush

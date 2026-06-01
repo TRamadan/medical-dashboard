@@ -18,9 +18,18 @@
   padding: 15px 17px !important;
 }
 
+@media (max-width: 480px) {
+  :host ::ng-deep .summary-section-card .p-card-body {
+    padding: 12px 10px !important;
+  }
+}
+
 .summary-panel {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .two-col {
@@ -29,9 +38,10 @@
   gap: 12px;
 }
 
-@media (max-width: 680px) {
+@media (max-width: 768px) {
   .two-col {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
 }
 
@@ -41,6 +51,9 @@
   border-radius: 12px;
   padding: 15px 17px;
   margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .card-title {
@@ -104,6 +117,41 @@
   justify-content: space-between;
   font-size: 11px;
 }
+
+/* ========================================
+   MOBILE — Professional Light Theme
+   ======================================== */
+@media (max-width: 480px) {
+  /* Cards: white surfaces */
+  :host ::ng-deep .summary-section-card.p-card {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important;
+  }
+
+  .card {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    padding: 12px;
+  }
+
+  /* Typography: dark on light */
+  .stat-label, .pr-label, .ptmeta { color: #718096 !important; }
+  .stat-val, .card-title, .ptphase { color: #1a202c !important; }
+  .bold-black-section-title { color: #1a202c !important; }
+
+  /* Stat items: compact */
+  .stat-item {
+    font-size: 10px;
+    flex-wrap: wrap;
+    gap: 2px;
+  }
+
+  /* Phase timeline items: less padding */
+  .ptcontent { padding-bottom: 8px; }
+  .ptphase   { font-size: 11px; }
+}
+
 
 .stat-label { color: var(--grey); }
 .stat-val { color: var(--white); }
@@ -204,3 +252,26 @@
 .purple-text { color: var(--purple2); }
 .gold-text { color: var(--gold); }
 .mono { font-family: var(--mono); }
+
+/* Response Design */
+@media (max-width: 480px) {
+  .card {
+    padding: 12px;
+  }
+
+  .stat-item {
+    font-size: 10px;
+  }
+
+  .ptcontent {
+    padding-bottom: 8px;
+  }
+
+  .ptphase {
+    font-size: 11px;
+  }
+
+  :host ::ng-deep .summary-section-card .p-card-body {
+    padding: 12px !important;
+  }
+}

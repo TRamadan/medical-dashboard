@@ -1,6 +1,9 @@
 .confirm-panel {
   display: flex;
   flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .sect {
@@ -22,6 +25,9 @@
   line-height: 1.7;
   border-right: 3px solid;
   margin-bottom: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
 }
 
 .n-mint {
@@ -39,6 +45,8 @@
   border-radius: 12px;
   padding: 16px;
   margin-top: 14px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .cg-title {
@@ -92,6 +100,12 @@
 .action-buttons {
   display: flex;
   gap: 8px;
+}
+
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+  }
 }
 
 .btn-ghost {
@@ -152,3 +166,97 @@
 }
 
 .ann strong { color: var(--white); }
+
+/* ========================================
+   MOBILE — Professional Light Theme
+   ======================================== */
+@media (max-width: 480px) {
+  /* Confirm gate: warm light surface */
+  .confirm-gate {
+    background: rgba(201,168,76,0.05) !important;
+    border-color: rgba(201,168,76,0.25) !important;
+    padding: 14px 12px;
+  }
+
+  .cg-title {
+    font-size: 12px;
+    color: #8a6a10 !important;
+    margin-bottom: 12px;
+  }
+
+  /* Checklist items: more tap-friendly */
+  .cg-check {
+    font-size: 10px;
+    color: #4a5568 !important;
+    gap: 10px;
+    padding: 4px 0;
+    line-height: 1.5;
+  }
+
+  .cg-check.done {
+    color: #1d7a57 !important;
+  }
+
+  /* Confirm info text */
+  .confirm-info {
+    font-size: 10px;
+    color: #4a5568 !important;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+
+  /* Action buttons: stacked, full width */
+  .action-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-ghost {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    border-color: #cbd5e0 !important;
+    color: #4a5568 !important;
+  }
+
+  .btn-gold {
+    width: 100%;
+    text-align: center;
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  /* Note: readable on light */
+  .note {
+    font-size: 10px;
+    color: #4a5568 !important;
+    line-height: 1.6;
+    background: rgba(29,158,117,0.04) !important;
+  }
+
+  .note strong { color: #1a202c !important; }
+
+  /* Annotation box: soft purple on light */
+  .ann {
+    background: rgba(107,71,255,0.04) !important;
+    border-color: rgba(107,71,255,0.15) !important;
+    font-size: 10px;
+    color: #4a5568 !important;
+    padding: 10px 12px;
+  }
+
+  .ann strong { color: #1a202c !important; }
+  .ann-t { color: #6b47ff !important; font-size: 8px; }
+
+  /* Section label */
+  .sect {
+    font-size: 8px;
+    color: #718096 !important;
+    border-bottom-color: #e2e8f0 !important;
+  }
+
+  /* Graduated state */
+  .grad-title { font-size: 13px; color: #8a6a10 !important; }
+  .grad-sub   { font-size: 10px; color: #4a5568 !important; }
+}
+

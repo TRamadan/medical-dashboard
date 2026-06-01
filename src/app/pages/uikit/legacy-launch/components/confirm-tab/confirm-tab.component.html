@@ -7,21 +7,26 @@
   <div class="confirm-gate">
     <div class="cg-title">قائمة التخرج — Graduation Checklist</div>
     <div class="cg-checks">
-      <label class="cg-check" [class.done]="checks().chk1">
-        <input type="checkbox" [(ngModel)]="checks().chk1" (change)="updateChecks()"/> مراجعة جميع القياسات الختامية ✓
-      </label>
-      <label class="cg-check" [class.done]="checks().chk2">
-        <input type="checkbox" [(ngModel)]="checks().chk2" (change)="updateChecks()"/> تأكيد اجتياز معايير العودة (LSI ≥ 90٪ + Hop ≥ 90٪ + VAS ≤ 2) ✓
-      </label>
-      <label class="cg-check" [class.done]="checks().chk3">
-        <input type="checkbox" [(ngModel)]="checks().chk3" (change)="updateChecks()"/> تسجيل ملاحظات التخرج في Tab "مقارنة قبل/بعد" ✓
-      </label>
-      <label class="cg-check" [class.done]="checks().chk4">
-        <input type="checkbox" [(ngModel)]="checks().chk4" (change)="updateChecks()"/> تحديد المسار القادم في Tab "المسار القادم" ✓
-      </label>
-      <label class="cg-check" [class.done]="checks().chk5">
-        <input type="checkbox" [(ngModel)]="checks().chk5" (change)="updateChecks()"/> تسجيل قرار الرياضي (تجديد / إيقاف / إنهاء) ✓
-      </label>
+      <div class="cg-check" [class.done]="checks().chk1">
+        <p-checkbox [(ngModel)]="checks().chk1" (onChange)="updateChecks()" [binary]="true" inputId="chk1"></p-checkbox>
+        <label for="chk1">مراجعة جميع القياسات الختامية ✓</label>
+      </div>
+      <div class="cg-check" [class.done]="checks().chk2">
+        <p-checkbox [(ngModel)]="checks().chk2" (onChange)="updateChecks()" [binary]="true" inputId="chk2"></p-checkbox>
+        <label for="chk2">تأكيد اجتياز معايير العودة (LSI ≥ 90٪ + Hop ≥ 90٪ + VAS ≤ 2) ✓</label>
+      </div>
+      <div class="cg-check" [class.done]="checks().chk3">
+        <p-checkbox [(ngModel)]="checks().chk3" (onChange)="updateChecks()" [binary]="true" inputId="chk3"></p-checkbox>
+        <label for="chk3">تسجيل ملاحظات التخرج في Tab "مقارنة قبل/بعد" ✓</label>
+      </div>
+      <div class="cg-check" [class.done]="checks().chk4">
+        <p-checkbox [(ngModel)]="checks().chk4" (onChange)="updateChecks()" [binary]="true" inputId="chk4"></p-checkbox>
+        <label for="chk4">تحديد المسار القادم في Tab "المسار القادم" ✓</label>
+      </div>
+      <div class="cg-check" [class.done]="checks().chk5">
+        <p-checkbox [(ngModel)]="checks().chk5" (onChange)="updateChecks()" [binary]="true" inputId="chk5"></p-checkbox>
+        <label for="chk5">تسجيل قرار الرياضي (تجديد / إيقاف / إنهاء) ✓</label>
+      </div>
     </div>
 
     @if (allChecked() && !graduated()) {

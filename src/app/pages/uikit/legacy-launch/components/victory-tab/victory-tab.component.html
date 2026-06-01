@@ -1,35 +1,36 @@
 <div class="victory-panel">
   <div class="sect">Moment of Victory — لحظة الانتصار</div>
   <div class="note n-gold">
-    <strong>في Lab OS:</strong> لحظة مُصمَّمة — "Validate the Data" Card. أعلى حالة عاطفية للرياضي = أفضل وقت لـ Google Review.
+    <strong>في Lab OS:</strong> لحظة مُصمَّمة — "Validate the Data" Card. أعلى حالة عاطفية للرياضي = أفضل وقت لـ Google
+    Review.
   </div>
-  
+
   <div class="victory-section">
     <div class="vs-trophy">🏆</div>
     <div class="vs-title">مبروك هاني — أنجزت إرثك</div>
     <div class="vs-desc">
-      من ألم ركبة شديد وROM 85° إلى LSI 92% واجتياز Hop Test بـ 94%.<br/>
-      هذا ليس تعافياً — هذا هندسة جسم من جديد.<br/><br/>
+      من ألم ركبة شديد وROM 85° إلى LSI 92% واجتياز Hop Test بـ 94%.<br />
+      هذا ليس تعافياً — هذا هندسة جسم من جديد.<br /><br />
       <strong class="gold-text">٣٦ جلسة · ٢٤ أسبوع · إرث مكتمل.</strong>
     </div>
-    
+
     <div class="vs-actions">
       <button class="btn-gold" (click)="triggerVictory()" [disabled]="victorySent()">
         @if (victorySent()) { ✓ تم الإرسال } @else { 🌟 إرسال لحظة الانتصار للرياضي }
       </button>
       <button class="btn-ghost" (click)="previewCard()">معاينة البطاقة</button>
     </div>
-    
+
     @if (victorySent()) {
-      <div class="victory-sent-banner">
-        ✓ تم الإرسال — الرياضي تلقّى رسالة WhatsApp مع رابط Google Review وملخص إنجازاته.
-      </div>
+    <div class="victory-sent-banner">
+      ✓ تم الإرسال — الرياضي تلقّى رسالة WhatsApp مع رابط Google Review وملخص إنجازاته.
+    </div>
     }
   </div>
 
-  <div class="divlbl"><div class="dl-t">WhatsApp Preview</div></div>
-  
-  <div class="ws-card">
+  <!-- <div class="divlbl"><div class="dl-t">WhatsApp Preview</div></div> -->
+
+  <!-- <div class="ws-card">
     <div class="ws-header">رسالة WhatsApp — هاني سالم</div>
     <div class="ws-bubble">
       🏆 <strong>مبروك يا هاني!</strong><br/><br/>
@@ -42,18 +43,25 @@
       <span class="ws-link">⭐ اكتب تقييمك هنا</span>
     </div>
     <div class="ws-footer">الرابط ينتهي بعد ٤٨ ساعة</div>
-  </div>
+  </div> -->
 
   <div class="actions-grid">
-    <div class="card clickable" (click)="exportPdf()">
-      <div class="card-icon">📄</div>
-      <div class="card-label">تصدير التقرير النهائي PDF</div>
-      <div class="card-sub">ملخص كامل للرياضي بكل القياسات والمراحل</div>
-    </div>
-    <div class="card clickable" (click)="updatePersona()">
-      <div class="card-icon">🎯</div>
-      <div class="card-label">تحديث Persona Intelligence</div>
-      <div class="card-sub">إرسال بيانات الحالة لتحليل المسارات</div>
-    </div>
+    <p-button (onClick)="exportPdf()" [raised]="true" [severity]="activeAction() === 'pdf' ? 'success' : 'secondary'"
+      styleClass="w-full h-full action-p-button">
+      <div class="action-card-content">
+        <div class="card-icon">📄</div>
+        <div class="card-label">تصدير التقرير النهائي PDF</div>
+        <div class="card-sub">ملخص كامل للرياضي بكل القياسات والمراحل</div>
+      </div>
+    </p-button>
+
+    <p-button (onClick)="updatePersona()" [raised]="true"
+      [severity]="activeAction() === 'persona' ? 'success' : 'secondary'" styleClass="w-full h-full action-p-button">
+      <div class="action-card-content">
+        <div class="card-icon">🎯</div>
+        <div class="card-label">تحديث Persona Intelligence</div>
+        <div class="card-sub">إرسال بيانات الحالة لتحليل المسارات</div>
+      </div>
+    </p-button>
   </div>
 </div>
