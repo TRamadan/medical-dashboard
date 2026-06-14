@@ -95,18 +95,25 @@
                                         <div class="flex items-center justify-between mb-4">
                                             <div class="flex items-center gap-3">
                                                 <div
-                                                    class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-400 text-white font-bold">
+                                                    class="flex items-center justify-center w-10 h-10 rounded-full bg-gray-400 text-white font-bold flex-shrink-0">
                                                     {{ secIndex + 1 }}
                                                 </div>
-                                                <span class="font-medium text-lg">{{ section.sectionName || 'Section ' +
-                                                    (secIndex + 1) }}</span>
+                                                <div class="flex flex-col gap-1">
+                                                    <label
+                                                        class="font-medium text-xs text-gray-500 uppercase tracking-wide">Section
+                                                        Name</label>
+                                                    <input pInputText [(ngModel)]="section.sectionName"
+                                                        [id]="'section-name-' + secIndex"
+                                                        [name]="'section-name-' + secIndex"
+                                                        class="font-semibold text-base" />
+                                                </div>
                                             </div>
                                             <button pButton icon="pi pi-trash"
                                                 class="p-button-text p-button-danger p-button-sm"
                                                 (click)="removeSection(phase, globalSessionNum, secIndex)"></button>
                                         </div>
 
-                                        <!-- Section Time -->
+                                        <!-- Section Fields: Time -->
                                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                                             <div class="flex flex-col gap-2">
                                                 <label class="font-medium text-sm text-gray-600">Time</label>

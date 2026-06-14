@@ -7,55 +7,97 @@
 
         <!-- FITT-VP Grid -->
         <div class="fitt-grid">
-            <p-card *ngFor="let card of fittCards" styleClass="fitt-card h-full">
-                <div class="flex flex-col h-full min-h-[110px]">
-                    <div class="fitt-card-top">
-                        <!-- Badge -->
-                        <div class="fitt-badge" [ngClass]="card.badgeClass">{{ card.letter }}</div>
-
-                        <!-- Info -->
-                        <div class="fitt-info">
-                            <div class="fitt-title">
-                                <span class="fitt-en">{{ card.titleEn }}</span>
+            @for (card of fittCards(); track card.titleEn) {
+                <p-card
+                    styleClass="fitt-card h-full"
+                    [class.fitt-card--incomplete]="!card.complete">
+                    <div class="flex flex-col h-full min-h-[110px]">
+                        <div class="fitt-card-top">
+                            <!-- Badge -->
+                            <div
+                                class="fitt-badge"
+                                [class]="card.badgeClass"
+                                [class.badge--error]="!card.complete">
+                                {{ card.letter }}
                             </div>
-                            <div class="fitt-desc">{{ card.desc }}</div>
-                        </div>
-                    </div>
 
-                    <!-- Status -->
-                    <div class="fitt-status mt-auto pt-3 flex justify-start" [ngClass]="card.statusClass">
-                        <i class="pi pi-check" *ngIf="card.statusClass === 'status-complete'"></i>
-                        <span>{{ card.status }}</span>
+                            <!-- Info -->
+                            <div class="fitt-info">
+                                <div class="fitt-title">
+                                    <span class="fitt-en">{{ card.titleEn }}</span>
+                                </div>
+                                <div class="fitt-desc">{{ card.desc }}</div>
+                            </div>
+
+                            <!-- Status icon (top-right) -->
+                            <div class="fitt-icon-status ml-auto pl-2 flex-shrink-0">
+                                @if (card.complete) {
+                                    <i
+                                        class="pi pi-check-circle text-xl"
+                                        style="color: #2ecc8a"
+                                        aria-label="Complete"
+                                        pTooltip="All fields complete"
+                                        tooltipPosition="top"></i>
+                                } @else {
+                                    <i
+                                        class="pi pi-times-circle text-xl"
+                                        style="color: #e05c5c"
+                                        aria-label="Incomplete"
+                                        [pTooltip]="card.missingItems.length + ' item(s) incomplete'"
+                                        tooltipPosition="top"></i>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Status row -->
+                        <div
+                            class="fitt-status mt-auto pt-3 flex justify-start"
+                            [class.status-complete]="card.complete"
+                            [class.status-error]="!card.complete">
+                            @if (card.complete) {
+                                <i class="pi pi-check mr-1"></i>
+                                <span>Complete</span>
+                            } @else {
+                                <i class="pi pi-exclamation-triangle mr-1"></i>
+                                <span>{{ card.missingItems.length }} item(s) need attention</span>
+                            }
+                        </div>
+
+                        <!-- Missing items detail (only when incomplete) -->
+                        @if (!card.complete && card.missingItems.length > 0) {
+                            <ul class="fitt-missing-list" role="list" aria-label="Missing items">
+                                @for (item of card.missingItems; track item) {
+                                    <li class="fitt-missing-item">
+                                        <i class="pi pi-angle-right text-xs mr-1" aria-hidden="true"></i>
+                                        {{ item }}
+                                    </li>
+                                }
+                            </ul>
+                        }
                     </div>
-                </div>
-            </p-card>
+                </p-card>
+            }
         </div>
 
         <div class="my-5 border-t border-[#222840]"></div>
 
         <!-- CERT Section Header -->
         <div class="section-header-row cert-header mb-3">
-            <span class="section-label">CERT Completion – <span class="cert-count">16 items</span></span>
+            <span class="section-label">CERT Completion – <span class="cert-count">{{ certItems.length }} items</span></span>
         </div>
 
         <!-- CERT List -->
-        <p-card *ngFor="let item of certItems" [ngClass]="{'checked': item.checked}" styleClass="fitt-card h-full">
-            <div class="cert-row">
-                <!-- In LTR: Tag left, Label middle, Checkbox right -->
-                <div class="cert-tag-badge">{{ item.tag }}</div>
-                <div class="cert-label">{{ item.label }}</div>
-                <div class="cert-checkbox">
-                    <p-checkbox [(ngModel)]="item.checked" [binary]="true"></p-checkbox>
+        @for (item of certItems; track item.tag + item.label) {
+            <p-card [class.checked]="item.checked" styleClass="fitt-card h-full">
+                <div class="cert-row">
+                    <!-- Tag left, Label middle, Checkbox right -->
+                    <div class="cert-tag-badge">{{ item.tag }}</div>
+                    <div class="cert-label">{{ item.label }}</div>
+                    <div class="cert-checkbox">
+                        <p-checkbox [(ngModel)]="item.checked" [binary]="true"></p-checkbox>
+                    </div>
                 </div>
-            </div>
-
-        </p-card>
-        <!-- <div class="cert-row">
-                <div class="cert-tag-badge">{{ item.tag }}</div>
-                <div class="cert-label">{{ item.label }}</div>
-                <div class="cert-checkbox">
-                    <p-checkbox [(ngModel)]="item.checked" [binary]="true"></p-checkbox>
-                </div>
-            </div> -->
+            </p-card>
+        }
     </div>
 </div>

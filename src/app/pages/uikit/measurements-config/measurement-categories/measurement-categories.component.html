@@ -250,34 +250,28 @@
                     <input type="text" pInputText id="unit" [(ngModel)]="newMeasurement.unit" class="w-100"
                         placeholder="e.g. kg, cm" />
                 </div>
-                <div class="formgrid grid">
-                    <div class="row">
-                        <div class="field col-6">
-                            <label for="min" class="fw-bold mb-2 d-block">Min</label>
-                            <p-inputNumber id="min" [(ngModel)]="newMeasurement.minValue"
-                                styleClass="w-100"></p-inputNumber>
-                        </div>
-                        <div class="field col-6">
-                            <label for="max" class="fw-bold mb-2 d-block">Max</label>
-                            <p-inputNumber id="max" [(ngModel)]="newMeasurement.maxValue"
-                                styleClass="w-100"></p-inputNumber>
-                        </div>
+                <div class="field">
+                    <h5 class="fw-bold mb-3">Normal range</h5>
+                </div>
+                <div class="row">
+                    <div class="field col-6">
+                        <label for="min" class="fw-bold mb-2 d-block">Min</label>
+                        <p-inputNumber id="min" [(ngModel)]="newMeasurement.minValue"
+                            styleClass="w-100"></p-inputNumber>
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-12" *ngIf="newMeasurement.inputType === 3">
-                            <label for="step" class="fw-bold mb-2 d-block">Step</label>
-                            <p-inputNumber id="step" [(ngModel)]="newMeasurement.step"
-                                styleClass="w-100"></p-inputNumber>
-                        </div>
+                    <div class="field col-6">
+                        <label for="max" class="fw-bold mb-2 d-block">Max</label>
+                        <p-inputNumber id="max" [(ngModel)]="newMeasurement.maxValue"
+                            styleClass="w-100"></p-inputNumber>
                     </div>
                 </div>
+
+                <div class="field" *ngIf="newMeasurement.inputType === 3">
+                    <label for="step" class="fw-bold mb-2 d-block">Step</label>
+                    <p-inputNumber id="step" [(ngModel)]="newMeasurement.step"
+                        styleClass="w-100"></p-inputNumber>
+                </div>
             </ng-container>
-            <div class="field" *ngIf="!isSubjective(newMeasurement.subCategoryId) && newMeasurement.inputType != 2">
-                <label for="rangeHint" class="fw-bold mb-2 d-block">Normal Range Hint</label>
-                <input type="text" pInputText id="rangeHint" [(ngModel)]="newMeasurement.normalRangeHint"
-                    class="w-100" />
-            </div>
 
             <!-- Add other type specific fields if needed later -->
             <!-- this control is for handle values for radio buttons and check-boxes-->

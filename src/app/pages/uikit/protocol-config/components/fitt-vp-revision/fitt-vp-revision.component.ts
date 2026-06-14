@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
@@ -7,12 +7,23 @@ import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { DropdownModule } from 'primeng/dropdown';
 import { CheckboxModule } from 'primeng/checkbox';
+import { TooltipModule } from 'primeng/tooltip';
 import { ProtocolService } from '../../services/protocol.service';
-import { Phase, Exercise, CertItem } from '../../models/protocol.model';
+import { Phase, Exercise, ExerciseType } from '../../models/protocol.model';
+
+export interface FittCard {
+    letter: string;
+    titleEn: string;
+    desc: string;
+    badgeClass: string;
+    complete: boolean;
+    missingItems: string[];
+}
 
 @Component({
     selector: 'app-fitt-vp-revision',
-    imports: [CommonModule, FormsModule, CardModule, TagModule, ButtonModule, InputTextModule, DropdownModule, CheckboxModule],
+    imports: [CommonModule, FormsModule, CardModule, TagModule, ButtonModule,
+        InputTextModule, DropdownModule, CheckboxModule, TooltipModule],
     templateUrl: './fitt-vp-revision.component.html',
     styleUrl: './fitt-vp-revision.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -21,57 +32,241 @@ export class FittVpRevisionComponent {
     private protocolService = inject(ProtocolService);
     readonly protocol = this.protocolService.activeProtocol;
 
-    fittCards: any[] = [
-        {
+    // ── Computed validation ────────────────────────────────────────────────────
+    // Reads both activeProtocol AND protocolRevision so it re-runs whenever
+    // either signal changes — including when ngModel mutates nested objects
+    // and the host component calls protocolService.notifyChange().
+    readonly fittCards = computed<FittCard[]>(() => {
+        // Declare dependency on the revision counter so mutations trigger re-evaluation
+        this.protocolService.protocolRevision();
+
+        const proto = this.protocol();
+        const phases = proto?.phases ?? [];
+
+        return [
+            this.buildFrequencyCard(phases),
+            this.buildIntensityCard(phases),
+            this.buildTimeCard(phases),
+            this.buildTypeCard(phases),
+            this.buildVolumeCard(phases),
+            this.buildProgressionCard(phases),
+        ];
+    });
+
+    // ── Shared guard: collect all exercises across all phases ─────────────────
+    private collectAllExercises(phases: Phase[]): {
+        phase: Phase;
+        sessionNum: number;
+        sectionName: string;
+        ex: Exercise;
+    }[] {
+        const all: { phase: Phase; sessionNum: number; sectionName: string; ex: Exercise }[] = [];
+        for (const phase of phases) {
+            for (const week of phase.weeks) {
+                for (const session of week.sessions) {
+                    for (const section of session.sections) {
+                        for (const ex of section.exercises) {
+                            all.push({ phase, sessionNum: session.sessionNumber, sectionName: section.sectionName, ex });
+                        }
+                    }
+                }
+            }
+        }
+        return all;
+    }
+
+    // ── F – Frequency ─────────────────────────────────────────────────────────
+    private buildFrequencyCard(phases: Phase[]): FittCard {
+        const missing: string[] = [];
+
+        if (phases.length === 0) {
+            missing.push('No phases defined yet — add at least one phase with sessions/week');
+        } else {
+            phases.forEach(phase => {
+                const spw = Number(phase.sessionsPerWeek);
+                if (!spw || spw < 1) {
+                    missing.push(`Phase "${phase.name}": sessions/week not defined`);
+                }
+            });
+        }
+
+        return {
             letter: 'F',
             titleEn: 'Frequency',
-            desc: '3 sessions / week – Documented in phase definition',
-            status: 'Complete',
+            desc: 'Sessions / week – documented in each phase definition',
             badgeClass: 'badge-f',
-            statusClass: 'status-complete'
-        },
-        {
+            complete: missing.length === 0,
+            missingItems: missing,
+        };
+    }
+
+    // ── I – Intensity ─────────────────────────────────────────────────────────
+    private buildIntensityCard(phases: Phase[]): FittCard {
+        const missing: string[] = [];
+        const allExercises = this.collectAllExercises(phases);
+
+        if (allExercises.length === 0) {
+            missing.push('No exercises defined yet — add exercises to sessions first');
+        } else {
+            for (const { phase, sessionNum, ex } of allExercises) {
+                if (ex.type !== 'exercise') continue;
+                const exT = ex as ExerciseType;
+                const label = `Phase "${phase.name}" › Session ${sessionNum} › "${ex.name || 'Unnamed exercise'}"`;
+
+                if (!exT.intensityMethod?.trim()) {
+                    missing.push(`${label}: intensity method not set`);
+                } else {
+                    const missingIntensity = exT.sets.some(s => !s.intensity?.trim());
+                    if (missingIntensity) {
+                        missing.push(`${label}: one or more set intensity values are empty`);
+                    }
+                }
+            }
+        }
+
+        return {
             letter: 'I',
             titleEn: 'Intensity',
-            desc: 'Intensity method documented for each exercise: kg / % 1RM / RPE / RIR',
-            status: 'Complete',
+            desc: 'Intensity method + per-set intensity value for each exercise',
             badgeClass: 'badge-i',
-            statusClass: 'status-complete'
-        },
-        {
+            complete: missing.length === 0,
+            missingItems: missing,
+        };
+    }
+
+    // ── T – Time ──────────────────────────────────────────────────────────────
+    private buildTimeCard(phases: Phase[]): FittCard {
+        const missing: string[] = [];
+
+        if (phases.length === 0) {
+            missing.push('No phases defined yet — section duration and tempo cannot be validated');
+        } else {
+            let exerciseCount = 0;
+            for (const phase of phases) {
+                for (const week of phase.weeks) {
+                    for (const session of week.sessions) {
+                        for (const section of session.sections) {
+                            if (!section.time?.trim()) {
+                                missing.push(
+                                    `Phase "${phase.name}" › Session ${session.sessionNumber} › Section "${section.sectionName || 'Unnamed'}": duration (time) not set`
+                                );
+                            }
+                            for (const ex of section.exercises) {
+                                exerciseCount++;
+                                if (ex.type !== 'exercise') continue;
+                                const exT = ex as ExerciseType;
+                                const label = `Phase "${phase.name}" › Session ${session.sessionNumber} › "${ex.name || 'Unnamed exercise'}"`;
+                                if (exT.sets.some(s => !s.tempo?.trim())) {
+                                    missing.push(`${label}: one or more set tempos are empty`);
+                                }
+                                if (exT.sets.some(s => !s.rest?.toString().trim())) {
+                                    missing.push(`${label}: one or more rest values are empty`);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (exerciseCount === 0) {
+                missing.push('No exercises defined yet — add exercises to validate time fields');
+            }
+        }
+
+        return {
             letter: 'T',
             titleEn: 'Time',
-            desc: 'Part duration + rest between sets + tempo',
-            status: 'Complete',
+            desc: 'Part duration + rest between sets + tempo per set',
             badgeClass: 'badge-t',
-            statusClass: 'status-complete'
-        },
-        {
+            complete: missing.length === 0,
+            missingItems: missing,
+        };
+    }
+
+    // ── T – Type ──────────────────────────────────────────────────────────────
+    private buildTypeCard(phases: Phase[]): FittCard {
+        const missing: string[] = [];
+        const allExercises = this.collectAllExercises(phases);
+
+        if (allExercises.length === 0) {
+            missing.push('No exercises defined yet — add exercises to sessions first');
+        } else {
+            for (const { phase, sessionNum, sectionName, ex } of allExercises) {
+                const label = `Phase "${phase.name}" › Session ${sessionNum}`;
+                if (!ex.name?.trim()) {
+                    missing.push(`${label} › Section "${sectionName || 'Unnamed'}": exercise name not set`);
+                }
+                if (ex.type === 'exercise') {
+                    const exT = ex as ExerciseType;
+                    if (!exT.equipment?.trim()) {
+                        missing.push(`${label} › "${ex.name || 'Unnamed'}": equipment (tool) not set`);
+                    }
+                    if (!exT.contractionType?.trim()) {
+                        missing.push(`${label} › "${ex.name || 'Unnamed'}": contraction type not set`);
+                    }
+                }
+            }
+        }
+
+        return {
             letter: 'T',
             titleEn: 'Type',
             desc: 'Name + tool + contraction type (Concentric / Eccentric / Isometric)',
-            status: 'Complete',
             badgeClass: 'badge-t2',
-            statusClass: 'status-complete'
-        },
-        {
+            complete: missing.length === 0,
+            missingItems: missing,
+        };
+    }
+
+    // ── V – Volume (auto-calculated, always informational) ────────────────────
+    private buildVolumeCard(_phases: Phase[]): FittCard {
+        return {
             letter: 'V',
             titleEn: 'Volume',
             desc: 'Calculated automatically = ∑ (Sets × Reps × Load) Volume Load',
-            status: 'Complete – Auto',
             badgeClass: 'badge-v',
-            statusClass: 'status-complete'
-        },
-        {
+            complete: true,
+            missingItems: [],
+        };
+    }
+
+    // ── P – Progression ───────────────────────────────────────────────────────
+    private buildProgressionCard(phases: Phase[]): FittCard {
+        const missing: string[] = [];
+        const allExercises = this.collectAllExercises(phases);
+
+        if (allExercises.length === 0) {
+            missing.push('No exercises defined yet — add exercises to sessions first');
+        } else {
+            for (const { phase, sessionNum, ex } of allExercises) {
+                const label = `Phase "${phase.name}" › Session ${sessionNum} › "${ex.name || 'Unnamed exercise'}"`;
+                const pr = ex.progressionRule;
+                if (!pr) {
+                    missing.push(`${label}: no progression rule defined`);
+                } else {
+                    if (!pr.title?.trim()) {
+                        missing.push(`${label}: progression type (title) is empty`);
+                    }
+                    if (pr.incrementAmount === null || pr.incrementAmount === undefined || String(pr.incrementAmount).trim() === '') {
+                        missing.push(`${label}: increment amount not set`);
+                    }
+                    if (!pr.progressionCondition?.trim()) {
+                        missing.push(`${label}: trigger condition is empty`);
+                    }
+                }
+            }
+        }
+
+        return {
             letter: 'P',
             titleEn: 'Progression',
-            desc: 'Progression rule documented: Type + Increment + Trigger Condition',
-            status: 'Complete',
+            desc: 'Progression rule per exercise: Type + Increment + Trigger Condition',
             badgeClass: 'badge-p',
-            statusClass: 'status-complete'
-        }
-    ];
+            complete: missing.length === 0,
+            missingItems: missing,
+        };
+    }
 
+    // ── CERT items ────────────────────────────────────────────────────────────
     certItems: any[] = [
         { tag: 'CERT #1', label: 'Equipment and materials required for the exercise', checked: true },
         { tag: 'CERT #2', label: 'Qualifications and experience of the provider', checked: true },
@@ -83,21 +278,13 @@ export class FittVpRevisionComponent {
         { tag: 'CERT #3', label: 'Link to video demonstration of the exercise', checked: true }
     ];
 
-    get phases(): Phase[] {
-        return this.protocol()?.phases ?? [];
-    }
-
     getAllExercises(phase: Phase): { sessionNum: number; sectionTitle: string; exercise: Exercise }[] {
         const result: { sessionNum: number; sectionTitle: string; exercise: Exercise }[] = [];
         for (const week of phase.weeks) {
             for (const session of week.sessions) {
                 for (const section of session.sections) {
                     for (const ex of section.exercises) {
-                        result.push({
-                            sessionNum: session.sessionNumber,
-                            sectionTitle: section.sectionName,
-                            exercise: ex
-                        });
+                        result.push({ sessionNum: session.sessionNumber, sectionTitle: section.sectionName, exercise: ex });
                     }
                 }
             }

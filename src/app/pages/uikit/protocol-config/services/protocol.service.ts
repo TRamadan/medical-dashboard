@@ -738,6 +738,13 @@ export class ProtocolService {
     readonly currentStep = signal(1);
     readonly stepperMode = signal<'create' | 'view' | 'edit'>('create');
 
+    /** Bump this whenever nested object properties are mutated via ngModel
+     *  so any computed() that reads it will re-run. */
+    readonly protocolRevision = signal(0);
+    notifyChange(): void {
+        this.protocolRevision.update(v => v + 1);
+    }
+
     readonly protocolCount = computed(() => this.protocols().length);
 
     // ── Protocol CRUD ────────────────────────────────────────────────────────
@@ -861,7 +868,7 @@ export class ProtocolService {
     // ── Section helpers ──────────────────────────────────────────────────────
     createSection(): Section {
         return {
-            sectionName: 'New Section',
+            sectionName: '',
             time: '',
             exercises: [this.createExercise()]
         };
