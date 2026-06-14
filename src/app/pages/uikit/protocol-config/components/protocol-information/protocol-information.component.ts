@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit, effect, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, effect, input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { finalize } from 'rxjs';
 import { FormArray, FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -26,7 +27,9 @@ export class ProtocolInformationComponent implements OnInit {
 
     readonly readonly = input(false);
 
-    constructor(private fb: FormBuilder) {
+    private fb = inject(FormBuilder);
+
+    constructor() {
         effect(() => {
             if (!this.form) return;
             this.readonly() ? this.form.disable() : this.form.enable();
@@ -35,8 +38,9 @@ export class ProtocolInformationComponent implements OnInit {
 
     protocol = this.protocolService.activeProtocol;
 
-    serviceCategories: { id: number; nameEn: string; nameAr: string; selected: boolean }[] = [];
-    loadingServices: boolean = true;
+    serviceCategories = signal<{ id: number; nameEn: string; nameAr: string; selected: boolean }[]>([]);
+    loadingServices = signal(false);
+    serviceCategoriesError = signal<string | null>(null);
     selectedService: any = null;
     useTemplate = false;
     selectedTemplate: ProtocolTemplate | null = null;
@@ -111,26 +115,36 @@ export class ProtocolInformationComponent implements OnInit {
     }
 
     loadServiceCategories(): void {
-        this.loadingServices = true;
-        this.serviceCategoryService.getServiceCategories().subscribe({
-            next: (data: any) => {
-                debugger
-                this.serviceCategories = data.data.map((item: any) => ({ ...item, selected: false }));
-                this.loadingServices = false;
+        this.loadingServices.set(true);
+        this.serviceCategoriesError.set(null);
+
+        this.serviceCategoryService.getServiceCategories().pipe(
+            finalize(() => this.loadingServices.set(false))
+        ).subscribe({
+            next: (data) => {
+                this.serviceCategories.set(
+                    data.map((item: any) => ({ ...item, selected: false }))
+                );
             },
             error: (err) => {
                 console.error('Failed to load service categories', err);
-                this.loadingServices = false;
+                this.serviceCategoriesError.set('Failed to load services. Please try again.');
             }
         });
     }
 
+    toggleService(service: { id: number; nameEn: string; nameAr: string; selected: boolean }): void {
+        this.serviceCategories.update(categories =>
+            categories.map(c => c.id === service.id ? { ...c, selected: !c.selected } : c)
+        );
+        this.onServiceChange();
+    }
+
     onServiceChange(): void {
         const proto = this.protocol();
-        if (proto && this.selectedService) {
-            proto.services = [this.selectedService];
-        } else if (proto) {
-            proto.services = [];
+        const selected = this.serviceCategories().filter(c => c.selected);
+        if (proto) {
+            proto.services = selected.length > 0 ? selected : [];
         }
     }
 

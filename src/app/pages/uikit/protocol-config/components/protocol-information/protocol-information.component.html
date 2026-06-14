@@ -8,42 +8,69 @@
         <div class="flex flex-col gap-4 mt-4">
             <span class="text-gray-600 mb-2">Select the services related to this plan:</span>
 
-            <!-- <div *ngIf="loadingServices" class="flex items-center gap-2 text-gray-500 italic p-2">
-                <i class="pi pi-spin pi-spinner text-xl"></i>
-                <span>Loading services...</span>
-            </div>
-
-            <div *ngIf="!loadingServices && (!serviceCategories || serviceCategories.length === 0)"
-                class="flex items-center gap-2 text-gray-500 italic p-2">
-                <i class="pi pi-info-circle text-xl"></i>
-                <span>No services found.</span>
-            </div> -->
-
-            <div *ngIf=" serviceCategories.length> 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div *ngFor="let service of serviceCategories"
-                    class="border-2 rounded-xl p-3 transition-all duration-200 flex items-center justify-between"
-                    [class]="service.selected
-                        ? 'border-[#131337] bg-[#131337]'
-                        : 'border-gray-100 bg-white'" [class.cursor-pointer]="!readonly()"
-                    [class.cursor-default]="readonly()" [class.hover:shadow-md]="!readonly()"
-                    [class.hover:border-gray-300]="!readonly() && !service.selected" [class.opacity-70]="readonly()"
-                    (click)="!readonly() && (service.selected = !service.selected); !readonly() && onServiceChange()">
-                    <div class="flex items-center gap-3">
-                        <div class="h-8 w-8 rounded-full flex items-center justify-center transition-colors"
-                            [ngClass]="{'bg-[#2A2A4A] text-white': service.selected, 'bg-gray-100 text-gray-500': !service.selected}">
-                            <i class="pi pi-briefcase text-base"></i>
-                        </div>
-                        <span class="font-semibold text-sm"
-                            [ngClass]="{'text-white': service.selected, 'text-gray-800': !service.selected}">{{
-                            service.nameEn || service.nameAr || 'Service
-                            Target' }}</span>
-                    </div>
-                    <div class="h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors"
-                        [ngClass]="{'border-[#70F4C3] bg-[#70F4C3]': service.selected, 'border-gray-300 bg-white': !service.selected}">
-                        <i class="pi pi-check text-[#131337] text-xs" *ngIf="service.selected"></i>
-                    </div>
+            <!-- Loading state -->
+            @if (loadingServices()) {
+                <div class="flex items-center gap-2 text-gray-500 italic p-2" aria-live="polite">
+                    <i class="pi pi-spin pi-spinner text-xl" aria-hidden="true"></i>
+                    <span>Loading services...</span>
                 </div>
-            </div>
+            }
+
+            <!-- Error state -->
+            @if (!loadingServices() && serviceCategoriesError()) {
+                <div class="flex items-center gap-2 text-red-500 italic p-2" role="alert">
+                    <i class="pi pi-exclamation-triangle text-xl" aria-hidden="true"></i>
+                    <span>{{ serviceCategoriesError() }}</span>
+                </div>
+            }
+
+            <!-- Empty state -->
+            @if (!loadingServices() && !serviceCategoriesError() && serviceCategories().length === 0) {
+                <div class="flex items-center gap-2 text-gray-500 italic p-2" aria-live="polite">
+                    <i class="pi pi-info-circle text-xl" aria-hidden="true"></i>
+                    <span>No services found.</span>
+                </div>
+            }
+
+            <!-- Services grid -->
+            @if (!loadingServices() && serviceCategories().length > 0) {
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="group" aria-label="Service categories">
+                    @for (service of serviceCategories(); track service.id) {
+                        <div
+                            class="border-2 rounded-xl p-3 transition-all duration-200 flex items-center justify-between"
+                            [class]="service.selected ? 'border-[#131337] bg-[#131337]' : 'border-gray-100 bg-white'"
+                            [class.cursor-pointer]="!readonly()"
+                            [class.cursor-default]="readonly()"
+                            [class.opacity-70]="readonly()"
+                            [attr.role]="readonly() ? null : 'checkbox'"
+                            [attr.aria-checked]="service.selected"
+                            [attr.tabindex]="readonly() ? null : 0"
+                            (click)="!readonly() && toggleService(service)"
+                            (keydown.enter)="!readonly() && toggleService(service)"
+                            (keydown.space)="!readonly() && toggleService(service); $event.preventDefault()">
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="h-8 w-8 rounded-full flex items-center justify-center transition-colors"
+                                    [class]="service.selected ? 'bg-[#2A2A4A] text-white' : 'bg-gray-100 text-gray-500'">
+                                    <i class="pi pi-briefcase text-base" aria-hidden="true"></i>
+                                </div>
+                                <span
+                                    class="font-semibold text-sm"
+                                    [class]="service.selected ? 'text-white' : 'text-gray-800'">
+                                    {{ service.nameEn }}
+                                </span>
+                            </div>
+                            <div
+                                class="h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors"
+                                [class]="service.selected ? 'border-[#70F4C3] bg-[#70F4C3]' : 'border-gray-300 bg-white'">
+                                @if (service.selected) {
+                                    <i class="pi pi-check text-[#131337] text-xs" aria-hidden="true"></i>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
         </div>
     </p-card>
 
