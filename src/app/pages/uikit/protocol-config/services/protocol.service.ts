@@ -915,23 +915,27 @@ export class ProtocolService {
 
     syncSetData(ex: Exercise): number[] {
         if (ex.type !== 'exercise') return [];
+        const exerciseEx = ex as ExerciseType;
+        const sets = exerciseEx.sets;
 
-        const count = Math.max(1, Math.min((ex as ExerciseType).sets.length || 1, 20));
-        const sets = (ex as ExerciseType).sets;
+        // Ensure we have at least 1 and at most 20 sets
+        if (sets.length < 1) sets.length = 1;
+        if (sets.length > 20) sets.length = 20;
 
-        while (sets.length < count) {
-            const last = sets[sets.length - 1];
-            sets.push({
-                repetitions: last?.repetitions ?? 0,
-                intensity: last?.intensity ?? '',
-                tempo: last?.tempo ?? '',
-                rest: last?.rest ?? ''
-            });
+        // Fill any holes (e.g. if ngModel increased the length)
+        for (let i = 0; i < sets.length; i++) {
+            if (!sets[i]) {
+                const prev = sets[i - 1];
+                sets[i] = {
+                    repetitions: prev?.repetitions ?? 0,
+                    intensity: prev?.intensity ?? '',
+                    tempo: prev?.tempo ?? '',
+                    rest: prev?.rest ?? ''
+                };
+            }
         }
 
-        if (sets.length > count) sets.length = count;
-
-        return Array.from({ length: count }, (_, i) => i);
+        return Array.from({ length: sets.length }, (_, i) => i);
     }
 
 

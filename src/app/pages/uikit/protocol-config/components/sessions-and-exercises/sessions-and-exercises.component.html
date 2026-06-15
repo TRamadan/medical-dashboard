@@ -137,11 +137,11 @@
                                                         <button
                                                             class="flex-1 relative z-10 py-1.5 text-center text-xs rounded-full transition-colors duration-300 focus:outline-none"
                                                             [ngClass]="{'text-gray-900 font-bold': ex.type !== 'manual', 'text-gray-500 font-medium': ex.type === 'manual'}"
-                                                            (click)="ex.type = 'exercise'">Exercise</button>
+                                                            (click)="ex.type = 'exercise'; protocolService.notifyChange()">Exercise</button>
                                                         <button
                                                             class="flex-1 relative z-10 py-1.5 text-center text-xs rounded-full transition-colors duration-300 focus:outline-none"
                                                             [ngClass]="{'text-gray-900 font-bold': ex.type === 'manual', 'text-gray-500 font-medium': ex.type !== 'manual'}"
-                                                            (click)="ex.type = 'manual'">Manual</button>
+                                                            (click)="ex.type = 'manual'; protocolService.notifyChange()">Manual</button>
                                                     </div>
                                                 </div>
 
@@ -159,13 +159,13 @@
                                                     <div class="flex flex-col gap-1">
                                                         <label class="text-sm font-semibold text-gray-700">Exercise
                                                             Name <span class="text-red-500">*</span></label>
-                                                        <input pInputText [(ngModel)]="ex.name" class="w-full"
+                                                        <input pInputText [(ngModel)]="ex.name" (ngModelChange)="protocolService.notifyChange()" class="w-full"
                                                             placeholder="Exercise name" />
                                                     </div>
                                                     <div class="flex flex-col gap-1" *ngIf="ex.type === 'exercise'">
                                                         <label
                                                             class="text-sm font-semibold text-gray-700">Equipment</label>
-                                                        <input pInputText [(ngModel)]="$any(ex).equipment"
+                                                        <input pInputText [(ngModel)]="$any(ex).equipment" (ngModelChange)="protocolService.notifyChange()"
                                                             class="w-full" placeholder="e.g. Leg Press Machine" />
                                                     </div>
                                                 </div>
@@ -174,7 +174,7 @@
                                                 <div class="flex flex-col gap-1">
                                                     <label
                                                         class="text-sm font-semibold text-gray-700">Description</label>
-                                                    <textarea pInputTextarea [(ngModel)]="ex.description" rows="3"
+                                                    <textarea pInputTextarea [(ngModel)]="ex.description" (ngModelChange)="protocolService.notifyChange()" rows="3"
                                                         class="w-full" placeholder="Enter Description..."></textarea>
                                                 </div>
 
@@ -182,7 +182,7 @@
                                                 <div class="flex flex-col gap-1" *ngIf="ex.type === 'manual'">
                                                     <label class="text-sm font-semibold text-gray-700">Video URL</label>
                                                     <div class="flex items-center gap-2">
-                                                        <input pInputText [(ngModel)]="$any(ex).videoUrl" class="w-full"
+                                                        <input pInputText [(ngModel)]="$any(ex).videoUrl" (ngModelChange)="protocolService.notifyChange()" class="w-full"
                                                             placeholder="https://youtube.com/watch?v=..." />
                                                         <button pButton icon="pi pi-play"
                                                             class="p-button-rounded p-button-success p-button-sm flex-shrink-0"></button>
@@ -246,7 +246,7 @@
                                                             <input pInputText [(ngModel)]="$any(ex).sets.length"
                                                                 type="number" min="1" max="20"
                                                                 class="w-16 text-center text-sm h-8 p-1" placeholder="1"
-                                                                (ngModelChange)="syncSetData(ex)" />
+                                                                (ngModelChange)="syncSetData(ex); protocolService.notifyChange()" />
                                                         </div>
                                                         <span
                                                             class="bg-[#134e4a] text-[#2dd4a0] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP
@@ -286,17 +286,19 @@
                                                                 </div>
                                                                 <input pInputText
                                                                     [(ngModel)]="$any(ex).sets[idx].repetitions"
+                                                                    (ngModelChange)="protocolService.notifyChange()"
                                                                     type="number" min="0"
                                                                     class="w-full text-center text-sm h-9 shadow-sm"
                                                                     placeholder="reps" />
                                                                 <input pInputText
                                                                     [(ngModel)]="$any(ex).sets[idx].intensity"
+                                                                    (ngModelChange)="protocolService.notifyChange()"
                                                                     class="w-full text-center text-sm h-9 shadow-sm"
                                                                     placeholder="Mod" />
-                                                                <input pInputText [(ngModel)]="$any(ex).sets[idx].tempo"
+                                                                <input pInputText [(ngModel)]="$any(ex).sets[idx].tempo" (ngModelChange)="protocolService.notifyChange()"
                                                                     class="w-full text-center text-sm h-9 shadow-sm"
                                                                     placeholder="2-1-3" />
-                                                                <input pInputText [(ngModel)]="$any(ex).sets[idx].rest"
+                                                                <input pInputText [(ngModel)]="$any(ex).sets[idx].rest" (ngModelChange)="protocolService.notifyChange()"
                                                                     class="w-full text-center text-sm h-9 shadow-sm"
                                                                     placeholder="90" />
                                                             </div>
@@ -322,7 +324,7 @@
                                                             <label
                                                                 class="text-xs font-semibold text-gray-500 uppercase">Progression
                                                                 title</label>
-                                                            <input pInputText [(ngModel)]="ex.progressionRule.title"
+                                                            <input pInputText [(ngModel)]="ex.progressionRule.title" (ngModelChange)="protocolService.notifyChange()"
                                                                 class="w-full text-sm"
                                                                 placeholder="e.g. Volume Progression" />
                                                         </div>
@@ -331,7 +333,7 @@
                                                                 class="text-xs font-semibold text-gray-500 uppercase">Increment
                                                                 amount</label>
                                                             <input pInputText
-                                                                [(ngModel)]="ex.progressionRule.incrementAmount"
+                                                                [(ngModel)]="ex.progressionRule.incrementAmount" (ngModelChange)="protocolService.notifyChange()"
                                                                 type="number" class="w-full text-sm"
                                                                 placeholder="e.g. 2.5" />
                                                         </div>
@@ -340,7 +342,7 @@
                                                                 class="text-xs font-semibold text-gray-500 uppercase">Progression
                                                                 condition</label>
                                                             <input pInputText
-                                                                [(ngModel)]="ex.progressionRule.progressionCondition"
+                                                                [(ngModel)]="ex.progressionRule.progressionCondition" (ngModelChange)="protocolService.notifyChange()"
                                                                 class="w-full text-sm"
                                                                 placeholder="e.g. VAS ≤ 4 + RIR ≥ 3" />
                                                         </div>

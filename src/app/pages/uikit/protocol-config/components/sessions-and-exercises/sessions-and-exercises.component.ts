@@ -21,7 +21,7 @@ import { Phase, Week, Exercise, Section, ExerciseType, isMeasurementSession, get
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SessionsAndExercisesComponent implements OnInit {
-    private protocolService = inject(ProtocolService);
+    public protocolService = inject(ProtocolService);
     private measurementTemplatesService = inject(MeasurementTemplatesService);
     private cdr = inject(ChangeDetectorRef)
     readonly protocol = this.protocolService.activeProtocol;
@@ -207,23 +207,26 @@ export class SessionsAndExercisesComponent implements OnInit {
         if (ex.type !== 'exercise') return [];
 
         const exerciseEx = ex as ExerciseType;
-        const desiredLength = exerciseEx.sets.length;
+        const sets = exerciseEx.sets;
 
-        // Ensure sets array matches desired length
-        while (exerciseEx.sets.length < desiredLength) {
-            exerciseEx.sets.push({
-                repetitions: 0,
-                intensity: '',
-                tempo: '',
-                rest: ''
-            });
+        // If ngModel set .length, we might have undefined holes. Fill them.
+        for (let i = 0; i < sets.length; i++) {
+            if (!sets[i]) {
+                const prev = sets[i - 1];
+                sets[i] = {
+                    repetitions: prev?.repetitions ?? 0,
+                    intensity: prev?.intensity ?? '',
+                    tempo: prev?.tempo ?? '',
+                    rest: prev?.rest ?? ''
+                };
+            }
         }
 
-        if (exerciseEx.sets.length > desiredLength) {
-            exerciseEx.sets.splice(desiredLength);
-        }
+        // Enforce limits
+        if (sets.length > 20) sets.length = 20;
+        if (sets.length < 1) sets.length = 1;
 
-        // Return array of indices for *ngFor
-        return Array.from({ length: exerciseEx.sets.length }, (_, i) => i);
+        // Return array of indices
+        return Array.from({ length: sets.length }, (_, i) => i);
     }
 }

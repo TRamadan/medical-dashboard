@@ -26,7 +26,7 @@
                         </div>
                         <div class="flex flex-col gap-1 flex-1">
                             <label class="font-medium text-gray-700 text-sm">Phase Name:</label>
-                            <input pInputText [(ngModel)]="phase.name" placeholder="Enter phase name" class="w-full" />
+                            <input pInputText [(ngModel)]="phase.name" (ngModelChange)="protocolService.notifyChange()" placeholder="Enter phase name" class="w-full" />
                         </div>
                     </div>
 
@@ -34,7 +34,12 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="flex flex-col gap-2">
                             <label class="font-medium text-gray-700 text-sm">Weeks:</label>
-                            <input pInputText [(ngModel)]="phase.totalWeeks" placeholder="eg., 12" class="w-full"
+                            <input pInputText [(ngModel)]="phase.totalWeeks" (ngModelChange)="protocolService.notifyChange()" placeholder="eg., 12" class="w-full"
+                                type="number" />
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="font-medium text-gray-700 text-sm">Sessions per Week:</label>
+                            <input pInputText [(ngModel)]="phase.sessionsPerWeek" (ngModelChange)="protocolService.notifyChange()" placeholder="eg., 3" class="w-full"
                                 type="number" />
                         </div>
                         <div class="flex flex-col gap-2">
@@ -42,17 +47,13 @@
                             <input pInputText [ngModel]="getPhaseSessionCount(phase)" placeholder="eg., 12"
                                 class="w-full" type="number" />
                         </div>
-                        <div class="flex flex-col gap-2">
-                            <label class="font-medium text-gray-700 text-sm">Sessions per Week:</label>
-                            <input pInputText [(ngModel)]="phase.sessionsPerWeek" placeholder="eg., 3" class="w-full"
-                                type="number" />
-                        </div>
+
                     </div>
 
                     <!-- Objective -->
                     <div class="flex flex-col gap-2">
                         <label class="font-medium text-gray-700 text-sm">Phase Objective:</label>
-                        <textarea pInputTextarea [(ngModel)]="phase.objective" rows="3" class="w-full"
+                        <textarea pInputTextarea [(ngModel)]="phase.objective" (ngModelChange)="protocolService.notifyChange()" rows="3" class="w-full"
                             placeholder="Reduce inflammation, protect healing tissue, gentle ROM exercises"></textarea>
                     </div>
 

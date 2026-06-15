@@ -9,7 +9,7 @@ import { DropdownModule } from 'primeng/dropdown';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TooltipModule } from 'primeng/tooltip';
 import { ProtocolService } from '../../services/protocol.service';
-import { Phase, Exercise, ExerciseType } from '../../models/protocol.model';
+import { Phase, Exercise, ExerciseType, ManualType } from '../../models/protocol.model';
 
 export interface FittCard {
     letter: string;
@@ -267,16 +267,82 @@ export class FittVpRevisionComponent {
     }
 
     // ── CERT items ────────────────────────────────────────────────────────────
-    certItems: any[] = [
-        { tag: 'CERT #1', label: 'Equipment and materials required for the exercise', checked: true },
-        { tag: 'CERT #2', label: 'Qualifications and experience of the provider', checked: true },
-        { tag: 'CERT #3', label: 'Detailed description of how to perform the exercise', checked: true },
-        { tag: 'CERT #13', label: 'Dosage – Sets, repetitions, and duration', checked: true },
-        { tag: 'CERT #14-15', label: 'Method of progression and individualization', checked: true },
-        { tag: 'CERT #3', label: 'Contraindications and stop signals', checked: true },
-        { tag: 'CERT #14', label: 'Criteria for transition between phases (Criteria-Based)', checked: true },
-        { tag: 'CERT #3', label: 'Link to video demonstration of the exercise', checked: true }
-    ];
+    // ── CERT Items (Reactive Validation) ──────────────────────────────────────
+    readonly certItems = computed(() => {
+        this.protocolService.protocolRevision();
+        const proto = this.protocol();
+        if (!proto) return [];
+
+        const phases = proto.phases ?? [];
+        const allExercises = this.collectAllExercises(phases);
+        const hasManualExercise = allExercises.some(e => e.ex.type === 'manual');
+
+        const items = [
+            {
+                tag: 'CERT #1',
+                label: 'Equipment and materials required for the exercise',
+                checked: allExercises.length > 0 && allExercises.every(e => {
+                    if (e.ex.type !== 'exercise') return true;
+                    return (e.ex as ExerciseType).equipment?.trim().length > 0;
+                })
+            },
+            {
+                tag: 'CERT #2',
+                label: 'Qualifications and experience of the provider',
+                checked: !!proto.createdBy?.name?.trim() && !!proto.createdBy?.role?.trim()
+            },
+            {
+                tag: 'CERT #3',
+                label: 'Detailed description of how to perform the exercise',
+                checked: allExercises.length > 0 && allExercises.every(e => e.ex.description?.trim().length > 0)
+            },
+            {
+                tag: 'CERT #13',
+                label: 'Dosage – Sets, repetitions, and duration',
+                checked: allExercises.length > 0 && allExercises.every(e => {
+                    if (e.ex.type !== 'exercise') return true;
+                    const exT = e.ex as ExerciseType;
+                    const hasSets = exT.sets.length > 0;
+                    const setsFilled = exT.sets.every(s => s.repetitions > 0);
+                    // Check if the section containing this exercise has time
+                    const phase = phases.find(p => p.weeks.some(w => w.sessions.some(s => s.sessionNumber === e.sessionNum)));
+                    const session = phase?.weeks.flatMap(w => w.sessions).find(s => s.sessionNumber === e.sessionNum);
+                    const section = session?.sections.find(s => s.sectionName === e.sectionName);
+                    const timeFilled = !!section?.time?.trim();
+                    return hasSets && setsFilled && timeFilled;
+                })
+            },
+            {
+                tag: 'CERT #14-15',
+                label: 'Method of progression and individualization',
+                checked: allExercises.length > 0 && allExercises.every(e => {
+                    const pr = e.ex.progressionRule;
+                    return !!pr?.title?.trim() && (pr?.incrementAmount !== null && pr?.incrementAmount !== undefined) && !!pr?.progressionCondition?.trim();
+                })
+            },
+            {
+                tag: 'CERT #3',
+                label: 'Contraindications and stop signals',
+                checked: phases.length > 0 && phases.every(p => p.criteria?.precautions?.trim().length > 0)
+            },
+            {
+                tag: 'CERT #14',
+                label: 'Criteria for transition between phases (Criteria-Based)',
+                checked: phases.length > 0 && phases.every(p => p.criteria?.transitionCriteria?.length > 0)
+            }
+        ];
+
+        // Add Video Link item only if there's a manual exercise
+        if (hasManualExercise) {
+            items.push({
+                tag: 'CERT #3',
+                label: 'Link to video demonstration of the exercise',
+                checked: allExercises.filter(e => e.ex.type === 'manual').every((e: any) => (e.ex as ManualType).videoUrl?.trim().length > 0)
+            });
+        }
+
+        return items;
+    });
 
     getAllExercises(phase: Phase): { sessionNum: number; sectionTitle: string; exercise: Exercise }[] {
         const result: { sessionNum: number; sectionTitle: string; exercise: Exercise }[] = [];

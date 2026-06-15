@@ -83,18 +83,18 @@
 
         <!-- CERT Section Header -->
         <div class="section-header-row cert-header mb-3">
-            <span class="section-label">CERT Completion – <span class="cert-count">{{ certItems.length }} items</span></span>
+            <span class="section-label">CERT Completion – <span class="cert-count">{{ certItems().length }} items</span></span>
         </div>
 
         <!-- CERT List -->
-        @for (item of certItems; track item.tag + item.label) {
+        @for (item of certItems(); track item.tag + item.label) {
             <p-card [class.checked]="item.checked" styleClass="fitt-card h-full">
                 <div class="cert-row">
                     <!-- Tag left, Label middle, Checkbox right -->
                     <div class="cert-tag-badge">{{ item.tag }}</div>
                     <div class="cert-label">{{ item.label }}</div>
                     <div class="cert-checkbox">
-                        <p-checkbox [(ngModel)]="item.checked" [binary]="true"></p-checkbox>
+                        <p-checkbox [ngModel]="item.checked" [binary]="true" [disabled]="true"></p-checkbox>
                     </div>
                 </div>
             </p-card>

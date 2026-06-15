@@ -28,7 +28,7 @@ export interface CriterionOption {
 
 
 export class PhasesAndCriteriaComponent {
-    private protocolService = inject(ProtocolService);
+    public protocolService = inject(ProtocolService);
     readonly protocol = this.protocolService.activeProtocol;
     readonly getPhaseSessionCount = getPhaseSessionCount;
     readonly getSessionNumbers = getProtocolSessions;
