@@ -1,0 +1,73 @@
+{
+    "name": "string",
+    "injuryCondition": "string",
+    "primaryGoal": "string",
+    "totalWeeks": 0,
+    "sessionsPerWeek": 0,
+    "numberOfPhases": 0,
+    "targetAthleteLevel": "string",
+    "doctorId": "string",
+    "saveAsDraft": true,
+    "protocolServiceIds": [
+        0
+    ],
+    "phases": [
+        {
+            "phaseName": "string",
+            "phaseOrder": 0,
+            "weeks": 0,
+            "sessionsPerWeek": 0,
+            "phaseObjective": "string",
+            "criteria": [
+                {
+                    "criterionType": "string",
+                    "operator": "string",
+                    "value": 0,
+                    "unit": "string"
+                }
+            ],
+            "sessions": [
+                {
+                    "sessionNumber": 0,
+                    "isMeasurementSession": true,
+                    "measurementTemplateId": 0,
+                    "sections": [
+                        {
+                            "sectionName": "string",
+                            "durationMinutes": 0,
+                            "order": 0,
+                            "exercises": [
+                                {
+                                    "exerciseType": "string",
+                                    "order": 0,
+                                    "exerciseId": 0,
+                                    "equipment": "string",
+                                    "contractionType": "string",
+                                    "intensityMethod": "string",
+                                    "sets": [
+                                        {
+                                            "setNumber": 0,
+                                            "reps": 0,
+                                            "intensity": "string",
+                                            "tempo": "string",
+                                            "restSeconds": 0
+                                        }
+                                    ],
+                                    "exerciseName": "string",
+                                    "description": "string",
+                                    "videoUrl": "string",
+                                    "progressionTitle": "string",
+                                    "incrementAmount": 0,
+                                    "progressionCondition": "string"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "contraindications": [
+        "string"
+    ]
+}

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, ChangeDetectorRef, input, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
@@ -25,6 +25,7 @@ export class SessionsAndExercisesComponent implements OnInit {
     private measurementTemplatesService = inject(MeasurementTemplatesService);
     private cdr = inject(ChangeDetectorRef)
     readonly protocol = this.protocolService.activeProtocol;
+    readonly readonly = input(false);
     availableTemplates: any[] = [];
 
     get phases(): Phase[] {
@@ -88,10 +89,11 @@ export class SessionsAndExercisesComponent implements OnInit {
                 while (week.sessions.length > perWeek) week.sessions.pop();
                 for (let si = week.sessions.length; si < perWeek; si++) {
                     const globalNum = wi * perWeek + si + 1;
+                    const isMeasurement = (targetPhase.measurementSessionNums || []).includes(globalNum);
                     week.sessions.push({
                         id: crypto.randomUUID(),
                         sessionNumber: globalNum,
-                        sections: [{ sectionName: 'Warm Up', time: '10 min', exercises: [] }]
+                        sections: isMeasurement ? [] : [{ sectionName: 'Warm Up', time: '10 min', exercises: [] }]
                     });
                 }
                 // Re-number sessions
@@ -136,11 +138,11 @@ export class SessionsAndExercisesComponent implements OnInit {
 
     // ── Sections ─────────────────────────────────────────────────────────────
     getSections(phase: Phase, sessionNum: number): Section[] {
-        this.protocolService.ensureSessionData(phase, sessionNum);
-        return phase.weeks
-            .flatMap(w => w.sessions)
-            .find(s => s.sessionNumber === sessionNum)
-            ?.sections ?? [];
+        for (const week of phase.weeks) {
+            const session = week.sessions.find(s => s.sessionNumber === sessionNum);
+            if (session) return session.sections;
+        }
+        return [];
     }
 
     addSection(phase: Phase, globalSessionNum: number): void {
@@ -174,12 +176,24 @@ export class SessionsAndExercisesComponent implements OnInit {
 
             this.protocolService.ensureSessionData(targetPhase, sessionNum);
 
-            const isCurrentlySelected = targetPhase.measurementSessionNums.includes(sessionNum);
-            if (isCurrentlySelected) {
-                // If already selected, maybe we just want to keep it selected but ensure it is indeed in the list
-                // (In a real app, you'd also save the template ID here)
-            } else {
-                targetPhase.measurementSessionNums = [...targetPhase.measurementSessionNums, sessionNum];
+            const session = targetPhase.weeks
+                .flatMap(w => w.sessions)
+                .find(s => s.sessionNumber === sessionNum);
+
+            if (session) {
+                if (session.measurementTemplateId === template?.id) {
+                    // Toggle Off
+                    session.measurementTemplateId = null;
+                } else {
+                    // Switch template
+                    session.measurementTemplateId = template?.id ?? null;
+                    // Ensure it's in measurementSessionNums
+                    if (!targetPhase.measurementSessionNums.includes(sessionNum)) {
+                        targetPhase.measurementSessionNums = [...targetPhase.measurementSessionNums, sessionNum];
+                    }
+                    // Clear sections since it's a measurement session
+                    session.sections = [];
+                }
             }
 
             return { ...proto };
@@ -199,17 +213,25 @@ export class SessionsAndExercisesComponent implements OnInit {
     }
 
     isSessionMeasurementSelected(phase: Phase, sessionNum: number, template: { id: number; name: string }): boolean {
-        return phase.measurementSessionNums.includes(sessionNum);
+        const session = phase.weeks
+            .flatMap(w => w.sessions)
+            .find(s => s.sessionNumber === sessionNum);
+        return session?.measurementTemplateId === template.id;
     }
 
 
-    syncSetData(ex: Exercise): number[] {
+    getSetIndices(ex: Exercise): number[] {
         if (ex.type !== 'exercise') return [];
+        return this.protocolService.getRange((ex as ExerciseType).sets.length).map(v => v - 1);
+    }
+
+    syncSetData(ex: Exercise): void {
+        if (ex.type !== 'exercise') return;
 
         const exerciseEx = ex as ExerciseType;
         const sets = exerciseEx.sets;
 
-        // If ngModel set .length, we might have undefined holes. Fill them.
+        // Ensure we have objects for all sets
         for (let i = 0; i < sets.length; i++) {
             if (!sets[i]) {
                 const prev = sets[i - 1];
@@ -225,8 +247,5 @@ export class SessionsAndExercisesComponent implements OnInit {
         // Enforce limits
         if (sets.length > 20) sets.length = 20;
         if (sets.length < 1) sets.length = 1;
-
-        // Return array of indices
-        return Array.from({ length: sets.length }, (_, i) => i);
     }
 }

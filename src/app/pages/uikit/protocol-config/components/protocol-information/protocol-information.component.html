@@ -10,76 +10,73 @@
 
             <!-- Loading state -->
             @if (loadingServices()) {
-                <div class="flex items-center gap-2 text-gray-500 italic p-2" aria-live="polite">
-                    <i class="pi pi-spin pi-spinner text-xl" aria-hidden="true"></i>
-                    <span>Loading services...</span>
-                </div>
+            <div class="flex items-center gap-2 text-gray-500 italic p-2" aria-live="polite">
+                <i class="pi pi-spin pi-spinner text-xl" aria-hidden="true"></i>
+                <span>Loading services...</span>
+            </div>
             }
 
             <!-- Error state -->
             @if (!loadingServices() && serviceCategoriesError()) {
-                <div class="flex items-center gap-2 text-red-500 italic p-2" role="alert">
-                    <i class="pi pi-exclamation-triangle text-xl" aria-hidden="true"></i>
-                    <span>{{ serviceCategoriesError() }}</span>
-                </div>
+            <div class="flex items-center gap-2 text-red-500 italic p-2" role="alert">
+                <i class="pi pi-exclamation-triangle text-xl" aria-hidden="true"></i>
+                <span>{{ serviceCategoriesError() }}</span>
+            </div>
             }
 
             <!-- Empty state -->
-            @if (!loadingServices() && !serviceCategoriesError() && serviceCategories().length === 0) {
-                <div class="flex items-center gap-2 text-gray-500 italic p-2" aria-live="polite">
-                    <i class="pi pi-info-circle text-xl" aria-hidden="true"></i>
-                    <span>No services found.</span>
-                </div>
+            @if (!loadingServices() && !serviceCategoriesError() && servicesSignal().length === 0) {
+            <div class="flex items-center gap-2 text-gray-500 italic p-2" aria-live="polite">
+                <i class="pi pi-info-circle text-xl" aria-hidden="true"></i>
+                <span>No services found.</span>
+            </div>
             }
 
             <!-- Services grid -->
-            @if (!loadingServices() && serviceCategories().length > 0) {
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="group" aria-label="Service categories">
-                    @for (service of serviceCategories(); track service.id) {
-                        <div
-                            class="border-2 rounded-xl p-3 transition-all duration-200 flex items-center justify-between"
-                            [class]="service.selected ? 'border-[#131337] bg-[#131337]' : 'border-gray-100 bg-white'"
-                            [class.cursor-pointer]="!readonly()"
-                            [class.cursor-default]="readonly()"
-                            [class.opacity-70]="readonly()"
-                            [attr.role]="readonly() ? null : 'checkbox'"
-                            [attr.aria-checked]="service.selected"
-                            [attr.tabindex]="readonly() ? null : 0"
-                            (click)="!readonly() && toggleService(service)"
-                            (keydown.enter)="!readonly() && toggleService(service)"
-                            (keydown.space)="!readonly() && toggleService(service); $event.preventDefault()">
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="h-8 w-8 rounded-full flex items-center justify-center transition-colors"
-                                    [class]="service.selected ? 'bg-[#2A2A4A] text-white' : 'bg-gray-100 text-gray-500'">
-                                    <i class="pi pi-briefcase text-base" aria-hidden="true"></i>
-                                </div>
-                                <span
-                                    class="font-semibold text-sm"
-                                    [class]="service.selected ? 'text-white' : 'text-gray-800'">
-                                    {{ service.nameEn }}
-                                </span>
-                            </div>
-                            <div
-                                class="h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors"
-                                [class]="service.selected ? 'border-[#70F4C3] bg-[#70F4C3]' : 'border-gray-300 bg-white'">
-                                @if (service.selected) {
-                                    <i class="pi pi-check text-[#131337] text-xs" aria-hidden="true"></i>
-                                }
-                            </div>
+            @if (!loadingServices() && servicesSignal().length > 0) {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" role="group"
+                aria-label="Service categories">
+                @for (service of servicesSignal(); track service.id) {
+                <div class="border-2 rounded-xl p-3 transition-all duration-200 flex items-center justify-between"
+                    [class]="service.selected ? 'border-[#131337] bg-[#131337]' : 'border-gray-100 bg-white'"
+                    [class.cursor-pointer]="!readonly()" [class.cursor-default]="readonly()"
+                    [class.opacity-70]="readonly()" [attr.role]="readonly() ? null : 'checkbox'"
+                    [attr.aria-checked]="service.selected" [attr.tabindex]="readonly() ? null : 0"
+                    (click)="!readonly() && toggleService(service)"
+                    (keydown.enter)="!readonly() && toggleService(service)"
+                    (keydown.space)="!readonly() && toggleService(service); $event.preventDefault()">
+                    <div class="flex items-center gap-3">
+                        <div class="h-8 w-8 rounded-full flex items-center justify-center transition-colors"
+                            [class]="service.selected ? 'bg-[#2A2A4A] text-white' : 'bg-gray-100 text-gray-500'">
+                            <i class="pi pi-briefcase text-base" aria-hidden="true"></i>
                         </div>
-                    }
+                        <span class="font-semibold text-sm" [class]="service.selected ? 'text-white' : 'text-gray-800'">
+                            {{ service.serviceNameEn }}
+                        </span>
+                    </div>
+                    <div class="h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors"
+                        [class]="service.selected ? 'border-[#70F4C3] bg-[#70F4C3]' : 'border-gray-300 bg-white'">
+                        @if (service.selected) {
+                        <i class="pi pi-check text-[#131337] text-xs" aria-hidden="true"></i>
+                        }
+                    </div>
                 </div>
+                }
+            </div>
             }
         </div>
     </p-card>
 
     <!-- Template Selection Card -->
+    @if (!readonly()) {
     <p-card>
         <div class="flex flex-col gap-4">
             <div class="flex items-center gap-2">
                 <i class="pi pi-clone text-blue-600 text-xl"></i>
                 <span class="text-xl font-bold">Use Treatment Plan Template</span>
+                @if (loadingTemplateDetails()) {
+                <i class="pi pi-spin pi-spinner text-blue-600 ml-2" aria-hidden="true" title="Loading details..."></i>
+                }
             </div>
             <div class="flex items-center gap-2">
                 <p-checkbox [(ngModel)]="useTemplate" [binary]="true" inputId="template"
@@ -90,8 +87,26 @@
             <div *ngIf="useTemplate" class="flex flex-col gap-4 mt-2">
                 <span class="text-gray-600">Select a template to customize:</span>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div *ngFor="let template of templates"
+                <!-- Loading state -->
+                @if (protocolService.loadingProtocols()) {
+                <div class="flex items-center gap-2 text-gray-500 italic p-2" aria-live="polite">
+                    <i class="pi pi-spin pi-spinner text-xl" aria-hidden="true"></i>
+                    <span>Loading available plans...</span>
+                </div>
+                }
+
+                <!-- Empty state -->
+                @if (!protocolService.loadingProtocols() && templates().length === 0) {
+                <div class="flex items-center gap-2 text-gray-500 italic p-4 bg-gray-50 border border-dashed border-gray-200 rounded-lg"
+                    aria-live="polite">
+                    <i class="pi pi-info-circle text-xl" aria-hidden="true"></i>
+                    <span>No existing treatment plans found to use as a template.</span>
+                </div>
+                }
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+                    *ngIf="!protocolService.loadingProtocols() && templates().length > 0">
+                    <div *ngFor="let template of templates()"
                         class="border rounded-xl p-4 transition-all duration-200 relative flex flex-col h-full" [class]="selectedTemplate === template
                             ? 'border-[#131337] bg-[#131337] shadow-lg scale-[1.02]'
                             : 'border-gray-200 bg-white'" [class.cursor-pointer]="!readonly()"
@@ -138,6 +153,7 @@
             </div>
         </div>
     </p-card>
+    }
 
     <!-- Plan Configuration Card -->
     <!-- acl-protocol.component.html -->
@@ -157,6 +173,10 @@
                         <label>Total Weeks <span class="required">*</span></label>
                         <p-inputNumber formControlName="totalWeeks" [min]="1" [showButtons]="false" styleClass="w-full"
                             inputStyleClass="proto-input"></p-inputNumber>
+                        @if (form.get('totalWeeks')?.invalid && (form.get('totalWeeks')?.dirty ||
+                        form.get('totalWeeks')?.touched)) {
+                        <small class="text-red-500 mt-1 block">Total weeks is required.</small>
+                        }
                     </div>
 
                     <div class="field">
@@ -185,11 +205,19 @@
                     <div class="field">
                         <label>Protocol Name <span class="required">*</span></label>
                         <input pInputText formControlName="protocolName" class="proto-input w-full" />
+                        @if (form.get('protocolName')?.invalid && (form.get('protocolName')?.dirty ||
+                        form.get('protocolName')?.touched)) {
+                        <small class="text-red-500 mt-1 block">Protocol name is required.</small>
+                        }
                     </div>
 
                     <div class="field">
                         <label>Injury / Condition <span class="required">*</span></label>
                         <input pInputText formControlName="injuryCondition" class="proto-input w-full" />
+                        @if (form.get('injuryCondition')?.invalid && (form.get('injuryCondition')?.dirty ||
+                        form.get('injuryCondition')?.touched)) {
+                        <small class="text-red-500 mt-1 block">Injury / condition is required.</small>
+                        }
                     </div>
 
 
@@ -197,6 +225,10 @@
                         <label>Primary Goal <span class="required">*</span></label>
                         <textarea pInputTextarea formControlName="primaryGoal" class="proto-input w-full" rows="3"
                             [autoResize]="false"></textarea>
+                        @if (form.get('primaryGoal')?.invalid && (form.get('primaryGoal')?.dirty ||
+                        form.get('primaryGoal')?.touched)) {
+                        <small class="text-red-500 mt-1 block">Primary goal is required.</small>
+                        }
                     </div>
                 </p-card>
             </div>
@@ -214,10 +246,19 @@
                     </div>
 
                     <div class="contra-list" formArrayName="contraindications">
-                        <div *ngFor="let ctrl of contraindications.controls; let i = index" class="contra-item">
+                        <!-- Empty state message -->
+                        @if (contraindications.length === 0) {
+                        <div
+                            class="flex items-center gap-2 p-4 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-gray-500 italic">
+                            <i class="pi pi-info-circle text-lg"></i>
+                            <span>No contraindications or stop signals defined for this protocol.</span>
+                        </div>
+                        }
+
+                        <div *ngFor="let ctrl of contraindications.controls; let i = index" class="contra-item" [formGroupName]="i">
                             <span class="contra-x" *ngIf="!readonly()" (click)="removeContraindication(i)">✕</span>
                             <span class="contra-x opacity-30" *ngIf="readonly()">✕</span>
-                            <input pInputText [formControlName]="i" class="proto-input contra-input" />
+                            <input pInputText formControlName="description" class="proto-input contra-input" />
                         </div>
                     </div>
 

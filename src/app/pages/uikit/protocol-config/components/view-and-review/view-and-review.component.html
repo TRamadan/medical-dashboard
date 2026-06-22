@@ -1,3 +1,4 @@
+<p-toast />
 <div class="flex flex-col gap-6">
     <!-- Alert Banner -->
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-4 items-start w-11/12 mx-auto">
@@ -15,12 +16,39 @@
             <div class="flex flex-col gap-1">
                 <span class="text-xl font-bold text-gray-800">{{ proto.name || 'Untitled Protocol' }}</span>
                 <div class="flex items-center gap-3 text-sm text-gray-500">
-                    <span><i class="pi pi-calendar mr-1"></i>{{ proto.weeks || '—' }} weeks</span>
-                    <span><i class="pi pi-list mr-1"></i>{{ proto.totalSessions || '—' }} sessions</span>
+                    <span><i class="pi pi-calendar mr-1"></i>{{ computedTotalWeeks || '—' }} weeks</span>
+                    <span><i class="pi pi-list mr-1"></i>{{ computedTotalSessions || '—' }} sessions</span>
                     <span><i class="pi pi-chart-bar mr-1"></i>{{ proto.phases.length }} phases</span>
                 </div>
             </div>
             <p-tag [value]="proto.status | titlecase" severity="warn"></p-tag>
+        </div>
+    </p-card>
+
+    <!-- Contraindications Summary -->
+    <p-card *ngIf="protocol() as proto">
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-2 text-gray-700">
+                <i class="pi pi-exclamation-circle text-red-500 font-bold"></i>
+                <span class="font-bold uppercase text-xs tracking-wider">Stop Signals & Contraindications</span>
+            </div>
+
+            <!-- Empty State -->
+            @if (!proto.contraindications || proto.contraindications.length === 0) {
+                <div class="flex items-center gap-2 p-3 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-gray-500 italic text-sm">
+                    <i class="pi pi-info-circle"></i>
+                    <span>No contraindications defined for this protocol.</span>
+                </div>
+            } @else {
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    @for (item of proto.contraindications; track $index) {
+                        <div class="flex items-start gap-2 p-2.5 bg-red-50/50 border border-red-100 rounded-lg text-sm text-red-800">
+                            <span class="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                            <span>{{ item.description }}</span>
+                        </div>
+                    }
+                </div>
+            }
         </div>
     </p-card>
 
@@ -172,12 +200,12 @@
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="flex flex-col items-center bg-[#131337] rounded-xl p-4 text-white">
                 <i class="pi pi-calendar text-[#70F4C3] text-xl mb-2"></i>
-                <span class="text-2xl font-bold">{{ proto.weeks || '—' }}</span>
+                <span class="text-2xl font-bold">{{ computedTotalWeeks || '—' }}</span>
                 <span class="text-xs text-gray-300 uppercase font-semibold mt-1">Weeks</span>
             </div>
             <div class="flex flex-col items-center bg-[#131337] rounded-xl p-4 text-white">
                 <i class="pi pi-list text-[#70F4C3] text-xl mb-2"></i>
-                <span class="text-2xl font-bold">{{ proto.totalSessions || '—' }}</span>
+                <span class="text-2xl font-bold">{{ computedTotalSessions || '—' }}</span>
                 <span class="text-xs text-gray-300 uppercase font-semibold mt-1">Total Sessions</span>
             </div>
             <div class="flex flex-col items-center bg-[#131337] rounded-xl p-4 text-white">
@@ -216,7 +244,7 @@
 
 
         <!-- Action Cards -->
-        <div class="flex flex-col gap-3">
+        <div *ngIf="!readonly()" class="flex flex-col gap-3">
             <div class="flex items-center gap-2">
                 <i class="pi pi-sliders-h text-[#131337] text-lg"></i>
                 <span class="font-bold text-gray-800 text-base">Save Options</span>
@@ -310,10 +338,13 @@
             </div>
         </div>
 
-        <!-- Activate Protocol & Save Draft -->
-        <div class="flex justify-center gap-4 pb-4">
-            <button pButton class="p-button-outlined px-10 py-3 text-base font-bold" icon="pi pi-save" iconPos="left"
-                label="Save as draft" [disabled]="!proto.name?.trim()"
+        <!-- Activate Protocol & Save Draft (Hidden in Readonly) -->
+        <div class="flex justify-center gap-4 pb-4" *ngIf="!readonly() && !isActionSelected('pdf')">
+            <button pButton class="p-button-outlined px-10 py-3 text-base font-bold"
+                [icon]="savingDraft() ? 'pi pi-spin pi-spinner' : 'pi pi-save'"
+                iconPos="left"
+                label="Save as draft"
+                [disabled]="!proto.name?.trim() || savingDraft()"
                 pTooltip="{{ proto.name?.trim() ? 'Save protocol as draft' : 'Please enter a protocol name first' }}"
                 tooltipPosition="top" (click)="saveAsDraft()">
             </button>
@@ -321,6 +352,14 @@
                 label="Activate protocol and send notifications" [disabled]="!proto.name?.trim()"
                 pTooltip="{{ proto.name?.trim() ? 'Activate and save protocol' : 'Please enter a protocol name first' }}"
                 tooltipPosition="top" (click)="activateProtocol()">
+            </button>
+        </div>
+
+        <!-- Download PDF (Always visible if action selected OR if readonly) -->
+        <div class="flex justify-center gap-4 pb-4" *ngIf="readonly() || isActionSelected('pdf')">
+            <button pButton class="px-10 py-3 text-base font-bold p-button-danger" icon="pi pi-file-pdf" iconPos="left"
+                label="Download Protocol PDF" [disabled]="!proto.name?.trim()"
+                (click)="exportToPDF()">
             </button>
         </div>
 

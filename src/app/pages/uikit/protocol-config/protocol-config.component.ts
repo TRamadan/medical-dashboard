@@ -49,7 +49,18 @@ export class ProtocolConfigComponent {
     }
 
     saveEditedProtocol(): void {
-        this.protocolService.saveEditedProtocol();
+        const proto = this.activeProtocol();
+        if (!proto) return;
+
+        this.protocolService.updateTreatmentPlan(proto.id).subscribe({
+            next: () => {
+                this.protocolService.fetchProtocols(); // Refresh UI list
+                this.protocolService.cancelProtocol(); // Close stepper
+            },
+            error: (err) => {
+                console.error('Failed to update protocol:', err);
+            }
+        });
     }
 
     switchToEdit(): void {

@@ -121,6 +121,7 @@ export class PhasesSessionsComponent implements OnInit {
         if (!phase.sessionData[sessionNum]) {
             phase.sessionData[sessionNum] = {
                 exerciseMode: 'exercise',
+                measurementTemplate: null,
                 sections: [
                     { title: 'Warm Up', time: '', coach: null, exercises: [] }
                 ]

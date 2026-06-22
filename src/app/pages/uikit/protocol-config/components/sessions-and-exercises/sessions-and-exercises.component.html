@@ -29,12 +29,12 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div class="flex flex-col gap-2">
                             <label class="font-medium text-sm text-gray-700">Weeks:</label>
-                            <input pInputText type="number" [(ngModel)]="phase.totalWeeks"
+                            <input pInputText type="number" [(ngModel)]="phase.totalWeeks" [disabled]="readonly()"
                                 (ngModelChange)="updateTotalSessions(phase)" placeholder="eg., 12" class="w-full" />
                         </div>
                         <div class="flex flex-col gap-2">
                             <label class="font-medium text-sm text-gray-700">Sessions per week:</label>
-                            <input pInputText type="number" [(ngModel)]="phase.sessionsPerWeek"
+                            <input pInputText type="number" [(ngModel)]="phase.sessionsPerWeek" [disabled]="readonly()"
                                 (ngModelChange)="updateTotalSessions(phase)" placeholder="eg., 3" class="w-full" />
                         </div>
                     </div>
@@ -104,11 +104,11 @@
                                                         Name</label>
                                                     <input pInputText [(ngModel)]="section.sectionName"
                                                         [id]="'section-name-' + secIndex"
-                                                        [name]="'section-name-' + secIndex"
+                                                        [name]="'section-name-' + secIndex" [disabled]="readonly()"
                                                         class="font-semibold text-base" />
                                                 </div>
                                             </div>
-                                            <button pButton icon="pi pi-trash"
+                                            <button *ngIf="!readonly()" pButton icon="pi pi-trash"
                                                 class="p-button-text p-button-danger p-button-sm"
                                                 (click)="removeSection(phase, globalSessionNum, secIndex)"></button>
                                         </div>
@@ -118,7 +118,7 @@
                                             <div class="flex flex-col gap-2">
                                                 <label class="font-medium text-sm text-gray-600">Time</label>
                                                 <input pInputText type="text" [(ngModel)]="section.time"
-                                                    placeholder="e.g. 10 min" />
+                                                    [disabled]="readonly()" placeholder="e.g. 10 min" />
                                             </div>
                                         </div>
 
@@ -136,19 +136,22 @@
                                                         </div>
                                                         <button
                                                             class="flex-1 relative z-10 py-1.5 text-center text-xs rounded-full transition-colors duration-300 focus:outline-none"
-                                                            [ngClass]="{'text-gray-900 font-bold': ex.type !== 'manual', 'text-gray-500 font-medium': ex.type === 'manual'}"
-                                                            (click)="ex.type = 'exercise'; protocolService.notifyChange()">Exercise</button>
+                                                            [disabled]="readonly()"
+                                                            [ngClass]="{'text-gray-900 font-bold': ex.type !== 'manual', 'text-gray-500 font-medium': ex.type === 'manual', 'cursor-default': readonly()}"
+                                                            (click)="!readonly() && (ex.type = 'exercise'); !readonly() && protocolService.notifyChange()">Exercise</button>
                                                         <button
                                                             class="flex-1 relative z-10 py-1.5 text-center text-xs rounded-full transition-colors duration-300 focus:outline-none"
-                                                            [ngClass]="{'text-gray-900 font-bold': ex.type === 'manual', 'text-gray-500 font-medium': ex.type !== 'manual'}"
-                                                            (click)="ex.type = 'manual'; protocolService.notifyChange()">Manual</button>
+                                                            [disabled]="readonly()"
+                                                            [ngClass]="{'text-gray-900 font-bold': ex.type === 'manual', 'text-gray-500 font-medium': ex.type !== 'manual', 'cursor-default': readonly()}"
+                                                            (click)="!readonly() && (ex.type = 'manual'); !readonly() && protocolService.notifyChange()">Manual</button>
                                                     </div>
                                                 </div>
 
                                                 <div class="absolute top-2 right-2">
-                                                    <span class="pi pi-bars mr-2 text-gray-500 cursor-move"
+                                                    <span *ngIf="!readonly()"
+                                                        class="pi pi-bars mr-2 text-gray-500 cursor-move"
                                                         pTooltip="Drag to reorder" tooltipPosition="left"></span>
-                                                    <button pButton icon="pi pi-trash"
+                                                    <button *ngIf="!readonly()" pButton icon="pi pi-trash"
                                                         class="p-button-rounded p-button-danger p-button-text p-button-sm"
                                                         (click)="removeExercise(section, exIndex)"
                                                         pTooltip="Remove Exercise"></button>
@@ -159,13 +162,16 @@
                                                     <div class="flex flex-col gap-1">
                                                         <label class="text-sm font-semibold text-gray-700">Exercise
                                                             Name <span class="text-red-500">*</span></label>
-                                                        <input pInputText [(ngModel)]="ex.name" (ngModelChange)="protocolService.notifyChange()" class="w-full"
-                                                            placeholder="Exercise name" />
+                                                        <input pInputText [(ngModel)]="ex.name" [disabled]="readonly()"
+                                                            (ngModelChange)="protocolService.notifyChange()"
+                                                            class="w-full" placeholder="Exercise name" />
                                                     </div>
                                                     <div class="flex flex-col gap-1" *ngIf="ex.type === 'exercise'">
                                                         <label
                                                             class="text-sm font-semibold text-gray-700">Equipment</label>
-                                                        <input pInputText [(ngModel)]="$any(ex).equipment" (ngModelChange)="protocolService.notifyChange()"
+                                                        <input pInputText [(ngModel)]="$any(ex).equipment"
+                                                            [disabled]="readonly()"
+                                                            (ngModelChange)="protocolService.notifyChange()"
                                                             class="w-full" placeholder="e.g. Leg Press Machine" />
                                                     </div>
                                                 </div>
@@ -174,7 +180,9 @@
                                                 <div class="flex flex-col gap-1">
                                                     <label
                                                         class="text-sm font-semibold text-gray-700">Description</label>
-                                                    <textarea pInputTextarea [(ngModel)]="ex.description" (ngModelChange)="protocolService.notifyChange()" rows="3"
+                                                    <textarea pInputTextarea [(ngModel)]="ex.description"
+                                                        [disabled]="readonly()"
+                                                        (ngModelChange)="protocolService.notifyChange()" rows="3"
                                                         class="w-full" placeholder="Enter Description..."></textarea>
                                                 </div>
 
@@ -182,9 +190,12 @@
                                                 <div class="flex flex-col gap-1" *ngIf="ex.type === 'manual'">
                                                     <label class="text-sm font-semibold text-gray-700">Video URL</label>
                                                     <div class="flex items-center gap-2">
-                                                        <input pInputText [(ngModel)]="$any(ex).videoUrl" (ngModelChange)="protocolService.notifyChange()" class="w-full"
+                                                        <input pInputText [(ngModel)]="$any(ex).videoUrl"
+                                                            [disabled]="readonly()"
+                                                            (ngModelChange)="protocolService.notifyChange()"
+                                                            class="w-full"
                                                             placeholder="https://youtube.com/watch?v=..." />
-                                                        <button pButton icon="pi pi-play"
+                                                        <button *ngIf="!readonly()" pButton icon="pi pi-play"
                                                             class="p-button-rounded p-button-success p-button-sm flex-shrink-0"></button>
                                                     </div>
                                                 </div>
@@ -205,10 +216,13 @@
                                                             <button
                                                                 *ngFor="let type of ['Dynamic', 'Isokinetic', 'Isometric', 'Eccentric', 'Concentric']"
                                                                 class="px-3 py-1.5 text-xs font-semibold rounded-full transition-colors border"
-                                                                [ngClass]="$any(ex).contractionType === type
-                                                            ? 'bg-[#451a03] text-[#f0a940] border-[#f0a940]'
-                                                            : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'"
-                                                                (click)="$any(ex).contractionType = type">{{ type
+                                                                [disabled]="readonly()" [ngClass]="{
+                                                                    'bg-[#451a03] text-[#f0a940] border-[#f0a940] cursor-default': $any(ex).contractionType === type,
+                                                                    'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100': $any(ex).contractionType !== type && !readonly(),
+                                                                    'bg-gray-100 text-gray-400 border-gray-100 cursor-default': $any(ex).contractionType !== type && readonly()
+                                                                 }"
+                                                                (click)="!readonly() && ($any(ex).contractionType = type)">{{
+                                                                type
                                                                 }}</button>
                                                         </div>
                                                     </div>
@@ -227,10 +241,13 @@
                                                             <button
                                                                 *ngFor="let method of ['HR Zone', 'RIR', 'RPE 1-10', '1RM %', 'kg/lb', 'Bodyweight']"
                                                                 class="px-3 py-1.5 text-xs font-semibold rounded-full transition-colors border"
-                                                                [ngClass]="$any(ex).intensityMethod === method
-                                                            ? 'bg-[#134e4a] text-[#2dd4a0] border-[#2dd4a0]'
-                                                            : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'"
-                                                                (click)="$any(ex).intensityMethod = method">{{ method
+                                                                [disabled]="readonly()" [ngClass]="{
+                                                                    'bg-[#134e4a] text-[#2dd4a0] border-[#2dd4a0] cursor-default': $any(ex).intensityMethod === method,
+                                                                    'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100': $any(ex).intensityMethod !== method && !readonly(),
+                                                                    'bg-gray-100 text-gray-400 border-gray-100 cursor-default': $any(ex).intensityMethod !== method && readonly()
+                                                                 }"
+                                                                (click)="!readonly() && ($any(ex).intensityMethod = method)">{{
+                                                                method
                                                                 }}</button>
                                                         </div>
                                                     </div>
@@ -244,7 +261,7 @@
                                                             <span
                                                                 class="text-sm font-semibold text-gray-700">Sets:</span>
                                                             <input pInputText [(ngModel)]="$any(ex).sets.length"
-                                                                type="number" min="1" max="20"
+                                                                [disabled]="readonly()" type="number" min="1" max="20"
                                                                 class="w-16 text-center text-sm h-8 p-1" placeholder="1"
                                                                 (ngModelChange)="syncSetData(ex); protocolService.notifyChange()" />
                                                         </div>
@@ -274,7 +291,7 @@
 
                                                     <!-- Table Rows -->
                                                     <div class="flex flex-col gap-2 overflow-y-auto max-h-[300px]">
-                                                        <ng-container *ngFor="let idx of syncSetData(ex)">
+                                                        <ng-container *ngFor="let idx of getSetIndices(ex)">
                                                             <div
                                                                 class="grid grid-cols-[2rem_1fr_1fr_1fr_1fr] gap-2 items-center px-1">
                                                                 <div class="flex justify-center">
@@ -286,19 +303,25 @@
                                                                 </div>
                                                                 <input pInputText
                                                                     [(ngModel)]="$any(ex).sets[idx].repetitions"
+                                                                    [disabled]="readonly()"
                                                                     (ngModelChange)="protocolService.notifyChange()"
                                                                     type="number" min="0"
                                                                     class="w-full text-center text-sm h-9 shadow-sm"
                                                                     placeholder="reps" />
                                                                 <input pInputText
                                                                     [(ngModel)]="$any(ex).sets[idx].intensity"
+                                                                    [disabled]="readonly()"
                                                                     (ngModelChange)="protocolService.notifyChange()"
                                                                     class="w-full text-center text-sm h-9 shadow-sm"
                                                                     placeholder="Mod" />
-                                                                <input pInputText [(ngModel)]="$any(ex).sets[idx].tempo" (ngModelChange)="protocolService.notifyChange()"
+                                                                <input pInputText [(ngModel)]="$any(ex).sets[idx].tempo"
+                                                                    [disabled]="readonly()"
+                                                                    (ngModelChange)="protocolService.notifyChange()"
                                                                     class="w-full text-center text-sm h-9 shadow-sm"
                                                                     placeholder="2-1-3" />
-                                                                <input pInputText [(ngModel)]="$any(ex).sets[idx].rest" (ngModelChange)="protocolService.notifyChange()"
+                                                                <input pInputText [(ngModel)]="$any(ex).sets[idx].rest"
+                                                                    [disabled]="readonly()"
+                                                                    (ngModelChange)="protocolService.notifyChange()"
                                                                     class="w-full text-center text-sm h-9 shadow-sm"
                                                                     placeholder="90" />
                                                             </div>
@@ -324,7 +347,9 @@
                                                             <label
                                                                 class="text-xs font-semibold text-gray-500 uppercase">Progression
                                                                 title</label>
-                                                            <input pInputText [(ngModel)]="ex.progressionRule.title" (ngModelChange)="protocolService.notifyChange()"
+                                                            <input pInputText [(ngModel)]="ex.progressionRule.title"
+                                                                [disabled]="readonly()"
+                                                                (ngModelChange)="protocolService.notifyChange()"
                                                                 class="w-full text-sm"
                                                                 placeholder="e.g. Volume Progression" />
                                                         </div>
@@ -333,7 +358,9 @@
                                                                 class="text-xs font-semibold text-gray-500 uppercase">Increment
                                                                 amount</label>
                                                             <input pInputText
-                                                                [(ngModel)]="ex.progressionRule.incrementAmount" (ngModelChange)="protocolService.notifyChange()"
+                                                                [(ngModel)]="ex.progressionRule.incrementAmount"
+                                                                [disabled]="readonly()"
+                                                                (ngModelChange)="protocolService.notifyChange()"
                                                                 type="number" class="w-full text-sm"
                                                                 placeholder="e.g. 2.5" />
                                                         </div>
@@ -342,7 +369,9 @@
                                                                 class="text-xs font-semibold text-gray-500 uppercase">Progression
                                                                 condition</label>
                                                             <input pInputText
-                                                                [(ngModel)]="ex.progressionRule.progressionCondition" (ngModelChange)="protocolService.notifyChange()"
+                                                                [(ngModel)]="ex.progressionRule.progressionCondition"
+                                                                [disabled]="readonly()"
+                                                                (ngModelChange)="protocolService.notifyChange()"
                                                                 class="w-full text-sm"
                                                                 placeholder="e.g. VAS ≤ 4 + RIR ≥ 3" />
                                                         </div>
@@ -351,7 +380,7 @@
                                             </div>
 
                                             <!-- Add Exercise Button -->
-                                            <div
+                                            <div *ngIf="!readonly()"
                                                 class="flex justify-center mt-2 p-2 border-t border-dashed border-gray-300">
                                                 <p-button label="Add Exercise" icon="pi pi-plus" [outlined]="true"
                                                     size="small" (click)="addExercise(section)"></p-button>
@@ -359,7 +388,7 @@
                                         </div>
 
                                         <!-- Section Action Buttons -->
-                                        <div class="flex justify-end gap-3 mt-4">
+                                        <div *ngIf="!readonly()" class="flex justify-end gap-3 mt-4">
                                             <p-button label="Cancel" [outlined]="true" severity="secondary"
                                                 size="small"></p-button>
                                             <p-button label="Save" severity="success" size="small"
@@ -370,7 +399,7 @@
                                     </div>
 
                                     <!-- Add Section Button -->
-                                    <div class="flex justify-center">
+                                    <div *ngIf="!readonly()" class="flex justify-center">
                                         <p-button label="Add New Section" icon="pi pi-plus-circle" severity="secondary"
                                             [outlined]="true"
                                             (onClick)="addSection(phase, globalSessionNum)"></p-button>
@@ -393,7 +422,7 @@
                                         <div *ngFor="let template of availableTemplates"
                                             class="border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 hover:shadow-md flex items-center justify-between"
                                             [ngClass]="{'border-[#131337] bg-[#131337]': isSessionMeasurementSelected(phase, globalSessionNum, template), 'border-gray-100 bg-white hover:border-gray-300': !isSessionMeasurementSelected(phase, globalSessionNum, template)}"
-                                            (click)="setSessionMeasurementTemplate(phase, globalSessionNum, template)">
+                                            (click)="!readonly() && setSessionMeasurementTemplate(phase, globalSessionNum, template)">
                                             <div class="flex items-center gap-4">
                                                 <div class="h-10 w-10 rounded-full flex items-center justify-center transition-colors"
                                                     [ngClass]="{'bg-[#2A2A4A] text-white': isSessionMeasurementSelected(phase, globalSessionNum, template), 'bg-gray-100 border text-gray-500': !isSessionMeasurementSelected(phase, globalSessionNum, template)}">

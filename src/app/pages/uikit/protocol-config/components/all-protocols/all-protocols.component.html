@@ -10,144 +10,150 @@
         </div>
     </div>
 
+    <!-- Loading state -->
+    @if (protocolService.loadingProtocols()) {
+    <div class="flex flex-col items-center justify-center py-20 text-gray-500 bg-white/50 rounded-2xl border-2 border-dashed border-gray-100" aria-live="polite">
+        <i class="pi pi-spin pi-spinner text-4xl mb-4 text-[#131337]" aria-hidden="true"></i>
+        <span class="text-lg font-medium animate-pulse">Loading all protocols...</span>
+        <span class="text-sm opacity-70 mt-1">Please wait a moment</span>
+    </div>
+    }
+
     <!-- Status Filter Tabs -->
-    <div class="flex items-center gap-1 p-1 bg-gray-100 rounded-xl w-full" role="tablist" aria-label="Protocol status filter">
+    <div *ngIf="!protocolService.loadingProtocols()" class="flex items-center gap-1 p-1 bg-gray-100 rounded-xl w-full" role="tablist"
+        aria-label="Protocol status filter">
         <!-- Active Tab -->
-        <button
-            id="tab-active"
-            role="tab"
-            [attr.aria-selected]="activeTab() === 'active'"
-            [attr.aria-controls]="'tabpanel-protocols'"
-            (click)="setTab('active')"
+        <button id="tab-active" role="tab" [attr.aria-selected]="activeTab() === 'Published'"
+            [attr.aria-controls]="'tabpanel-protocols'" (click)="setTab('Published')"
             class="flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#131337]"
-            [class]="activeTab() === 'active'
+            [class]="activeTab() === 'Published'
                 ? 'bg-white text-emerald-600 shadow-sm'
                 : 'text-gray-500 hover:text-gray-700 hover:bg-white/60'">
             <i class="pi pi-check-circle text-xs"></i>
-            Active
-            <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold transition-all"
-                [class]="activeTab() === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'">
+            Published
+            <span
+                class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold transition-all"
+                [class]="activeTab() === 'Published' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'">
                 {{ tabCounts().active }}
             </span>
         </button>
 
         <!-- Draft Tab -->
-        <button
-            id="tab-draft"
-            role="tab"
-            [attr.aria-selected]="activeTab() === 'draft'"
-            [attr.aria-controls]="'tabpanel-protocols'"
-            (click)="setTab('draft')"
+        <button id="tab-draft" role="tab" [attr.aria-selected]="activeTab() === 'Draft'"
+            [attr.aria-controls]="'tabpanel-protocols'" (click)="setTab('Draft')"
             class="flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#131337]"
-            [class]="activeTab() === 'draft'
+            [class]="activeTab() === 'Draft'
                 ? 'bg-white text-amber-600 shadow-sm'
                 : 'text-gray-500 hover:text-gray-700 hover:bg-white/60'">
             <i class="pi pi-pencil text-xs"></i>
             Draft
-            <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold transition-all"
-                [class]="activeTab() === 'draft' ? 'bg-amber-100 text-amber-700' : 'bg-gray-200 text-gray-500'">
+            <span
+                class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold transition-all"
+                [class]="activeTab() === 'Draft' ? 'bg-amber-100 text-amber-700' : 'bg-gray-200 text-gray-500'">
                 {{ tabCounts().draft }}
             </span>
         </button>
 
         <!-- Archived Tab -->
-        <button
-            id="tab-archived"
-            role="tab"
-            [attr.aria-selected]="activeTab() === 'archived'"
-            [attr.aria-controls]="'tabpanel-protocols'"
-            (click)="setTab('archived')"
+        <button id="tab-archived" role="tab" [attr.aria-selected]="activeTab() === 'Archived'"
+            [attr.aria-controls]="'tabpanel-protocols'" (click)="setTab('Archived')"
             class="flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#131337]"
-            [class]="activeTab() === 'archived'
+            [class]="activeTab() === 'Archived'
                 ? 'bg-white text-gray-600 shadow-sm'
                 : 'text-gray-500 hover:text-gray-700 hover:bg-white/60'">
             <i class="pi pi-inbox text-xs"></i>
             Archived
-            <span class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold transition-all"
-                [class]="activeTab() === 'archived' ? 'bg-gray-200 text-gray-700' : 'bg-gray-200 text-gray-500'">
+            <span
+                class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold transition-all"
+                [class]="activeTab() === 'Archived' ? 'bg-gray-200 text-gray-700' : 'bg-gray-200 text-gray-500'">
                 {{ tabCounts().archived }}
             </span>
         </button>
     </div>
 
     <!-- Protocol Cards Grid -->
-    <div id="tabpanel-protocols" role="tabpanel"
-        [attr.aria-labelledby]="'tab-' + activeTab()"
+    <div *ngIf="!protocolService.loadingProtocols()" id="tabpanel-protocols" role="tabpanel" [attr.aria-labelledby]="'tab-' + activeTab()"
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
         @for (protocol of filteredProtocols(); track protocol.name) {
-            <div class="border rounded-xl p-0 overflow-hidden bg-white shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group">
+        <div
+            class="border rounded-xl p-0 overflow-hidden bg-white shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group">
 
-                <!-- Top accent bar -->
-                <div class="h-1.5"
-                    [style.background-color]="protocol.status === 'active' ? '#10b981' : protocol.status === 'draft' ? '#fbbf24' : '#d1d5db'">
+            <!-- Top accent bar -->
+            <div class="h-1.5"
+                [style.background-color]="protocol.status === 'Published' ? '#10b981' : protocol.status === 'Draft' ? '#fbbf24' : '#d1d5db'">
+            </div>
+
+            <div class="p-5 flex flex-col gap-4">
+                <!-- Title Row -->
+                <div class="flex justify-between items-start">
+                    <div class="flex flex-col gap-1 flex-1 pr-2">
+                        <span class="font-bold text-base text-gray-800 group-hover:text-[#131337] transition-colors">{{
+                            protocol.name }}</span>
+                    </div>
+                    <p-tag [value]="protocol.status | titlecase" [severity]="getSeverity(protocol.status)"
+                        [icon]="getStatusIcon(protocol.status)"></p-tag>
                 </div>
 
-                <div class="p-5 flex flex-col gap-4">
-                    <!-- Title Row -->
-                    <div class="flex justify-between items-start">
-                        <div class="flex flex-col gap-1 flex-1 pr-2">
-                            <span class="font-bold text-base text-gray-800 group-hover:text-[#131337] transition-colors">{{ protocol.name }}</span>
-                            <span class="text-xs text-gray-400">Created {{ protocol.createdAt }}</span>
-                        </div>
-                        <p-tag [value]="protocol.status | titlecase" [severity]="getSeverity(protocol.status)"
-                            [icon]="getStatusIcon(protocol.status)"></p-tag>
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="flex flex-col items-center bg-gray-50 rounded-lg p-2.5">
+                        <i class="pi pi-calendar text-[#131337] text-sm mb-1"></i>
+                        <span class="text-lg font-bold text-gray-800">{{ protocol.weeks || '—' }}</span>
+                        <span class="text-[10px] text-gray-500 uppercase font-semibold">Weeks</span>
                     </div>
-
-                    <!-- Stats -->
-                    <div class="grid grid-cols-3 gap-2">
-                        <div class="flex flex-col items-center bg-gray-50 rounded-lg p-2.5">
-                            <i class="pi pi-calendar text-[#131337] text-sm mb-1"></i>
-                            <span class="text-lg font-bold text-gray-800">{{ protocol.weeks || '—' }}</span>
-                            <span class="text-[10px] text-gray-500 uppercase font-semibold">Weeks</span>
-                        </div>
-                        <div class="flex flex-col items-center bg-gray-50 rounded-lg p-2.5">
-                            <i class="pi pi-list text-[#131337] text-sm mb-1"></i>
-                            <span class="text-lg font-bold text-gray-800">{{ protocol.totalSessions || '—' }}</span>
-                            <span class="text-[10px] text-gray-500 uppercase font-semibold">Sessions</span>
-                        </div>
-                        <div class="flex flex-col items-center bg-gray-50 rounded-lg p-2.5">
-                            <i class="pi pi-chart-bar text-[#131337] text-sm mb-1"></i>
-                            <span class="text-lg font-bold text-gray-800">{{ protocol.phases.length }}</span>
-                            <span class="text-[10px] text-gray-500 uppercase font-semibold">Phases</span>
-                        </div>
+                    <div class="flex flex-col items-center bg-gray-50 rounded-lg p-2.5">
+                        <i class="pi pi-list text-[#131337] text-sm mb-1"></i>
+                        <span class="text-lg font-bold text-gray-800">{{ protocol.totalSessions || '—' }}</span>
+                        <span class="text-[10px] text-gray-500 uppercase font-semibold">Sessions</span>
                     </div>
+                    <div class="flex flex-col items-center bg-gray-50 rounded-lg p-2.5">
+                        <i class="pi pi-chart-bar text-[#131337] text-sm mb-1"></i>
+                        <span class="text-lg font-bold text-gray-800">{{ protocol.numberOfPhases }}</span>
+                        <span class="text-[10px] text-gray-500 uppercase font-semibold">Phases</span>
+                    </div>
+                </div>
 
-                    <!-- Actions -->
-                    <div class="flex justify-end gap-2 pt-1 border-t border-gray-100">
+                <!-- Actions -->
+                <div class="flex items-center justify-between pt-1 border-t border-gray-100">
+                    <div class="flex flex-wrap gap-1">
+                        @for (svc of protocol.services; track svc.id) {
+                        <p-badge [value]="svc.serviceNameEn" severity="info" class="text-[10px]"></p-badge>
+                        }
+                    </div>
+                    <div class="flex gap-2">
                         <button pButton icon="pi pi-eye" class="p-button-text p-button-sm p-button-secondary"
-                            pTooltip="View Protocol" tooltipPosition="top"
-                            (click)="viewProtocol(protocol)"></button>
+                            pTooltip="View Protocol" tooltipPosition="top" (click)="viewProtocol(protocol)"></button>
                         <button pButton icon="pi pi-pencil" class="p-button-text p-button-sm" pTooltip="Edit Protocol"
-                            tooltipPosition="top"
-                            (click)="editProtocol(protocol)"></button>
+                            tooltipPosition="top" (click)="editProtocol(protocol)"></button>
                     </div>
                 </div>
             </div>
+        </div>
         }
     </div>
 
     <!-- Per-tab Empty State -->
     @if (filteredProtocols().length === 0) {
-        <div class="flex flex-col items-center justify-center py-16 text-gray-400" role="status">
-            @switch (activeTab()) {
-                @case ('active') {
-                    <i class="pi pi-check-circle text-5xl mb-4 text-emerald-300"></i>
-                    <span class="text-lg font-semibold">No active protocols</span>
-                    <span class="text-sm">Activate a draft protocol or define a new one.</span>
-                }
-                @case ('draft') {
-                    <i class="pi pi-pencil text-5xl mb-4 text-amber-300"></i>
-                    <span class="text-lg font-semibold">No draft protocols</span>
-                    <span class="text-sm">Click "Define New Protocol" to start building one.</span>
-                }
-                @case ('archived') {
-                    <i class="pi pi-inbox text-5xl mb-4 text-gray-300"></i>
-                    <span class="text-lg font-semibold">No archived protocols</span>
-                    <span class="text-sm">Archived protocols will appear here.</span>
-                }
-            }
-        </div>
+    <div class="flex flex-col items-center justify-center py-16 text-gray-400" role="status">
+        @switch (activeTab()) {
+        @case ('Published') {
+        <i class="pi pi-check-circle text-5xl mb-4 text-emerald-300"></i>
+        <span class="text-lg font-semibold">No active protocols</span>
+        <span class="text-sm">Activate a draft protocol or define a new one.</span>
+        }
+        @case ('Draft') {
+        <i class="pi pi-pencil text-5xl mb-4 text-amber-300"></i>
+        <span class="text-lg font-semibold">No draft protocols</span>
+        <span class="text-sm">Click "Define New Protocol" to start building one.</span>
+        }
+        @case ('Archived') {
+        <i class="pi pi-inbox text-5xl mb-4 text-gray-300"></i>
+        <span class="text-lg font-semibold">No archived protocols</span>
+        <span class="text-sm">Archived protocols will appear here.</span>
+        }
+        }
+    </div>
     }
 
 </div>

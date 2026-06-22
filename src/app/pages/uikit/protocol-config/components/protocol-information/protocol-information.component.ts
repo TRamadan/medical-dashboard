@@ -1,6 +1,6 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit, effect, input, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, effect, input, signal, DestroyRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { finalize } from 'rxjs';
+import { finalize, takeUntil } from 'rxjs';
 import { FormArray, FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
@@ -11,8 +11,9 @@ import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { ProtocolService } from '../../services/protocol.service';
 import { ServicecategoryService } from '../../../add-service/services/servicecategory.service';
-import { ProtocolTemplate } from '../../models/protocol.model';
+import { ProtocolTemplate, ServiceItem } from '../../models/protocol.model';
 import { ReactiveFormsModule } from '@angular/forms';
+import { ServicesService } from '../../../add-service/services/services.service';
 @Component({
     selector: 'app-protocol-information',
     imports: [ReactiveFormsModule, CommonModule, FormsModule, CardModule, ButtonModule, InputTextModule, InputTextarea, CheckboxModule, DropdownModule, InputNumberModule],
@@ -21,9 +22,9 @@ import { ReactiveFormsModule } from '@angular/forms';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProtocolInformationComponent implements OnInit {
-    private protocolService = inject(ProtocolService);
+    public protocolService = inject(ProtocolService);
     form!: FormGroup;
-    private serviceCategoryService = inject(ServicecategoryService);
+    private services = inject(ServicesService);
 
     readonly readonly = input(false);
 
@@ -38,12 +39,13 @@ export class ProtocolInformationComponent implements OnInit {
 
     protocol = this.protocolService.activeProtocol;
 
-    serviceCategories = signal<{ id: number; nameEn: string; nameAr: string; selected: boolean }[]>([]);
+    servicesSignal = signal<ServiceItem[]>([]);
     loadingServices = signal(false);
     serviceCategoriesError = signal<string | null>(null);
     selectedService: any = null;
     useTemplate = false;
     selectedTemplate: ProtocolTemplate | null = null;
+    loadingTemplateDetails = signal(false);
 
     athleteLevelOptions = [
         { label: 'Recreational', value: 'recreational' },
@@ -53,41 +55,28 @@ export class ProtocolInformationComponent implements OnInit {
         { label: 'Elite / Near-Professional', value: 'elite' },
     ];
 
-    defaultContraindications: string[] = [
-        'Pain > 7/10 at start of exercise — Stop and notify the doctor',
-        'New acute joint swelling within 24 hours of last session',
-        'Fever > 38°C or signs of local inflammation',
+    defaultContraindications = [
+        { id: 1, description: 'Pain > 7/10 at start of exercise — Stop and notify the doctor', order: 1 },
+        { id: 2, description: 'New acute joint swelling within 24 hours of last session', order: 2 },
+        { id: 3, description: 'Fever > 38°C or signs of local inflammation', order: 3 },
     ];
 
-    templates: ProtocolTemplate[] = [
-        {
-            id: 1,
-            title: 'ACL Reconstruction Protocol',
-            subtitle: 'ACL Tear',
-            description: 'Standard post-surgical ACL rehabilitation',
-            duration: '12 weeks',
-            frequency: '3x/week',
-            phases: '4 phases'
-        },
-        {
-            id: 2,
-            title: 'Rotator Cuff Recovery',
-            subtitle: 'Shoulder Injury',
-            description: 'Non-surgical rotator cuff rehabilitation',
-            duration: '10 weeks',
-            frequency: '2x/week',
-            phases: '3 phases'
-        },
-        {
-            id: 3,
-            title: 'Hamstring Strain Protocol',
-            subtitle: 'Hamstring Injury',
-            description: 'Grade 2 hamstring strain recovery',
-            duration: '8 weeks',
-            frequency: '3x/week',
-            phases: '3 phases'
-        }
-    ];
+    templates = computed<ProtocolTemplate[]>(() => {
+        return this.protocolService.protocols().map((p: any) => {
+            const weeks = p.weeks || (p.phases?.reduce((sum: number, ph: any) => sum + (ph.totalWeeks || 0), 0)) || 0;
+            const sessions = p.totalSessions || (p.phases?.reduce((sum: number, ph: any) => sum + ((ph.totalWeeks || 0) * (ph.sessionsPerWeek || 0)), 0)) || 0;
+            
+            return {
+                id: p.id,
+                title: p.name,
+                subtitle: p.injuryCondition || 'General Protocol',
+                description: p.primaryGoal || 'Professional treatment plan template.',
+                duration: `${weeks} weeks`,
+                frequency: `${weeks > 0 ? (sessions / weeks).toFixed(1) : 0}x/week`,
+                phases: `${p.numberOfPhases || p.phases?.length || 0} phases`
+            };
+        });
+    });
 
     ngOnInit(): void {
         this.form = this.fb.group({
@@ -106,24 +95,69 @@ export class ProtocolInformationComponent implements OnInit {
             athleteLevel: ['', Validators.required],
 
             // Contraindications
-            contraindications: this.fb.array(
-                this.defaultContraindications.map(text => this.fb.control(text))
-            ),
+            contraindications: this.fb.array([]),
             newContraindication: [''],
         });
-        this.loadServiceCategories();
+
+        // Pre-populate form from active protocol (e.g. when returning to this step)
+        const existing = this.protocol();
+        if (existing) {
+            this.form.patchValue({
+                protocolName: existing.name ?? '',
+                injuryCondition: existing.injuryCondition ?? '',
+                primaryGoal: existing.primaryGoal ?? '',
+                totalWeeks: (existing as any).weeks ?? '',
+                sessionsPerWeek: (existing as any).sessionsPerWeek ?? '',
+                numberOfPhases: existing.numberOfPhases ?? existing.phases?.length ?? '',
+                athleteLevel: existing.targetAthleteLevel ?? '',
+            }, { emitEvent: false });
+
+            // Fill contraindications
+            const contra = existing.contraindications || this.defaultContraindications;
+            const arr = this.contraindications;
+            arr.clear();
+            contra.forEach((c: any) => {
+                arr.push(this.fb.group({
+                    id: [c.id || null],
+                    description: [typeof c === 'string' ? c : c.description, Validators.required],
+                    order: [c.order || arr.length + 1]
+                }));
+            });
+        }
+
+        // Keep activeProtocol in sync whenever the form changes
+        this.form.valueChanges.subscribe(values => {
+            const proto = this.protocol();
+            if (!proto) return;
+            proto.name = values.protocolName ?? proto.name;
+            proto.injuryCondition = values.injuryCondition ?? '';
+            proto.primaryGoal = values.primaryGoal ?? '';
+            proto.weeks = values.totalWeeks ?? null;
+            proto.numberOfPhases = values.numberOfPhases ?? null;
+            proto.targetAthleteLevel = values.athleteLevel ?? '';
+            proto.contraindications = values.contraindications ?? [];
+            this.protocolService.notifyChange();
+        });
+
+        this.loadServices();
     }
 
-    loadServiceCategories(): void {
+    loadServices(): void {
         this.loadingServices.set(true);
         this.serviceCategoriesError.set(null);
 
-        this.serviceCategoryService.getServiceCategories().pipe(
+        this.services.getServices().pipe(
             finalize(() => this.loadingServices.set(false))
         ).subscribe({
             next: (data) => {
-                this.serviceCategories.set(
-                    data.map((item: any) => ({ ...item, selected: false }))
+                const protoServices = this.protocol()?.services || [];
+                this.servicesSignal.set(
+                    data.map((item: any) => ({
+                        id: item.id,
+                        serviceNameEn: item.nameEn || '',
+                        serviceNameAr: item.nameAr || '',
+                        selected: protoServices.some(s => s.id === item.id)
+                    }))
                 );
             },
             error: (err) => {
@@ -133,8 +167,8 @@ export class ProtocolInformationComponent implements OnInit {
         });
     }
 
-    toggleService(service: { id: number; nameEn: string; nameAr: string; selected: boolean }): void {
-        this.serviceCategories.update(categories =>
+    toggleService(service: ServiceItem): void {
+        this.servicesSignal.update(categories =>
             categories.map(c => c.id === service.id ? { ...c, selected: !c.selected } : c)
         );
         this.onServiceChange();
@@ -142,7 +176,7 @@ export class ProtocolInformationComponent implements OnInit {
 
     onServiceChange(): void {
         const proto = this.protocol();
-        const selected = this.serviceCategories().filter(c => c.selected);
+        const selected = this.servicesSignal().filter(c => c.selected);
         if (proto) {
             proto.services = selected.length > 0 ? selected : [];
         }
@@ -169,16 +203,53 @@ export class ProtocolInformationComponent implements OnInit {
         const proto = this.protocol();
         if (!proto) return;
 
-        proto.template = template;
+        // Fetch full protocol details to clone it
+        this.loadingTemplateDetails.set(true);
+        this.protocolService.getTreatmentPlanById(template.id).pipe(
+            finalize(() => this.loadingTemplateDetails.set(false))
+        ).subscribe({
+            next: (fullTemplate) => {
+                const active = this.protocol();
+                if (!active) return;
 
-        const weeks = parseInt(template.duration);
-        const frequencyMatch = template.frequency.match(/(\d+)x/);
-        const frequency = frequencyMatch ? parseInt(frequencyMatch[1]) : 0;
+                // Clone important fields but keep current ID and name if already started?
+                // Actually usually selecting a template replaces most logic
+                active.template = template;
+                active.name = fullTemplate.name;
+                active.injuryCondition = fullTemplate.injuryCondition;
+                active.primaryGoal = fullTemplate.primaryGoal;
+                active.targetAthleteLevel = fullTemplate.targetAthleteLevel;
+                active.phases = JSON.parse(JSON.stringify(fullTemplate.phases)); // Deep clone phases
+                active.contraindications = [...(fullTemplate.contraindications || [])];
+                active.weeks = fullTemplate.weeks;
+                active.totalSessions = fullTemplate.totalSessions;
 
-        if (!isNaN(weeks) && frequency && proto.phases.length > 0) {
-            proto.phases[0].totalWeeks = weeks;
-            proto.phases[0].sessionsPerWeek = frequency;
-        }
+                // Update form to reflect template changes
+                this.form.patchValue({
+                    injuryCondition: active.injuryCondition || '',
+                    primaryGoal: active.primaryGoal || '',
+                    athleteLevel: active.targetAthleteLevel || '',
+                    totalWeeks: (fullTemplate as any).weeks || '',
+                    sessionsPerWeek: fullTemplate.phases[0]?.sessionsPerWeek || '',
+                    numberOfPhases: fullTemplate.phases.length || '',
+                    protocolName: active.name || '',
+                });
+
+                // Clear and refill contraindications FormArray
+                const arr = this.contraindications;
+                arr.clear();
+                (active.contraindications || []).forEach((c: any) => {
+                    arr.push(this.fb.group({
+                        id: [c.id || null],
+                        description: [typeof c === 'string' ? c : c.description, Validators.required],
+                        order: [c.order || arr.length + 1]
+                    }));
+                });
+
+                this.protocolService.notifyChange();
+            },
+            error: (err) => console.error('Failed to load template details:', err)
+        });
     }
 
     get contraindications(): FormArray {
@@ -188,7 +259,11 @@ export class ProtocolInformationComponent implements OnInit {
     addContraindication(): void {
         const val = this.form.get('newContraindication')?.value?.trim();
         if (val) {
-            this.contraindications.push(this.fb.control(val));
+            this.contraindications.push(this.fb.group({
+                id: [null],
+                description: [val, Validators.required],
+                order: [this.contraindications.length + 1]
+            }));
             this.form.get('newContraindication')?.reset();
         }
     }

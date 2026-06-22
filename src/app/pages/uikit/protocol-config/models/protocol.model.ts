@@ -14,6 +14,7 @@ export interface ProgressionRule {
 
 
 export interface BaseExercise {
+    id?: number;
     type: 'exercise' | 'manual';
     name: string;
     description: string;
@@ -47,6 +48,7 @@ export interface Session {
     id?: string;
     sessionNumber: number;
     sections: Section[];
+    measurementTemplateId?: number | null;
 }
 
 
@@ -90,14 +92,19 @@ export interface Phase {
 export interface Protocol {
     id: number;
     name: string;
-    status: 'draft' | 'active' | 'archived';
+    status: 'Draft' | 'Published' | 'Archived';
+    injuryCondition?: string;
+    primaryGoal?: string;
+    targetAthleteLevel?: string;
     services: ServiceItem[];
-    weeks: null;
-    totalSessions: null;
+    weeks: number | null;
+    totalSessions: number | null;
     template: ProtocolTemplate | null;
     phases: Phase[];
-    createdAt: string;
-    createdBy: CreatedBy;
+    numberOfPhases?: number;
+    contraindications?: { id: number; description: string; order: number; }[];
+    createdAt?: string;
+    createdBy?: CreatedBy;
 }
 
 
@@ -109,8 +116,8 @@ export interface CreatedBy {
 
 export interface ServiceItem {
     id: number;
-    nameEn: string;
-    nameAr: string;
+    serviceNameEn: string;
+    serviceNameAr: string;
     selected: boolean;
 }
 
@@ -169,3 +176,75 @@ export const toAbsoluteWeek = (
         .reduce((sum, p) => sum + p.totalWeeks, 0);
     return offset + relativeWeekNumber;
 };
+
+// ── API Request Body Types (TreatmentPlans endpoint) ─────────────────────────
+
+export interface TreatmentPlanSet {
+    setNumber: number;
+    reps: number;
+    intensity: string;
+    tempo: string;
+    restSeconds: number;
+}
+
+export interface TreatmentPlanExercise {
+    exerciseType: string;
+    order: number;
+    exerciseId: number;
+    equipment: string;
+    contractionType: string;
+    intensityMethod: string;
+    sets: TreatmentPlanSet[];
+    exerciseName: string;
+    description: string;
+    videoUrl: string;
+    progressionTitle: string;
+    incrementAmount: number;
+    progressionCondition: string;
+}
+
+export interface TreatmentPlanSection {
+    sectionName: string;
+    durationMinutes: number;
+    order: number;
+    exercises: TreatmentPlanExercise[];
+}
+
+export interface TreatmentPlanSession {
+    sessionNumber: number;
+    isMeasurementSession: boolean;
+    measurementTemplateId: number;
+    sections: TreatmentPlanSection[];
+}
+
+export interface TreatmentPlanCriterion {
+    criterionType: string;
+    operator: string;
+    value: number;
+    unit: string;
+}
+
+export interface TreatmentPlanPhase {
+    phaseName: string;
+    phaseOrder: number;
+    weeks: number;
+    sessionsPerWeek: number;
+    phaseObjective: string;
+    criteria: TreatmentPlanCriterion[];
+    sessions: TreatmentPlanSession[];
+}
+
+export interface TreatmentPlanRequest {
+    name: string;
+    injuryCondition: string;
+    primaryGoal: string;
+    totalWeeks: number;
+    sessionsPerWeek: number;
+    numberOfPhases: number;
+    targetAthleteLevel: string;
+    doctorId?: string;
+    saveAsDraft: boolean;
+    protocolServiceIds: number[];
+    contraindications?: { id: number; description: string; order: number; }[];
+    phases: TreatmentPlanPhase[];
+}

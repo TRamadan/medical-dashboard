@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
@@ -30,6 +30,7 @@ export interface FittCard {
 })
 export class FittVpRevisionComponent {
     private protocolService = inject(ProtocolService);
+    readonly readonly = input(false);
     readonly protocol = this.protocolService.activeProtocol;
 
     // ── Computed validation ────────────────────────────────────────────────────
@@ -64,6 +65,7 @@ export class FittVpRevisionComponent {
         for (const phase of phases) {
             for (const week of phase.weeks) {
                 for (const session of week.sessions) {
+                    if (phase.measurementSessionNums?.includes(session.sessionNumber)) continue;
                     for (const section of session.sections) {
                         for (const ex of section.exercises) {
                             all.push({ phase, sessionNum: session.sessionNumber, sectionName: section.sectionName, ex });
@@ -145,6 +147,7 @@ export class FittVpRevisionComponent {
             for (const phase of phases) {
                 for (const week of phase.weeks) {
                     for (const session of week.sessions) {
+                        if (phase.measurementSessionNums?.includes(session.sessionNumber)) continue;
                         for (const section of session.sections) {
                             if (!section.time?.trim()) {
                                 missing.push(
@@ -289,7 +292,7 @@ export class FittVpRevisionComponent {
             {
                 tag: 'CERT #2',
                 label: 'Qualifications and experience of the provider',
-                checked: !!proto.createdBy?.name?.trim() && !!proto.createdBy?.role?.trim()
+                checked: !!proto?.createdBy?.name?.trim() && !!proto.createdBy?.role?.trim()
             },
             {
                 tag: 'CERT #3',
@@ -348,6 +351,7 @@ export class FittVpRevisionComponent {
         const result: { sessionNum: number; sectionTitle: string; exercise: Exercise }[] = [];
         for (const week of phase.weeks) {
             for (const session of week.sessions) {
+                if (phase.measurementSessionNums?.includes(session.sessionNumber)) continue;
                 for (const section of session.sections) {
                     for (const ex of section.exercises) {
                         result.push({ sessionNum: session.sessionNumber, sectionTitle: section.sectionName, exercise: ex });

@@ -1,737 +1,179 @@
-import { Injectable, signal, computed } from '@angular/core';
-import { Protocol, Phase, Exercise, Section, SetData, PhaseCriteria, TransitionCriterion, ExerciseType } from '../models/protocol.model';
+import { Injectable, signal, computed, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
+import { Protocol, Phase, Week, Session, Exercise, Section, SetData, PhaseCriteria, TransitionCriterion, ExerciseType, ManualType, TreatmentPlanRequest, TreatmentPlanPhase, TreatmentPlanSession, TreatmentPlanSection, TreatmentPlanExercise, TreatmentPlanSet, TreatmentPlanCriterion } from '../models/protocol.model';
+import { environment } from '../../../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class ProtocolService {
+    private readonly http = inject(HttpClient);
+    private readonly apiUrl = environment.apiUrl;
+
+    // ── API state signals ─────────────────────────────────────────────────────
+    readonly savingDraft = signal(false);
+    readonly saveDraftError = signal<string | null>(null);
+    readonly loadingProtocols = signal(false);
     // ── State ────────────────────────────────────────────────────────────────
-    readonly protocols = signal<Protocol[]>([
-        {
-            id: 1,
-            name: 'ACL Reconstruction – Standard',
-            status: 'active',
-            services: [],
-            weeks: null,
-            totalSessions: null,
-            template: null,
-            createdAt: '2026-04-20',
-            createdBy: { id: 101, name: 'Dr. Sarah Mitchell', role: 'Physiotherapist' },
-            phases: [
-                {
-                    id: 'phase-acl-1',
-                    name: 'Acute & Protection Phase',
-                    totalWeeks: 3,
-                    sessionsPerWeek: 3,
-                    objective: 'Reduce swelling and pain, protect the graft, and restore basic ROM.',
-                    measurementSessionNums: [1, 3],
-                    criteria: {
-                        progressionCriteria: 'Pain ≤ 3/10 at rest, full passive knee extension, minimal effusion, independent ambulation with crutches',
-                        regressionCriteria: 'Pain > 5/10, increased swelling post-session, or inability to complete 50% of sets',
-                        precautions: 'No pivoting or twisting, avoid full weight-bearing without crutches, monitor for DVT signs',
-                        transitionCriteria: [
-                            { id: 1, metric: 'Pain at rest', operator: '≤', value: 3, unit: '/10' },
-                            { id: 2, metric: 'Passive knee extension', operator: '≥', value: 0, unit: '°' },
-                            { id: 3, metric: 'Effusion grade', operator: '≤', value: 1, unit: 'grade' },
-                            { id: 4, metric: 'Crutch independence', operator: '=', value: 1, unit: 'boolean' }
+    readonly protocols = signal<Protocol[]>([]);
+
+    constructor() {
+        this.fetchProtocols();
+    }
+
+    /**
+     * Fetches all treatment plans from the API and maps them to the local Protocol model.
+     */
+    fetchProtocols(): void {
+        this.loadingProtocols.set(true);
+        this.http.get<any>(this.apiUrl + 'TreatmentPlans').subscribe({
+            next: (data: any) => {
+                const mappedProtocols = data.data.map((item: any) => this.mapToProtocol(item));
+                this.protocols.set(mappedProtocols);
+                this.loadingProtocols.set(false);
+            },
+            error: (err) => {
+                console.error('Failed to fetch protocols:', err);
+                this.loadingProtocols.set(false);
+            }
+        });
+    }
+
+    /**
+     * Fetches detailed treatment plan by ID.
+     */
+    getTreatmentPlanById(id: number): Observable<Protocol> {
+        return this.http.get<any>(`${this.apiUrl}TreatmentPlans/${id}`).pipe(
+            map(res => this.mapToProtocol(res.data))
+        );
+    }
+
+    private mapToProtocol(apiData: any): Protocol {
+        return {
+            id: apiData.id || 0,
+            name: apiData.name || '',
+            status: apiData.status,
+            injuryCondition: apiData.injuryCondition,
+            primaryGoal: apiData.primaryGoal,
+            targetAthleteLevel: apiData.targetAthleteLevel,
+            services: (apiData.protocolTypes || []).map((s: any) => ({
+                id: s.serviceId,
+                serviceNameEn: s.serviceNameEn,
+                serviceNameAr: s.serviceNameAr,
+                selected: true
+            })),
+            weeks: apiData.totalWeeks,
+            totalSessions: apiData.totalSessions,
+            template: apiData.template,
+            numberOfPhases: apiData.numberOfPhases,
+            phases: (apiData.phases || []).map((p: any) => this.mapToPhase(p)),
+            contraindications: apiData.contraindications || [],
+        };
+    }
+
+    private mapToPhase(apiPhase: any): Phase {
+        const sessionsPerWeek = apiPhase.sessionsPerWeek || 0;
+        const totalWeeks = apiPhase.weeks || 0;
+        const phase: Phase = {
+            id: String(apiPhase.id || apiPhase.phaseOrder),
+            name: apiPhase.phaseName || '',
+            totalWeeks: totalWeeks,
+            sessionsPerWeek: sessionsPerWeek,
+            objective: apiPhase.phaseObjective || '',
+            criteria: {
+                progressionCriteria: '',
+                regressionCriteria: '',
+                precautions: '',
+                transitionCriteria: (apiPhase.criteria || []).map((c: any, idx: number) => ({
+                    id: idx,
+                    metric: c.criterionType,
+                    operator: c.operator as any,
+                    value: c.value,
+                    unit: c.unit
+                }))
+            },
+            weeks: [],
+            measurementSessionNums: (apiPhase.sessions || [])
+                .filter((s: any) => s.isMeasurementSession)
+                .map((s: any) => s.sessionNumber)
+        };
+
+        // Reconstruct weeks and sessions
+        for (let w = 1; w <= totalWeeks; w++) {
+            const week: Week = {
+                weekNumber: w,
+                sessions: []
+            };
+
+            for (let s = 1; s <= sessionsPerWeek; s++) {
+                const sessionNum = (w - 1) * sessionsPerWeek + s;
+                const apiSession = (apiPhase.sessions || []).find((as: any) => as.sessionNumber === sessionNum);
+
+                if (apiSession) {
+                    week.sessions.push({
+                        sessionNumber: sessionNum,
+                        measurementTemplateId: apiSession.measurementTemplateId,
+                        sections: (apiSession.sections || []).map((sec: any) => ({
+                            sectionName: sec.sectionName,
+                            time: String(sec.durationMinutes) + ' min',
+                            exercises: (sec.exercises || []).map((ex: any) => this.mapToExercise(ex))
+                        }))
+                    });
+                } else {
+                    // Initialize empty session
+                    const isMeasurement = phase.measurementSessionNums.includes(sessionNum);
+                    week.sessions.push({
+                        sessionNumber: sessionNum,
+                        measurementTemplateId: null,
+                        sections: isMeasurement ? [] : [
+                            {
+                                sectionName: 'Warm Up',
+                                time: '10 min',
+                                exercises: []
+                            }
                         ]
-                    },
-                    weeks: [
-                        {
-                            id: 'week-acl-1-1',
-                            weekNumber: 1,
-                            sessions: [
-                                {
-                                    id: 'session-acl-1-1',
-                                    sessionNumber: 1,
-                                    sections: [
-                                        {
-                                            sectionName: 'Warm-Up',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Ankle Pumps',
-                                                    equipment: 'None',
-                                                    description: 'Pump ankles up and down to promote circulation.',
-                                                    contractionType: 'Isotonic',
-                                                    intensityMethod: 'RPE',
-                                                    sets: [
-                                                        { repetitions: 20, intensity: '2 RPE', tempo: '1-0-1', rest: '30s' },
-                                                        { repetitions: 20, intensity: '2 RPE', tempo: '1-0-1', rest: '30s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'Volume Progression',
-                                                        incrementAmount: 5,
-                                                        progressionCondition: 'Increase reps by 5 if pain remains ≤ 2/10'
-                                                    }
-                                                },
-                                                {
-                                                    type: 'manual',
-                                                    name: 'Diaphragmatic Breathing',
-                                                    description: 'Guided breathing to reduce stress and promote recovery.',
-                                                    videoUrl: 'https://cdn.rehab.io/videos/diaphragmatic-breathing.mp4',
-                                                    progressionRule: {
-                                                        title: 'Duration Progression',
-                                                        incrementAmount: 1,
-                                                        progressionCondition: 'Add 1 minute each session if patient is comfortable'
-                                                    }
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            sectionName: 'Main Work',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Quad Sets',
-                                                    equipment: 'Mat',
-                                                    description: 'Tighten the quadriceps without moving the knee.',
-                                                    contractionType: 'Isometric',
-                                                    intensityMethod: 'MVC%',
-                                                    sets: [
-                                                        { repetitions: 10, intensity: '40% MVC', tempo: '5-0-5', rest: '60s' },
-                                                        { repetitions: 10, intensity: '40% MVC', tempo: '5-0-5', rest: '60s' },
-                                                        { repetitions: 10, intensity: '40% MVC', tempo: '5-0-5', rest: '60s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'Intensity Progression',
-                                                        incrementAmount: 10,
-                                                        progressionCondition: 'Increase MVC% by 10 when patient completes all sets without compensation'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    id: 'session-acl-1-2',
-                                    sessionNumber: 2,
-                                    sections: [
-                                        {
-                                            sectionName: 'Mobility',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Heel Slides',
-                                                    equipment: 'Mat',
-                                                    description: 'Slide heel toward glutes to improve knee flexion ROM.',
-                                                    contractionType: 'Isotonic',
-                                                    intensityMethod: 'ROM',
-                                                    sets: [
-                                                        { repetitions: 15, intensity: 'Pain-free range', tempo: '2-1-2', rest: '45s' },
-                                                        { repetitions: 15, intensity: 'Pain-free range', tempo: '2-1-2', rest: '45s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'ROM Progression',
-                                                        incrementAmount: 5,
-                                                        progressionCondition: 'Increase range by 5° when movement is pain-free'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    id: 'session-acl-1-3',
-                                    sessionNumber: 3,
-                                    sections: [
-                                        {
-                                            sectionName: 'Strengthening',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Straight Leg Raises',
-                                                    equipment: 'Mat',
-                                                    description: 'Lift the leg straight while keeping knee fully extended.',
-                                                    contractionType: 'Isotonic',
-                                                    intensityMethod: 'RPE',
-                                                    sets: [
-                                                        { repetitions: 12, intensity: '3 RPE', tempo: '2-1-2', rest: '60s' },
-                                                        { repetitions: 12, intensity: '3 RPE', tempo: '2-1-2', rest: '60s' },
-                                                        { repetitions: 12, intensity: '3 RPE', tempo: '2-1-2', rest: '60s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'Load Progression',
-                                                        incrementAmount: 0.5,
-                                                        progressionCondition: 'Add 0.5kg ankle weight when 3 sets completed without compensation'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    id: 'phase-acl-2',
-                    name: 'Neuromuscular Control Phase',
-                    totalWeeks: 4,
-                    sessionsPerWeek: 3,
-                    objective: 'Restore neuromuscular control, improve proprioception, and begin closed-chain strengthening.',
-                    measurementSessionNums: [1],
-                    criteria: {
-                        progressionCriteria: 'Full active ROM, no post-exercise effusion, single-leg stance ≥ 30s, pain ≤ 2/10',
-                        regressionCriteria: 'Effusion returning after sessions, pain > 4/10 during closed-chain exercises',
-                        precautions: 'Avoid deep knee flexion beyond 90°, no running or jumping yet',
-                        transitionCriteria: [
-                            { id: 1, metric: 'Active ROM', operator: '=', value: 140, unit: '°' },
-                            { id: 2, metric: 'Single-leg stance', operator: '≥', value: 30, unit: 'sec' },
-                            { id: 3, metric: 'Pain during exercise', operator: '≤', value: 2, unit: '/10' },
-                            { id: 4, metric: 'Post-exercise effusion', operator: '=', value: 0, unit: 'grade' }
-                        ]
-                    },
-                    weeks: [
-                        {
-                            id: 'week-acl-2-1',
-                            weekNumber: 1,
-                            sessions: [
-                                {
-                                    id: 'session-acl-2-1',
-                                    sessionNumber: 1,
-                                    sections: [
-                                        {
-                                            sectionName: 'Proprioception',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Single-Leg Balance',
-                                                    equipment: 'Balance Board',
-                                                    description: 'Stand on one leg on a balance board to challenge stability.',
-                                                    contractionType: 'Stabilization',
-                                                    intensityMethod: 'Duration',
-                                                    sets: [
-                                                        { repetitions: 1, intensity: '20 seconds', tempo: 'Hold', rest: '60s' },
-                                                        { repetitions: 1, intensity: '20 seconds', tempo: 'Hold', rest: '60s' },
-                                                        { repetitions: 1, intensity: '20 seconds', tempo: 'Hold', rest: '60s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'Duration Progression',
-                                                        incrementAmount: 10,
-                                                        progressionCondition: 'Increase hold time by 10s when 3 sets completed without loss of balance'
-                                                    }
-                                                },
-                                                {
-                                                    type: 'manual',
-                                                    name: 'Eyes-Closed Balance Drill',
-                                                    description: 'Perform single-leg stance with eyes closed to enhance proprioception.',
-                                                    videoUrl: 'https://cdn.rehab.io/videos/eyes-closed-balance.mp4',
-                                                    progressionRule: {
-                                                        title: 'Surface Progression',
-                                                        incrementAmount: 1,
-                                                        progressionCondition: 'Progress to unstable surface when 30s eyes-closed hold achieved'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    id: 'phase-acl-3',
-                    name: 'Return to Sport Phase',
-                    totalWeeks: 5,
-                    sessionsPerWeek: 3,
-                    objective: 'Restore full strength, power, and sport-specific movement patterns for safe return to play.',
-                    measurementSessionNums: [1],
-                    criteria: {
-                        progressionCriteria: 'Hamstring strength symmetry ≥ 90%, pain-free sprinting, successful agility tests, H:Q ratio ≥ 0.6',
-                        regressionCriteria: 'Pain > 2/10 during sprinting, strength symmetry dropping below 85%, fear avoidance behavior',
-                        precautions: 'Gradual sprint progression, avoid maximum velocity sprinting until fully cleared',
-                        transitionCriteria: [
-                            { id: 1, metric: 'Hamstring strength symmetry', operator: '≥', value: 90, unit: '%' },
-                            { id: 2, metric: 'H:Q ratio', operator: '≥', value: 0.6, unit: 'ratio' },
-                            { id: 3, metric: 'Pain during sprint', operator: '=', value: 0, unit: '/10' },
-                            { id: 4, metric: 'Agility test completion', operator: '=', value: 1, unit: 'boolean' }
-                        ]
-                    },
-                    weeks: [
-                        {
-                            id: 'week-acl-3-1',
-                            weekNumber: 1,
-                            sessions: [
-                                {
-                                    id: 'session-acl-3-1',
-                                    sessionNumber: 1,
-                                    sections: [
-                                        {
-                                            sectionName: 'Power Development',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Box Jump',
-                                                    equipment: 'Plyometric Box',
-                                                    description: 'Jump onto box with bilateral takeoff, focusing on soft landing mechanics.',
-                                                    contractionType: 'Plyometric',
-                                                    intensityMethod: 'RPE',
-                                                    sets: [
-                                                        { repetitions: 6, intensity: '6 RPE', tempo: 'Explosive', rest: '90s' },
-                                                        { repetitions: 6, intensity: '6 RPE', tempo: 'Explosive', rest: '90s' },
-                                                        { repetitions: 6, intensity: '7 RPE', tempo: 'Explosive', rest: '90s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'Height Progression',
-                                                        incrementAmount: 5,
-                                                        progressionCondition: 'Increase box height by 5cm when landing mechanics are optimal'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
+                    });
                 }
-            ]
-        },
-        {
-            id: 2,
-            name: 'Rotator Cuff Recovery – Non-Surgical',
-            status: 'draft',
-            services: [],
-            weeks: null,
-            totalSessions: null,
-            template: null,
-            createdAt: '2026-05-01',
-            createdBy: { id: 102, name: 'Dr. James Thornton', role: 'Sports Rehabilitator' },
-            phases: [
-                {
-                    id: 'phase-rc-1',
-                    name: 'Pain Management & Mobility Phase',
-                    totalWeeks: 3,
-                    sessionsPerWeek: 2,
-                    objective: 'Reduce pain and inflammation while restoring shoulder mobility and scapular control.',
-                    measurementSessionNums: [1],
-                    criteria: {
-                        progressionCriteria: 'Pain ≤ 3/10 at rest, shoulder AROM ≥ 120° flexion, no night pain, scapular dyskinesis resolved',
-                        regressionCriteria: 'Pain > 5/10 post-session, increased crepitus, or inability to sleep on affected side',
-                        precautions: 'Avoid overhead loading, no resisted internal rotation above 60°, ice post-session if inflamed',
-                        transitionCriteria: [
-                            { id: 1, metric: 'Pain at rest', operator: '≤', value: 3, unit: '/10' },
-                            { id: 2, metric: 'Shoulder AROM flexion', operator: '≥', value: 120, unit: '°' },
-                            { id: 3, metric: 'Night pain', operator: '=', value: 0, unit: 'boolean' },
-                            { id: 4, metric: 'Scapular dyskinesis', operator: '=', value: 0, unit: 'boolean' }
-                        ]
-                    },
-                    weeks: [
-                        {
-                            id: 'week-rc-1-1',
-                            weekNumber: 1,
-                            sessions: [
-                                {
-                                    id: 'session-rc-1-1',
-                                    sessionNumber: 1,
-                                    sections: [
-                                        {
-                                            sectionName: 'Mobility',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Pendulum Circles',
-                                                    equipment: 'None',
-                                                    description: 'Lean forward and let the arm hang, making small circles to decompress the shoulder.',
-                                                    contractionType: 'Passive',
-                                                    intensityMethod: 'RPE',
-                                                    sets: [
-                                                        { repetitions: 20, intensity: '1 RPE', tempo: 'Slow', rest: '30s' },
-                                                        { repetitions: 20, intensity: '1 RPE', tempo: 'Slow', rest: '30s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'Range Progression',
-                                                        incrementAmount: 2,
-                                                        progressionCondition: 'Gradually increase circle diameter as pain decreases'
-                                                    }
-                                                },
-                                                {
-                                                    type: 'manual',
-                                                    name: 'Heat Therapy Application',
-                                                    description: 'Apply moist heat to the shoulder for 15 minutes prior to exercise.',
-                                                    videoUrl: 'https://cdn.rehab.io/videos/heat-therapy-shoulder.mp4',
-                                                    progressionRule: {
-                                                        title: 'Duration Progression',
-                                                        incrementAmount: 5,
-                                                        progressionCondition: 'Extend to 20 minutes if tolerated well after week 1'
-                                                    }
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            sectionName: 'Scapular Stabilization',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Scapular Retractions',
-                                                    equipment: 'Resistance Band',
-                                                    description: 'Squeeze shoulder blades together against light resistance.',
-                                                    contractionType: 'Isometric',
-                                                    intensityMethod: 'RPE',
-                                                    sets: [
-                                                        { repetitions: 15, intensity: '3 RPE', tempo: '2-2-2', rest: '45s' },
-                                                        { repetitions: 15, intensity: '3 RPE', tempo: '2-2-2', rest: '45s' },
-                                                        { repetitions: 15, intensity: '3 RPE', tempo: '2-2-2', rest: '45s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'Resistance Progression',
-                                                        incrementAmount: 1,
-                                                        progressionCondition: 'Progress to next band level when 3x15 completed pain-free'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    id: 'phase-rc-2',
-                    name: 'Strengthening & Endurance Phase',
-                    totalWeeks: 4,
-                    sessionsPerWeek: 2,
-                    objective: 'Strengthen rotator cuff and periscapular muscles, improve endurance and dynamic stability.',
-                    measurementSessionNums: [1],
-                    criteria: {
-                        progressionCriteria: 'Pain ≤ 2/10 during resisted exercises, AROM full, ER/IR strength symmetry ≥ 75%',
-                        regressionCriteria: 'Pain > 4/10 during band exercises, loss of range achieved in Phase 1',
-                        precautions: 'Avoid overhead work above 90° until fully cleared, monitor for impingement symptoms',
-                        transitionCriteria: [
-                            { id: 1, metric: 'Pain during resistance', operator: '≤', value: 2, unit: '/10' },
-                            { id: 2, metric: 'ER/IR strength symmetry', operator: '≥', value: 75, unit: '%' },
-                            { id: 3, metric: 'AROM flexion', operator: '≥', value: 160, unit: '°' },
-                            { id: 4, metric: 'Overhead impingement sign', operator: '=', value: 0, unit: 'boolean' }
-                        ]
-                    },
-                    weeks: [
-                        {
-                            id: 'week-rc-2-1',
-                            weekNumber: 1,
-                            sessions: [
-                                {
-                                    id: 'session-rc-2-1',
-                                    sessionNumber: 1,
-                                    sections: [
-                                        {
-                                            sectionName: 'Rotator Cuff Strengthening',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'External Rotation with Band',
-                                                    equipment: 'Resistance Band',
-                                                    description: 'Elbow at 90°, rotate forearm outward against band resistance.',
-                                                    contractionType: 'Isotonic',
-                                                    intensityMethod: 'RPE',
-                                                    sets: [
-                                                        { repetitions: 15, intensity: '4 RPE', tempo: '2-1-3', rest: '60s' },
-                                                        { repetitions: 15, intensity: '4 RPE', tempo: '2-1-3', rest: '60s' },
-                                                        { repetitions: 12, intensity: '5 RPE', tempo: '2-1-3', rest: '60s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'Load Progression',
-                                                        incrementAmount: 1,
-                                                        progressionCondition: 'Increase band resistance when 3x15 performed with controlled tempo'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    id: 'phase-rc-3',
-                    name: 'Functional Return Phase',
-                    totalWeeks: 3,
-                    sessionsPerWeek: 2,
-                    objective: 'Restore full overhead function and sport/work-specific shoulder mechanics.',
-                    measurementSessionNums: [1],
-                    criteria: {
-                        progressionCriteria: 'Full pain-free AROM, ER/IR symmetry ≥ 90%, successful functional throwing or overhead test',
-                        regressionCriteria: 'Pain > 3/10 overhead, recurrence of impingement, strength regression > 15%',
-                        precautions: 'Gradual overhead loading, no ballistic throwing until final clearance',
-                        transitionCriteria: [
-                            { id: 1, metric: 'Pain-free AROM', operator: '=', value: 1, unit: 'boolean' },
-                            { id: 2, metric: 'ER/IR strength symmetry', operator: '≥', value: 90, unit: '%' },
-                            { id: 3, metric: 'Overhead functional test', operator: '=', value: 1, unit: 'boolean' },
-                            { id: 4, metric: 'Subjective shoulder score', operator: '≥', value: 80, unit: '/100' }
-                        ]
-                    },
-                    weeks: [
-                        {
-                            id: 'week-rc-3-1',
-                            weekNumber: 1,
-                            sessions: [
-                                {
-                                    id: 'session-rc-3-1',
-                                    sessionNumber: 1,
-                                    sections: [
-                                        {
-                                            sectionName: 'Overhead Loading',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Overhead Press',
-                                                    equipment: 'Dumbbells',
-                                                    description: 'Press dumbbells overhead from shoulder height, maintaining neutral spine.',
-                                                    contractionType: 'Isotonic',
-                                                    intensityMethod: '1RM%',
-                                                    sets: [
-                                                        { repetitions: 10, intensity: '50% 1RM', tempo: '2-1-2', rest: '90s' },
-                                                        { repetitions: 10, intensity: '55% 1RM', tempo: '2-1-2', rest: '90s' },
-                                                        { repetitions: 8, intensity: '60% 1RM', tempo: '2-1-2', rest: '90s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'Load Progression',
-                                                        incrementAmount: 5,
-                                                        progressionCondition: 'Increase load by 5% 1RM when all sets completed with full ROM'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            id: 3,
-            name: 'Hamstring Strain – Grade 2',
-            status: 'archived',
-            services: [],
-            weeks: null,
-            totalSessions: null,
-            template: null,
-            createdAt: '2026-03-15',
-            createdBy: { id: 103, name: 'Dr. Layla Hassan', role: 'Physical Therapist' },
-            phases: [
-                {
-                    id: 'phase-hs-1',
-                    name: 'Acute Protection Phase',
-                    totalWeeks: 2,
-                    sessionsPerWeek: 3,
-                    objective: 'Minimize tissue damage, control inflammation, and maintain pain-free range of motion.',
-                    measurementSessionNums: [1],
-                    criteria: {
-                        progressionCriteria: 'Pain ≤ 2/10 during eccentric exercise, full active ROM, hamstring strength ≥ 70%, normal gait',
-                        regressionCriteria: 'Pain > 4/10 during eccentric loading, strength deficit > 40% vs contralateral side',
-                        precautions: 'Avoid maximal sprinting, no ballistic stretching, monitor soreness 24h post-session',
-                        transitionCriteria: [
-                            { id: 1, metric: 'Pain during eccentric', operator: '≤', value: 2, unit: '/10' },
-                            { id: 2, metric: 'Hamstring strength symmetry', operator: '≥', value: 70, unit: '%' },
-                            { id: 3, metric: 'Active ROM', operator: '=', value: 1, unit: 'boolean' },
-                            { id: 4, metric: 'Gait pattern', operator: '=', value: 1, unit: 'boolean' }
-                        ]
-                    },
-                    weeks: [
-                        {
-                            id: 'week-hs-1-1',
-                            weekNumber: 1,
-                            sessions: [
-                                {
-                                    id: 'session-hs-1-1',
-                                    sessionNumber: 1,
-                                    sections: [
-                                        {
-                                            sectionName: 'Isometric Loading',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Prone Isometric Hamstring Contraction',
-                                                    equipment: 'Mat',
-                                                    description: 'Lying prone, gently contract hamstrings against therapist resistance at low intensity.',
-                                                    contractionType: 'Isometric',
-                                                    intensityMethod: 'MVC%',
-                                                    sets: [
-                                                        { repetitions: 5, intensity: '20% MVC', tempo: '5-0-5', rest: '90s' },
-                                                        { repetitions: 5, intensity: '20% MVC', tempo: '5-0-5', rest: '90s' },
-                                                        { repetitions: 5, intensity: '25% MVC', tempo: '5-0-5', rest: '90s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'Intensity Progression',
-                                                        incrementAmount: 5,
-                                                        progressionCondition: 'Increase MVC% by 5 when no pain or discomfort reported post-session'
-                                                    }
-                                                },
-                                                {
-                                                    type: 'manual',
-                                                    name: 'Cold Therapy Protocol',
-                                                    description: 'Apply ice pack wrapped in cloth to the posterior thigh for 15 minutes.',
-                                                    videoUrl: 'https://cdn.rehab.io/videos/cold-therapy-hamstring.mp4',
-                                                    progressionRule: {
-                                                        title: 'Frequency Reduction',
-                                                        incrementAmount: -1,
-                                                        progressionCondition: 'Reduce icing frequency as acute inflammation resolves after day 5'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                },
-                                {
-                                    id: 'session-hs-1-2',
-                                    sessionNumber: 2,
-                                    sections: [
-                                        {
-                                            sectionName: 'Mobility',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Supine Hamstring Stretch',
-                                                    equipment: 'Strap',
-                                                    description: 'Lying on back, use strap to gently stretch the hamstring within pain-free range.',
-                                                    contractionType: 'Passive',
-                                                    intensityMethod: 'ROM',
-                                                    sets: [
-                                                        { repetitions: 3, intensity: 'Pain-free end range', tempo: 'Hold 30s', rest: '30s' },
-                                                        { repetitions: 3, intensity: 'Pain-free end range', tempo: 'Hold 30s', rest: '30s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'ROM Progression',
-                                                        incrementAmount: 5,
-                                                        progressionCondition: 'Increase stretch range by 5° every 2 sessions if pain-free'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    id: 'phase-hs-2',
-                    name: 'Tissue Remodeling & Strength Phase',
-                    totalWeeks: 3,
-                    sessionsPerWeek: 3,
-                    objective: 'Promote collagen remodeling, restore eccentric strength, and improve tissue capacity.',
-                    measurementSessionNums: [1],
-                    criteria: {
-                        progressionCriteria: 'Eccentric strength symmetry ≥ 80%, SLR pain-free at 70°, no 24h soreness > 3/10',
-                        regressionCriteria: 'Any sharp posterior thigh pain during loading, swelling, or 24h soreness > 5/10',
-                        precautions: 'Avoid maximal eccentric load until week 2, no sprinting, monitor 24h soreness response',
-                        transitionCriteria: [
-                            { id: 1, metric: 'Eccentric strength symmetry', operator: '≥', value: 80, unit: '%' },
-                            { id: 2, metric: 'SLR angle pain-free', operator: '≥', value: 70, unit: '°' },
-                            { id: 3, metric: '24h soreness', operator: '≤', value: 3, unit: '/10' },
-                            { id: 4, metric: 'Hamstring tightness (palpation)', operator: '=', value: 0, unit: 'boolean' }
-                        ]
-                    },
-                    weeks: [
-                        {
-                            id: 'week-hs-2-1',
-                            weekNumber: 1,
-                            sessions: [
-                                {
-                                    id: 'session-hs-2-1',
-                                    sessionNumber: 1,
-                                    sections: [
-                                        {
-                                            sectionName: 'Eccentric Strengthening',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Nordic Hamstring Curl',
-                                                    equipment: 'Partner / Anchor',
-                                                    description: 'Kneel with ankles anchored, slowly lower torso toward floor using hamstrings eccentrically.',
-                                                    contractionType: 'Eccentric',
-                                                    intensityMethod: 'RPE',
-                                                    sets: [
-                                                        { repetitions: 5, intensity: '5 RPE', tempo: '4-0-1', rest: '120s' },
-                                                        { repetitions: 5, intensity: '5 RPE', tempo: '4-0-1', rest: '120s' },
-                                                        { repetitions: 5, intensity: '6 RPE', tempo: '4-0-1', rest: '120s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'Volume Progression',
-                                                        incrementAmount: 1,
-                                                        progressionCondition: 'Add 1 rep per set each week when completed without pain'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                },
-                {
-                    id: 'phase-hs-3',
-                    name: 'Return to Sport Phase',
-                    totalWeeks: 3,
-                    sessionsPerWeek: 3,
-                    objective: 'Restore sprint mechanics, explosive power, and sport-specific movement confidence.',
-                    measurementSessionNums: [1],
-                    criteria: {
-                        progressionCriteria: 'Hamstring strength symmetry ≥ 90%, pain-free sprint at 80% max, H:Q ratio ≥ 0.6',
-                        regressionCriteria: 'Any posterior thigh pain during sprinting, strength regression > 10%',
-                        precautions: 'Gradual sprint progression, no ballistic actions until fully cleared, warm-up mandatory',
-                        transitionCriteria: [
-                            { id: 1, metric: 'Hamstring strength symmetry', operator: '≥', value: 90, unit: '%' },
-                            { id: 2, metric: 'Pain during sprint', operator: '=', value: 0, unit: '/10' },
-                            { id: 3, metric: 'H:Q ratio', operator: '≥', value: 0.6, unit: 'ratio' },
-                            { id: 4, metric: 'Agility test', operator: '=', value: 1, unit: 'boolean' }
-                        ]
-                    },
-                    weeks: [
-                        {
-                            id: 'week-hs-3-1',
-                            weekNumber: 1,
-                            sessions: [
-                                {
-                                    id: 'session-hs-3-1',
-                                    sessionNumber: 1,
-                                    sections: [
-                                        {
-                                            sectionName: 'Speed & Agility',
-                                            exercises: [
-                                                {
-                                                    type: 'exercise',
-                                                    name: 'Resisted Sprint Acceleration',
-                                                    equipment: 'Sprint Sled',
-                                                    description: 'Sprint 20m with sled resistance, focusing on hip drive and hamstring loading.',
-                                                    contractionType: 'Isotonic',
-                                                    intensityMethod: 'RPE',
-                                                    sets: [
-                                                        { repetitions: 4, intensity: '7 RPE', tempo: 'Maximal', rest: '180s' },
-                                                        { repetitions: 4, intensity: '8 RPE', tempo: 'Maximal', rest: '180s' }
-                                                    ],
-                                                    progressionRule: {
-                                                        title: 'Load & Distance Progression',
-                                                        incrementAmount: 5,
-                                                        progressionCondition: 'Increase sprint distance by 5m when mechanics are consistently clean'
-                                                    }
-                                                },
-                                                {
-                                                    type: 'manual',
-                                                    name: 'High Knee Running Drill',
-                                                    description: 'Perform high knee running at progressive speeds to reinforce hamstring recruitment patterns.',
-                                                    videoUrl: 'https://cdn.rehab.io/videos/high-knee-drill.mp4',
-                                                    progressionRule: {
-                                                        title: 'Speed Progression',
-                                                        incrementAmount: 10,
-                                                        progressionCondition: 'Increase speed by 10% each session when form remains controlled'
-                                                    }
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
+            }
+            phase.weeks.push(week);
         }
-    ]);
+
+        return phase;
+    }
+
+    private mapToExercise(apiEx: any): Exercise {
+        const type = String(apiEx.exerciseType || '').toLowerCase() as 'exercise' | 'manual';
+        const base: any = {
+            id: apiEx.id,
+            type: type,
+            name: apiEx.exerciseName,
+            description: apiEx.description,
+            progressionRule: {
+                title: apiEx.progressionTitle,
+                incrementAmount: apiEx.incrementAmount,
+                progressionCondition: apiEx.progressionCondition
+            }
+        };
+
+        if (type === 'exercise') {
+            return {
+                ...base,
+                equipment: apiEx.equipment,
+                contractionType: apiEx.contractionType,
+                intensityMethod: apiEx.intensityMethod,
+                sets: (apiEx.sets || []).map((s: any) => ({
+                    repetitions: s.reps,
+                    intensity: s.intensity,
+                    tempo: s.tempo,
+                    rest: String(s.restSeconds) + 's'
+                }))
+            } as ExerciseType;
+        } else {
+            return {
+                ...base,
+                videoUrl: apiEx.videoUrl
+            } as ManualType;
+        }
+    }
 
     readonly showStepper = signal(false);
     readonly activeProtocol = signal<Protocol | null>(null);
@@ -752,18 +194,12 @@ export class ProtocolService {
         const newProtocol: Protocol = {
             id: Date.now(),
             name: '',
-            status: 'draft',
+            status: 'Draft',
             services: [],
             weeks: null,
             totalSessions: null,
             template: null,
             phases: [this.createPhase(1)],
-            createdAt: new Date().toISOString().split('T')[0],
-            createdBy: {
-                id: 0,
-                name: '',
-                role: ''
-            }
         };
         this.activeProtocol.set(newProtocol);
         this.stepperMode.set('create');
@@ -772,23 +208,33 @@ export class ProtocolService {
     }
 
     viewProtocol(protocol: Protocol): void {
-        this.activeProtocol.set({ ...protocol });
-        this.stepperMode.set('view');
-        this.currentStep.set(1);
-        this.showStepper.set(true);
+        this.getTreatmentPlanById(protocol.id).subscribe({
+            next: (fullProtocol) => {
+                this.activeProtocol.set(fullProtocol);
+                this.stepperMode.set('view');
+                this.currentStep.set(1);
+                this.showStepper.set(true);
+            },
+            error: (err) => console.error('Failed to fetch protocol details:', err)
+        });
     }
 
     editProtocol(protocol: Protocol): void {
-        this.activeProtocol.set({ ...protocol });
-        this.stepperMode.set('edit');
-        this.currentStep.set(1);
-        this.showStepper.set(true);
+        this.getTreatmentPlanById(protocol.id).subscribe({
+            next: (fullProtocol) => {
+                this.activeProtocol.set(fullProtocol);
+                this.stepperMode.set('edit');
+                this.currentStep.set(1);
+                this.showStepper.set(true);
+            },
+            error: (err) => console.error('Failed to fetch protocol details:', err)
+        });
     }
 
     finaliseProtocol(): void {
         const proto = this.activeProtocol();
         if (!proto) return;
-        proto.status = 'active';
+        proto.status = 'Published';
         this.protocols.update(list => [...list, proto]);
         this.activeProtocol.set(null);
         this.showStepper.set(false);
@@ -799,7 +245,7 @@ export class ProtocolService {
     saveProtocolAsDraft(): void {
         const proto = this.activeProtocol();
         if (!proto) return;
-        proto.status = 'draft';
+        proto.status = 'Draft';
         this.protocols.update(list => [...list, proto]);
         this.activeProtocol.set(null);
         this.showStepper.set(false);
@@ -807,17 +253,149 @@ export class ProtocolService {
         this.currentStep.set(1);
     }
 
-    saveEditedProtocol(): void {
+    // ── API: Create Treatment Plan ────────────────────────────────────────────
+    /**
+     * Maps the active Protocol signal to the TreatmentPlans API request body
+     * and sends a POST request to create a new treatment plan.
+     *
+     * @param saveAsDraft - when true the record is saved as a draft on the server.
+     */
+    createTreatmentPlan(saveAsDraft: boolean = true): Observable<unknown> {
         const proto = this.activeProtocol();
-        if (!proto) return;
-        this.protocols.update(list =>
-            list.map(p => (p.id === proto.id ? { ...proto } : p))
-        );
-        this.activeProtocol.set(null);
-        this.showStepper.set(false);
-        this.stepperMode.set('create');
-        this.currentStep.set(1);
+        if (!proto) {
+            throw new Error('No active protocol to save.');
+        }
+
+        const body = this.mapProtocolToRequest(proto, saveAsDraft);
+        return this.http.post<unknown>(this.apiUrl + 'TreatmentPlans', body);
     }
+
+    /**
+     * Maps the active Protocol signal to the TreatmentPlans API request body
+     * and sends a PUT request to update an existing treatment plan.
+     *
+     * @param id - The ID of the treatment plan to update.
+     * @param saveAsDraft - when true the record is saved as a draft on the server.
+     */
+    updateTreatmentPlan(id: number, saveAsDraft?: boolean): Observable<unknown> {
+        const proto = this.activeProtocol();
+        if (!proto) {
+            throw new Error('No active protocol to update.');
+        }
+
+        // If status is 'Published', we don't want to revert it to 'Draft'
+        const calculatedSaveAsDraft = saveAsDraft !== undefined 
+            ? saveAsDraft 
+            : (proto.status !== 'Published');
+
+        const body = this.mapProtocolToRequest(proto, calculatedSaveAsDraft);
+        return this.http.put<unknown>(`${this.apiUrl}TreatmentPlans/${id}`, body);
+    }
+
+    private mapProtocolToRequest(proto: Protocol, saveAsDraft: boolean): TreatmentPlanRequest {
+        const totalWeeks = proto.phases.reduce((sum, p) => sum + (p.totalWeeks ?? 0), 0);
+        const avgSessionsPerWeek = proto.phases.length
+            ? Math.round(proto.phases.reduce((sum, p) => sum + (p.sessionsPerWeek ?? 0), 0) / proto.phases.length)
+            : 0;
+
+        return {
+            name: proto.name,
+            injuryCondition: proto.injuryCondition || '',
+            primaryGoal: proto.primaryGoal || '',
+            totalWeeks,
+            sessionsPerWeek: avgSessionsPerWeek,
+            numberOfPhases: proto.phases.length,
+            targetAthleteLevel: proto.targetAthleteLevel || '',
+            saveAsDraft,
+            protocolServiceIds: (proto.services ?? []).map(s => s.id),
+            contraindications: proto.contraindications || [],
+            phases: proto.phases.map((phase, phaseIdx) => this.mapPhase(phase, phaseIdx)),
+        };
+    }
+
+    private mapPhase(phase: Phase, phaseIdx: number): TreatmentPlanPhase {
+        const allSessions = phase.weeks.flatMap(w => w.sessions);
+        return {
+            phaseName: phase.name,
+            phaseOrder: phaseIdx + 1,
+            weeks: phase.totalWeeks,
+            sessionsPerWeek: phase.sessionsPerWeek,
+            phaseObjective: phase.objective ?? '',
+            criteria: (phase.criteria.transitionCriteria ?? []).map(tc => ({
+                criterionType: tc.metric,
+                operator: tc.operator,
+                value: tc.value ?? 0,
+                unit: tc.unit,
+            } satisfies TreatmentPlanCriterion)),
+            sessions: allSessions.map(session => this.mapSession(session, phase)),
+        };
+    }
+
+    private mapSession(session: Session, phase: Phase): TreatmentPlanSession {
+        const isMeasurement = phase.measurementSessionNums.includes(session.sessionNumber);
+        return {
+            sessionNumber: session.sessionNumber,
+            isMeasurementSession: isMeasurement,
+            measurementTemplateId: session.measurementTemplateId ?? 0,
+            sections: isMeasurement ? [] : session.sections.map((sec, secIdx) => this.mapSection(sec, secIdx)),
+        };
+    }
+
+    private mapSection(section: Section, sectionIdx: number): TreatmentPlanSection {
+        return {
+            sectionName: section.sectionName,
+            durationMinutes: this.parseDurationMinutes(section.time),
+            order: sectionIdx + 1,
+            exercises: section.exercises.map((ex, exIdx) => this.mapExercise(ex, exIdx)),
+        };
+    }
+
+    private mapExercise(ex: Exercise, exIdx: number): TreatmentPlanExercise {
+        const isExercise = ex.type === 'exercise';
+        const exerciseEx = isExercise ? (ex as ExerciseType) : null;
+        return {
+            exerciseType: ex.type,
+            order: exIdx + 1,
+            exerciseId: ex.id ?? 0,
+            equipment: exerciseEx?.equipment ?? '',
+            contractionType: exerciseEx?.contractionType ?? '',
+            intensityMethod: exerciseEx?.intensityMethod ?? '',
+            sets: (exerciseEx?.sets ?? []).map((set, setIdx) => ({
+                setNumber: setIdx + 1,
+                reps: set.repetitions,
+                intensity: set.intensity,
+                tempo: set.tempo,
+                restSeconds: this.parseRestSeconds(set.rest),
+            } satisfies TreatmentPlanSet)),
+            exerciseName: ex.name,
+            description: ex.description ?? '',
+            videoUrl: ex.type === 'manual' ? (ex as import('../models/protocol.model').ManualType).videoUrl ?? '' : '',
+            progressionTitle: ex.progressionRule?.title ?? '',
+            incrementAmount: ex.progressionRule?.incrementAmount ?? 0,
+            progressionCondition: ex.progressionRule?.progressionCondition ?? '',
+        };
+    }
+
+    /** Converts rest strings like '60s', '1m', '90' to seconds. */
+    private parseRestSeconds(rest: string): number {
+        if (!rest) return 0;
+        const minMatch = rest.match(/(\d+(?:\.\d+)?)\s*m/i);
+        if (minMatch) return Math.round(parseFloat(minMatch[1]) * 60);
+        const secMatch = rest.match(/(\d+(?:\.\d+)?)/i);
+        if (secMatch) return Math.round(parseFloat(secMatch[1]));
+        return 0;
+    }
+
+    /** Converts duration strings like '10 min', '1h', '60' to minutes. */
+    private parseDurationMinutes(time: string | undefined): number {
+        if (!time) return 0;
+        const hourMatch = time.match(/(\d+(?:\.\d+)?)\s*h/i);
+        if (hourMatch) return Math.round(parseFloat(hourMatch[1]) * 60);
+        const minMatch = time.match(/(\d+(?:\.\d+)?)/i);
+        if (minMatch) return Math.round(parseFloat(minMatch[1]));
+        return 0;
+    }
+
 
     cancelProtocol(): void {
         this.activeProtocol.set(null);
@@ -834,13 +412,13 @@ export class ProtocolService {
             totalWeeks: 0,
             sessionsPerWeek: 0,
             objective: '',
-            criteria: this.createCriteria(),
+            criteria: this.createCriteria(1),
             weeks: [],
             measurementSessionNums: []
         };
     }
 
-    createCriteria(): PhaseCriteria {
+    createCriteria(id: number): PhaseCriteria {
         return {
             progressionCriteria: '',
             regressionCriteria: '',
@@ -953,12 +531,13 @@ export class ProtocolService {
         const week = phase.weeks[weekIndex];
 
         if (!week.sessions[sessionIndex]) {
+            const isMeasurement = phase.measurementSessionNums.includes(sessionNum);
             week.sessions[sessionIndex] = {
                 sessionNumber: sessionNum,
-                sections: [
+                sections: isMeasurement ? [] : [
                     {
-                        sectionName: 'Warm Up',
-                        time: '10 min',
+                        sectionName: '',
+                        time: '',
                         exercises: []
                     }
                 ]
