@@ -257,21 +257,86 @@ textarea.proto-input {
 .contra-item {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    padding: 4px 0;
+
+    &:first-of-type .contra-reorder-btn:first-child,
+    &:last-of-type .contra-reorder-btn:last-child {
+        opacity: 0.25;
+        pointer-events: none;
+    }
 }
 
-.contra-x {
-    color: $accent-red;
-    font-size: 13px;
+// ─── Order badge ──────────────────────────────────────────────────────
+.contra-order-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(74, 140, 219, 0.12);
+    color: $accent-blue;
+    font-size: 11px;
     font-weight: 700;
-    cursor: pointer;
     flex-shrink: 0;
-    width: 18px;
-    text-align: center;
-    transition: opacity 0.15s;
+}
+
+// ─── Reorder buttons ──────────────────────────────────────────────────
+.contra-reorder-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.contra-reorder-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 18px;
+    background: transparent;
+    border: 1px solid $border-color;
+    border-radius: 4px;
+    color: $text-secondary;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
+    font-size: 10px;
+
+    &:hover:not(:disabled) {
+        background: rgba(74, 140, 219, 0.12);
+        border-color: $accent-blue;
+        color: $accent-blue;
+    }
+
+    &:disabled {
+        opacity: 0.25;
+        cursor: not-allowed;
+    }
+}
+
+// ─── Remove button ────────────────────────────────────────────────────
+.contra-remove-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: transparent;
+    border: 1px solid rgba(224, 92, 92, 0.3);
+    border-radius: 6px;
+    color: $accent-red;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s;
+    font-size: 12px;
 
     &:hover {
-        opacity: 0.7;
+        background: rgba(224, 92, 92, 0.1);
+        border-color: $accent-red;
     }
 }
 
@@ -285,39 +350,58 @@ textarea.proto-input {
 .add-contra-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin-top: 4px;
+    gap: 8px;
+    padding: 4px 0;
+    margin-top: 6px;
+    border-top: 1px dashed $border-color;
+    padding-top: 10px;
+}
 
-    .add-icon {
-        opacity: 0.4;
-        cursor: default;
+// New-item badge (shows a + icon instead of a number)
+.contra-order-badge--new {
+    background: rgba(74, 140, 219, 0.08);
+    color: $accent-blue;
+    border: 1px dashed rgba(74, 140, 219, 0.4);
+    font-size: 10px;
+}
+
+// Spacer that replaces the ↑↓ reorder-btns column so columns stay aligned
+.contra-reorder-spacer {
+    // Same width as .contra-reorder-btns (22px) + gap between buttons
+    width: 22px;
+    flex-shrink: 0;
+}
+
+// ─── Add button (mirrors contra-remove-btn, accented blue) ────────────
+.contra-add-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    background: transparent;
+    border: 1px solid rgba(74, 140, 219, 0.35);
+    border-radius: 6px;
+    color: $accent-blue;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    font-size: 12px;
+
+    &:hover {
+        background: rgba(74, 140, 219, 0.12);
+        border-color: $accent-blue;
+        transform: scale(1.08);
     }
 
-    .contra-input {
-        flex: 1;
+    &:active {
+        transform: scale(0.95);
     }
 }
 
 // ─── Buttons ──────────────────────────────────────────────────────────
 :host ::ng-deep {
-    .add-btn {
-        .p-button {
-            background: rgba(74, 140, 219, 0.15) !important;
-            border: 1px solid rgba(74, 140, 219, 0.4) !important;
-            color: $accent-blue !important;
-            font-size: 12px !important;
-            font-weight: 600 !important;
-            padding: 8px 16px !important;
-            border-radius: 6px !important;
-            transition: background 0.2s !important;
-            white-space: nowrap;
-
-            &:hover {
-                background: rgba(74, 140, 219, 0.25) !important;
-            }
-        }
-    }
-
     .save-btn {
         .p-button {
             background: $accent-blue !important;

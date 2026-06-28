@@ -5,6 +5,8 @@ import { Protocol, Phase, Exercise, getProtocolWeeks, getProtocolSessions } from
 import { MessageService } from 'primeng/api';
 
 import { MeasurementTemplatesService } from '../../measurements-config/services/measurement-templates.service';
+import { HttpClient } from '@angular/common/http';
+import { fixArabicText } from '../utils/arabic-helper';
 
 @Injectable({
     providedIn: 'root'
@@ -12,19 +14,49 @@ import { MeasurementTemplatesService } from '../../measurements-config/services/
 export class PdfExportService {
     private messageService = inject(MessageService);
     private templatesService = inject(MeasurementTemplatesService);
+    private http = inject(HttpClient);
 
     exportProtocolToPDF(proto: Protocol): void {
         if (!proto) return;
 
-        // Fetch templates first to resolve IDs to names
-        this.templatesService.getAllTemplates().subscribe({
-            next: (templates) => this.generatePDF(proto, templates),
-            error: () => this.generatePDF(proto, [])
+        // Load the Arabic font from assets and fetch templates, then generate PDF
+        this.http.get('assets/fonts/DINNextLTArabic-Regular-3.ttf', { responseType: 'arraybuffer' }).subscribe({
+            next: (fontBuffer) => {
+                const fontBase64 = this.arrayBufferToBase64(fontBuffer);
+                this.templatesService.getAllTemplates().subscribe({
+                    next: (templates) => this.generatePDF(proto, templates, fontBase64),
+                    error: () => this.generatePDF(proto, [], fontBase64)
+                });
+            },
+            error: (err) => {
+                console.warn('Failed to load DINNext Arabic font, falling back without embedding.', err);
+                this.templatesService.getAllTemplates().subscribe({
+                    next: (templates) => this.generatePDF(proto, templates),
+                    error: () => this.generatePDF(proto, [])
+                });
+            }
         });
     }
 
-    private generatePDF(proto: Protocol, templates: any[]): void {
+    private arrayBufferToBase64(buffer: ArrayBuffer): string {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
+    }
+
+    private generatePDF(proto: Protocol, templates: any[], fontBase64?: string): void {
         const doc = new jsPDF();
+        const mainFont = fontBase64 ? 'DINNext' : 'helvetica';
+
+        if (fontBase64) {
+            doc.addFileToVFS('DINNextLTArabic.ttf', fontBase64);
+            doc.addFont('DINNextLTArabic.ttf', 'DINNext', 'normal');
+            doc.setFont('DINNext');
+        }
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
 
@@ -41,20 +73,20 @@ export class PdfExportService {
         doc.rect(0, 0, pageWidth, 40, 'F');
 
         // Logo / Title
-        doc.setFont('helvetica', 'bold');
+        doc.setFont(mainFont, 'bold');
         doc.setFontSize(24);
         doc.setTextColor(ACCENT_TEAL[0], ACCENT_TEAL[1], ACCENT_TEAL[2]);
         doc.text('The sports doctor', 14, 20); // Placeholder for brand name
 
         doc.setFontSize(10);
         doc.setTextColor(255, 255, 255);
-        doc.setFont('helvetica', 'normal');
+        doc.setFont(mainFont, 'normal');
         doc.text('Advanced Clinical Rehabilitation Protocol', 14, 28);
 
         doc.setFontSize(18);
         doc.setTextColor(255, 255, 255);
-        doc.setFont('helvetica', 'bold');
-        doc.text(proto.name || 'Protocol Report', pageWidth - 14, 22, { align: 'right' });
+        doc.setFont(mainFont, 'bold');
+        doc.text(fixArabicText(proto.name) || 'Protocol Report', pageWidth - 14, 22, { align: 'right' });
 
         // Meta Info Header
         doc.setFontSize(8);
@@ -62,7 +94,7 @@ export class PdfExportService {
         doc.text(`Generated: ${new Date().toLocaleDateString()}`, pageWidth - 14, 30, { align: 'right' });
         doc.text(`Status: ${proto.status.toUpperCase()}`, pageWidth - 14, 34, { align: 'right' });
         if (proto.createdBy?.name) {
-            doc.text(`Doctor: ${proto.createdBy.name}`, pageWidth - 14, 38, { align: 'right' });
+            doc.text(`Doctor: ${fixArabicText(proto.createdBy.name)}`, pageWidth - 14, 38, { align: 'right' });
         }
 
         // ── PROTOCOL OVERVIEW SECTION ──
@@ -70,7 +102,7 @@ export class PdfExportService {
 
         doc.setFontSize(14);
         doc.setTextColor(PRIMARY_BLUE[0], PRIMARY_BLUE[1], PRIMARY_BLUE[2]);
-        doc.setFont('helvetica', 'bold');
+        doc.setFont(mainFont, 'bold');
         doc.text('Protocol Overview', 14, currentY);
 
         doc.setDrawColor(ACCENT_TEAL[0], ACCENT_TEAL[1], ACCENT_TEAL[2]);
@@ -87,17 +119,17 @@ export class PdfExportService {
             .join(', ') || 'None';
 
         const generalInfo = [
-            ['Condition', proto.injuryCondition || '—', 'Goal', proto.primaryGoal || '—'],
+            ['Condition', fixArabicText(proto.injuryCondition) || '—', 'Goal', fixArabicText(proto.primaryGoal) || '—'],
             ['Total Weeks', `${totalWeeks} Weeks`, 'Total Sessions', `${totalSessions} Sessions`],
-            ['Athlete Level', proto.targetAthleteLevel || '—', 'Configuration', `${proto.phases.length} Phases`],
-            ['Applied Services', services, '', '']
+            ['Athlete Level', fixArabicText(proto.targetAthleteLevel) || '—', 'Configuration', `${proto.phases.length} Phases`],
+            ['Applied Services', fixArabicText(services), '', '']
         ];
 
         autoTable(doc, {
             startY: currentY,
             body: generalInfo,
             theme: 'plain',
-            styles: { cellPadding: 3, fontSize: 10, textColor: TEXT_DARK },
+            styles: { cellPadding: 3, fontSize: 10, textColor: TEXT_DARK, font: mainFont },
             columnStyles: {
                 0: { fontStyle: 'bold', cellWidth: 35, textColor: MEDIUM_GRAY },
                 1: { cellWidth: 60 },
@@ -108,15 +140,65 @@ export class PdfExportService {
 
         currentY = (doc as any).lastAutoTable.finalY + 12;
 
+        // ── ASSIGNED DOCTOR SECTION ──
+        if (currentY > 230) { doc.addPage(); currentY = 20; }
+
+        doc.setFontSize(14);
+        doc.setTextColor(PRIMARY_BLUE[0], PRIMARY_BLUE[1], PRIMARY_BLUE[2]);
+        doc.setFont(mainFont, 'bold');
+        doc.text('Assigned Doctor', 14, currentY);
+
+        doc.setDrawColor(ACCENT_TEAL[0], ACCENT_TEAL[1], ACCENT_TEAL[2]);
+        doc.setLineWidth(1);
+        doc.line(14, currentY + 2, 40, currentY + 2);
+
+        currentY += 10;
+
+        const doctorHeaders = ['DOCTOR NAME (ENGLISH)'];
+        const doctorData = [
+            [proto.doctorNameEn || '—']
+        ];
+
+        autoTable(doc, {
+            startY: currentY,
+            head: [doctorHeaders],
+            body: doctorData,
+            theme: 'grid',
+            headStyles: {
+                fillColor: PRIMARY_BLUE,
+                textColor: ACCENT_TEAL,
+                fontSize: 8.5,
+                fontStyle: 'bold',
+                halign: 'left',
+                cellPadding: 4,
+                font: mainFont
+            },
+            styles: {
+                fontSize: 9.5,
+                cellPadding: 4,
+                lineColor: [226, 232, 240] as [number, number, number],
+                lineWidth: 0.15,
+                font: mainFont
+            },
+            columnStyles: {
+                0: { cellWidth: 85 },
+                1: { cellWidth: 85, halign: 'right' }
+            },
+            margin: { left: 14, right: 14 }
+        });
+
+        currentY = (doc as any).lastAutoTable.finalY + 12;
+
         // ── CONTRAINDICATIONS (SAFETY FIRST) ──
         if (proto.contraindications?.length) {
             // First calculate required height
-            doc.setFont('helvetica', 'normal');
+            doc.setFont(mainFont, 'normal');
             doc.setFontSize(9);
             let totalTextHeight = 0;
             proto.contraindications.forEach(item => {
                 const desc = typeof item === 'string' ? item : item.description;
-                const lines = doc.splitTextToSize(`• ${desc}`, pageWidth - 36);
+                const fixedDesc = fixArabicText(desc);
+                const lines = doc.splitTextToSize(`• ${fixedDesc}`, pageWidth - 36);
                 totalTextHeight += lines.length * 5;
             });
 
@@ -128,17 +210,18 @@ export class PdfExportService {
 
             doc.setFontSize(10);
             doc.setTextColor(185, 28, 28);
-            doc.setFont('helvetica', 'bold');
+            doc.setFont(mainFont, 'bold');
             doc.text('SAFETY & CONTRAINDICATIONS', 20, currentY + 6);
 
-            doc.setFont('helvetica', 'normal');
+            doc.setFont(mainFont, 'normal');
             doc.setFontSize(9);
             doc.setTextColor(TEXT_DARK[0], TEXT_DARK[1], TEXT_DARK[2]);
-            
+
             let contraY = currentY + 12;
             proto.contraindications.forEach((item) => {
                 const desc = typeof item === 'string' ? item : item.description;
-                const lines = doc.splitTextToSize(`• ${desc}`, pageWidth - 40);
+                const fixedDesc = fixArabicText(desc);
+                const lines = doc.splitTextToSize(`• ${fixedDesc}`, pageWidth - 40);
                 doc.text(lines, 22, contraY);
                 contraY += lines.length * 5;
             });
@@ -150,10 +233,10 @@ export class PdfExportService {
         const drawSectionLabel = (label: string, y: number, color: [number, number, number]) => {
             doc.setFillColor(color[0], color[1], color[2]);
             doc.rect(14, y, 3, 5, 'F');
-            doc.setFont('helvetica', 'bold');
+            doc.setFont(mainFont, 'bold');
             doc.setFontSize(8);
             doc.setTextColor(color[0], color[1], color[2]);
-            doc.text(label.toUpperCase(), 20, y + 3.8);
+            doc.text(fixArabicText(label).toUpperCase(), 20, y + 3.8);
         };
 
         proto.phases.forEach((phase, phaseIdx) => {
@@ -171,13 +254,13 @@ export class PdfExportService {
 
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(13);
-            doc.setFont('helvetica', 'bold');
-            doc.text(`PHASE ${phaseIdx + 1}: ${phase.name.toUpperCase()}`, 22, currentY + 9);
+            doc.setFont(mainFont, 'bold');
+            doc.text(fixArabicText(`PHASE ${phaseIdx + 1}: ${phase.name}`), 22, currentY + 9);
 
             doc.setFontSize(8.5);
-            doc.setFont('helvetica', 'normal');
+            doc.setFont(mainFont, 'normal');
             doc.setTextColor(ACCENT_TEAL[0], ACCENT_TEAL[1], ACCENT_TEAL[2]);
-            doc.text(`${phase.totalWeeks} Weeks  ·  ${phase.sessionsPerWeek} Sessions / Week`, pageWidth - 18, currentY + 9, { align: 'right' });
+            doc.text(fixArabicText(`${phase.totalWeeks} Weeks  ·  ${phase.sessionsPerWeek} Sessions / Week`), pageWidth - 18, currentY + 9, { align: 'right' });
             currentY += 18;
 
             // ── Phase Stats Bar ──
@@ -197,11 +280,11 @@ export class PdfExportService {
                 doc.setFillColor(LIGHT_GRAY[0], LIGHT_GRAY[1], LIGHT_GRAY[2]);
                 doc.rect(bx, currentY, boxW - 1, 14, 'F');
                 doc.setFontSize(14);
-                doc.setFont('helvetica', 'bold');
+                doc.setFont(mainFont, 'bold');
                 doc.setTextColor(PRIMARY_BLUE[0], PRIMARY_BLUE[1], PRIMARY_BLUE[2]);
                 doc.text(box.value, bx + boxW / 2 - 0.5, currentY + 8, { align: 'center' });
                 doc.setFontSize(6.5);
-                doc.setFont('helvetica', 'normal');
+                doc.setFont(mainFont, 'normal');
                 doc.setTextColor(MEDIUM_GRAY[0], MEDIUM_GRAY[1], MEDIUM_GRAY[2]);
                 doc.text(box.label.toUpperCase(), bx + boxW / 2 - 0.5, currentY + 12.5, { align: 'center' });
             });
@@ -215,14 +298,15 @@ export class PdfExportService {
                 doc.rect(14, currentY, pageWidth - 28, 14, 'F');
                 doc.setFillColor(OBJ_BLUE[0], OBJ_BLUE[1], OBJ_BLUE[2]);
                 doc.rect(14, currentY, 3, 14, 'F');
-                doc.setFont('helvetica', 'bold');
+                doc.setFont(mainFont, 'bold');
                 doc.setFontSize(8);
                 doc.setTextColor(OBJ_BLUE[0], OBJ_BLUE[1], OBJ_BLUE[2]);
                 doc.text('PHASE OBJECTIVE', 20, currentY + 5);
-                doc.setFont('helvetica', 'normal');
+                doc.setFont(mainFont, 'normal');
                 doc.setFontSize(8.5);
                 doc.setTextColor(TEXT_DARK[0], TEXT_DARK[1], TEXT_DARK[2]);
-                const objLines = doc.splitTextToSize(phase.objective, pageWidth - 50);
+                const fixedObjective = fixArabicText(phase.objective);
+                const objLines = doc.splitTextToSize(fixedObjective, pageWidth - 50);
                 doc.text(objLines, 20, currentY + 10.5);
                 currentY += Math.max(14, objLines.length * 4 + 8) + 4;
             }
@@ -240,17 +324,18 @@ export class PdfExportService {
 
                 criteriaEntries.forEach(entry => {
                     if (currentY > 255) { doc.addPage(); currentY = 20; }
-                    const lines = doc.splitTextToSize(entry.text, pageWidth - 50);
+                    const fixedText = fixArabicText(entry.text);
+                    const lines = doc.splitTextToSize(fixedText, pageWidth - 50);
                     const rowH = Math.max(12, lines.length * 4.5 + 7);
                     doc.setFillColor(entry.bg[0], entry.bg[1], entry.bg[2]);
                     doc.rect(14, currentY, pageWidth - 28, rowH, 'F');
                     doc.setFillColor(entry.color[0], entry.color[1], entry.color[2]);
                     doc.rect(14, currentY, 3, rowH, 'F');
-                    doc.setFont('helvetica', 'bold');
+                    doc.setFont(mainFont, 'bold');
                     doc.setFontSize(7.5);
                     doc.setTextColor(entry.color[0], entry.color[1], entry.color[2]);
-                    doc.text(entry.label.toUpperCase(), 20, currentY + 5);
-                    doc.setFont('helvetica', 'normal');
+                    doc.text(fixArabicText(entry.label).toUpperCase(), 20, currentY + 5);
+                    doc.setFont(mainFont, 'normal');
                     doc.setFontSize(8.5);
                     doc.setTextColor(TEXT_DARK[0], TEXT_DARK[1], TEXT_DARK[2]);
                     doc.text(lines, 20, currentY + 10);
@@ -267,10 +352,10 @@ export class PdfExportService {
 
                 const transitionData: any[] = phase.criteria.transitionCriteria.map((c, ci) => [
                     { content: `#${ci + 1}`, styles: { halign: 'center', fontStyle: 'bold', textColor: MEDIUM_GRAY } },
-                    { content: c.metric || '—', styles: { fontStyle: 'bold', textColor: TEXT_DARK } },
+                    { content: fixArabicText(c.metric) || '—', styles: { fontStyle: 'bold', textColor: TEXT_DARK } },
                     { content: c.operator || '—', styles: { halign: 'center', fontStyle: 'bold', textColor: [79, 70, 229] as [number, number, number], fontSize: 11 } },
                     { content: String(c.value ?? '—'), styles: { halign: 'center', fontStyle: 'bold', textColor: PRIMARY_BLUE } },
-                    { content: c.unit || '—', styles: { halign: 'center', textColor: MEDIUM_GRAY } },
+                    { content: fixArabicText(c.unit) || '—', styles: { halign: 'center', textColor: MEDIUM_GRAY } },
                 ]);
 
                 autoTable(doc, {
@@ -284,9 +369,10 @@ export class PdfExportService {
                         fontSize: 7.5,
                         fontStyle: 'bold',
                         halign: 'center',
-                        cellPadding: 3
+                        cellPadding: 3,
+                        font: mainFont
                     },
-                    styles: { fontSize: 8, cellPadding: 2.5, lineColor: [226, 232, 240] as [number, number, number], lineWidth: 0.1 },
+                    styles: { fontSize: 8, cellPadding: 2.5, lineColor: [226, 232, 240] as [number, number, number], lineWidth: 0.1, font: mainFont },
                     columnStyles: {
                         0: { cellWidth: 10, halign: 'center' },
                         1: { cellWidth: 65 },
@@ -320,23 +406,25 @@ export class PdfExportService {
                     doc.rect(14, currentY, pageWidth - 28, 10, 'F');
                     doc.setFillColor(isMeasurement ? 100 : INDIGO[0], isMeasurement ? 116 : INDIGO[1], isMeasurement ? 139 : INDIGO[2]);
                     doc.rect(14, currentY, 3, 10, 'F');
-                    doc.setFont('helvetica', 'bold');
+                    doc.setFont(mainFont, 'bold');
                     doc.setFontSize(8.5);
                     doc.setTextColor(sessionTc[0], sessionTc[1], sessionTc[2]);
                     doc.text(
-                        isMeasurement
-                            ? `WEEK ${week.weekNumber}  ·  SESSION ${session.sessionNumber}  ·  MEASUREMENT SESSION`
-                            : `WEEK ${week.weekNumber}  ·  SESSION ${session.sessionNumber}`,
+                        fixArabicText(
+                            isMeasurement
+                                ? `WEEK ${week.weekNumber}  ·  SESSION ${session.sessionNumber}  ·  MEASUREMENT SESSION`
+                                : `WEEK ${week.weekNumber}  ·  SESSION ${session.sessionNumber}`
+                        ),
                         20, currentY + 6.5
                     );
                     currentY += 12;
 
                     if (isMeasurement) {
                         const templateName = templates.find(t => t.id === session.measurementTemplateId)?.name || 'Not Assigned';
-                        doc.setFont('helvetica', 'normal');
+                        doc.setFont(mainFont, 'normal');
                         doc.setFontSize(8);
                         doc.setTextColor(MEDIUM_GRAY[0], MEDIUM_GRAY[1], MEDIUM_GRAY[2]);
-                        doc.text(`Assessment Template:  ${templateName}`, 22, currentY + 4);
+                        doc.text(fixArabicText(`Assessment Template:  ${templateName}`), 22, currentY + 4);
                         currentY += 10;
                         return;
                     }
@@ -347,22 +435,22 @@ export class PdfExportService {
                         // ── Section Header ──
                         doc.setFillColor(230, 244, 255);
                         doc.rect(14, currentY, pageWidth - 28, 8, 'F');
-                        doc.setFont('helvetica', 'bold');
+                        doc.setFont(mainFont, 'bold');
                         doc.setFontSize(7.5);
                         doc.setTextColor(PRIMARY_BLUE[0], PRIMARY_BLUE[1], PRIMARY_BLUE[2]);
-                        doc.text(`SECTION: ${section.sectionName.toUpperCase()}`, 18, currentY + 5.5);
+                        doc.text(fixArabicText(`SECTION: ${section.sectionName}`).toUpperCase(), 18, currentY + 5.5);
                         if (section.time) {
-                            doc.setFont('helvetica', 'normal');
+                            doc.setFont(mainFont, 'normal');
                             doc.setTextColor(MEDIUM_GRAY[0], MEDIUM_GRAY[1], MEDIUM_GRAY[2]);
-                            doc.text(`Duration: ${section.time}`, pageWidth - 16, currentY + 5.5, { align: 'right' });
+                            doc.text(fixArabicText(`Duration: ${section.time}`), pageWidth - 16, currentY + 5.5, { align: 'right' });
                         }
                         currentY += 10;
 
                         if (section.exercises.length === 0) {
-                            doc.setFont('helvetica', 'italic');
+                            doc.setFont(mainFont, 'italic');
                             doc.setFontSize(8);
                             doc.setTextColor(MEDIUM_GRAY[0], MEDIUM_GRAY[1], MEDIUM_GRAY[2]);
-                            doc.text('No exercises configured for this section.', 22, currentY + 4);
+                            doc.text(fixArabicText('No exercises configured for this section.'), 22, currentY + 4);
                             currentY += 10;
                             return;
                         }
@@ -378,16 +466,16 @@ export class PdfExportService {
                             const badgeColor: [number, number, number] = isEx ? PRIMARY_BLUE : [153, 27, 27];
                             doc.setFillColor(badgeColor[0], badgeColor[1], badgeColor[2]);
                             doc.roundedRect(14, currentY, 7, 7, 1, 1, 'F');
-                            doc.setFont('helvetica', 'bold');
+                            doc.setFont(mainFont, 'bold');
                             doc.setFontSize(7);
                             doc.setTextColor(255, 255, 255);
                             doc.text(String(exIdx + 1), 17.5, currentY + 4.8, { align: 'center' });
 
                             // ── Exercise Name ──
-                            doc.setFont('helvetica', 'bold');
+                            doc.setFont(mainFont, 'bold');
                             doc.setFontSize(10);
                             doc.setTextColor(isEx ? PRIMARY_BLUE[0] : RED_EX[0], isEx ? PRIMARY_BLUE[1] : RED_EX[1], isEx ? PRIMARY_BLUE[2] : RED_EX[2]);
-                            doc.text(ex.name || '(Unnamed Exercise)', 24, currentY + 5);
+                            doc.text(fixArabicText(ex.name) || '(Unnamed Exercise)', 24, currentY + 5);
                             currentY += 10;
 
                             // ── Exercise Properties Table ──
@@ -395,11 +483,11 @@ export class PdfExportService {
                                 const propBody: any[] = [
                                     [
                                         { content: 'EQUIPMENT', styles: { fontStyle: 'bold' as const, fontSize: 7, textColor: MEDIUM_GRAY, cellPadding: { top: 2, bottom: 2, left: 3, right: 2 } } },
-                                        { content: exerciseEx.equipment || 'No Equipment', styles: { fontSize: 8, textColor: TEXT_DARK, fontStyle: 'bold' as const, cellPadding: 2 } },
+                                        { content: fixArabicText(exerciseEx.equipment) || 'No Equipment', styles: { fontSize: 8, textColor: TEXT_DARK, fontStyle: 'bold' as const, cellPadding: 2 } },
                                         { content: 'CONTRACTION', styles: { fontStyle: 'bold' as const, fontSize: 7, textColor: MEDIUM_GRAY, cellPadding: { top: 2, bottom: 2, left: 3, right: 2 } } },
-                                        { content: exerciseEx.contractionType || '—', styles: { fontSize: 8, textColor: TEXT_DARK, cellPadding: 2 } },
+                                        { content: fixArabicText(exerciseEx.contractionType) || '—', styles: { fontSize: 8, textColor: TEXT_DARK, cellPadding: 2 } },
                                         { content: 'INT. METHOD', styles: { fontStyle: 'bold' as const, fontSize: 7, textColor: MEDIUM_GRAY, cellPadding: { top: 2, bottom: 2, left: 3, right: 2 } } },
-                                        { content: exerciseEx.intensityMethod || '—', styles: { fontSize: 8, textColor: TEAL, fontStyle: 'bold' as const, cellPadding: 2 } },
+                                        { content: fixArabicText(exerciseEx.intensityMethod) || '—', styles: { fontSize: 8, textColor: TEAL, fontStyle: 'bold' as const, cellPadding: 2 } },
                                     ]
                                 ];
 
@@ -407,7 +495,7 @@ export class PdfExportService {
                                     startY: currentY,
                                     body: propBody,
                                     theme: 'plain',
-                                    styles: { lineColor: [226, 232, 240] as [number, number, number], lineWidth: 0.1 },
+                                    styles: { lineColor: [226, 232, 240] as [number, number, number], lineWidth: 0.1, font: mainFont },
                                     tableLineColor: [226, 232, 240] as [number, number, number],
                                     tableLineWidth: 0.1,
                                     columnStyles: {
@@ -430,9 +518,9 @@ export class PdfExportService {
                                         return [
                                             { content: `${si + 1}`, styles: { halign: 'center' as const, fontStyle: 'bold' as const, fontSize: 8, fillColor: rowBg, textColor: INDIGO } },
                                             { content: String(set.repetitions ?? '—'), styles: { halign: 'center' as const, fontStyle: 'bold' as const, fontSize: 9, fillColor: rowBg, textColor: TEXT_DARK } },
-                                            { content: set.intensity || '—', styles: { halign: 'center' as const, fontSize: 8.5, fontStyle: 'bold' as const, fillColor: rowBg, textColor: PRIMARY_BLUE } },
-                                            { content: set.tempo || '—', styles: { halign: 'center' as const, fontSize: 8, fillColor: rowBg, textColor: TEXT_DARK } },
-                                            { content: set.rest || '—', styles: { halign: 'center' as const, fontSize: 8, fontStyle: 'bold' as const, fillColor: rowBg, textColor: TEAL } },
+                                            { content: fixArabicText(set.intensity) || '—', styles: { halign: 'center' as const, fontSize: 8.5, fontStyle: 'bold' as const, fillColor: rowBg, textColor: PRIMARY_BLUE } },
+                                            { content: fixArabicText(set.tempo) || '—', styles: { halign: 'center' as const, fontSize: 8, fillColor: rowBg, textColor: TEXT_DARK } },
+                                            { content: fixArabicText(set.rest) || '—', styles: { halign: 'center' as const, fontSize: 8, fontStyle: 'bold' as const, fillColor: rowBg, textColor: TEAL } },
                                         ];
                                     });
 
@@ -452,13 +540,15 @@ export class PdfExportService {
                                             textColor: ACCENT_TEAL,
                                             fontSize: 7.5,
                                             fontStyle: 'bold',
-                                            cellPadding: 3
+                                            cellPadding: 3,
+                                            font: mainFont
                                         },
                                         styles: {
                                             fontSize: 8,
                                             cellPadding: 3,
                                             lineColor: [226, 232, 240] as [number, number, number],
-                                            lineWidth: 0.15
+                                            lineWidth: 0.15,
+                                            font: mainFont
                                         },
                                         columnStyles: {
                                             0: { cellWidth: 14 },
@@ -478,7 +568,7 @@ export class PdfExportService {
                                 if (ex.description) {
                                     manualRows.push([
                                         { content: 'DESCRIPTION', styles: { fontStyle: 'bold' as const, fontSize: 7, textColor: MEDIUM_GRAY, cellPadding: 2 } },
-                                        { content: ex.description, styles: { fontSize: 8, textColor: TEXT_DARK, cellPadding: 2 } }
+                                        { content: fixArabicText(ex.description), styles: { fontSize: 8, textColor: TEXT_DARK, cellPadding: 2 } }
                                     ]);
                                 }
                                 const videoUrl = (ex as any).videoUrl;
@@ -486,7 +576,7 @@ export class PdfExportService {
                                     videoRowIndex = manualRows.length;
                                     manualRows.push([
                                         { content: 'VIDEO URL', styles: { fontStyle: 'bold' as const, fontSize: 7, textColor: MEDIUM_GRAY, cellPadding: 2 } },
-                                        { content: videoUrl, styles: { fontSize: 7.5, textColor: [13, 148, 136] as [number, number, number], fontStyle: 'italic' as const, cellPadding: 2 } }
+                                        { content: fixArabicText(videoUrl), styles: { fontSize: 7.5, textColor: [13, 148, 136] as [number, number, number], fontStyle: 'italic' as const, cellPadding: 2 } }
                                     ]);
                                 }
 
@@ -495,6 +585,7 @@ export class PdfExportService {
                                         startY: currentY,
                                         body: manualRows,
                                         theme: 'plain',
+                                        styles: { font: mainFont },
                                         tableLineColor: [226, 232, 240] as [number, number, number],
                                         tableLineWidth: 0.1,
                                         columnStyles: { 0: { cellWidth: 26 }, 1: { cellWidth: 'auto' } },

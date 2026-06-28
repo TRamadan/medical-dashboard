@@ -1,5 +1,39 @@
 <div class="flex flex-col gap-6">
 
+    <!-- Assigned Doctor (View Mode Only) -->
+    @if (readonly()) {
+    <p-card>
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-2 text-gray-700">
+                <i class="pi pi-user text-blue-600 font-bold"></i>
+                <span class="font-bold uppercase text-xs tracking-wider">Assigned Doctor</span>
+            </div>
+
+            @if (protocol()?.doctorNameEn || protocol()?.doctorNameAr) {
+                <div class="flex flex-col md:flex-row gap-4">
+                    @if (protocol()?.doctorNameEn) {
+                        <div class="flex-1 p-3 bg-blue-50/50 border border-blue-100 rounded-lg">
+                            <span class="text-xs text-gray-500 uppercase block mb-1">Doctor Name (EN)</span>
+                            <span class="font-medium text-gray-800 text-sm">{{ protocol()?.doctorNameEn }}</span>
+                        </div>
+                    }
+                    @if (protocol()?.doctorNameAr) {
+                        <div class="flex-1 p-3 bg-blue-50/50 border border-blue-100 rounded-lg" dir="rtl">
+                            <span class="text-xs text-gray-500 uppercase block mb-1 text-right">اسم الطبيب (AR)</span>
+                            <span class="font-semibold text-gray-800 text-sm text-right block">{{ protocol()?.doctorNameAr }}</span>
+                        </div>
+                    }
+                </div>
+            } @else {
+                <div class="flex items-center gap-2 p-3 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-gray-500 italic text-sm">
+                    <i class="pi pi-info-circle"></i>
+                    <span>No doctor assigned to this protocol.</span>
+                </div>
+            }
+        </div>
+    </p-card>
+    }
+
     <!-- Protocol Type Card -->
     <p-card>
         <ng-template pTemplate="title">
@@ -68,7 +102,7 @@
     </p-card>
 
     <!-- Template Selection Card -->
-    @if (!readonly()) {
+    @if (!readonly() && protocolService.stepperMode() !== 'edit') {
     <p-card>
         <div class="flex flex-col gap-4">
             <div class="flex items-center gap-2">
@@ -117,10 +151,12 @@
                         <div class="flex justify-between items-start mb-2">
                             <div class="flex flex-col gap-1">
                                 <span class="font-bold text-lg transition-colors"
-                                    [ngClass]="{'text-white': selectedTemplate === template, 'text-gray-800': selectedTemplate !== template}">{{
+                                    [class.text-white]="selectedTemplate === template"
+                                    [class.text-gray-800]="selectedTemplate !== template">{{
                                     template.title }}</span>
                                 <span class="text-sm transition-colors"
-                                    [ngClass]="{'text-[#70f4c3]': selectedTemplate === template, 'text-gray-500': selectedTemplate !== template}">{{
+                                    [class.text-[#70f4c3]]="selectedTemplate === template"
+                                    [class.text-gray-500]="selectedTemplate !== template">{{
                                     template.subtitle }}</span>
                             </div>
                             <div *ngIf="selectedTemplate === template"
@@ -130,11 +166,15 @@
                         </div>
 
                         <span class="mt-1 transition-colors text-sm mb-4 flex-1"
-                            [ngClass]="{'text-gray-300': selectedTemplate === template, 'text-gray-600': selectedTemplate !== template}">{{
+                            [class.text-gray-300]="selectedTemplate === template"
+                            [class.text-gray-600]="selectedTemplate !== template">{{
                             template.description }}</span>
 
                         <div class="flex items-center gap-4 mt-auto pt-3 border-t text-sm transition-colors"
-                            [ngClass]="{'text-gray-400 border-gray-700': selectedTemplate === template, 'text-gray-600 border-gray-100': selectedTemplate !== template}">
+                            [class.text-gray-400]="selectedTemplate === template"
+                            [class.border-gray-700]="selectedTemplate === template"
+                            [class.text-gray-600]="selectedTemplate !== template"
+                            [class.border-gray-100]="selectedTemplate !== template">
                             <div class="flex items-center gap-1" title="Duration">
                                 <i class="pi pi-stopwatch"></i>
                                 <span>{{ template.duration }}</span>
@@ -257,18 +297,60 @@
 
                         <div *ngFor="let ctrl of contraindications.controls; let i = index" class="contra-item"
                             [formGroupName]="i">
-                            <span class="contra-x" *ngIf="!readonly()" (click)="removeContraindication(i)">✕</span>
-                            <span class="contra-x opacity-30" *ngIf="readonly()">✕</span>
-                            <input pInputText formControlName="description" class="proto-input contra-input" />
+
+                            <!-- Order badge -->
+                            <span class="contra-order-badge" aria-hidden="true">{{ i + 1 }}</span>
+
+                            <!-- Reorder buttons (edit/create mode only) -->
+                            @if (!readonly()) {
+                            <div class="contra-reorder-btns" role="group" [attr.aria-label]="'Reorder item ' + (i + 1)">
+                                <button type="button" class="contra-reorder-btn"
+                                    [disabled]="i === 0"
+                                    [attr.aria-label]="'Move item ' + (i + 1) + ' up'"
+                                    (click)="moveContraindication(i, 'up')">
+                                    <i class="pi pi-chevron-up"></i>
+                                </button>
+                                <button type="button" class="contra-reorder-btn"
+                                    [disabled]="i === contraindications.length - 1"
+                                    [attr.aria-label]="'Move item ' + (i + 1) + ' down'"
+                                    (click)="moveContraindication(i, 'down')">
+                                    <i class="pi pi-chevron-down"></i>
+                                </button>
+                            </div>
+                            }
+
+                            <input pInputText formControlName="description" class="proto-input contra-input"
+                                [attr.aria-label]="'Contraindication ' + (i + 1)" />
+
+                            <!-- Remove button -->
+                            @if (!readonly()) {
+                            <button type="button" class="contra-remove-btn"
+                                [attr.aria-label]="'Remove contraindication ' + (i + 1)"
+                                (click)="removeContraindication(i)">
+                                <i class="pi pi-trash"></i>
+                            </button>
+                            }
                         </div>
                     </div>
 
                     <!-- Add new contraindication (hidden in read-only mode) -->
                     <div class="add-contra-row" *ngIf="!readonly()">
-                        <span class="contra-x add-icon">✕</span>
+                        <!-- Spacer aligns with the order-badge + reorder-btns columns above -->
+                        <span class="contra-order-badge contra-order-badge--new" aria-hidden="true">
+                            <i class="pi pi-plus"></i>
+                        </span>
+                        <span class="contra-reorder-spacer" aria-hidden="true"></span>
+
                         <input pInputText formControlName="newContraindication" class="proto-input contra-input"
-                            placeholder="+ Add contraindication..." (keyup.enter)="addContraindication()" />
-                        <p-button label="Add" styleClass="add-btn" (onClick)="addContraindication()"></p-button>
+                            placeholder="Type a contraindication and press Enter or click Add…"
+                            aria-label="New contraindication"
+                            (keyup.enter)="addContraindication()" />
+
+                        <button type="button" class="contra-add-btn"
+                            aria-label="Add contraindication"
+                            (click)="addContraindication()">
+                            <i class="pi pi-plus"></i>
+                        </button>
                     </div>
                 </div>
             </p-card>

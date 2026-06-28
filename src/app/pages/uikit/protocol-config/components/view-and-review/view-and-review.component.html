@@ -1,4 +1,3 @@
-<p-toast />
 <div class="flex flex-col gap-6">
     <!-- Alert Banner -->
     <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-4 items-start w-11/12 mx-auto">
@@ -24,6 +23,42 @@
             <p-tag [value]="proto.status | titlecase" severity="warn"></p-tag>
         </div>
     </p-card>
+
+    <!-- Assigned Doctor Section -->
+    @if (protocol()) {
+    <p-card>
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center gap-2 text-gray-700">
+                <i class="pi pi-user text-blue-600 font-bold"></i>
+                <span class="font-bold uppercase text-xs tracking-wider">Assigned Doctor</span>
+            </div>
+
+            @if (protocol()?.doctorNameEn || protocol()?.doctorNameAr) {
+            <div class="flex flex-col md:flex-row gap-4">
+                @if (protocol()?.doctorNameEn) {
+                <div class="flex-1 p-3 bg-blue-50/50 border border-blue-100 rounded-lg">
+                    <span class="text-xs text-gray-500 uppercase block mb-1">Coach manager Name (EN)</span>
+                    <span class="font-medium text-gray-800 text-sm">{{ protocol()?.doctorNameEn }}</span>
+                </div>
+                }
+                @if (protocol()?.doctorNameAr) {
+                <div class="flex-1 p-3 bg-blue-50/50 border border-blue-100 rounded-lg" dir="rtl">
+                    <span class="text-xs text-gray-500 uppercase block mb-1 text-right">اسم مسؤول المدربين (AR)</span>
+                    <span class="font-semibold text-gray-800 text-sm text-right block">{{ protocol()?.doctorNameAr
+                        }}</span>
+                </div>
+                }
+            </div>
+            } @else {
+            <div
+                class="flex items-center gap-2 p-3 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-gray-500 italic text-sm">
+                <i class="pi pi-info-circle"></i>
+                <span>No doctor assigned to this protocol.</span>
+            </div>
+            }
+        </div>
+    </p-card>
+    }
 
     <!-- Contraindications Summary -->
     <p-card *ngIf="protocol() as proto">
@@ -432,30 +467,48 @@
             <!-- Save as Template Option -->
             @if (isActionSelected('template')) {
             <button pButton class="p-button-outlined px-10 py-3 text-base font-bold"
-                [icon]="savingDraft() ? 'pi pi-spin pi-spinner' : 'pi pi-save'" iconPos="left" label="Create protocol"
+                [icon]="savingDraft() ? 'pi pi-spin pi-spinner' : 'pi pi-save'" iconPos="left"
+                [label]="isEditMode() ? 'Save Changes' : 'Create protocol'"
                 [disabled]="!proto.name?.trim() || savingDraft()"
-                pTooltip="{{ proto.name?.trim() ? 'Save protocol as draft' : 'Please enter a protocol name first' }}"
-                tooltipPosition="top" (click)="saveAsDraft()">
+                pTooltip="{{ proto.name?.trim() ? (isEditMode() ? 'Update this protocol' : 'Save protocol as draft') : 'Please enter a protocol name first' }}"
+                tooltipPosition="top"
+                (click)="isEditMode() ? saveEditedProtocol() : saveAsDraft()">
             </button>
             }
 
             <!-- Apply to Athlete Option -->
             @if (isActionSelected('athlete')) {
-            <button pButton class="px-10 py-3 text-base font-bold" icon="pi pi-check-circle" iconPos="left"
-                label="Create and Sent to athelete"
-                [disabled]="!proto.name?.trim() || !selectedPatientId || savingDraft()"
-                pTooltip="{{ proto.name?.trim() ? (selectedPatientId ? 'Activate and save protocol' : 'Please select an athlete') : 'Please enter a protocol name first' }}"
-                tooltipPosition="top" (click)="activateProtocol()">
+            <button pButton class="px-10 py-3 text-base font-bold" iconPos="left"
+                [icon]="savingDraft() ? 'pi pi-spin pi-spinner' : 'pi pi-check-circle'"
+                [label]="isEditMode() ? 'Save Changes' : 'Create and Sent to athelete'"
+                [disabled]="!proto.name?.trim() || (!isEditMode() && !selectedPatientId) || savingDraft()"
+                pTooltip="{{ proto.name?.trim() ? (isEditMode() ? 'Update this protocol' : (selectedPatientId ? 'Activate and save protocol' : 'Please select an athlete')) : 'Please enter a protocol name first' }}"
+                tooltipPosition="top"
+                (click)="isEditMode() ? saveEditedProtocol() : activateProtocol()">
             </button>
             }
 
             <!-- Share with Team Option -->
             @if (isActionSelected('share')) {
-            <button pButton class="px-10 py-3 text-base font-bold" icon="pi pi-check-circle" iconPos="left"
-                label="Create and send to the team"
-                [disabled]="!proto.name?.trim() || !selectedDoctorId || savingDraft()"
-                pTooltip="{{ proto.name?.trim() ? (selectedDoctorId ? 'Activate and save protocol' : 'Please select a team member') : 'Please enter a protocol name first' }}"
-                tooltipPosition="top" (click)="activateProtocol()">
+            <button pButton class="px-10 py-3 text-base font-bold" iconPos="left"
+                [icon]="savingDraft() ? 'pi pi-spin pi-spinner' : 'pi pi-check-circle'"
+                [label]="isEditMode() ? 'Save Changes' : 'Create and send to the team'"
+                [disabled]="!proto.name?.trim() || (!isEditMode() && !selectedDoctorId) || savingDraft()"
+                pTooltip="{{ proto.name?.trim() ? (isEditMode() ? 'Update this protocol' : (selectedDoctorId ? 'Activate and save protocol' : 'Please select a team member')) : 'Please enter a protocol name first' }}"
+                tooltipPosition="top"
+                (click)="isEditMode() ? saveEditedProtocol() : activateProtocol()">
+            </button>
+            }
+
+            <!-- Edit mode: show Save Changes when no card is selected -->
+            @if (isEditMode() && !selectedAction) {
+            <button pButton class="px-10 py-3 text-base font-bold" iconPos="left"
+                [icon]="savingDraft() ? 'pi pi-spin pi-spinner' : 'pi pi-save'"
+                label="Save Changes"
+                [disabled]="!proto.name?.trim() || savingDraft()"
+                pTooltip="{{ proto.name?.trim() ? 'Update this protocol' : 'Please enter a protocol name first' }}"
+                tooltipPosition="top"
+                (click)="saveEditedProtocol()">
             </button>
             }
         </div>

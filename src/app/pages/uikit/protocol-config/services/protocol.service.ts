@@ -69,6 +69,10 @@ export class ProtocolService {
             numberOfPhases: apiData.numberOfPhases,
             phases: (apiData.phases || []).map((p: any) => this.mapToPhase(p)),
             contraindications: apiData.contraindications || [],
+            doctorNameAr: apiData.doctorNameAr || null,
+            doctorNameEn: apiData.doctorNameEn || null,
+            doctorId: apiData.doctorId || null,
+            patientId: apiData.patientId || null,
         };
     }
 

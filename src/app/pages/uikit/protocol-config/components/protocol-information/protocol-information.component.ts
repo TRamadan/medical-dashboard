@@ -33,7 +33,11 @@ export class ProtocolInformationComponent implements OnInit {
     constructor() {
         effect(() => {
             if (!this.form) return;
-            this.readonly() ? this.form.disable() : this.form.enable();
+            // Use emitEvent: false to avoid triggering valueChanges during enable/disable
+            // which would cause syncContraindications() to run before the form is populated.
+            this.readonly()
+                ? this.form.disable({ emitEvent: false })
+                : this.form.enable({ emitEvent: false });
         });
     }
 
@@ -109,30 +113,35 @@ export class ProtocolInformationComponent implements OnInit {
                 athleteLevel: existing.targetAthleteLevel ?? '',
             }, { emitEvent: false });
 
-            // Fill contraindications
+            // Fill contraindications without emitting events to avoid mid-loop
+            // partial-state syncs overwriting proto.contraindications prematurely.
             const contra = existing.contraindications || this.defaultContraindications;
             const arr = this.contraindications;
-            arr.clear();
+            arr.clear({ emitEvent: false });
             contra.forEach((c: any) => {
                 arr.push(this.fb.group({
                     id: [c.id || null],
                     description: [typeof c === 'string' ? c : c.description, Validators.required],
                     order: [c.order || arr.length + 1]
-                }));
+                }), { emitEvent: false });
             });
+            // Explicitly sync now that the array is fully populated.
+            this.syncContraindications(existing);
         }
 
-        // Keep activeProtocol in sync whenever the form changes
-        this.form.valueChanges.subscribe(values => {
+        // Keep activeProtocol in sync whenever the form changes.
+        // Use getRawValue() to capture all values including those in disabled controls.
+        this.form.valueChanges.subscribe(() => {
             const proto = this.protocol();
             if (!proto) return;
-            proto.name = values.protocolName ?? proto.name;
-            proto.injuryCondition = values.injuryCondition ?? '';
-            proto.primaryGoal = values.primaryGoal ?? '';
-            proto.weeks = values.totalWeeks ?? null;
-            proto.numberOfPhases = values.numberOfPhases ?? null;
-            proto.targetAthleteLevel = values.athleteLevel ?? '';
-            proto.contraindications = values.contraindications ?? [];
+            const raw = this.form.getRawValue();
+            proto.name = raw.protocolName ?? proto.name;
+            proto.injuryCondition = raw.injuryCondition ?? '';
+            proto.primaryGoal = raw.primaryGoal ?? '';
+            proto.weeks = raw.totalWeeks ?? null;
+            proto.numberOfPhases = raw.numberOfPhases ?? null;
+            proto.targetAthleteLevel = raw.athleteLevel ?? '';
+            this.syncContraindications(proto);
             this.protocolService.notifyChange();
         });
 
@@ -253,6 +262,18 @@ export class ProtocolInformationComponent implements OnInit {
         return this.form.get('contraindications') as FormArray;
     }
 
+    /** Reads the contraindications FormArray raw values and writes them to the active protocol. */
+    private syncContraindications(proto = this.protocol()): void {
+        if (!proto) return;
+        const rawItems: { id: number | null; description: string; order: number }[] =
+            this.contraindications.getRawValue();
+        proto.contraindications = rawItems.map((c, idx) => ({
+            id: c.id ?? 0,
+            description: c.description ?? '',
+            order: c.order ?? idx + 1,
+        }));
+    }
+
     addContraindication(): void {
         const val = this.form.get('newContraindication')?.value?.trim();
         if (val) {
@@ -262,11 +283,51 @@ export class ProtocolInformationComponent implements OnInit {
                 order: [this.contraindications.length + 1]
             }));
             this.form.get('newContraindication')?.reset();
+            // Explicitly sync so the new item is immediately in proto.contraindications
+            const proto = this.protocol();
+            this.syncContraindications(proto);
+            this.protocolService.notifyChange();
         }
     }
 
     removeContraindication(index: number): void {
-        this.contraindications.removeAt(index);
+        this.contraindications.removeAt(index, { emitEvent: false });
+        // Explicitly sync so the removed item is immediately out of proto.contraindications
+        const proto = this.protocol();
+        this.syncContraindications(proto);
+        this.protocolService.notifyChange();
+    }
+
+    moveContraindication(index: number, direction: 'up' | 'down'): void {
+        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+        const arr = this.contraindications;
+
+        if (targetIndex < 0 || targetIndex >= arr.length) return;
+
+        // Grab both controls
+        const current = arr.at(index);
+        const target = arr.at(targetIndex);
+
+        // Swap by removing and re-inserting (emitEvent: false during the swap)
+        arr.removeAt(Math.max(index, targetIndex), { emitEvent: false });
+        arr.removeAt(Math.min(index, targetIndex), { emitEvent: false });
+
+        if (direction === 'up') {
+            arr.insert(targetIndex, current, { emitEvent: false });
+            arr.insert(index, target, { emitEvent: false });
+        } else {
+            arr.insert(index, target, { emitEvent: false });
+            arr.insert(targetIndex, current, { emitEvent: false });
+        }
+
+        // Rewrite the order field of every item to match the new position
+        arr.controls.forEach((ctrl, i) => {
+            ctrl.get('order')?.setValue(i + 1, { emitEvent: false });
+        });
+
+        const proto = this.protocol();
+        this.syncContraindications(proto);
+        this.protocolService.notifyChange();
     }
 
     onSubmit(): void {

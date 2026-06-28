@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { StepperModule } from 'primeng/stepper';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { ProtocolService } from './services/protocol.service';
 import { AllProtocolsComponent } from './components/all-protocols/all-protocols.component';
 import { ProtocolInformationComponent } from './components/protocol-information/protocol-information.component';
@@ -10,6 +12,7 @@ import { PhasesAndCriteriaComponent } from './components/phases-and-criteria/pha
 import { SessionsAndExercisesComponent } from './components/sessions-and-exercises/sessions-and-exercises.component';
 import { FittVpRevisionComponent } from './components/fitt-vp-revision/fitt-vp-revision.component';
 import { ViewAndReviewComponent } from './components/view-and-review/view-and-review.component';
+
 @Component({
     selector: 'app-protocol-config',
     imports: [
@@ -17,6 +20,7 @@ import { ViewAndReviewComponent } from './components/view-and-review/view-and-re
         StepperModule,
         ButtonModule,
         CardModule,
+        ToastModule,
         AllProtocolsComponent,
         ProtocolInformationComponent,
         PhasesAndCriteriaComponent,
@@ -26,10 +30,12 @@ import { ViewAndReviewComponent } from './components/view-and-review/view-and-re
     ],
     templateUrl: './protocol-config.component.html',
     styleUrl: './protocol-config.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [MessageService]
 })
 export class ProtocolConfigComponent {
     private protocolService = inject(ProtocolService);
+    private messageService = inject(MessageService);
     readonly showStepper = this.protocolService.showStepper;
     readonly currentStep = this.protocolService.currentStep;
     readonly stepperMode = this.protocolService.stepperMode;
@@ -54,11 +60,21 @@ export class ProtocolConfigComponent {
 
         this.protocolService.updateTreatmentPlan(proto.id).subscribe({
             next: () => {
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Protocol Updated',
+                    detail: 'The protocol has been saved successfully.',
+                });
                 this.protocolService.fetchProtocols(); // Refresh UI list
                 this.protocolService.cancelProtocol(); // Close stepper
             },
             error: (err) => {
                 console.error('Failed to update protocol:', err);
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Update Failed',
+                    detail: 'Failed to update protocol. Please try again.',
+                });
             }
         });
     }

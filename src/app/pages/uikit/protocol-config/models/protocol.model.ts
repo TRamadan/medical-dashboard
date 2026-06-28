@@ -105,6 +105,10 @@ export interface Protocol {
     contraindications?: { id: number; description: string; order: number; }[];
     createdAt?: string;
     createdBy?: CreatedBy;
+    doctorNameAr?: string | null;
+    doctorNameEn?: string | null;
+    doctorId?: string | null;
+    patientId?: string | null;
 }
 
 

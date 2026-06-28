@@ -1,3 +1,4 @@
+<p-toast />
 <section>
     <div class="container">
         <div class="header">
@@ -33,9 +34,7 @@
                 @if (!showStepper()) {
                 <p-button label="Define New Protocol" icon="pi pi-plus" (onClick)="startNewProtocol()"></p-button>
                 }
-                @if (showStepper() && stepperMode() === 'edit') {
-                <p-button label="Save Changes" icon="pi pi-save" (onClick)="saveEditedProtocol()"></p-button>
-                }
+
                 @if (showStepper() && stepperMode() === 'view') {
                 <p-button label="Edit Protocol" icon="pi pi-pencil" severity="secondary"
                     (onClick)="switchToEdit()"></p-button>

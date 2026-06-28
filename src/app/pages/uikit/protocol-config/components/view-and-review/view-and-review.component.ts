@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, input, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, input, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CardModule } from 'primeng/card';
@@ -21,8 +21,7 @@ import { AssignEmployeeBranchService } from '../../../add-employees-to-branch/se
     imports: [CommonModule, FormsModule, CardModule, TagModule, ButtonModule, AccordionModule, TooltipModule, InputTextarea, ToastModule, DropdownModule, FloatLabelModule],
     templateUrl: './view-and-review.component.html',
     styleUrl: './view-and-review.component.scss',
-    changeDetection: ChangeDetectionStrategy.OnPush,
-    providers: [MessageService]
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ViewAndReviewComponent {
     private protocolService = inject(ProtocolService);
@@ -35,6 +34,20 @@ export class ViewAndReviewComponent {
     readonly saveDraftError = this.protocolService.saveDraftError;
 
     readonly getPhaseSessionCount = getPhaseSessionCount;
+
+    constructor() {
+        effect(() => {
+            const proto = this.protocol();
+            if (proto) {
+                if (proto.doctorId) {
+                    this.selectedDoctorId = proto.doctorId;
+                }
+                if (proto.patientId) {
+                    this.selectedPatientId = proto.patientId;
+                }
+            }
+        });
+    }
 
     activationNotes = '';
     selectedAction: string | null = null;
@@ -107,10 +120,11 @@ export class ViewAndReviewComponent {
     toggleAction(action: string): void {
         this.selectedAction = this.selectedAction === action ? null : action;
 
-        // Reset selections when action changes
-        this.selectedPatientId = null;
+        const proto = this.protocol();
+        // Reset selections to the original values from proto when action changes, or null.
+        this.selectedPatientId = proto?.patientId || null;
         this.selectedLocationId = null;
-        this.selectedDoctorId = null;
+        this.selectedDoctorId = proto?.doctorId || null;
 
         if (this.selectedAction === 'athlete') {
             this.fetchAthletes();
@@ -155,6 +169,38 @@ export class ViewAndReviewComponent {
 
     isActionSelected(action: string): boolean {
         return this.selectedAction === action;
+    }
+
+    readonly isEditMode = computed(() => this.protocolService.stepperMode() === 'edit');
+
+    saveEditedProtocol(): void {
+        const proto = this.protocol();
+        if (!proto) return;
+
+        const patientId = this.selectedPatientId || proto.patientId || null;
+        const doctorId = this.selectedDoctorId || proto.doctorId || null;
+
+        this.protocolService.savingDraft.set(true);
+        this.protocolService.updateTreatmentPlan(proto.id, undefined, patientId, doctorId).subscribe({
+            next: () => {
+                this.protocolService.savingDraft.set(false);
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Protocol Updated',
+                    detail: 'The protocol has been saved successfully.',
+                });
+                this.protocolService.fetchProtocols();
+                this.protocolService.cancelProtocol();
+            },
+            error: (err: any) => {
+                this.protocolService.savingDraft.set(false);
+                let message = 'Failed to update protocol. Please try again.';
+                if (err.error?.error?.errors && Array.isArray(err.error.error.errors)) {
+                    message = err.error.error.errors.map((e: any) => e.errorEn).join(' ');
+                }
+                this.messageService.add({ severity: 'error', summary: 'Update Failed', detail: message });
+            }
+        });
     }
 
     get phases(): Phase[] {
