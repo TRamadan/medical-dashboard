@@ -255,7 +255,8 @@
                         </div>
                         }
 
-                        <div *ngFor="let ctrl of contraindications.controls; let i = index" class="contra-item" [formGroupName]="i">
+                        <div *ngFor="let ctrl of contraindications.controls; let i = index" class="contra-item"
+                            [formGroupName]="i">
                             <span class="contra-x" *ngIf="!readonly()" (click)="removeContraindication(i)">✕</span>
                             <span class="contra-x opacity-30" *ngIf="readonly()">✕</span>
                             <input pInputText formControlName="description" class="proto-input contra-input" />

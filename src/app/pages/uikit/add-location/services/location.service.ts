@@ -30,4 +30,8 @@ export class LocationService {
     deleteLocation(id: any): Observable<void> {
         return this.http.delete<void>(`${this.apiUrl}/${id}`);
     }
+
+    getUsersByLocation(locationId: number): Observable<any[]> {
+        return this.http.get<any[]>(`${this.apiUrl}/${locationId}/Users`);
+    }
 }

@@ -8,11 +8,13 @@ import { environment } from '../../../../../environments/environment';
 export class ProtocolService {
     private readonly http = inject(HttpClient);
     private readonly apiUrl = environment.apiUrl;
+    readonly isEditMode = computed(() => this.stepperMode() === 'edit');
 
     // ── API state signals ─────────────────────────────────────────────────────
     readonly savingDraft = signal(false);
     readonly saveDraftError = signal<string | null>(null);
     readonly loadingProtocols = signal(false);
+
     // ── State ────────────────────────────────────────────────────────────────
     readonly protocols = signal<Protocol[]>([]);
 
@@ -260,13 +262,13 @@ export class ProtocolService {
      *
      * @param saveAsDraft - when true the record is saved as a draft on the server.
      */
-    createTreatmentPlan(saveAsDraft: boolean = true): Observable<unknown> {
+    createTreatmentPlan(saveAsDraft: boolean = true, patientId?: string | null, doctorId?: string | null): Observable<unknown> {
         const proto = this.activeProtocol();
         if (!proto) {
             throw new Error('No active protocol to save.');
         }
 
-        const body = this.mapProtocolToRequest(proto, saveAsDraft);
+        const body = this.mapProtocolToRequest(proto, saveAsDraft, patientId, doctorId);
         return this.http.post<unknown>(this.apiUrl + 'TreatmentPlans', body);
     }
 
@@ -277,22 +279,22 @@ export class ProtocolService {
      * @param id - The ID of the treatment plan to update.
      * @param saveAsDraft - when true the record is saved as a draft on the server.
      */
-    updateTreatmentPlan(id: number, saveAsDraft?: boolean): Observable<unknown> {
+    updateTreatmentPlan(id: number, saveAsDraft?: boolean, patientId?: string | null, doctorId?: string | null): Observable<unknown> {
         const proto = this.activeProtocol();
         if (!proto) {
             throw new Error('No active protocol to update.');
         }
 
         // If status is 'Published', we don't want to revert it to 'Draft'
-        const calculatedSaveAsDraft = saveAsDraft !== undefined 
-            ? saveAsDraft 
+        const calculatedSaveAsDraft = saveAsDraft !== undefined
+            ? saveAsDraft
             : (proto.status !== 'Published');
 
-        const body = this.mapProtocolToRequest(proto, calculatedSaveAsDraft);
+        const body = this.mapProtocolToRequest(proto, calculatedSaveAsDraft, patientId, doctorId);
         return this.http.put<unknown>(`${this.apiUrl}TreatmentPlans/${id}`, body);
     }
 
-    private mapProtocolToRequest(proto: Protocol, saveAsDraft: boolean): TreatmentPlanRequest {
+    private mapProtocolToRequest(proto: Protocol, saveAsDraft: boolean, patientId?: string | null, doctorId?: string | null): TreatmentPlanRequest {
         const totalWeeks = proto.phases.reduce((sum, p) => sum + (p.totalWeeks ?? 0), 0);
         const avgSessionsPerWeek = proto.phases.length
             ? Math.round(proto.phases.reduce((sum, p) => sum + (p.sessionsPerWeek ?? 0), 0) / proto.phases.length)
@@ -307,10 +309,16 @@ export class ProtocolService {
             numberOfPhases: proto.phases.length,
             targetAthleteLevel: proto.targetAthleteLevel || '',
             saveAsDraft,
+            patientId: patientId || null,
+            doctorId: doctorId || null,
             protocolServiceIds: (proto.services ?? []).map(s => s.id),
-            contraindications: proto.contraindications || [],
+            contraindications: (proto.contraindications || []).map(c => c.description),
             phases: proto.phases.map((phase, phaseIdx) => this.mapPhase(phase, phaseIdx)),
         };
+    }
+
+    getAthletes(): Observable<any[]> {
+        return this.http.get<any>(this.apiUrl + 'Athletes').pipe(map(res => res.data));
     }
 
     private mapPhase(phase: Phase, phaseIdx: number): TreatmentPlanPhase {

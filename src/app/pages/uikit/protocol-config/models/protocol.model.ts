@@ -242,9 +242,10 @@ export interface TreatmentPlanRequest {
     sessionsPerWeek: number;
     numberOfPhases: number;
     targetAthleteLevel: string;
-    doctorId?: string;
+    patientId?: string | null;
+    doctorId?: string | null;
     saveAsDraft: boolean;
     protocolServiceIds: number[];
-    contraindications?: { id: number; description: string; order: number; }[];
+    contraindications?: string[];
     phases: TreatmentPlanPhase[];
 }

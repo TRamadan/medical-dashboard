@@ -35,19 +35,21 @@
 
             <!-- Empty State -->
             @if (!proto.contraindications || proto.contraindications.length === 0) {
-                <div class="flex items-center gap-2 p-3 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-gray-500 italic text-sm">
-                    <i class="pi pi-info-circle"></i>
-                    <span>No contraindications defined for this protocol.</span>
-                </div>
+            <div
+                class="flex items-center gap-2 p-3 bg-gray-50 border border-dashed border-gray-200 rounded-lg text-gray-500 italic text-sm">
+                <i class="pi pi-info-circle"></i>
+                <span>No contraindications defined for this protocol.</span>
+            </div>
             } @else {
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    @for (item of proto.contraindications; track $index) {
-                        <div class="flex items-start gap-2 p-2.5 bg-red-50/50 border border-red-100 rounded-lg text-sm text-red-800">
-                            <span class="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-red-400"></span>
-                            <span>{{ item.description }}</span>
-                        </div>
-                    }
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                @for (item of proto.contraindications; track $index) {
+                <div
+                    class="flex items-start gap-2 p-2.5 bg-red-50/50 border border-red-100 rounded-lg text-sm text-red-800">
+                    <span class="mt-1 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                    <span>{{ item.description }}</span>
                 </div>
+                }
+            </div>
             }
         </div>
     </p-card>
@@ -338,28 +340,130 @@
             </div>
         </div>
 
-        <!-- Activate Protocol & Save Draft (Hidden in Readonly) -->
+        <!-- Selection Details Section -->
+        <div class="mt-2" *ngIf="isActionSelected('template')">
+            <div
+                [class]="'rounded-xl p-5 border flex flex-col gap-4 ' + (protocolCompleteness().isComplete ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200')">
+                <div class="flex items-start gap-3">
+                    <i
+                        [class]="'pi text-xl mt-0.5 ' + (protocolCompleteness().isComplete ? 'pi-check-circle text-emerald-600' : 'pi-info-circle text-amber-600')"></i>
+                    <div class="flex flex-col gap-1">
+                        <span
+                            [class]="'font-bold ' + (protocolCompleteness().isComplete ? 'text-emerald-800' : 'text-amber-800')">
+                            {{ protocolCompleteness().isComplete ? 'Protocol Ready for Publishing' : 'Saving as Draft'
+                            }}
+                        </span>
+                        <span
+                            [class]="'text-sm ' + (protocolCompleteness().isComplete ? 'text-emerald-600' : 'text-amber-600')">
+                            {{ protocolCompleteness().isComplete
+                            ? 'This protocol is complete and will be published for future assignments.'
+                            : 'Some sections are missing. The protocol will be saved as a draft until completed.' }}
+                        </span>
+
+                        @if (!protocolCompleteness().isComplete) {
+                        <div class="flex flex-wrap gap-1.5 mt-2">
+                            @for (section of protocolCompleteness().missingSections; track $index) {
+                            <span
+                                class="px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-bold rounded border border-amber-200 uppercase">
+                                {{ section }}
+                            </span>
+                            }
+                        </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-2" *ngIf="isActionSelected('athlete')">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 flex flex-col gap-4">
+                <div class="flex items-start gap-3">
+                    <i class="pi pi-info-circle text-blue-600 text-xl mt-0.5"></i>
+                    <div class="flex flex-col gap-1">
+                        <span class="font-bold text-blue-800">Athlete Assignment</span>
+                        <span class="text-sm text-blue-600 italic">Please choose from the athletes who have already
+                            accepted the treatment report and are ready for protocol assignment.</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-sm font-semibold text-gray-700">Select Athlete</label>
+                    <p-dropdown [options]="athletes()" [(ngModel)]="selectedPatientId" optionLabel="name"
+                        optionValue="id" placeholder="Choose an athlete..." styleClass="w-full md:w-80" [filter]="true"
+                        filterBy="name" [showClear]="true">
+                    </p-dropdown>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-2" *ngIf="isActionSelected('share')">
+            <div class="bg-purple-50 border border-purple-200 rounded-xl p-5 flex flex-col gap-4">
+                <div class="flex items-start gap-3">
+                    <i class="pi pi-share-alt text-purple-600 text-xl mt-0.5"></i>
+                    <div class="flex flex-col gap-1">
+                        <span class="font-bold text-purple-800">Team Sharing</span>
+                        <span class="text-sm text-purple-600">Select a location and then choose the coach or specialist
+                            to review this protocol.</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-semibold text-gray-700">Location</label>
+                        <p-dropdown [options]="locations()" [(ngModel)]="selectedLocationId" optionLabel="label"
+                            optionValue="id" placeholder="Select Location" styleClass="w-full"
+                            (onChange)="onLocationChange($event.value)" [showClear]="true">
+                        </p-dropdown>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="text-sm font-semibold text-gray-700">Coach / Specialist</label>
+                        <p-dropdown [options]="coachManagers()" [(ngModel)]="selectedDoctorId" optionLabel="nameEn"
+                            optionValue="userId" placeholder="Select Member" styleClass="w-full"
+                            [disabled]="!selectedLocationId" [showClear]="true">
+                        </p-dropdown>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons (Hidden in Readonly) -->
         <div class="flex justify-center gap-4 pb-4" *ngIf="!readonly() && !isActionSelected('pdf')">
+            <!-- Save as Template Option -->
+            @if (isActionSelected('template')) {
             <button pButton class="p-button-outlined px-10 py-3 text-base font-bold"
-                [icon]="savingDraft() ? 'pi pi-spin pi-spinner' : 'pi pi-save'"
-                iconPos="left"
-                label="Save as draft"
+                [icon]="savingDraft() ? 'pi pi-spin pi-spinner' : 'pi pi-save'" iconPos="left" label="Create protocol"
                 [disabled]="!proto.name?.trim() || savingDraft()"
                 pTooltip="{{ proto.name?.trim() ? 'Save protocol as draft' : 'Please enter a protocol name first' }}"
                 tooltipPosition="top" (click)="saveAsDraft()">
             </button>
+            }
+
+            <!-- Apply to Athlete Option -->
+            @if (isActionSelected('athlete')) {
             <button pButton class="px-10 py-3 text-base font-bold" icon="pi pi-check-circle" iconPos="left"
-                label="Activate protocol and send notifications" [disabled]="!proto.name?.trim()"
-                pTooltip="{{ proto.name?.trim() ? 'Activate and save protocol' : 'Please enter a protocol name first' }}"
+                label="Create and Sent to athelete"
+                [disabled]="!proto.name?.trim() || !selectedPatientId || savingDraft()"
+                pTooltip="{{ proto.name?.trim() ? (selectedPatientId ? 'Activate and save protocol' : 'Please select an athlete') : 'Please enter a protocol name first' }}"
                 tooltipPosition="top" (click)="activateProtocol()">
             </button>
+            }
+
+            <!-- Share with Team Option -->
+            @if (isActionSelected('share')) {
+            <button pButton class="px-10 py-3 text-base font-bold" icon="pi pi-check-circle" iconPos="left"
+                label="Create and send to the team"
+                [disabled]="!proto.name?.trim() || !selectedDoctorId || savingDraft()"
+                pTooltip="{{ proto.name?.trim() ? (selectedDoctorId ? 'Activate and save protocol' : 'Please select a team member') : 'Please enter a protocol name first' }}"
+                tooltipPosition="top" (click)="activateProtocol()">
+            </button>
+            }
         </div>
 
         <!-- Download PDF (Always visible if action selected OR if readonly) -->
         <div class="flex justify-center gap-4 pb-4" *ngIf="readonly() || isActionSelected('pdf')">
             <button pButton class="px-10 py-3 text-base font-bold p-button-danger" icon="pi pi-file-pdf" iconPos="left"
-                label="Download Protocol PDF" [disabled]="!proto.name?.trim()"
-                (click)="exportToPDF()">
+                label="Download Protocol PDF" [disabled]="!proto.name?.trim()" (click)="exportToPDF()">
             </button>
         </div>
 

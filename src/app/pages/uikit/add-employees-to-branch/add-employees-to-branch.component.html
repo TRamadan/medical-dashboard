@@ -1,0 +1,193 @@
+<p-toast></p-toast>
+
+<div class="employees-branch-container w-full min-h-screen p-4 md:p-6">
+    <!-- Header Block -->
+    <header
+        class="header-panel mb-6 p-5 rounded-xl flex flex-col md:flex-row md:items-center md:justify-between shadow-lg gap-4"
+        role="banner">
+        <div>
+            <h1 class="text-2xl font-bold m-0 flex items-center gap-2">
+                <i class="pi pi-building text-3xl"></i>
+                <span>Assign Employees to Branch</span>
+            </h1>
+            <p class="text-sm mt-1 text-subtitle">Manage and sync employee affiliations across clinic locations</p>
+        </div>
+    </header>
+
+    <!-- Main Section Grid -->
+    <main class="grid-content grid grid-cols-1 lg:grid-cols-12 gap-6" role="main">
+
+        <!-- Left Side: Assign Panel Form -->
+        <section class="lg:col-span-4 block-card p-5 rounded-xl shadow-md flex flex-col justify-between"
+            aria-labelledby="form-section-title">
+            <div>
+                <h2 id="form-section-title" class="section-title mb-4 flex items-center gap-2">
+                    <i class="pi pi-user-plus"></i>
+                    <span>Assignment Config</span>
+                </h2>
+
+                <form [formGroup]="assignForm" (ngSubmit)="onSubmitAssignment()" class="flex flex-col gap-4">
+                    <!-- Branch Input -->
+                    <div class="form-group flex flex-col gap-2">
+                        <label for="branch-selector" class="font-semibold text-sm">Select Branch <span
+                                class="required">*</span></label>
+                        <p-dropdown id="branch-selector" formControlName="branchId" [options]="branches()"
+                            optionLabel="nameEn" optionValue="id" placeholder="Choose a branch" [filter]="true"
+                            filterBy="nameEn" styleClass="w-full flex-dropdown" aria-required="true"
+                            aria-label="Select Branch">
+                            <ng-template let-branch pTemplate="item">
+                                <div class="dropdown-item flex flex-col">
+                                    <span class="font-semibold item-head">{{ branch.nameEn }}</span>
+                                    <span class="text-xs item-sub">{{ branch.nameAr }} · {{ branch.addressEn }}</span>
+                                </div>
+                            </ng-template>
+                        </p-dropdown>
+                        @if (assignForm.get('branchId')?.touched && assignForm.get('branchId')?.errors?.['required']) {
+                        <small class="error-text text-danger" id="branch-error-desc">Branch selection is
+                            required.</small>
+                        }
+                    </div>
+
+                    <!-- Employee Input -->
+                    <div class="form-group flex flex-col gap-2">
+                        <label for="employee-selector" class="font-semibold text-sm">Select Employee <span
+                                class="required">*</span></label>
+                        <ng-select inputId="employee-selector" [items]="availableEmployees()" bindLabel="nameAr"
+                            bindValue="id" placeholder="Search employees..." [searchable]="true" [clearable]="false"
+                            [loading]="isEmployeesLoading()" [disabled]="!selectedBranchId()"
+                            [formControl]="userIdControl" (scrollToEnd)="loadMoreEmployees()"
+                            (search)="onEmployeeSearch($event)" (clear)="onEmployeeSearchClear()"
+                            aria-label="Select Employee" class="ng-select-employee">
+                            <ng-template ng-option-tmp let-emp="item">
+                                <div class="ng-emp-option">
+                                    <span class="ng-emp-name">{{ emp.nameAr }}</span>
+                                    <span class="ng-emp-username">{{ emp.userName }}</span>
+                                </div>
+                            </ng-template>
+                            <ng-template ng-footer-tmp>
+                                @if (!isEmployeesLoading() && !hasMoreEmployees() && availableEmployees().length > 0) {
+                                <div class="ng-footer-label">
+                                    All {{ availableEmployees().length }} employees loaded
+                                </div>
+                                }
+                            </ng-template>
+                        </ng-select>
+                        @if (!selectedBranchId()) {
+                        <small class="info-text text-muted">Please select a branch first to choose an employee.</small>
+                        }
+                        @if (userIdControl.touched && userIdControl.errors?.['required']) {
+                        <small class="error-text text-danger" id="employee-error-desc">Employee selection is
+                            required.</small>
+                        }
+                    </div>
+
+                    <!-- Button -->
+                    <button type="submit"
+                        class="btn-submit w-full mt-4 p-3 rounded-lg flex items-center justify-center gap-2"
+                        [disabled]="isFormInvalid() || isActionLoading()" [attr.aria-busy]="isActionLoading()">
+                        @if (isActionLoading()) {
+                        <i class="pi pi-spin pi-spinner"></i>
+                        <span>Assigning...</span>
+                        } @else {
+                        <i class="pi pi-check-circle"></i>
+                        <span>Assign Employee</span>
+                        }
+                    </button>
+                </form>
+            </div>
+
+        </section>
+
+        <!-- Right Side: Assigned List Panel -->
+        <section class="lg:col-span-8 block-card p-5 rounded-xl shadow-md flex flex-col"
+            aria-labelledby="list-section-title">
+            <div class="list-header mb-4 flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div>
+                    <h2 id="list-section-title" class="section-title m-0 flex items-center gap-2">
+                        <i class="pi pi-users text-primary"></i>
+                        <span>Assigned Employees</span>
+                    </h2>
+                    <p class="text-xs text-subtitle mt-1">Total assigned in branch: <span class="badge-count">{{
+                            assignedEmployeesCount() }}</span></p>
+                </div>
+
+                <!-- Filter by Employee Type -->
+                <div class="flex items-center gap-3">
+                    <label for="type-filter" class="text-sm font-semibold whitespace-nowrap">Filter Position:</label>
+                    <p-dropdown id="type-filter" [options]="employeeTypes()" optionLabel="name" optionValue="id"
+                        placeholder="All Roles" [showClear]="true" (onChange)="onFilterChange($event)"
+                        class="filter-dropdown" [disabled]="!selectedBranchId()" aria-label="Filter by Employee Type">
+                    </p-dropdown>
+                </div>
+            </div>
+
+            <!-- List State -->
+            @if (isLoading()) {
+            <div class="loading-state flex flex-col justify-center items-center py-12 gap-3" aria-live="polite">
+                <i class="pi pi-spin pi-spinner text-3xl text-primary animate-spin"></i>
+                <p class="text-gray-400 font-medium">Fetching assigned staff...</p>
+            </div>
+            } @else if (!selectedBranchId()) {
+            <div class="empty-state py-12 flex flex-col justify-center items-center text-center gap-3">
+                <div class="icon-orb shadow-sm">
+                    <i class="pi pi-map-marker text-4xl text-primary"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-700 m-0">No Branch Selected</h3>
+                    <p class="text-sm text-gray-500 mt-1 max-w-sm">Please select a clinic branch on the left sidebar to
+                        view the list of assigned employees configuration.</p>
+                </div>
+            </div>
+            } @else if (assignedEmployees().length === 0) {
+            <div class="empty-state py-12 flex flex-col justify-center items-center text-center gap-3">
+                <div class="icon-orb shadow-sm">
+                    <i class="pi pi-users-slash text-4xl text-warning"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-700 m-0">No Assigned Employees</h3>
+                    <p class="text-sm text-gray-500 mt-1 max-w-sm">No employees match this selection or filter criteria
+                        in this branch.</p>
+                </div>
+            </div>
+            } @else {
+            <!-- Employees Table List -->
+            <div class="table-wrapper overflow-x-auto rounded-lg shadow-sm border">
+                <table class="employees-table w-full border-collapse text-left text-sm" role="table">
+                    <thead class="bg-light-header font-semibold" role="rowgroup">
+                        <tr role="row">
+                            <th class="p-3" role="columnheader">Full Name (EN)</th>
+                            <th class="p-3" role="columnheader">Full Name (AR)</th>
+                            <th class="p-3" role="columnheader">Email Address</th>
+                            <th class="p-3" role="columnheader">Phone Number</th>
+                            <th class="p-3" role="columnheader">Position / Title</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100" role="rowgroup">
+                        @for (emp of assignedEmployees(); track emp.id) {
+                        <tr class="hover:bg-gray-50 transition-colors" role="row">
+                            <td class="p-3 font-semibold text-gray-800" role="cell">
+                                <div class="flex items-center gap-2">
+                                    <span class="avatar">{{ emp.fullNameEn ? emp.fullNameEn.charAt(0) : 'U' }}</span>
+                                    <span>{{ emp.fullNameEn || 'N/A' }}</span>
+                                </div>
+                            </td>
+                            <td class="p-3 font-medium text-gray-700" role="cell">{{ emp.fullNameAr || 'N/A' }}</td>
+                            <td class="p-3 text-gray-500 font-mono text-xs" role="cell">{{ emp.email || 'N/A' }}</td>
+                            <td class="p-3 text-gray-500" role="cell">{{ emp.phoneNumber || 'N/A' }}</td>
+                            <td class="p-3" role="cell">
+                                <span class="badge-role" [class.badge-doctor]="emp.employeeTypeId === 1"
+                                    [class.badge-coach]="emp.employeeTypeId === 2"
+                                    [class.badge-admin]="emp.employeeTypeId === 3"
+                                    [class.badge-physio]="emp.employeeTypeId === 4">
+                                    {{ emp.employeeTypeName || 'Employee' }}
+                                </span>
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            }
+        </section>
+    </main>
+</div>

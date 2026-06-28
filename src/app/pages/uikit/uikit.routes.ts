@@ -96,6 +96,11 @@ export default [
         component: AddLocationComponent
     },
     {
+        path: 'add-employees-to-branch',
+        data: { breadcrumb: 'Add Employees to Branch' },
+        loadComponent: () => import('./add-employees-to-branch/add-employees-to-branch.component').then(m => m.AddEmployeesToBranchComponent)
+    },
+    {
         path: 'calendar',
         data: { breadcrumb: 'Caledar' },
         component: CalendarComponent

@@ -56,16 +56,13 @@ export class ProtocolInformationComponent implements OnInit {
     ];
 
     defaultContraindications = [
-        { id: 1, description: 'Pain > 7/10 at start of exercise — Stop and notify the doctor', order: 1 },
-        { id: 2, description: 'New acute joint swelling within 24 hours of last session', order: 2 },
-        { id: 3, description: 'Fever > 38°C or signs of local inflammation', order: 3 },
     ];
 
     templates = computed<ProtocolTemplate[]>(() => {
         return this.protocolService.protocols().map((p: any) => {
             const weeks = p.weeks || (p.phases?.reduce((sum: number, ph: any) => sum + (ph.totalWeeks || 0), 0)) || 0;
             const sessions = p.totalSessions || (p.phases?.reduce((sum: number, ph: any) => sum + ((ph.totalWeeks || 0) * (ph.sessionsPerWeek || 0)), 0)) || 0;
-            
+
             return {
                 id: p.id,
                 title: p.name,

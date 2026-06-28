@@ -543,7 +543,6 @@ export class PendingTicketsComponent {
   }
 
   goToAthleteProfile(): void {
-    debugger
     this.router.navigate(['/uikit/athleteprofile']);
   }
 

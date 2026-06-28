@@ -8,6 +8,7 @@ import { InputTextarea } from 'primeng/inputtextarea';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ServicecategoryService } from '../../add-service/services/servicecategory.service';
 import { Servicecategory } from '../../add-service/models/servicecategory';
+import { ProtocolService } from '../../protocol-config/services/protocol.service';
 
 @Component({
     selector: 'app-plan-cofig',
@@ -20,7 +21,11 @@ export class PlanCofigComponent implements OnInit {
     @Input() phases: any[] = [];
     @Output() phasesChange = new EventEmitter<any[]>();
 
+    /** When true (edit mode), the template selection card is hidden */
+    @Input() isEditMode: boolean = false;
+
     serviceCategoryService = inject(ServicecategoryService);
+    protocolService = inject(ProtocolService);
     serviceCategories: any[] = [];
 
     isTemplateSelected: boolean = false;
