@@ -13,7 +13,6 @@ import { ProtocolService } from '../../protocol-config/services/protocol.service
 @Component({
     selector: 'app-plan-cofig',
     imports: [CommonModule, FormsModule, CardModule, ButtonModule, InputTextModule, InputTextarea, CheckboxModule],
-    standalone: true,
     templateUrl: './plan-cofig.component.html',
     styleUrl: './plan-cofig.component.scss'
 })
@@ -149,15 +148,30 @@ export class PlanCofigComponent implements OnInit {
         this.emitPhasesChange();
     }
 
-    addPhase() {
-        const nextId = this.phases.length + 1;
-        this.phases.push({
-            id: nextId,
-            title: `Phase ${nextId}: New Phase`,
+    addPhase(index?: number) {
+        const newPhase = {
+            id: 0, // set below
+            title: '', // set below
             weeks: 0,
             sessions: 0,
             objective: '',
             ...this.createDefaultPhaseSelections()
+        };
+
+        if (typeof index === 'number') {
+            this.phases.splice(index + 1, 0, newPhase);
+        } else {
+            this.phases.push(newPhase);
+        }
+
+        // Re-index and update titles for default naming
+        this.phases.forEach((phase, idx) => {
+            const nextId = idx + 1;
+            phase.id = nextId;
+            if (!phase.title || phase.title.startsWith('Phase ')) {
+                const suffix = phase.title.includes(':') ? phase.title.substring(phase.title.indexOf(':')) : '';
+                phase.title = `Phase ${nextId}${suffix || (suffix === '' ? ': New Phase' : '')}`;
+            }
         });
 
         this.emitPhasesChange();
@@ -166,6 +180,15 @@ export class PlanCofigComponent implements OnInit {
     removePhase(index: number) {
         if (index > 0) {
             this.phases.splice(index, 1);
+            // Re-index and update default titles upon deletion
+            this.phases.forEach((phase, idx) => {
+                const nextId = idx + 1;
+                phase.id = nextId;
+                if (!phase.title || phase.title.startsWith('Phase ')) {
+                    const suffix = phase.title.includes(':') ? phase.title.substring(phase.title.indexOf(':')) : '';
+                    phase.title = `Phase ${nextId}${suffix || (suffix === '' ? ': New Phase' : '')}`;
+                }
+            });
             this.emitPhasesChange();
         }
     }

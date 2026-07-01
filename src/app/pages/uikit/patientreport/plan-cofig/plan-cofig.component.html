@@ -152,77 +152,99 @@
             <div class="flex flex-col gap-6">
                 <div class="flex justify-between items-center">
                     <span class="text-xl font-bold">Template Phases - Customize as Needed</span>
-                    <p-button label="+ Add Phase" [text]="true" (onClick)="addPhase()"></p-button>
                 </div>
 
                 <!-- Phase Items -->
-                <div class="flex flex-col gap-4">
-                    <div *ngFor="let phase of phases; let i = index"
-                        class="border rounded-xl p-4 flex flex-col gap-4 relative">
-                        <!-- Close Button -->
-                        <button *ngIf="i > 0" class="absolute top-4 right-4 text-gray-500 hover:text-red-500"
-                            (click)="removePhase(i)">
-                            <i class="pi pi-times"></i>
-                        </button>
+                <div class="flex flex-col gap-6">
+                    @for (phase of phases; track phase.id; let i = $index, last = $last) {
+                        <div class="flex flex-col gap-4">
+                            <div class="border rounded-xl p-4 flex flex-col gap-4 relative">
+                                <!-- Close Button -->
+                                @if (i > 0) {
+                                    <button class="absolute top-4 right-4 text-gray-500 hover:text-red-500"
+                                        (click)="removePhase(i)">
+                                        <i class="pi pi-times"></i>
+                                    </button>
+                                }
 
-                        <!-- Title -->
-                        <span *ngIf="isTemplateSelected" class="font-bold text-lg">{{ phase.title }}</span>
-                        <div *ngIf="!isTemplateSelected" class="flex flex-col gap-2">
-                            <label class="font-medium text-gray-700">Phase Name:</label>
-                            <input pInputText [(ngModel)]="phase.title" placeholder="Enter phase name" class="w-full" />
-                        </div>
+                                <!-- Title -->
+                                @if (isTemplateSelected) {
+                                    <span class="font-bold text-lg">{{ phase.title }}</span>
+                                } @else {
+                                    <div class="flex flex-col gap-2">
+                                        <label class="font-medium text-gray-700">Phase Name:</label>
+                                        <input pInputText [(ngModel)]="phase.title" placeholder="Enter phase name" class="w-full" />
+                                    </div>
+                                }
 
-                        <!-- Weeks & Sessions -->
-                        <div class="flex gap-4">
-                            <div class="flex flex-col gap-2 flex-1">
-                                <label class="font-medium text-gray-700">Weeks:</label>
-                                <input pInputText [(ngModel)]="phase.weeks" placeholder="eg., 12" class="w-full"
-                                    type="number" />
-                            </div>
-                            <div class="flex flex-col gap-2 flex-1">
-                                <label class="font-medium text-gray-700">Sessions:</label>
-                                <input pInputText [(ngModel)]="phase.sessions" placeholder="eg., 12" class="w-full"
-                                    type="number" />
-                            </div>
-                        </div>
-
-                        <!-- Objective -->
-                        <div class="flex flex-col gap-2">
-                            <label class="font-medium text-gray-700">Phase Objective:</label>
-                            <textarea pInputTextarea [(ngModel)]="phase.objective" rows="3" class="w-full"
-                                placeholder="Reduce inflammation, protect healing tissue, gentle ROM exercises"></textarea>
-                        </div>
-
-                        <!-- Edit Protocol Link -->
-                        <div *ngIf="isTemplateSelected"
-                            class="flex items-center gap-2 text-blue-500 cursor-pointer hover:text-blue-600">
-                            <i class="pi pi-file-edit"></i>
-                            <span class="font-medium">Edit Exercise Protocol</span>
-                        </div>
-
-                        <!-- Divider -->
-                        <div class="border-t border-gray-200 my-2"></div>
-
-                        <!-- Apply Sessions Section -->
-                        <div class="flex flex-col gap-4" *ngIf="phase.sessions">
-                            <span class="text-xl font-bold">Apply measurements to Sessions</span>
-                            <span class="text-gray-500 text-sm mb-2">Select which sessions will include this phase's
-                                measurements:</span>
-                            <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
-                                <div *ngFor="let sessionNum of getSessionsArray(phase.sessions)"
-                                    class="border rounded-xl p-2 cursor-pointer transition-all hover:shadow-md flex flex-col items-center justify-center gap-2"
-                                    [ngClass]="{'border-[#131337] bg-[#131337] text-white': isSessionSelected(phase, sessionNum), 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50': !isSessionSelected(phase, sessionNum)}"
-                                    (click)="toggleSessionSelection(phase, sessionNum)">
-                                    <span class="font-bold text-sm">Session {{ sessionNum }}</span>
-                                    <div class="h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors"
-                                        [ngClass]="{'border-[#70F4C3] bg-[#70F4C3]': isSessionSelected(phase, sessionNum), 'border-gray-300 bg-white': !isSessionSelected(phase, sessionNum)}">
-                                        <i class="pi pi-check text-[#131337] text-[10px]"
-                                            *ngIf="isSessionSelected(phase, sessionNum)"></i>
+                                <!-- Weeks & Sessions -->
+                                <div class="flex gap-4">
+                                    <div class="flex flex-col gap-2 flex-1">
+                                        <label class="font-medium text-gray-700">Weeks:</label>
+                                        <input pInputText [(ngModel)]="phase.weeks" placeholder="eg., 12" class="w-full"
+                                            type="number" />
+                                    </div>
+                                    <div class="flex flex-col gap-2 flex-1">
+                                        <label class="font-medium text-gray-700">Sessions:</label>
+                                        <input pInputText [(ngModel)]="phase.sessions" placeholder="eg., 12" class="w-full"
+                                            type="number" />
                                     </div>
                                 </div>
+
+                                <!-- Objective -->
+                                <div class="flex flex-col gap-2">
+                                    <label class="font-medium text-gray-700">Phase Objective:</label>
+                                    <textarea pInputTextarea [(ngModel)]="phase.objective" rows="3" class="w-full"
+                                        placeholder="Reduce inflammation, protect healing tissue, gentle ROM exercises"></textarea>
+                                </div>
+
+                                <!-- Edit Protocol Link -->
+                                @if (isTemplateSelected) {
+                                    <div class="flex items-center gap-2 text-blue-500 cursor-pointer hover:text-blue-600">
+                                        <i class="pi pi-file-edit"></i>
+                                        <span class="font-medium">Edit Exercise Protocol</span>
+                                    </div>
+                                }
+
+                                <!-- Divider -->
+                                <div class="border-t border-gray-200 my-2"></div>
+
+                                <!-- Apply Sessions Section -->
+                                @if (phase.sessions) {
+                                    <div class="flex flex-col gap-4">
+                                        <span class="text-xl font-bold">Apply measurements to Sessions</span>
+                                        <span class="text-gray-500 text-sm mb-2">Select which sessions will include this phase's
+                                            measurements:</span>
+                                        <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-3">
+                                            @for (sessionNum of getSessionsArray(phase.sessions); track sessionNum) {
+                                                <div class="border rounded-xl p-2 cursor-pointer transition-all hover:shadow-md flex flex-col items-center justify-center gap-2"
+                                                    [class]="isSessionSelected(phase, sessionNum)
+                                                        ? 'border-[#131337] bg-[#131337] text-white'
+                                                        : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'"
+                                                    (click)="toggleSessionSelection(phase, sessionNum)">
+                                                    <span class="font-bold text-sm">Session {{ sessionNum }}</span>
+                                                    <div class="h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors"
+                                                        [class]="isSessionSelected(phase, sessionNum)
+                                                            ? 'border-[#70F4C3] bg-[#70F4C3]'
+                                                            : 'border-gray-300 bg-white'">
+                                                        <i class="pi pi-check text-[#131337] text-[10px]"
+                                                            *ngIf="isSessionSelected(phase, sessionNum)"></i>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
                             </div>
+
+                            <!-- Add Phase Button under the last phase -->
+                            @if (last) {
+                                <div class="flex justify-start">
+                                    <p-button label="+ Add Phase" [text]="true" (onClick)="addPhase(i)"></p-button>
+                                </div>
+                            }
                         </div>
-                    </div>
+                    }
                 </div>
             </div>
         </p-card>

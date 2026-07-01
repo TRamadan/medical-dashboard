@@ -148,18 +148,29 @@ export class PhasesAndCriteriaComponent implements OnInit {
         });
     }
 
-    addPhase(): void {
+    addPhase(index?: number): void {
         this.protocolService.activeProtocol.update(proto => {
             if (!proto) return proto;
-            const nextId = proto.phases.length + 1;
-            const newPhase = this.protocolService.createPhase(nextId);
+            
+            const maxId = proto.phases.reduce((max, p) => {
+                const idNum = parseInt(p.id, 10);
+                return isNaN(idNum) ? max : Math.max(max, idNum);
+            }, 0);
+            const newPhase = this.protocolService.createPhase(maxId + 1);
 
             // Initialize form array for the new phase
             this.initPhaseCriteria(newPhase);
 
+            let newPhases = [...proto.phases];
+            if (typeof index === 'number') {
+                newPhases.splice(index + 1, 0, newPhase);
+            } else {
+                newPhases.push(newPhase);
+            }
+
             return {
                 ...proto,
-                phases: [...proto.phases, newPhase]
+                phases: newPhases
             };
         });
     }

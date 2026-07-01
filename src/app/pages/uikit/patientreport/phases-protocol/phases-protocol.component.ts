@@ -12,8 +12,8 @@ import { DropdownModule } from 'primeng/dropdown';
 
 @Component({
     selector: 'app-phases-protocol',
-    imports: [CommonModule, FormsModule, CardModule, InputTextModule, InputTextarea, ButtonModule, CheckboxModule, AccordionModule, DropdownModule],
     standalone: true,
+    imports: [CommonModule, FormsModule, CardModule, InputTextModule, InputTextarea, ButtonModule, CheckboxModule, AccordionModule, DropdownModule],
     templateUrl: './phases-protocol.component.html',
     styleUrl: './phases-protocol.component.scss'
 })
@@ -155,22 +155,47 @@ export class PhasesProtocolComponent implements OnChanges {
         { label: 'Nutritionist', selected: false }
     ];
 
-    addPhase() {
-        const nextId = this.phases.length + 1;
-        this.phases.push({
-            id: nextId,
-            title: `Phase ${nextId}: New Phase`,
+    addPhase(index?: number) {
+        const newPhase = {
+            id: 0, // set below
+            title: '', // set below
             weeks: 0,
             sessions: 0,
             objective: '',
             ...this.createDefaultMeasurements()
+        };
+
+        if (typeof index === 'number') {
+            this.phases.splice(index + 1, 0, newPhase);
+        } else {
+            this.phases.push(newPhase);
+        }
+
+        // Re-index and update titles for default naming
+        this.phases.forEach((phase, idx) => {
+            const nextId = idx + 1;
+            phase.id = nextId;
+            if (!phase.title || phase.title.startsWith('Phase ')) {
+                const suffix = phase.title.includes(':') ? phase.title.substring(phase.title.indexOf(':')) : '';
+                phase.title = `Phase ${nextId}${suffix || (suffix === '' ? ': New Phase' : '')}`;
+            }
         });
+
         this.emitChanges();
     }
 
     removePhase(index: number) {
         if (index > 0) {
             this.phases.splice(index, 1);
+            // Re-index and update default titles upon deletion as well
+            this.phases.forEach((phase, idx) => {
+                const nextId = idx + 1;
+                phase.id = nextId;
+                if (!phase.title || phase.title.startsWith('Phase ')) {
+                    const suffix = phase.title.includes(':') ? phase.title.substring(phase.title.indexOf(':')) : '';
+                    phase.title = `Phase ${nextId}${suffix || (suffix === '' ? ': New Phase' : '')}`;
+                }
+            });
             this.emitChanges();
         }
     }
