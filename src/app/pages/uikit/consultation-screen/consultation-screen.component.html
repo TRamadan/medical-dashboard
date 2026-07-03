@@ -10,7 +10,9 @@
             </div>
         </div>
         <div style="flex:1"></div>
-        <p-tag [value]="entryBadge()?.label || ''" [severity]="entryBadge()?.severity"></p-tag>
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <p-tag [value]="entryBadge()?.label || ''" [severity]="entryBadge()?.severity"></p-tag>
+        </div>
     </div>
 </p-card>
 }
@@ -465,12 +467,189 @@
             <div class="btn-row">
                 <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
                     (onClick)="go(2)"></p-button>
-                <p-button label="Next Decision" icon="pi pi-arrow-right" iconPos="right" (onClick)="go(4)"></p-button>
+                <p-button label="Next — Athlete Report" icon="pi pi-arrow-right" iconPos="right"
+                    (onClick)="go(4)"></p-button>
             </div>
             }
 
-            <!-- -- STEP 4  Path Decision -- -->
+            <!-- ══ STEP 4 — Athlete Report ══ -->
             @if (currentStep() === 4) {
+            <form [formGroup]="rehabForm">
+                <p-card styleClass="mb-3">
+                    <ng-template pTemplate="title">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <span>Athlete Report</span>
+
+                        </div>
+                    </ng-template>
+
+                    <!-- Recommended Service / Track — selectable cards, visible to client only -->
+                    <div class="mb-4">
+                        <div class="field-label" style="font-weight: 600; margin-bottom: 0.6rem;">
+                            Recommended Service / Track <span class="req">*</span>
+                        </div>
+
+                        @if (servicesLoading()) {
+                        <!-- Loading skeleton -->
+                        <div class="service-card-grid">
+                            @for (_ of [1,2,3]; track $index) {
+                            <div class="service-card service-card--skeleton">
+                                <div class="sc-skeleton-icon"></div>
+                                <div class="sc-skeleton-line sc-skeleton-line--wide"></div>
+                                <div class="sc-skeleton-line"></div>
+                            </div>
+                            }
+                        </div>
+                        } @else if (servicesError()) {
+                        <div style="padding: 0.5rem 0.8rem; border-radius: 8px;
+                                    border: 1px solid rgba(226,75,74,.3);
+                                    background: rgba(226,75,74,.06);
+                                    color: #E24B4A; font-size: 0.83rem;">
+                            ⚠ {{ servicesError() }}
+                        </div>
+                        } @else if (recommendedTrackOptions().length === 0) {
+                        <div style="padding: 0.6rem 0.8rem; border-radius: 8px;
+                                    border: 1px dashed var(--p-content-border-color);
+                                    color: var(--p-text-muted-color); font-size: 0.83rem;">
+                            No services available.
+                        </div>
+                        } @else {
+                        <div class="service-card-grid" role="radiogroup" aria-label="Recommended Service or Track">
+                            @for (opt of recommendedTrackOptions(); track opt.value) {
+                            <div class="service-card" [class.selected]="selectedServiceId() === opt.value" role="radio"
+                                [attr.aria-checked]="selectedServiceId() === opt.value"
+                                [attr.tabindex]="selectedServiceId() === opt.value ? 0 : -1"
+                                (click)="selectService(opt.value)" (keydown.enter)="selectService(opt.value)"
+                                (keydown.space)="$event.preventDefault(); selectService(opt.value)">
+                                <!-- hidden radio for native form semantics -->
+                                <input type="radio" class="sc-hidden-radio" [id]="'svc-' + opt.value"
+                                    name="recommendedTrack" [value]="opt.value"
+                                    [checked]="selectedServiceId() === opt.value" (change)="selectService(opt.value)"
+                                    [attr.aria-hidden]="true" tabindex="-1" />
+                                <div class="sc-check-ring" [class.checked]="selectedServiceId() === opt.value"
+                                    aria-hidden="true">
+                                    <i class="pi pi-check" style="font-size: 0.65rem;"></i>
+                                </div>
+                                <div class="sc-icon" aria-hidden="true">
+                                    <i class="pi pi-briefcase"></i>
+                                </div>
+                                <div class="sc-name">{{ opt.label }}</div>
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Priority / Urgency Level — visible to both -->
+                    <div class="mb-4">
+                        <div class="field-label" style="font-weight: 600;">Priority / Urgency Level <span
+                                class="req">*</span></div>
+                        <p-selectButton [options]="priorityOptions" formControlName="priorityLevel" optionLabel="label"
+                            optionValue="value" class="w-full"></p-selectButton>
+                    </div>
+
+                    <!-- Program Duration — visible to both; Custom reveals sessions/week input -->
+                    <div class="form-grid-2 mb-4" style="align-items: flex-end;">
+                        <div>
+                            <div class="field-label" style="font-weight: 600;">Program Duration <span
+                                    class="req">*</span></div>
+                            <p-dropdown [options]="durationOptions" formControlName="programDuration"
+                                optionLabel="label" optionValue="value" styleClass="w-full" class="w-full"
+                                appendTo="body"></p-dropdown>
+                        </div>
+                        @if (rehabForm.get('programDuration')?.value === 'custom') {
+                        <div>
+                            <div class="field-label" style="font-weight: 600;">Sessions per Week <span
+                                    class="req">*</span></div>
+                            <p-inputNumber formControlName="customSessionsPerWeek" [showButtons]="true" [min]="1"
+                                [max]="7" styleClass="w-full" class="w-full"></p-inputNumber>
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Plan Phases — internal only, dynamic FormArray rows via p-table -->
+                    <div class="mb-4">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <div class="field-label" style="font-weight: 600; margin: 0;">Plan Phases
+                                <span style="margin-left: 0.5rem; font-size: 0.7rem; padding: 2px 7px; border-radius: 5px;
+                                     background: rgba(107,71,255,.1); color: #9B7FFF; font-weight: 600;">Internal
+                                    Only</span>
+                            </div>
+                            <p-button label="Add Phase Row" icon="pi pi-plus" [outlined]="true" size="small"
+                                (onClick)="addPhaseRow()"></p-button>
+                        </div>
+
+                        <p-table [value]="phasesArray.controls" styleClass="p-datatable-gridlines mt-1">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th style="width: 25%;">Phase Name</th>
+                                    <th style="width: 30%;">Goal</th>
+                                    <th style="width: 25%;">Transition Criteria</th>
+                                    <th style="width: 12%;">Sessions</th>
+                                    <th style="width: 8%;"></th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-control let-i="rowIndex">
+                                <tr [formGroup]="control">
+                                    <td><input pInputText formControlName="phaseName" placeholder="e.g. Phase 1…"
+                                            class="w-full" style="padding:.35rem .5rem;font-size:.85rem;" /></td>
+                                    <td><input pInputText formControlName="goal" placeholder="e.g. Restore ROM…"
+                                            class="w-full" style="padding:.35rem .5rem;font-size:.85rem;" /></td>
+                                    <td><input pInputText formControlName="transitionCriteria"
+                                            placeholder="e.g. LSI > 80%…" class="w-full"
+                                            style="padding:.35rem .5rem;font-size:.85rem;" /></td>
+                                    <td><p-inputNumber formControlName="sessions" [min]="1" [max]="50" class="w-full"
+                                            styleClass="w-full" [style]="{fontSize:'0.85rem'}"></p-inputNumber></td>
+                                    <td style="text-align:center;">
+                                        <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
+                                            [disabled]="phasesArray.length <= 1"
+                                            (onClick)="removePhaseRow(i)"></p-button>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+
+                    <!-- Sports Recommendations — visible to client -->
+                    <div class="mb-4">
+                        <div class="field-label" style="font-weight: 600;">Sports Recommendations</div>
+                        <p class="field-label" style="margin-top:0;font-size:.78rem;">Visible to the client in their
+                            report.</p>
+                        <textarea pTextarea formControlName="sportsRecommendations"
+                            placeholder="e.g. Resume light jogging after Phase 2, avoid contact sports until graduation…"
+                            [rows]="3" [autoResize]="true" class="w-full" style="resize:vertical;min-height:80px;padding:.55rem .7rem;border-radius:8px;
+                                         border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                                         font-family:inherit;font-size:.85rem;outline:none;"></textarea>
+                    </div>
+
+                    <!-- Team Notes — internal only, never shown in client view -->
+                    <div class="mb-2">
+                        <div class="field-label" style="font-weight: 600;">Team Notes
+                            <span style="margin-left: 0.5rem; font-size: 0.7rem; padding: 2px 7px; border-radius: 5px;
+                                 background: rgba(107,71,255,.1); color: #9B7FFF; font-weight: 600;">Internal
+                                Only</span>
+                        </div>
+                        <p class="field-label" style="margin-top:0;font-size:.78rem;">Never visible to the client.</p>
+                        <textarea pTextarea formControlName="teamNotes"
+                            placeholder="e.g. Monitor psychological status (Yellow Flag alert). Focus on quad control…"
+                            [rows]="3" [autoResize]="true" class="w-full" style="resize:vertical;min-height:80px;padding:.55rem .7rem;border-radius:8px;
+                                         border:1px solid rgba(107,71,255,.2);background:var(--p-content-background);
+                                         font-family:inherit;font-size:.85rem;outline:none;"></textarea>
+                    </div>
+
+                </p-card>
+            </form>
+
+            <div class="btn-row">
+                <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
+                    (onClick)="go(3)"></p-button>
+                <p-button label="Next — Decision" icon="pi pi-arrow-right" iconPos="right" (onClick)="go(5)"></p-button>
+            </div>
+            }
+
+            <!-- -- STEP 5  Path Decision -- -->
+            @if (currentStep() === 5) {
             <p-card styleClass="mb-3">
                 <ng-template pTemplate="title">
                     {{ entryType() === 'reassess' ? 'Reassessment Decision what happens to the active program?' :
@@ -678,15 +857,15 @@
 
             <div class="btn-row">
                 <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
-                    (onClick)="go(3)"></p-button>
+                    (onClick)="go(4)"></p-button>
                 @if (getDecisionConfirmVisible()) {
-                <p-button label="Confirm Path & Continue" severity="success" (onClick)="go(5)"></p-button>
+                <p-button label="Confirm Path & Continue" severity="success" (onClick)="go(6)"></p-button>
                 }
             </div>
             }
 
-            <!-- -- STEP 5  Action / Confirmation -- -->
-            @if (currentStep() === 5) {
+            <!-- -- STEP 6  Action / Confirmation -- -->
+            @if (currentStep() === 6) {
 
             @if (entryType() === 'reassess') {
             @if (selectedReassessPath() === 'A') {
@@ -827,7 +1006,7 @@
 
             <div class="btn-row mt-4">
                 <p-button label="Back" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
-                    (onClick)="go(4)"></p-button>
+                    (onClick)="go(5)"></p-button>
             </div>
             }
 

@@ -1,6 +1,9 @@
-import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map, catchError, startWith } from 'rxjs';
+import { of } from 'rxjs';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
@@ -12,9 +15,13 @@ import { DividerModule } from 'primeng/divider';
 import { TooltipModule } from 'primeng/tooltip';
 import { BadgeModule } from 'primeng/badge';
 import { RippleModule } from 'primeng/ripple';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { DropdownModule } from 'primeng/dropdown';
+import { TableModule } from 'primeng/table';
+import { ServicesService } from '../add-service/services/services.service';
 
 export type EntryType = 'new' | 'return' | 'reassess' | null;
-export type FlowStep = 0 | 1 | 2 | 3 | 4 | 5;
+export type FlowStep = 0 | 1 | 2 | 3 | 4 | 5 | 6;
 export type PathChoice = 1 | 2 | 3 | null;
 export type ReassessChoice = 'A' | 'B' | 'C' | 'D' | null;
 
@@ -45,7 +52,10 @@ interface AthleteInfo {
         DividerModule,
         TooltipModule,
         BadgeModule,
-        RippleModule
+        RippleModule,
+        SelectButtonModule,
+        DropdownModule,
+        TableModule
     ],
     templateUrl: './consultation-screen.component.html',
     styleUrl: './consultation-screen.component.scss',
@@ -55,6 +65,101 @@ export class ConsultationScreenComponent {
 
     // ── State ──────────────────────────────────────────────────────────────
     readonly entryType = signal<EntryType>(null);
+
+    private readonly fb = inject(FormBuilder);
+    private readonly servicesService = inject(ServicesService);
+
+    // ── Services (Recommended Track) — loaded from /api/Serivces ───────────
+    readonly servicesLoading = signal(true);
+    readonly servicesError = signal<string | null>(null);
+
+    private readonly _servicesRaw = toSignal(
+        this.servicesService.getServices().pipe(
+            map(data => { this.servicesLoading.set(false); return data; }),
+            catchError(err => {
+                this.servicesLoading.set(false);
+                this.servicesError.set(err?.message ?? 'Failed to load services');
+                return of([]);
+            }),
+            startWith([])
+        ),
+        { initialValue: [] }
+    );
+
+    readonly recommendedTrackOptions = computed(() =>
+        (this._servicesRaw() ?? []).map(s => ({
+            label: s.nameEn ?? s.nameAr ?? `Service ${s.id}`,
+            value: s.id
+        }))
+    );
+
+    /** Currently selected service id — drives the card-selection highlight. */
+    readonly selectedServiceId = computed(() =>
+        this.rehabForm.get('recommendedTrack')?.value as number | null
+    );
+
+    selectService(id: number | undefined): void {
+        if (id == null) return;
+        this.rehabForm.get('recommendedTrack')?.setValue(id);
+    }
+
+    readonly priorityOptions = [
+        { label: 'Low', value: 'low' },
+        { label: 'Medium', value: 'medium' },
+        { label: 'High', value: 'high' }
+    ];
+
+    readonly durationOptions = [
+        { label: '4 Weeks', value: '4' },
+        { label: '6 Weeks', value: '6' },
+        { label: '8 Weeks', value: '8' },
+        { label: '12 Weeks', value: '12' },
+        { label: 'Custom Program', value: 'custom' }
+    ];
+
+    readonly rehabForm = this.fb.group({
+        recommendedTrack: [null as number | null],
+        priorityLevel: ['medium'],
+        programDuration: ['8'],
+        customSessionsPerWeek: [3],
+        phases: this.fb.array([
+            this.fb.group({
+                phaseName: ['Phase 1: Mobility & Control'],
+                goal: ['Restore full range of motion'],
+                transitionCriteria: ['ROM flexion > 120°'],
+                sessions: [8]
+            }),
+            this.fb.group({
+                phaseName: ['Phase 2: Strength & Load'],
+                goal: ['Equalize limb strength'],
+                transitionCriteria: ['LSI > 80%'],
+                sessions: [12]
+            })
+        ]),
+        sportsRecommendations: ['Resume light jogging after Phase 2, avoid contact sports until graduation.'],
+        teamNotes: ['Monitor psychological status (Yellow Flag alert). Focus on quad control.']
+    });
+
+    get phasesArray(): FormArray {
+        return this.rehabForm.get('phases') as FormArray;
+    }
+
+    addPhaseRow(): void {
+        this.phasesArray.push(this.fb.group({
+            phaseName: [''],
+            goal: [''],
+            transitionCriteria: [''],
+            sessions: [6]
+        }));
+    }
+
+    removePhaseRow(index: number): void {
+        if (this.phasesArray.length > 1) {
+            this.phasesArray.removeAt(index);
+        }
+    }
+
+
     readonly currentStep = signal<FlowStep>(0);
     readonly selectedPath = signal<PathChoice>(null);
     readonly selectedReassessPath = signal<ReassessChoice>(null);
@@ -87,9 +192,9 @@ export class ConsultationScreenComponent {
     // ── Step label per flow ─────────────────────────────────────────────────
     readonly stepLabels = computed(() => {
         const t = this.entryType();
-        if (t === 'return') return ['Validity', 'Examination', 'Assessment', 'Diagnosis', 'Decision'];
-        if (t === 'reassess') return ['Examination', 'Assessment', 'Diagnosis', 'Decision', 'Action'];
-        return ['Examination', 'Assessment', 'Diagnosis', 'Decision', 'Action'];
+        if (t === 'return') return ['Validity', 'Examination', 'Assessment', 'Diagnosis', 'Athlete Report', 'Decision'];
+        if (t === 'reassess') return ['Examination', 'Assessment', 'Diagnosis', 'Athlete Report', 'Decision', 'Action'];
+        return ['Examination', 'Assessment', 'Diagnosis', 'Athlete Report', 'Decision', 'Action'];
     });
 
     // ── Examination form ────────────────────────────────────────────────────

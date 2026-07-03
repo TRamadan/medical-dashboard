@@ -56,7 +56,7 @@ export class ProtocolInformationComponent implements OnInit {
         { label: 'Amateur', value: 'amateur' },
         { label: 'Semi-Professional', value: 'semi_pro' },
         { label: 'Professional', value: 'professional' },
-        { label: 'Elite / Near-Professional', value: 'elite' },
+        { label: 'Elite / Near-Professional', value: 'Elite' },
     ];
 
     defaultContraindications = [

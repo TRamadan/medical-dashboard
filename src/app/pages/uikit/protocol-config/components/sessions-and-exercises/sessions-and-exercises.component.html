@@ -387,15 +387,7 @@
                                             </div>
                                         </div>
 
-                                        <!-- Section Action Buttons -->
-                                        <div *ngIf="!readonly()" class="flex justify-end gap-3 mt-4">
-                                            <p-button label="Cancel" [outlined]="true" severity="secondary"
-                                                size="small"></p-button>
-                                            <p-button label="Save" severity="success" size="small"
-                                                [disabled]="!isSectionValid(section)"
-                                                pTooltip="{{ isSectionValid(section) ? 'Save section' : 'Please add at least one exercise with name, sets, and reps' }}"
-                                                tooltipPosition="top"></p-button>
-                                        </div>
+
                                     </div>
 
                                     <!-- Add Section Button -->
