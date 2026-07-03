@@ -516,17 +516,17 @@
                         } @else {
                         <div class="service-card-grid" role="radiogroup" aria-label="Recommended Service or Track">
                             @for (opt of recommendedTrackOptions(); track opt.value) {
-                            <div class="service-card" [class.selected]="selectedServiceId() === opt.value" role="radio"
-                                [attr.aria-checked]="selectedServiceId() === opt.value"
-                                [attr.tabindex]="selectedServiceId() === opt.value ? 0 : -1"
+                            <div class="service-card" [class.selected]="selectedServiceId === opt.value" role="radio"
+                                [attr.aria-checked]="selectedServiceId === opt.value"
+                                [attr.tabindex]="selectedServiceId === opt.value ? 0 : -1"
                                 (click)="selectService(opt.value)" (keydown.enter)="selectService(opt.value)"
                                 (keydown.space)="$event.preventDefault(); selectService(opt.value)">
                                 <!-- hidden radio for native form semantics -->
                                 <input type="radio" class="sc-hidden-radio" [id]="'svc-' + opt.value"
                                     name="recommendedTrack" [value]="opt.value"
-                                    [checked]="selectedServiceId() === opt.value" (change)="selectService(opt.value)"
+                                    [checked]="selectedServiceId === opt.value" (change)="selectService(opt.value)"
                                     [attr.aria-hidden]="true" tabindex="-1" />
-                                <div class="sc-check-ring" [class.checked]="selectedServiceId() === opt.value"
+                                <div class="sc-check-ring" [class.checked]="selectedServiceId === opt.value"
                                     aria-hidden="true">
                                     <i class="pi pi-check" style="font-size: 0.65rem;"></i>
                                 </div>

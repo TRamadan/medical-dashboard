@@ -94,9 +94,9 @@ export class ConsultationScreenComponent {
     );
 
     /** Currently selected service id — drives the card-selection highlight. */
-    readonly selectedServiceId = computed(() =>
-        this.rehabForm.get('recommendedTrack')?.value as number | null
-    );
+    get selectedServiceId(): number | null {
+        return this.rehabForm.get('recommendedTrack')?.value as number | null;
+    }
 
     selectService(id: number | undefined): void {
         if (id == null) return;
