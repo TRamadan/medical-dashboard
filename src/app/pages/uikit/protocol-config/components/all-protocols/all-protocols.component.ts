@@ -23,7 +23,7 @@ export class AllProtocolsComponent {
     constructor() {
         this.logProtocols();
     }
-    readonly activeTab = signal<'Published' | 'Draft' | 'Archived'>('Published');
+    readonly activeTab = signal<'Published' | 'Draft'>('Published');
 
     readonly filteredProtocols = computed(() =>
         this.protocols().filter(p => p.status === this.activeTab())
@@ -44,7 +44,7 @@ export class AllProtocolsComponent {
         archived: this.protocols().filter(p => p.status === 'Archived').length,
     }));
 
-    setTab(tab: 'Published' | 'Draft' | 'Archived'): void {
+    setTab(tab: 'Published' | 'Draft'): void {
         this.activeTab.set(tab);
     }
 
