@@ -37,6 +37,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { ContactUsComponent } from '../contact-us/contact-us.component';
 import { PatientFormService } from './services/patient-form.service';
 
+
 @Component({
     selector: 'app-appointments',
     standalone: true,
@@ -137,6 +138,38 @@ export class AppointmentsComponent implements OnInit {
         this.initializeTable();
         this.getAllLocations();
     }
+    diagnosticTestOptions = [
+        { label: 'أشعة X', value: 'xray' },
+        { label: 'رنين مغناطيسي (MRI)', value: 'mri' },
+        { label: 'مقطعية (CT)', value: 'ct' },
+        { label: 'رسم عضلات', value: 'emg_muscle' },
+        { label: 'رسم عصب', value: 'emg_nerve' },
+        { label: 'موجات صوتية (سونار)', value: 'ultrasound' },
+        { label: 'مسح عظام', value: 'bone_scan' },
+        { label: 'أخرى', value: 'other' }
+    ];
+
+    prescribedTreatmentOptions = [
+        { label: 'علاج دوائي', value: 'medication' },
+        { label: 'علاج فيزيائي', value: 'physio' },
+        { label: 'تأهيل رياضي', value: 'rehab' },
+        { label: 'راحة', value: 'rest' },
+        { label: 'أخرى', value: 'other' }
+    ];
+
+    // Shared fixed disease list for the client / father / mother chip pickers (Tab 6)
+    diseaseOptions = [
+        'ارتفاع ضغط الدم',
+        'أمراض القلب',
+        'اضطرابات السكر',
+        'الأورام',
+        'الصرع',
+        'الجلطات',
+        'اضطرابات الغدة الدرقية',
+        'الربو',
+        'اضطرابات الكلى',
+        'أمراض جلدية'
+    ];
 
     initializeTable() {
         this.tableHeaders = [
@@ -161,6 +194,20 @@ export class AppointmentsComponent implements OnInit {
                 onClick: (row: any) => this.openCompletePatientInfo(row)
             }
         ];
+    }
+
+    // ── Doctors seen (Tab 4) ────────────────────────────────────────
+    addDoctor(): void {
+        if (!this.patientForm.doctors) {
+            this.patientForm.doctors = [];
+        }
+        this.patientForm.doctors.push({ name: '', specialty: '', contactMethod: '', diagnosis: '' });
+        this.syncForm();
+    }
+
+    removeDoctor(index: number): void {
+        this.patientForm.doctors?.splice(index, 1);
+        this.syncForm();
     }
 
     getAllLocations() {
@@ -528,6 +575,64 @@ export class AppointmentsComponent implements OnInit {
             this.patientForm.fillerName = '';
             this.patientForm.fillerRelation = '';
         }
+        this.syncForm();
+    }
+
+    /**
+ * Strips everything but digits as the person types, caps the length at 11
+ * (Egyptian mobile format: 01XXXXXXXXX), and keeps the leading zero intact —
+ * something p-inputNumber cannot do since it stores values as JS numbers.
+ */
+    sanitizePhoneInput(event: Event, field: 'phone' | 'emergencyPhone' | 'fillerPhone'): void {
+        const input = event.target as HTMLInputElement;
+        const digitsOnly = input.value.replace(/\D/g, '').slice(0, 11);
+        input.value = digitsOnly;
+        (this.patientForm as any)[field] = digitsOnly;
+        this.syncForm();
+    }
+
+
+    // ── Previous surgeries (Tab 5) ─────────────────────────────────
+    addSurgery(): void {
+        if (!this.patientForm.surgeries) {
+            this.patientForm.surgeries = [];
+        }
+        this.patientForm.surgeries.push({ type: '', part: '', year: '', notes: '' });
+        this.syncForm();
+    }
+
+    removeSurgery(index: number): void {
+        this.patientForm.surgeries?.splice(index, 1);
+        this.syncForm();
+    }
+
+    // ── Medical history disease chips (Tab 6) ───────────────────────
+    toggleChip(field: 'chronicConditions' | 'fatherConditions' | 'motherConditions', value: string): void {
+        const list = (this.patientForm[field] as string[]) || (this.patientForm[field] = []);
+        const idx = list.indexOf(value);
+        if (idx > -1) {
+            list.splice(idx, 1);
+        } else {
+            list.push(value);
+        }
+        this.syncForm();
+    }
+
+    isChipSelected(field: 'chronicConditions' | 'fatherConditions' | 'motherConditions', value: string): boolean {
+        return !!(this.patientForm[field] as string[])?.includes(value);
+    }
+
+    // ── Regular medications / stimulants (Tab 6) ────────────────────
+    addMedication(): void {
+        if (!this.patientForm.regularMedications) {
+            this.patientForm.regularMedications = [];
+        }
+        this.patientForm.regularMedications.push({ name: '', dose: '', duration: '' });
+        this.syncForm();
+    }
+
+    removeMedication(index: number): void {
+        this.patientForm.regularMedications?.splice(index, 1);
         this.syncForm();
     }
 }

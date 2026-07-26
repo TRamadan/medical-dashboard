@@ -6,6 +6,13 @@ export interface PreviousInjury {
     description: string;
 }
 
+export interface Doctor {
+    name: string;
+    specialty: string;
+    contactMethod: string;
+    diagnosis: string;
+}
+
 export interface Surgery {
     type: string;
     part: string;
@@ -16,7 +23,8 @@ export interface Surgery {
 export interface Medication {
     name: string;
     dose: string;
-    reason: string;
+    duration: string;
+    reason?: string;
     notes?: string;
 }
 
@@ -36,6 +44,7 @@ export interface PatientForm {
     injuredRelation: string;
     fillerName: string;
     fillerRelation: string;
+    fillerPhone: string;
     decisionInfluencers: string[];
     // Athletic
     sport: string;
@@ -63,26 +72,32 @@ export interface PatientForm {
     injuryRelatedToSport: boolean | null;
     // Medical procedures
     wasExamined: boolean | null;
-    diagnosis: string;
-    doctorName: string;
-    doctorContactMethod: string;
-    procedureType: string | null;
-    diagnosticMethods: string[];
+    doctors: Doctor[];
+    prescribedTreatments: string[];
+    prescribedTreatmentOtherText: string;
+    hadDiagnosticTests: boolean | null;
+    diagnosticTests: string[];
+    diagnosticTestsOtherText: string;
     seenDoctor: boolean | null;
     previousTests: string[];
     previousTreatment: string[];
     avoidMovements: boolean | null;
     // Medical history
     chronicConditions: string[];
-    familyHistory: string[];
+    chronicConditionsOtherText: string;
+    fatherConditions: string[];
+    fatherConditionsOtherText: string;
+    motherConditions: string[];
+    motherConditionsOtherText: string;
     previousInjuries: PreviousInjury[];
     surgeries: Surgery[];
     regularMedications: Medication[];
     allergies: string;
-    hasClientMedicalCondition: boolean | null;
-    clientMedicalConditionDetails: string;
-    hasParentsMedicalCondition: boolean | null;
-    parentsMedicalConditionDetails: string;
+    hadCovid: boolean | null;
+    covidTimes: number | null;
+    hadCovidVaccine: boolean | null;
+    covidVaccineType: string;
+    covidVaccineDoses: number | null;
     // Lifestyle / Social
     jobTitle: string;
     workNature: string;
@@ -107,7 +122,7 @@ const defaultForm: PatientForm = {
     weight: 70, height: 170,
     phone: '', phoneConfirm: '',
     emergencyPhone: '', emergencyRelation: '',
-    bookingForSelf: null, injuredRelation: '', fillerName: '', fillerRelation: '', decisionInfluencers: [],
+    bookingForSelf: null, injuredRelation: '', fillerName: '', fillerRelation: '', fillerPhone: '', decisionInfluencers: [],
     sport: '', position: '', club: '', team: '', center: '', role: '',
     practiceYears: 0, topAchievement: '', competitiveLevel: null,
     goal90Days: '', activityLevel: null,
@@ -116,18 +131,21 @@ const defaultForm: PatientForm = {
     injuryDate: null, injuryDescription: '', injuryCauses: '', timeOffFromSport: '',
     injuryCircumstances: '',
     injuryRelatedToSport: null,
-    wasExamined: null, diagnosis: '', doctorName: '', doctorContactMethod: '',
-    procedureType: null, diagnosticMethods: [],
+    wasExamined: null, doctors: [],
+    prescribedTreatments: [], prescribedTreatmentOtherText: '',
+    hadDiagnosticTests: null, diagnosticTests: [], diagnosticTestsOtherText: '',
     seenDoctor: null,
     previousTests: [], previousTreatment: [],
     avoidMovements: null,
-    chronicConditions: [], familyHistory: [],
+    chronicConditions: [], chronicConditionsOtherText: '',
+    fatherConditions: [], fatherConditionsOtherText: '',
+    motherConditions: [], motherConditionsOtherText: '',
     previousInjuries: [],
-    surgeries: [{ type: '', part: '', year: '', notes: '' }],
-    regularMedications: [{ name: '', dose: '', reason: '', notes: '' }],
+    surgeries: [],
+    regularMedications: [],
     allergies: '',
-    hasClientMedicalCondition: null, clientMedicalConditionDetails: '',
-    hasParentsMedicalCondition: null, parentsMedicalConditionDetails: '',
+    hadCovid: null, covidTimes: null,
+    hadCovidVaccine: null, covidVaccineType: '', covidVaccineDoses: null,
     jobTitle: '', workNature: '',
     dailySittingHours: 0, isMarried: null, hasChildren: false, habits: [],
     highWorkStress: null, sleepQuality: null,

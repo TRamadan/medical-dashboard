@@ -1297,7 +1297,8 @@
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">تاريخ عائلي</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.familyHistory.join('، ') }}</div>
+                                {{ mockPatientInfo.fatherConditions.concat(mockPatientInfo.motherConditions).join('، ') }}
+                            </div>
                         </div>
                         <div class="col-12 mb-3">
                             <span class="text-500 font-medium text-sm block mb-2">إصابات سابقة </span>
@@ -1306,8 +1307,8 @@
                                     <div
                                         class="p-2 border-1 surface-border border-round-lg bg-yellow-50 text-yellow-800 font-bold flex align-items-center gap-2">
                                         <i class="pi pi-exclamation-triangle"></i>
-                                        <span>{{ inj.name }} ({{ inj.date }}<ng-container
-                                                *ngIf="inj.description"> - {{ inj.description }}</ng-container>)</span>
+                                        <span>{{ inj.name }} ({{ inj.date }}<ng-container *ngIf="inj.description"> -
+                                                {{ inj.description }}</ng-container>)</span>
                                     </div>
                                 </ng-container>
                             </div>
@@ -1333,7 +1334,8 @@
                                     <div
                                         class="p-2 border-1 surface-border border-round-lg bg-green-50 text-green-800 font-bold flex align-items-center gap-2">
                                         <i class="pi pi-filter"></i>
-                                        <span>{{ m.name }} ({{ m.dose }} - {{ m.reason }}<ng-container *ngIf="m.notes">
+                                        <span>{{ m.name }} ({{ m.dose }} - {{ m.duration }}<ng-container
+                                                *ngIf="m.notes">
                                                 - {{m.notes}}</ng-container>)</span>
                                     </div>
                                 </ng-container>

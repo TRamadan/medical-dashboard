@@ -317,10 +317,11 @@
 
                                 <div class="col-12 col-md-6 col-lg-4">
                                     <label class="f">
-                                        <span>صفته بالنسبة للمصاب</span>
-                                        <input pInputText name="fillerRel" [(ngModel)]="patientForm.fillerRelation"
-                                            (ngModelChange)="syncForm()" placeholder="والد / مدرب ...">
-                                    </label>
+                                        <span>رقم موبايل القائم بملى الاستمارة</span>
+                                        <input pInputText type="tel" inputmode="numeric" name="fillerPhone"
+                                            [(ngModel)]="patientForm.fillerPhone"
+                                            (input)="sanitizePhoneInput($event, 'fillerPhone')"
+                                            placeholder="رقم الموبايل" maxlength="11" pattern="^01[0-9]{9}$"> </label>
                                 </div>
                             </div>
                         </div>
@@ -433,7 +434,7 @@
                                 class="w-100"></textarea>
                         </div>
 
-                        <div class="col-12 col-md-6">
+                        <div class="col-12 col-md-3">
                             <label class="form-label fw-bold">أسباب الإصابة</label>
                             <input pInputText [(ngModel)]="patientForm.injuryCauses" placeholder="نص حر"
                                 class="w-100" />
@@ -448,6 +449,15 @@
                             <input pInputText [(ngModel)]="patientForm.timeOffFromSport" placeholder="مثال: 3 أسابيع"
                                 class="w-100" />
                         </div>
+                        <div class="col-12 col-md-3">
+                            <label class="form-label fw-bold">هل الإصابة مرتبطة بالنشاط الرياضي؟</label>
+                            <div class="mt-2">
+                                <p-selectbutton [options]="yesNoOptions" optionLabel="label" optionValue="value"
+                                    [(ngModel)]="patientForm.injuryRelatedToSport"
+                                    (onChange)="syncForm()"></p-selectbutton>
+                            </div>
+                        </div>
+
                     </div>
                 </p-tabpanel>
 
@@ -457,47 +467,82 @@
                 <p-tabpanel value="3">
                     <div class="row g-3 py-3">
                         <div class="col-12">
-                            <label class="form-label fw-bold">هل تم الكشف؟</label>
+                            <label class="form-label fw-bold">هل عرضت نفسك على طبيب متخصص؟</label>
                             <div class="mt-2">
                                 <p-selectbutton [options]="yesNoOptions" optionLabel="label" optionValue="value"
                                     [(ngModel)]="patientForm.wasExamined" (onChange)="syncForm()"></p-selectbutton>
                             </div>
                         </div>
 
-                        <ng-container *ngIf="patientForm.wasExamined">
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-bold">التشخيص</label>
-                                <input pInputText [(ngModel)]="patientForm.diagnosis" placeholder="نص حر"
-                                    class="w-100" />
+                        <div class="col-12" *ngIf="patientForm.wasExamined">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-bold mb-0">الأطباء الذين تم عرض الحالة عليهم</label>
+                                <p-button icon="pi pi-plus" label="إضافة طبيب" styleClass="p-button-text p-button-sm"
+                                    (click)="addDoctor()"></p-button>
                             </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-bold">اسم الدكتور</label>
-                                <input pInputText [(ngModel)]="patientForm.doctorName" placeholder="نص حر"
-                                    class="w-100" />
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-bold">طريقة التواصل مع الدكتور</label>
-                                <input pInputText [(ngModel)]="patientForm.doctorContactMethod"
-                                    placeholder="هاتف / عيادة / أونلاين..." class="w-100" />
-                            </div>
-                            <div class="col-12 col-md-6">
-                                <label class="form-label fw-bold">نوع الإجراء</label>
-                                <p-dropdown [options]="procedureTypeOptions" [(ngModel)]="patientForm.procedureType"
-                                    placeholder="دواء / علاج طبيعي / تأهيل / راحة" styleClass="w-100" appendTo="body" />
-                            </div>
-                        </ng-container>
 
-                        <div class="col-12">
-                            <label class="form-label fw-bold">وسائل التشخيص</label>
-                            <div class="d-flex flex-wrap gap-3 mt-2">
-                                <div *ngFor="let opt of diagnosticMethodsOptions"
-                                    class="d-flex align-items-center gap-1">
-                                    <p-checkbox name="diagMethods" [value]="opt.value"
-                                        [(ngModel)]="patientForm.diagnosticMethods"
-                                        [inputId]="'dm_'+opt.value"></p-checkbox>
-                                    <label [for]="'dm_'+opt.value">{{opt.label}}</label>
+                            <div *ngFor="let doc of patientForm.doctors; let i = index"
+                                class="row g-2 align-items-center mb-2">
+                                <div class="col-12 col-md-3">
+                                    <input pInputText [(ngModel)]="doc.name" placeholder="اسم الدكتور" class="w-100" />
+                                </div>
+                                <div class="col-12 col-md-2">
+                                    <input pInputText [(ngModel)]="doc.specialty" placeholder="التخصص" class="w-100" />
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <input pInputText [(ngModel)]="doc.contactMethod" placeholder="وسيلة التواصل"
+                                        class="w-100" />
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <input pInputText [(ngModel)]="doc.diagnosis" placeholder="التشخيص" class="w-100" />
+                                </div>
+                                <div class="col-12 col-md-1 text-md-center">
+                                    <p-button icon="pi pi-trash" styleClass="p-button-text p-button-danger p-button-sm"
+                                        (click)="removeDoctor(i)"></p-button>
                                 </div>
                             </div>
+
+                            <small *ngIf="!patientForm.doctors?.length" class="text-muted">لم تتم إضافة أي طبيب
+                                بعد.</small>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold">العلاج الموصوف</label>
+                            <div class="d-flex flex-wrap gap-3 mt-2">
+                                <div *ngFor="let opt of prescribedTreatmentOptions"
+                                    class="d-flex align-items-center gap-1">
+                                    <p-checkbox name="prescribedTreatments" [value]="opt.value"
+                                        [(ngModel)]="patientForm.prescribedTreatments" (onChange)="syncForm()"
+                                        [inputId]="'ptmt_'+opt.value"></p-checkbox>
+                                    <label [for]="'ptmt_'+opt.value">{{opt.label}}</label>
+                                </div>
+                            </div>
+                            <input pInputText *ngIf="patientForm.prescribedTreatments?.includes('other')"
+                                [(ngModel)]="patientForm.prescribedTreatmentOtherText" (ngModelChange)="syncForm()"
+                                placeholder="حدد نوع العلاج الآخر" class="w-100 mt-2" />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold">هل أجريت فحوصات تشخيصية؟</label>
+                            <div class="mt-2">
+                                <p-selectbutton [options]="yesNoOptions" optionLabel="label" optionValue="value"
+                                    [(ngModel)]="patientForm.hadDiagnosticTests"
+                                    (onChange)="syncForm()"></p-selectbutton>
+                            </div>
+                        </div>
+
+                        <div class="col-12" *ngIf="patientForm.hadDiagnosticTests">
+                            <div class="d-flex flex-wrap gap-3 mt-2">
+                                <div *ngFor="let opt of diagnosticTestOptions" class="d-flex align-items-center gap-1">
+                                    <p-checkbox name="diagnosticTests" [value]="opt.value"
+                                        [(ngModel)]="patientForm.diagnosticTests" (onChange)="syncForm()"
+                                        [inputId]="'dtest_'+opt.value"></p-checkbox>
+                                    <label [for]="'dtest_'+opt.value">{{opt.label}}</label>
+                                </div>
+                            </div>
+                            <input pInputText *ngIf="patientForm.diagnosticTests?.includes('other')"
+                                [(ngModel)]="patientForm.diagnosticTestsOtherText" (ngModelChange)="syncForm()"
+                                placeholder="حدد الفحص الآخر" class="w-100 mt-2" />
                         </div>
                     </div>
                 </p-tabpanel>
@@ -534,6 +579,38 @@
                             <small *ngIf="!patientForm.previousInjuries?.length" class="text-muted">لا توجد إصابات
                                 مسجلة بعد.</small>
                         </div>
+
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-2 mt-3">
+                                <label class="form-label fw-bold mb-0">الجراحات السابقة</label>
+                                <p-button icon="pi pi-plus" label="إضافة جراحة" styleClass="p-button-text p-button-sm"
+                                    (click)="addSurgery()"></p-button>
+                            </div>
+
+                            <div *ngFor="let s of patientForm.surgeries; let i = index"
+                                class="row g-2 align-items-center mb-2">
+                                <div class="col-12 col-md-3">
+                                    <input pInputText [(ngModel)]="s.type" placeholder="نوع الجراحة" class="w-100" />
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <input pInputText [(ngModel)]="s.part" placeholder="الجزء / العضو" class="w-100" />
+                                </div>
+                                <div class="col-6 col-md-2">
+                                    <input pInputText [(ngModel)]="s.year" placeholder="السنة" class="w-100" />
+                                </div>
+                                <div class="col-12 col-md-3">
+                                    <input pInputText [(ngModel)]="s.notes" placeholder="ملاحظات (اختياري)"
+                                        class="w-100" />
+                                </div>
+                                <div class="col-12 col-md-1 text-md-center">
+                                    <p-button icon="pi pi-trash" styleClass="p-button-text p-button-danger p-button-sm"
+                                        (click)="removeSurgery(i)"></p-button>
+                                </div>
+                            </div>
+
+                            <small *ngIf="!patientForm.surgeries?.length" class="text-muted">لا توجد جراحات مسجلة
+                                بعد.</small>
+                        </div>
                     </div>
                 </p-tabpanel>
 
@@ -542,29 +619,111 @@
                 <!-- ============================================================ -->
                 <p-tabpanel value="5">
                     <div class="row g-3 py-3">
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold">الحالات المرضية</label>
+                            <small class="text-muted d-block mb-2">اختر من القائمة، أو أضف حالة أخرى غير
+                                مذكورة</small>
+                            <div class="chips">
+                                <span class="chip" *ngFor="let d of diseaseOptions"
+                                    [class.active]="isChipSelected('chronicConditions', d)"
+                                    (click)="toggleChip('chronicConditions', d)">{{d}}</span>
+                            </div>
+                            <input pInputText [(ngModel)]="patientForm.chronicConditionsOtherText"
+                                (ngModelChange)="syncForm()" placeholder="أخرى (اكتبها هنا)" class="w-100 mt-2" />
+                        </div>
+
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-2 mt-2">
+                                <label class="form-label fw-bold mb-0">الأدوية / المكيفات المستخدمة حالياً</label>
+                                <p-button icon="pi pi-plus" label="إضافة دواء" styleClass="p-button-text p-button-sm"
+                                    (click)="addMedication()"></p-button>
+                            </div>
+
+                            <div *ngFor="let m of patientForm.regularMedications; let i = index"
+                                class="row g-2 align-items-center mb-2">
+                                <div class="col-12 col-md-4">
+                                    <input pInputText [(ngModel)]="m.name" placeholder="اسم الدواء / المادة"
+                                        class="w-100" />
+                                </div>
+                                <div class="col-6 col-md-3">
+                                    <input pInputText [(ngModel)]="m.dose" placeholder="الجرعة" class="w-100" />
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <input pInputText [(ngModel)]="m.duration" placeholder="الفترة الزمنية"
+                                        class="w-100" />
+                                </div>
+                                <div class="col-12 col-md-1 text-md-center">
+                                    <p-button icon="pi pi-trash" styleClass="p-button-text p-button-danger p-button-sm"
+                                        (click)="removeMedication(i)"></p-button>
+                                </div>
+                            </div>
+
+                            <small *ngIf="!patientForm.regularMedications?.length" class="text-muted">لا توجد أدوية
+                                مسجلة بعد.</small>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold">هل يوجد أي مسببات حساسية معروفة؟</label>
+                            <input pInputText [(ngModel)]="patientForm.allergies" (ngModelChange)="syncForm()"
+                                placeholder="اكتب مسببات الحساسية المعروفة" class="w-100 mt-2" />
+                        </div>
+
                         <div class="col-12 col-md-6">
-                            <label class="form-label fw-bold">هل يوجد أمراض أو حالات صحية خاصة للعميل؟</label>
+                            <label class="form-label fw-bold">هل سبق إصابتك بفيروس كورونا؟</label>
                             <div class="mt-2">
                                 <p-selectbutton [options]="yesNoOptions" optionLabel="label" optionValue="value"
-                                    [(ngModel)]="patientForm.hasClientMedicalCondition"
-                                    (onChange)="syncForm()"></p-selectbutton>
+                                    [(ngModel)]="patientForm.hadCovid" (onChange)="syncForm()"></p-selectbutton>
                             </div>
-                            <input *ngIf="patientForm.hasClientMedicalCondition" pInputText
-                                [(ngModel)]="patientForm.clientMedicalConditionDetails" placeholder="تفاصيل الحالة"
+                            <input pInputText *ngIf="patientForm.hadCovid" type="number" min="1"
+                                [(ngModel)]="patientForm.covidTimes" (ngModelChange)="syncForm()" placeholder="كم مرة؟"
                                 class="w-100 mt-2" />
                         </div>
 
                         <div class="col-12 col-md-6">
-                            <label class="form-label fw-bold">هل يوجد أمراض أو حالات صحية خاصة للوالدين؟</label>
+                            <label class="form-label fw-bold">هل تلقيت لقاح كورونا؟</label>
                             <div class="mt-2">
                                 <p-selectbutton [options]="yesNoOptions" optionLabel="label" optionValue="value"
-                                    [(ngModel)]="patientForm.hasParentsMedicalCondition"
-                                    (onChange)="syncForm()"></p-selectbutton>
+                                    [(ngModel)]="patientForm.hadCovidVaccine" (onChange)="syncForm()"></p-selectbutton>
                             </div>
-                            <input *ngIf="patientForm.hasParentsMedicalCondition" pInputText
-                                [(ngModel)]="patientForm.parentsMedicalConditionDetails" placeholder="تفاصيل الحالة"
-                                class="w-100 mt-2" />
+                            <div class="row g-2 mt-1" *ngIf="patientForm.hadCovidVaccine">
+                                <div class="col-6">
+                                    <input pInputText [(ngModel)]="patientForm.covidVaccineType"
+                                        (ngModelChange)="syncForm()" placeholder="نوع اللقاح" class="w-100" />
+                                </div>
+                                <div class="col-6">
+                                    <input pInputText type="number" min="1" [(ngModel)]="patientForm.covidVaccineDoses"
+                                        (ngModelChange)="syncForm()" placeholder="عدد الجرعات" class="w-100" />
+                                </div>
+                            </div>
                         </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="f">
+                                <span>الأب — Father</span>
+                                <div class="chips">
+                                    <span class="chip" *ngFor="let d of diseaseOptions"
+                                        [class.active]="isChipSelected('fatherConditions', d)"
+                                        (click)="toggleChip('fatherConditions', d)">{{d}}</span>
+                                </div>
+                                <input pInputText [(ngModel)]="patientForm.fatherConditionsOtherText"
+                                    (ngModelChange)="syncForm()" placeholder="أخرى (اكتبها هنا)" class="w-100 mt-2" />
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-md-6">
+                            <div class="f">
+                                <span>الأم — Mother</span>
+                                <div class="chips">
+                                    <span class="chip" *ngFor="let d of diseaseOptions"
+                                        [class.active]="isChipSelected('motherConditions', d)"
+                                        (click)="toggleChip('motherConditions', d)">{{d}}</span>
+                                </div>
+                                <input pInputText [(ngModel)]="patientForm.motherConditionsOtherText"
+                                    (ngModelChange)="syncForm()" placeholder="أخرى (اكتبها هنا)" class="w-100 mt-2" />
+                            </div>
+                        </div>
+
                     </div>
                 </p-tabpanel>
 
