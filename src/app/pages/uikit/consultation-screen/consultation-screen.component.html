@@ -12,10 +12,26 @@
         <div style="flex:1"></div>
         <div style="display: flex; align-items: center; gap: 0.75rem;">
             <p-tag [value]="entryBadge()?.label || ''" [severity]="entryBadge()?.severity"></p-tag>
+            <p-button label="Back to Dashboard" icon="pi pi-arrow-left" severity="secondary" [outlined]="true"
+                (onClick)="backToDashboard()"></p-button>
         </div>
     </div>
 </p-card>
+} @else {
+<p-card styleClass="m-3">
+    <div class="page-header" style="display: flex; align-items: center; justify-content: space-between;">
+        <div>
+            <h2 class="text-xl font-bold m-0" style="color: var(--p-primary-color)">Consultation Flow</h2>
+            <p class="text-sm m-0" style="color: var(--p-text-muted-color)">Initiate a new Consultation program or
+                assessment sequence</p>
+        </div>
+        <p-button label="Back to Dashboard" icon="pi pi-arrow-left" severity="secondary" [outlined]="true"
+            (onClick)="backToDashboard()"></p-button>
+    </div>
+</p-card>
 }
+
+
 
 <!-- ── Layout ──────────────────────────────────────────────────────────── -->
 <p-card>
@@ -24,54 +40,23 @@
         <!-- Sidebar -->
 
         <aside class="consultation-sidebar">
-
-            @if (!entryType()) {
-            <div class="empty-sidebar">
-                <div style="font-size:2rem">←</div>
-                <div>Select a consultation type<br />to view athlete data</div>
-            </div>
-            }
-
-            @else {
-            <p-card>
-                @if (sidebarData(); as sb) {
-                <div class="sb-section-label">{{ sb.title }}</div>
-                @for (item of sb.items; track $index) {
-                <div class="sb-item">
-                    <span>{{ item.text }}</span>
-                </div>
-                }
-
-                @if (sb.activeProtocol; as ap) {
-                <div class="sb-section-label">Active Protocol</div>
-                <div class="active-protocol-card">
-                    <div class="apc-title">{{ ap.title }}</div>
-                    @for (row of ap.rows; track $index) {
-                    <div class="apc-row"><span>{{ row.label }}</span><span>{{ row.value }}</span></div>
+            <p-card styleClass="h-full flex flex-col justify-content-center align-items-center">
+                <div class="empty-sidebar" style="padding: 2rem 1rem; text-align: center;">
+                    <i class="pi pi-user"
+                        style="font-size:3rem; margin-bottom: 1rem; color: var(--p-primary-color)"></i>
+                    <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem;">Athlete Details</div>
+                    <div style="font-size: 0.85rem; color: var(--p-text-muted-color); margin-bottom: 1.5rem;">
+                        View complete file, medical history &amp; intake forms
+                    </div>
+                    @if (entryType()) {
+                    <p-button label="Open Patient File" icon="pi pi-folder-open" severity="primary"
+                        (onClick)="displayPatientInfoDialog = true" styleClass="w-full"></p-button>
+                    } @else {
+                    <div style="font-size: 0.8rem; color: var(--p-text-color);">Select a consultation type to view data
+                    </div>
                     }
                 </div>
-                }
-
-                <div class="sb-section-label">Medical History / Ticket</div>
-                @for (item of sb.history; track $index) {
-                <div class="sb-item">
-                    <span>{{ item.text }}</span>
-                </div>
-                }
-                @for (item of sb.ticketStatus; track $index) {
-                <div class="sb-item">
-                    <span>{{ item.text }}</span>
-                </div>
-                }
-
-                <div class="sb-note-card">
-                    <div class="sb-note-title">{{ sb.note.title }}</div>
-                    <div class="sb-note-text">{{ sb.note.text }}</div>
-                </div>
-                }
             </p-card>
-
-            }
         </aside>
 
 
@@ -1013,3 +998,449 @@
         </div>
     </div>
 </p-card>
+
+<!-- Patient Info Dialog (Consolidated view) -->
+<p-dialog header="ملف المريض الشامل" [(visible)]="displayPatientInfoDialog" [modal]="true"
+    [style]="{ width: '90vw', maxWidth: '1000px' }" [draggable]="false" [resizable]="false"
+    [contentStyle]="{ 'max-height': '80vh', 'overflow-y': 'auto' }" dir="rtl">
+    <div class="surface-ground p-3 lg:p-4 border-round-xl" dir="rtl">
+
+        <!-- Top Profile Header Card -->
+        <div
+            class="surface-card mb-4 border-round-2xl shadow-1 border-1 surface-border p-4 flex flex-wrap align-items-center justify-content-between gap-4">
+            <div class="flex align-items-center gap-3">
+                <div class="flex align-items-center justify-content-center bg-primary-50 text-primary border-circle"
+                    style="width: 4.5rem; height: 4.5rem;">
+                    <i class="pi pi-user text-3xl"></i>
+                </div>
+                <div>
+                    <div class="text-900 font-bold text-2xl mb-2">{{ mockPatientInfo.fullName }}</div>
+                    <div class="text-500 font-medium flex flex-wrap gap-4 text-sm mt-1">
+                        <span class="flex align-items-center gap-2"><i class="pi pi-calendar text-primary"></i> {{
+                            mockPatientInfo.dateOfBirth | date: 'dd/MM/yyyy' }}</span>
+                        <span class="flex align-items-center gap-2"><i class="pi pi-phone text-primary"></i> <span
+                                dir="ltr">{{ mockPatientInfo.phone }}</span></span>
+                        <span class="flex align-items-center gap-2"><i class="pi pi-briefcase text-primary"></i> {{
+                            mockPatientInfo.jobTitle }} ({{ mockPatientInfo.workNature }})</span>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <p-tag [value]="mockPatientInfo.sport + ' - ' + mockPatientInfo.competitiveLevel" severity="info"
+                    styleClass="px-3 py-2 text-sm border-round-2xl font-bold bg-blue-50 text-blue-600 border-1 border-blue-100"></p-tag>
+            </div>
+        </div>
+
+        <p-card styleClass="mb-3">
+            <!-- 7. System Record & Ticket Data -->
+            <div class="container-fluid mt-2">
+                @if (sidebarData(); as sb) {
+                <div class="row g-3">
+
+                    <!-- Section 1: Main items -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <p-card styleClass="h-100">
+                            <div class="sb-section-label">{{ sb.title }}</div>
+                            @for (item of sb.items; track $index) {
+                            <div class="sb-item">
+                                <span>{{ item.text }}</span>
+                            </div>
+                            }
+                        </p-card>
+                    </div>
+
+                    <!-- Section 2: Active Protocol -->
+                    @if (sb.activeProtocol; as ap) {
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <p-card styleClass="h-100">
+                            <div class="sb-section-label">Active Protocol</div>
+                            <div class="active-protocol-card">
+                                <div class="apc-title">{{ ap.title }}</div>
+                                @for (row of ap.rows; track $index) {
+                                <div class="apc-row">
+                                    <span>{{ row.label }}</span>
+                                    <span>{{ row.value }}</span>
+                                </div>
+                                }
+                            </div>
+                        </p-card>
+                    </div>
+                    }
+
+                    <!-- Section 3: Medical History / Ticket -->
+                    <div class="col-12 col-md-6 col-lg-3">
+                        <p-card styleClass="h-100">
+                            <div class="sb-section-label">Medical History / Ticket</div>
+                            @for (item of sb.history; track $index) {
+                            <div class="sb-item">
+                                <span>{{ item.text }}</span>
+                            </div>
+                            }
+                            @for (item of sb.ticketStatus; track $index) {
+                            <div class="sb-item">
+                                <span>{{ item.text }}</span>
+                            </div>
+                            }
+                        </p-card>
+                    </div>
+
+
+
+                </div>
+                }
+            </div>
+        </p-card>
+
+        <div class="row">
+            <!-- 1. الملف الشخصي -->
+            <div class="col-12 mb-3">
+                <p-card styleClass="border-round-2xl shadow-1 border-1 surface-border h-full">
+                    <ng-template pTemplate="title">
+                        <div class="flex align-items-center gap-3 pb-3 border-bottom-1 surface-border">
+                            <div class="bg-indigo-50 text-indigo-500 border-round-lg flex align-items-center justify-content-center p-2"
+                                style="width:2.5rem; height:2.5rem;">
+                                <i class="pi pi-id-card text-xl"></i>
+                            </div>
+                            <span class="text-xl font-bold text-900">الملف الشخصي</span>
+                        </div>
+                    </ng-template>
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">الاسم</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.fullName }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">تاريخ الميلاد</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.dateOfBirth | date: 'dd/MM/yyyy' }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">الجنس</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.gender }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">الوزن / الطول</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.weight }} كجم / {{ mockPatientInfo.height }} سم</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">رقم الموبايل</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold"
+                                dir="ltr" style="text-align: right;">{{ mockPatientInfo.phone }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">رقم الطوارئ / الصلة</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold"
+                                dir="ltr" style="text-align: right;">{{ mockPatientInfo.emergencyPhone }} ({{
+                                mockPatientInfo.emergencyRelation }})</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">حجز شخصي؟</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.bookingForSelf ? 'نعم' : 'لا' }}</div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">مؤثرون في قرار الاشتراك</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.decisionInfluencers.join('، ') }}</div>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+
+            <!-- 2. البروفايل الرياضي -->
+            <div class="col-12 mb-3">
+                <p-card styleClass="border-round-2xl shadow-1 border-1 surface-border h-full ">
+                    <ng-template pTemplate="title">
+                        <div class="flex align-items-center gap-3 pb-3 border-bottom-1 surface-border">
+                            <div class="bg-green-50 text-green-600 border-round-lg flex align-items-center justify-content-center p-2"
+                                style="width:2.5rem; height:2.5rem;">
+                                <i class="pi pi-bolt text-xl"></i>
+                            </div>
+                            <span class="text-xl font-bold text-900">البروفايل الرياضي</span>
+                        </div>
+                    </ng-template>
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">الرياضة والدور</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.sport }} ({{ mockPatientInfo.role }})</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">النادي</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.club }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">سنوات الممارسة</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.practiceYears }} سنوات</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">المستوي التنافسي</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.competitiveLevel }}</div>
+                        </div>
+                        <div class="col-12 col-lg-4 col-xl-3 col-sm-6 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">الهدف بعد 90 يوماً</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.goal90Days }}</div>
+                        </div>
+                        <div class="col-12 col-lg-4 col-xl-3 col-sm-6 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">مستوى النشاط البدني</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.activityLevel }}</div>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+
+            <!-- 3. بروفايل الإصابة -->
+            <div class="col-12 mb-3">
+                <p-card styleClass="border-round-2xl shadow-1 border-1 surface-border h-full ">
+                    <ng-template pTemplate="title">
+                        <div class="flex align-items-center gap-3 pb-3 border-bottom-1 surface-border">
+                            <div class="bg-red-50 text-red-500 border-round-lg flex align-items-center justify-content-center p-2"
+                                style="width:2.5rem; height:2.5rem;">
+                                <i class="pi pi-heart text-xl"></i>
+                            </div>
+                            <span class="text-xl font-bold text-900">بروفايل الإصابة</span>
+                        </div>
+                    </ng-template>
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">مستوي الالم الحالي</span>
+                            <div
+                                class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold flex justify-content-between">
+                                <span>{{ mockPatientInfo.currentPain }}/10</span>
+                                <i class="pi pi-info-circle text-orange-500"
+                                    pTooltip="أقصى ألم: {{ mockPatientInfo.maxPain }}/10"></i>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">اقصي الم</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.painEffectOnSport }}/10</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">تأثير الألم على الرياضة</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.painEffectOnSport }}/10</div>
+                        </div>
+                        <div class="col-12 mb-1">
+                            <span class="text-500 font-medium text-sm block mb-2">خريطة موقع الإصابة</span>
+                            <div class="border-1 surface-border border-round-lg overflow-hidden bg-white">
+                                <app-contact-us [readonly]="true"></app-contact-us>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">تاريخ الإصابة</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.injuryDate | date: 'dd/MM/yyyy' }}</div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">ظروف الإصابة / آلية الحدوث</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.injuryCircumstances }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">هل الإصابة مرتبطة بالنشاط
+                                الرياضي؟</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.injuryRelatedToSport ? 'نعم' : 'لا' }}</div>
+                        </div>
+
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">هل عرضت على طبيب؟</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.seenDoctor ? 'نعم' : 'لا' }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">الفحوصات المجراة</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.previousTests.join('، ') }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">العلاج السابق</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.previousTreatment.join('، ') }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">هل تتجنب حركات خوفاً من الألم؟</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.avoidMovements ? 'نعم' : 'لا' }}</div>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+
+            <!-- 4. التاريخ الطبي -->
+            <div class="col-12 mb-3">
+                <p-card styleClass="border-round-2xl shadow-1 border-1 surface-border h-full ">
+                    <ng-template pTemplate="title">
+                        <div class="flex align-items-center gap-3 pb-3 border-bottom-1 surface-border">
+                            <div class="bg-teal-50 text-teal-600 border-round-lg flex align-items-center justify-content-center p-2"
+                                style="width:2.5rem; height:2.5rem;">
+                                <i class="pi pi-file-plus text-xl"></i>
+                            </div>
+                            <span class="text-xl font-bold text-900">التاريخ الطبي</span>
+                        </div>
+                    </ng-template>
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">الحالات الطبية المزمنة</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.chronicConditions.join('، ') }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">تاريخ عائلي</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.familyHistory.join('، ') }}</div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-2">إصابات سابقة </span>
+                            <div class="flex flex-wrap gap-2">
+                                <ng-container *ngFor="let inj of mockPatientInfo.previousInjuries">
+                                    <div
+                                        class="p-2 border-1 surface-border border-round-lg bg-yellow-50 text-yellow-800 font-bold flex align-items-center gap-2">
+                                        <i class="pi pi-exclamation-triangle"></i>
+                                        <span>{{ inj.area }} ({{ inj.type }} - {{ inj.date }}<ng-container
+                                                *ngIf="inj.healed"> - الشفاء: {{ inj.healed }}</ng-container>)</span>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-2">العمليات الجراحية</span>
+                            <div class="flex flex-wrap gap-2">
+                                <ng-container *ngFor="let s of mockPatientInfo.surgeries">
+                                    <div
+                                        class="p-2 border-1 surface-border border-round-lg bg-blue-50 text-blue-800 font-bold flex align-items-center gap-2">
+                                        <i class="pi pi-wrench"></i>
+                                        <span>{{ s.type }} ({{ s.part }} <ng-container *ngIf="s.year">-
+                                                {{s.year}}</ng-container><ng-container *ngIf="s.notes"> -
+                                                {{s.notes}}</ng-container>)</span>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-2">أدوية دورية</span>
+                            <div class="flex flex-wrap gap-2">
+                                <ng-container *ngFor="let m of mockPatientInfo.regularMedications">
+                                    <div
+                                        class="p-2 border-1 surface-border border-round-lg bg-green-50 text-green-800 font-bold flex align-items-center gap-2">
+                                        <i class="pi pi-filter"></i>
+                                        <span>{{ m.name }} ({{ m.dose }} - {{ m.reason }}<ng-container *ngIf="m.notes">
+                                                - {{m.notes}}</ng-container>)</span>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">حساسية أطعمة / مواد / أدوية</span>
+                            <div
+                                class="p-2 surface-50 border-round-lg border-1 surface-border text-pink-500 font-semibold">
+                                {{ mockPatientInfo.allergies }}</div>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+
+            <!-- 5. نمط الحياة والعوامل النفسية والاجتماعية -->
+            <div class="col-12 mb-3">
+                <p-card styleClass="border-round-2xl shadow-1 border-1 surface-border h-full ">
+                    <ng-template pTemplate="title">
+                        <div class="flex align-items-center gap-3 pb-3 border-bottom-1 surface-border">
+                            <div class="bg-purple-50 text-purple-600 border-round-lg flex align-items-center justify-content-center p-2"
+                                style="width:2.5rem; height:2.5rem;">
+                                <i class="pi pi-sparkles text-xl"></i>
+                            </div>
+                            <span class="text-xl font-bold text-900">نمط الحياة والعوامل النفسية الاجتماعية</span>
+                        </div>
+                    </ng-template>
+                    <div class="row g-3">
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">الوظيفة / طبيعة العمل</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.jobTitle || 'غير محدد' }} / {{ mockPatientInfo.workNature || 'غير
+                                محدد' }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">هل يوجد ضغط نفسي عال في العمل؟</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.highWorkStress ? 'نعم' : 'لا' }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">جودة النوم</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.sleepQuality }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">استخدام الكيموليات؟</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.usesKinesio ? 'نعم' : 'لا' }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">توقع التعافي (1-10)</span>
+                            <div
+                                class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold flex align-items-center gap-2">
+                                <p-progressBar [value]="mockPatientInfo.recoveryExpectation * 10" [showValue]="false"
+                                    styleClass="w-full h-1rem"></p-progressBar>
+                                <span class="text-sm">{{ mockPatientInfo.recoveryExpectation }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+
+            <!-- 6. الإقرار والموافقة -->
+            <div class="col-12 mb-3">
+                <p-card styleClass="border-round-2xl shadow-1 border-1 surface-border h-full ">
+                    <ng-template pTemplate="title">
+                        <div class="flex align-items-center gap-3 pb-3 border-bottom-1 surface-border">
+                            <div class="bg-cyan-50 text-cyan-600 border-round-lg flex align-items-center justify-content-center p-2"
+                                style="width:2.5rem; height:2.5rem;">
+                                <i class="pi pi-pencil text-xl"></i>
+                            </div>
+                            <span class="text-xl font-bold text-900">الإقرار والموافقة</span>
+                        </div>
+                    </ng-template>
+                    <div class="row g-3">
+                        <div class="col-12 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">موافقة المعالجة وحفظ البيانات</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                <i class="pi"
+                                    [ngClass]="mockPatientInfo.dataConsent ? 'pi-check text-green-500' : 'pi-times text-red-500'"></i>
+                                {{ mockPatientInfo.dataConsent ? 'موافق' : 'غير موافق' }}
+                            </div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">الاسم الثلاثي الموّقع</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.consentFullName }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">تاريخ التوقيع</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.consentDate | date: 'dd/MM/yyyy' }}</div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">مهندس الأداء المسؤول</span>
+                            <div
+                                class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold flex align-items-center gap-2">
+                                <i class="pi pi-user-edit text-primary"></i>
+                                <span>{{ mockPatientInfo.performanceEngineer }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+
+
+
+        </div>
+    </div>
+</p-dialog>

@@ -1,4 +1,5 @@
 import { Component, ChangeDetectionStrategy, signal, computed, inject } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map, catchError, startWith } from 'rxjs';
 import { of } from 'rxjs';
@@ -18,6 +19,10 @@ import { RippleModule } from 'primeng/ripple';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DropdownModule } from 'primeng/dropdown';
 import { TableModule } from 'primeng/table';
+import { DialogModule } from 'primeng/dialog';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ContactUsComponent } from '../contact-us/contact-us.component';
+import { PatientFormService } from '../appointments/services/patient-form.service';
 import { ServicesService } from '../add-service/services/services.service';
 
 export type EntryType = 'new' | 'return' | 'reassess' | null;
@@ -55,7 +60,10 @@ interface AthleteInfo {
         RippleModule,
         SelectButtonModule,
         DropdownModule,
-        TableModule
+        TableModule,
+        DialogModule,
+        ProgressBarModule,
+        ContactUsComponent
     ],
     templateUrl: './consultation-screen.component.html',
     styleUrl: './consultation-screen.component.scss',
@@ -65,9 +73,29 @@ export class ConsultationScreenComponent {
 
     // ── State ──────────────────────────────────────────────────────────────
     readonly entryType = signal<EntryType>(null);
+    displayPatientInfoDialog = false;
+
+    // ── Patient form — live signal from the shared PatientFormService ──────
+    private readonly _patientFormService = inject(PatientFormService);
+    /** Reactive alias: template uses mockPatientInfo() or mockPatientInfo directly */
+    get mockPatientInfo() { return this._patientFormService.form(); }
 
     private readonly fb = inject(FormBuilder);
     private readonly servicesService = inject(ServicesService);
+    private readonly route = inject(ActivatedRoute);
+    private readonly router = inject(Router);
+
+    constructor() {
+        this.route.queryParams.subscribe(params => {
+            if (params['type']) {
+                this.selectEntry(params['type'] as EntryType);
+            }
+        });
+    }
+
+    backToDashboard(): void {
+        this.router.navigate(['/uikit/doctor-control']);
+    }
 
     // ── Services (Recommended Track) — loaded from /api/Serivces ───────────
     readonly servicesLoading = signal(true);
@@ -361,7 +389,6 @@ export class ConsultationScreenComponent {
                     { color: '#3DD9A0', text: 'Data Map complete ✓' },
                     { color: '#3DD9A0', text: 'Payment confirmed ✓ — 4,000 EGP' }
                 ],
-                note: { title: 'Admin Note', text: '"Concerned about cost — explain value with data."' },
                 activeProtocol: null
             },
             return: {
@@ -380,7 +407,6 @@ export class ConsultationScreenComponent {
                     { color: '#C9A84C', text: 'Total paid previously: 13,000 EGP' },
                     { color: '#3DD9A0', text: 'Data Map valid until Jan 2027' }
                 ],
-                note: { title: 'System Note', text: '"Previous athlete with excellent experience. Blueprint valid — no re-entry needed. Treat as Returning VIP."' },
                 activeProtocol: null
             },
             reassess: {
@@ -395,7 +421,6 @@ export class ConsultationScreenComponent {
                     { color: '#7A7FA8', text: 'No chronic illness' }
                 ],
                 ticketStatus: [],
-                note: { title: 'Last Session', text: '"Yesterday — Engineer noticed shoulder pain during chest press. Athlete mentioned it for the first time."' },
                 activeProtocol: {
                     title: 'ACL Return to Play — Active',
                     rows: [
@@ -420,6 +445,161 @@ export class ConsultationScreenComponent {
         this.selectedPath.set(null);
         this.selectedReassessPath.set(null);
         this.actionDone.set(false);
+
+        // Seed PatientFormService with mockup data matching the selected entry type
+        if (type === 'new') {
+            this._patientFormService.form.set({
+                fullName: 'Hani Salem',
+                dateOfBirth: new Date('1998-05-15'),
+                gender: 'male',
+                weight: 78,
+                height: 182,
+                phone: '01012345678',
+                phoneConfirm: '01012345678',
+                emergencyPhone: '01198765432',
+                emergencyRelation: 'Brother',
+                bookingForSelf: true,
+                decisionInfluencers: ['self', 'coach'],
+                sport: 'Football',
+                club: 'Al Ahly',
+                team: 'First Team',
+                center: 'Cairo',
+                role: 'Midfielder',
+                practiceYears: 12,
+                competitiveLevel: 'amateur',
+                goal90Days: 'Return to full pitch training without pain',
+                activityLevel: 'high',
+                currentPain: 4,
+                maxPain: 7,
+                painEffectOnSport: 6,
+                injuryDate: new Date('2026-04-10'),
+                injuryCircumstances: 'Twisting knee while changing direction on turf',
+                injuryRelatedToSport: true,
+                seenDoctor: true,
+                previousTests: ['lab'],
+                previousTreatment: ['physio', 'rest'],
+                avoidMovements: true,
+                chronicConditions: ['none'],
+                familyHistory: ['none'],
+                previousInjuries: [{ area: 'Ankle', type: 'Sprain', date: '2023', healed: 'Yes' }],
+                surgeries: [{ type: 'None', part: 'None', year: 'None', notes: 'None' }],
+                regularMedications: [{ name: 'None', dose: 'None', reason: 'None', notes: 'None' }],
+                allergies: 'None',
+                jobTitle: 'Accountant',
+                workNature: 'Desk job / sitting',
+                highWorkStress: false,
+                sleepQuality: 'average',
+                usesKinesio: true,
+                recoveryExpectation: 8,
+                dataConsent: true,
+                consentFullName: 'Hani Salem',
+                consentDate: new Date('2026-07-18'),
+                performanceEngineer: 'Engineers team member',
+                selectedMuscles: ['muscle 11', 'muscle 12']
+            });
+        } else if (type === 'return') {
+            this._patientFormService.form.set({
+                fullName: 'Omar Tarek',
+                dateOfBirth: new Date('1994-08-22'),
+                gender: 'male',
+                weight: 85,
+                height: 178,
+                phone: '01234567890',
+                phoneConfirm: '01234567890',
+                emergencyPhone: '01512345678',
+                emergencyRelation: 'Wife',
+                bookingForSelf: true,
+                decisionInfluencers: ['self'],
+                sport: 'Tennis',
+                club: 'Gezira Sporting Club',
+                team: 'Individual',
+                center: 'Giza',
+                role: 'Player',
+                practiceYears: 15,
+                competitiveLevel: 'professional',
+                goal90Days: 'Serve at 100% velocity',
+                activityLevel: 'high',
+                currentPain: 3,
+                maxPain: 6,
+                painEffectOnSport: 5,
+                injuryDate: new Date('2026-06-01'),
+                injuryCircumstances: 'Overhead serve pain in shoulder',
+                injuryRelatedToSport: true,
+                seenDoctor: true,
+                previousTests: ['none'],
+                previousTreatment: ['physio', 'massage'],
+                avoidMovements: true,
+                chronicConditions: ['none'],
+                familyHistory: ['none'],
+                previousInjuries: [{ area: 'Knee', type: 'ACL reconstruct', date: '2025', healed: 'Yes' }],
+                surgeries: [{ type: 'ACL Reconstruction', part: 'Right Knee', year: '2025', notes: 'Successful recovery' }],
+                regularMedications: [{ name: 'None', dose: 'None', reason: 'None', notes: 'None' }],
+                allergies: 'None',
+                jobTitle: 'Engineer',
+                workNature: 'Site visits',
+                highWorkStress: true,
+                sleepQuality: 'good',
+                usesKinesio: false,
+                recoveryExpectation: 9,
+                dataConsent: true,
+                consentFullName: 'Omar Tarek',
+                consentDate: new Date('2026-07-19'),
+                performanceEngineer: 'Lead Engineer',
+                selectedMuscles: ['muscle 1', 'muscle 3']
+            });
+        } else if (type === 'reassess') {
+            this._patientFormService.form.set({
+                fullName: 'Karim Mahmoud',
+                dateOfBirth: new Date('2001-11-03'),
+                gender: 'male',
+                weight: 92,
+                height: 195,
+                phone: '01011122233',
+                phoneConfirm: '01011122233',
+                emergencyPhone: '01133322211',
+                emergencyRelation: 'Father',
+                bookingForSelf: true,
+                decisionInfluencers: ['self', 'coach', 'club'],
+                sport: 'Basketball',
+                club: 'Zamalek',
+                team: 'First Team',
+                center: 'Giza',
+                role: 'Center',
+                practiceYears: 10,
+                competitiveLevel: 'professional',
+                goal90Days: 'Reassess shoulder pain and finalize ACL rehab phase 3',
+                activityLevel: 'high',
+                currentPain: 5,
+                maxPain: 8,
+                painEffectOnSport: 7,
+                injuryDate: new Date('2026-07-15'),
+                injuryCircumstances: 'Sudden shoulder stretch during defensive block',
+                injuryRelatedToSport: true,
+                seenDoctor: true,
+                previousTests: ['none'],
+                previousTreatment: ['physio'],
+                avoidMovements: true,
+                chronicConditions: ['none'],
+                familyHistory: ['none'],
+                previousInjuries: [{ area: 'Right Knee', type: 'ACL Tear', date: '2026', healed: 'No' }],
+                surgeries: [{ type: 'ACL Reconstruction', part: 'Right Knee', year: '2026', notes: 'Active recovery program' }],
+                regularMedications: [{ name: 'None', dose: 'None', reason: 'None', notes: 'None' }],
+                allergies: 'None',
+                jobTitle: 'Athlete',
+                workNature: 'High physical activity',
+                highWorkStress: true,
+                sleepQuality: 'poor',
+                usesKinesio: true,
+                recoveryExpectation: 7,
+                dataConsent: true,
+                consentFullName: 'Karim Mahmoud',
+                consentDate: new Date('2026-07-19'),
+                performanceEngineer: 'Ahmed Salem',
+                selectedMuscles: ['muscle 3', 'muscle 12']
+            });
+        } else {
+            this._patientFormService.reset();
+        }
     }
 
     startFlow(): void {
@@ -481,6 +661,5 @@ interface SidebarData {
     items: SidebarItem[];
     history: SidebarItem[];
     ticketStatus: SidebarItem[];
-    note: { title: string; text: string };
     activeProtocol: { title: string; rows: { label: string; value: string }[] } | null;
 }

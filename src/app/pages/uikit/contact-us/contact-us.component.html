@@ -8,17 +8,17 @@
         (click)="onImageClick($event)" (load)="onImageLoad($event)" />
 
       <!-- SVG overlay for all saved polygons -->
-      <svg [attr.width]="imageWidth" [attr.height]="imageHeight" class="polygon-overlay">
+      <svg [attr.width]="imageWidth" [attr.height]="imageHeight" class="polygon-overlay" [style.cursor]="readonly() ? 'default' : 'pointer'">
         @for(part of bodyParts; track part){
         @if(part.polygon && part.polygon.length > 1){
         <polygon [attr.points]="getPolygonPointsString(part.polygon)"
-          [attr.fill]="selectedParts[part.name] ? 'rgba(112, 244, 195, 0.5)' : (hoveredPart === part.name ? 'rgba(255,0,0,0.4)' : 'rgba(0,0,0,0)')"
-          [attr.stroke]="selectedParts[part.name] ? '#70F4C3' : (hoveredPart === part.name ? 'red' : 'transparent')"
-          [attr.stroke-width]="(selectedParts[part.name] || hoveredPart === part.name) ? 2 : 0"
+          [attr.fill]="selectedParts[part.name] ? 'rgba(112, 244, 195, 0.5)' : (!readonly() && hoveredPart === part.name ? 'rgba(255,0,0,0.4)' : 'rgba(0,0,0,0)')"
+          [attr.stroke]="selectedParts[part.name] ? '#70F4C3' : (!readonly() && hoveredPart === part.name ? 'red' : 'transparent')"
+          [attr.stroke-width]="(selectedParts[part.name] || (!readonly() && hoveredPart === part.name)) ? 2 : 0"
           [pTooltip]="part.name"
           tooltipPosition="top"
-          (mouseenter)="hoveredPart = part.name"
-          (mouseleave)="hoveredPart = 'None'"
+          (mouseenter)="readonly() ? null : hoveredPart = part.name"
+          (mouseleave)="readonly() ? null : hoveredPart = 'None'"
           (click)="onPartClick(part, $event)" />
         }
         }

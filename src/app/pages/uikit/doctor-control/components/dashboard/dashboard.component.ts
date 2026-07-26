@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 
@@ -15,6 +16,7 @@ interface ActionRow { name: string; dot: string; summary: string; details: strin
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardComponent {
+  private readonly router = inject(Router);
 
   activeFilter = signal('all');
 
@@ -30,8 +32,24 @@ export class DashboardComponent {
   readonly patients: PatientRow[] = [
     { name: 'M. Ahmed — Jan 24', time: '9:00 AM', badge: 'New', badgeAccent: '#10b981', dot: '#10b981', details: 'Initial Consultation — New' },
     { name: 'M. Salem — 132', time: '10:30 AM', badge: 'Revise', badgeAccent: '#f59e0b', dot: '#f59e0b', details: 'MRI Results Arrived — Review Plan' },
-    { name: 'R. Mustafa — 36M', time: '12:00 PM', badge: 'Plan', badgeAccent: '#ef4444', dot: '#ef4444', details: 'Connection Lost — Restart Program' }
+    { name: 'R. Mustafa — 36M', time: '12:00 PM', badge: 'Plan', badgeAccent: '#ef4444', dot: '#ef4444', details: 'Connection Lost — Restart Program' },
+    { name: 'A. Youssef — 22C', time: '1:00 PM', badge: 'New', badgeAccent: '#10b981', dot: '#10b981', details: 'Initial Consultation — New' },
+    { name: 'S. Omar — 11K', time: '2:30 PM', badge: 'Plan', badgeAccent: '#ef4444', dot: '#ef4444', details: 'Phase 2 Transition — Adjust Plan' },
+    { name: 'K. Ali — 09L', time: '4:00 PM', badge: 'Revise', badgeAccent: '#f59e0b', dot: '#f59e0b', details: 'Pain Report — Revise Status' },
   ];
+
+  navigateToConsultation(status: string) {
+    let type = '';
+    if (status === 'New') type = 'new';
+    else if (status === 'Revise') type = 'return';
+    else if (status === 'Plan') type = 'reassess';
+    
+    if (type) {
+      this.router.navigate(['/uikit/consultation-type'], { queryParams: { type } });
+    } else {
+      this.router.navigate(['/uikit/consultation-type']);
+    }
+  }
 
   readonly priorityRows: ActionRow[] = [
     {

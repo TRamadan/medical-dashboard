@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, signal, ViewChild, inject } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { PaginatorState } from 'primeng/paginator';
 import { Table } from 'primeng/table';
@@ -35,6 +35,7 @@ import { SliderModule } from 'primeng/slider';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { CardModule } from 'primeng/card';
 import { ContactUsComponent } from '../contact-us/contact-us.component';
+import { PatientFormService } from './services/patient-form.service';
 @Component({
     selector: 'app-appointments',
     standalone: true,
@@ -507,46 +508,20 @@ export class AppointmentsComponent implements OnInit {
         { label: 'لا يوجد', value: 'none' }
     ];
 
-    // ── Patient Form Model ────────────────────────────────────────
-    patientForm: any = {
-        // Personal
-        fullName: '', dateOfBirth: null, gender: null,
-        weight: 70, height: 170,
-        phone: '', phoneConfirm: '',
-        emergencyPhone: '', emergencyRelation: '',
-        bookingForSelf: null,
-        decisionInfluencers: [],
-        // Athletic
-        sport: '', club: '', team: '', center: '', role: '',
-        practiceYears: 0, competitiveLevel: null,
-        goal90Days: '', activityLevel: null,
-        // Injury
-        currentPain: 0, maxPain: 0, painEffectOnSport: 0,
-        injuryDate: null, injuryCircumstances: '',
-        injuryRelatedToSport: null, seenDoctor: null,
-        previousTests: [], previousTreatment: [],
-        avoidMovements: null,
-        // Medical
-        chronicConditions: [], familyHistory: [],
-        previousInjuries: [{ area: '', type: '', date: '', healed: '' }],
-        surgeries: [{ type: '', part: '', year: '' }],
-        regularMedications: [{ name: '', dose: '', reason: '' }],
-        allergies: '',
-        // Lifestyle
-        jobTitle: '', workNature: '',
-        highWorkStress: null,
-        sleepQuality: null,
-        usesKinesio: null,
-        recoveryExpectation: 5,
-        // Consent
-        dataConsent: false,
-        consentFullName: '', consentDate: null,
-        performanceEngineer: null
-    };
+    // ── Patient Form Model ── shared via PatientFormService ───────────────────
+    private readonly _patientFormService = inject(PatientFormService);
+    /** Local mutable copy — bound via ngModel. Synced to service on change. */
+    patientForm = this._patientFormService.form();
+
+    /** Call this from (ngModelChange) or any change event to keep the service in sync. */
+    syncForm(): void {
+        this._patientFormService.form.set({ ...this.patientForm });
+    }
 
     openCompletePatientInfo(row: any) {
         this.currentPatientRow = row;
-        this.patientForm.fullName = row.patientNameEn || '';
+        this.patientForm = { ...this._patientFormService.form(), fullName: row.patientNameEn || '' };
+        this.syncForm();
         this.displayCompletePatientInfoDialog = true;
     }
 
@@ -556,6 +531,7 @@ export class AppointmentsComponent implements OnInit {
     }
 
     savePatientInfo() {
+        this.syncForm();
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Patient information has been completed successfully.' });
         this.closePatientInfoDialog();
     }

@@ -1,7 +1,8 @@
-import { Component, computed, signal, OnInit, inject, ViewChild, ElementRef } from '@angular/core';
+import { Component, computed, signal, OnInit, inject, ViewChild, ElementRef, input, effect } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { TooltipModule } from 'primeng/tooltip';
+import { PatientFormService } from '../appointments/services/patient-form.service';
 
 interface BodyPart {
     name: string;
@@ -35,6 +36,9 @@ interface ComponentProperty {
     standalone: true
 })
 export class ContactUsComponent implements OnInit {
+    readonly = input<boolean>(false);
+    private readonly patientFormService = inject(PatientFormService, { optional: true });
+
     public mouseX = 0;
     public mouseY = 0;
     public hoveredPart: string = 'None';
@@ -58,7 +62,18 @@ export class ContactUsComponent implements OnInit {
     isDragging = false;
     dragOffset = { x: 0, y: 0 };
 
-
+    constructor() {
+        if (this.patientFormService) {
+            effect(() => {
+                const muscles = this.patientFormService?.form().selectedMuscles || [];
+                const newSelected: { [key: string]: boolean } = {};
+                muscles.forEach((m) => {
+                    newSelected[m] = true;
+                });
+                this.selectedParts = newSelected;
+            });
+        }
+    }
 
     ngOnInit(): void {
         this.http.get<BodyPart[]>('assets/muscle-polygns.json').subscribe((parts) => {
@@ -66,11 +81,16 @@ export class ContactUsComponent implements OnInit {
         });
     }
 
-
-
     onPartClick(part: BodyPart, event: MouseEvent): void {
         event.stopPropagation();
+        if (this.readonly()) {
+            return;
+        }
         this.selectedParts[part.name] = !this.selectedParts[part.name];
+        if (this.patientFormService) {
+            const selectedArray = Object.keys(this.selectedParts).filter(key => this.selectedParts[key]);
+            this.patientFormService.patch({ selectedMuscles: selectedArray });
+        }
     }
 
     finishPolygon(): void {
