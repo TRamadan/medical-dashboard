@@ -65,4 +65,229 @@
 
 .form-section-header span {
   color: var(--primary-color, #3b82f6);
-}
+}
+
+
+.patient-info-form {
+  overflow-x: hidden;
+
+  :host-context([dir='rtl']) &,
+  &[dir='rtl'] {
+    text-align: right;
+  }
+
+  .p-tablist {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+  }
+
+  .p-tab {
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 0.95rem;
+
+    @media (max-width: 576px) {
+      font-size: 0.85rem;
+      padding-inline: 0.75rem;
+    }
+  }
+
+  .p-tabpanel {
+    padding-inline: 0.25rem;
+  }
+
+  .form-label {
+    margin-bottom: 0.35rem;
+  }
+
+  .p-slider,
+  input.p-inputtext,
+  textarea.p-inputtextarea,
+  .p-select,
+  .p-datepicker {
+    width: 100% !important;
+  }
+}
+
+
+.patient-info-form {
+  overflow-x: hidden;
+
+  :host-context([dir='rtl']) &,
+  &[dir='rtl'] {
+    text-align: right;
+  }
+
+  .p-tablist {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    &::-webkit-scrollbar {
+      height: 4px;
+    }
+  }
+
+  .p-tab {
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 0.95rem;
+
+    @media (max-width: 576px) {
+      font-size: 0.85rem;
+      padding-inline: 0.75rem;
+    }
+  }
+
+  .p-tabpanel {
+    padding-inline: 0.25rem;
+  }
+
+  .form-label {
+    margin-bottom: 0.35rem;
+  }
+
+  .card.pur {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(160deg, #1e1b2e, #14121f);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin-bottom: 8px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 16px;
+      inset-inline-end: 12px;
+      width: 4px;
+      height: 20px;
+      border-radius: 2px;
+      background: #7c5cff;
+    }
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-inline-end: 18px;
+      font-weight: 700;
+      font-size: 1.05rem;
+      color: #fff;
+
+      .tsub {
+        margin-inline-start: auto;
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: #9aa0b4;
+      }
+    }
+
+    .grid {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+
+      &.g3 {
+        grid-template-columns: repeat(3, 1fr);
+
+        @media (max-width: 768px) {
+          grid-template-columns: 1fr;
+        }
+      }
+    }
+
+    .f {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      &.full {
+        width: 100%;
+      }
+
+      span {
+        font-size: 0.85rem;
+        color: #c7cbdb;
+      }
+
+      input,
+      input.p-inputtext {
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+        border-radius: 8px;
+        padding: 8px 10px;
+        color: #fff !important;
+        width: 100% !important;
+
+        &::placeholder {
+          color: #7d8298;
+        }
+
+        &:focus {
+          outline: none;
+          border-color: #7c5cff !important;
+        }
+      }
+    }
+
+    ::ng-deep .gate-seg.p-selectbutton {
+      display: inline-flex;
+      gap: 4px;
+      padding: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 999px;
+
+      @media (max-width: 576px) {
+        display: flex;
+        width: 100%;
+      }
+
+      .p-togglebutton {
+        border: none;
+        background: transparent;
+        color: #c7cbdb;
+        border-radius: 999px;
+        overflow: hidden;
+
+        @media (max-width: 576px) {
+          flex: 1;
+        }
+
+        .p-togglebutton-content {
+          padding: 8px 18px;
+          font-size: 0.85rem;
+          background: transparent;
+          border-radius: 999px;
+        }
+
+        &.p-togglebutton-checked .p-togglebutton-content {
+          background: #35e0a1;
+          color: #0d1b16;
+          font-weight: 600;
+        }
+      }
+    }
+
+    .hint {
+      color: #9aa0b4;
+      font-size: 0.82rem;
+
+      b {
+        color: #e7e9f2;
+      }
+    }
+  }
+
+  .p-slider,
+  input.p-inputtext,
+  textarea.p-inputtextarea,
+  .p-select,
+  .p-datepicker {
+    width: 100% !important;
+  }
+}

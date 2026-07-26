@@ -14,7 +14,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { PaginatorModule } from 'primeng/paginator';
-import { TabViewModule } from 'primeng/tabview';
+import { TabsModule } from 'primeng/tabs';
 import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -28,18 +28,20 @@ import { AppointmentService } from './services/appointment.service';
 import { LocationService } from '../add-location/services/location.service';
 import { DatePickerModule } from 'primeng/datepicker';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
+import { CardModule } from "primeng/card";
 import { BadgeModule } from 'primeng/badge';
 import { AppointmentsDetailsComponent } from './appointments-details/appointments-details.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { SliderModule } from 'primeng/slider';
 import { SelectButtonModule } from 'primeng/selectbutton';
-import { CardModule } from 'primeng/card';
 import { ContactUsComponent } from '../contact-us/contact-us.component';
 import { PatientFormService } from './services/patient-form.service';
+
 @Component({
     selector: 'app-appointments',
     standalone: true,
     imports: [
+        CardModule,
         ProgressSpinnerModule,
         ConfirmPopupModule,
         CommonModule,
@@ -58,9 +60,8 @@ import { PatientFormService } from './services/patient-form.service';
         TagModule,
         InputIconModule,
         IconFieldModule,
-        IconFieldModule,
         ConfirmDialogModule,
-        TabViewModule,
+        TabsModule,
         DatePickerModule,
         BadgeModule,
         AppointmentsDetailsComponent,
@@ -69,7 +70,6 @@ import { PatientFormService } from './services/patient-form.service';
         CheckboxModule,
         SliderModule,
         SelectButtonModule,
-        CardModule,
         ContactUsComponent
     ],
     providers: [MessageService, ConfirmationService],
@@ -118,7 +118,7 @@ export class AppointmentsComponent implements OnInit {
 
     @ViewChild('dt') dt!: Table;
     @ViewChild('isPaidTemplate', { static: true }) isPaidTemplate!: any;
-    
+
     tableHeaders: TableColumn[] = [];
     tableActions: any[] = [];
     globalFilterFields: string[] = [];
@@ -151,7 +151,7 @@ export class AppointmentsComponent implements OnInit {
             { field: 'status', label: 'Status', type: 'status' }
         ];
         this.tableHeaders.forEach((h) => this.globalFilterFields.push(h.field));
-        
+
         this.tableActions = [
             {
                 label: 'Complete Info',
@@ -174,13 +174,10 @@ export class AppointmentsComponent implements OnInit {
         });
     }
 
-
-
     onLocationChange() {
         this.filterAppointments();
         this.selectCard(this.selectedCard);
         this.updateCounts();
-
     }
 
     filterAppointments() {
@@ -298,10 +295,6 @@ export class AppointmentsComponent implements OnInit {
         this.loadUrgentAppointments();
     }
 
-
-
-
-
     updateCounts() {
         this._appointmentService.getAppointmentsCountByStatus(this.selectedLocation.id).subscribe((response: any) => {
             const counts = response;
@@ -360,8 +353,6 @@ export class AppointmentsComponent implements OnInit {
     onBookingSuccess(): void {
         this.hideDialog();
     }
-
-
 
     selectedAppointment: any;
     appointmentToEdit: any = null;
@@ -437,74 +428,53 @@ export class AppointmentsComponent implements OnInit {
     displayCompletePatientInfoDialog: boolean = false;
     currentPatientRow: any = null;
 
-    // ── Dropdown Options ──────────────────────────────────────────
+    // ── Dropdown / Checkbox / Radio Options ───────────────────────
+    // Kept from the original form in case other parts of the app still reference them.
     genderOptions = [{ label: 'ذكر', value: 'male' }, { label: 'أنثى', value: 'female' }];
-
-    competitiveLevelOptions = [
-        { label: 'ترفيهي', value: 'recreational' },
-        { label: 'هاوي', value: 'amateur' },
-        { label: 'شبه محترف', value: 'semi_pro' },
-        { label: 'محترف', value: 'professional' },
-        { label: 'منتخب وطني', value: 'national' }
-    ];
-
-    activityLevelOptions = [
-        { label: 'لا أندرب أقل من 3 مرات', value: 'low' },
-        { label: '3-5 مرات أسبوعياً', value: 'moderate' },
-        { label: 'أكثر من 5 مرات أسبوعياً', value: 'high' }
-    ];
-
-    sleepQualityOptions = [
-        { label: 'جيد', value: 'good' },
-        { label: 'متوسط', value: 'average' },
-        { label: 'سيئ', value: 'poor' }
-    ];
 
     performanceEngineerOptions = [
         { label: 'مهندس 1', value: '1' },
         { label: 'مهندس 2', value: '2' }
     ];
 
-    decisionInfluencers = [
-        { label: 'أنا', value: 'self' },
-        { label: 'وحدي', value: 'alone' },
-        { label: 'الزوج / الزوجة', value: 'spouse' },
-        { label: 'أحد الوالدين', value: 'parent' },
-        { label: 'المدرب', value: 'coach' },
-        { label: 'النادي', value: 'club' },
-        { label: 'الطبيب', value: 'doctor' }
+    // ── Options for the new tabbed patient-info form ──────────────
+    bookingForSelfOptions = [
+        { label: 'نعم — لي', value: true },
+        { label: 'لا — لشخص آخر', value: false }
     ];
 
-    previousTestsOptions = [
-        { label: 'تحاليل', value: 'lab' },
-        { label: 'لا يوجد أخرى', value: 'none' }
+    yesNoOptions = [
+        { label: 'نعم', value: true },
+        { label: 'لا', value: false }
     ];
 
-    previousTreatmentOptions = [
-        { label: 'راحة', value: 'rest' },
-        { label: 'تدليك', value: 'massage' },
-        { label: 'أدوية', value: 'medication' },
-        { label: 'حقن', value: 'injection' },
+    workNatureOptions = [
+        { label: 'مكتبي', value: 'مكتبي' },
+        { label: 'ميداني', value: 'ميداني' }
+    ];
+
+    maritalStatusOptions = [
+        { label: 'متزوج', value: true },
+        { label: 'أعزب', value: false }
+    ];
+
+    procedureTypeOptions = [
+        { label: 'دواء', value: 'medication' },
         { label: 'علاج طبيعي', value: 'physio' },
-        { label: 'جراحة', value: 'surgery' },
-        { label: 'لا يوجد أخرى', value: 'none' }
+        { label: 'تأهيل', value: 'rehab' },
+        { label: 'راحة', value: 'rest' }
     ];
 
-    chronicConditionsOptions = [
-        { label: 'القلب', value: 'heart' },
-        { label: 'السكر', value: 'diabetes' },
-        { label: 'الضغط', value: 'bp' },
-        { label: 'الروماتيزم', value: 'rheumatism' },
-        { label: 'الغدة', value: 'thyroid' },
-        { label: 'أريو', value: 'anemia' },
-        { label: 'لا يوجد أخرى', value: 'none' }
+    diagnosticMethodsOptions = [
+        { label: 'فحص سريري', value: 'clinical' },
+        { label: 'أشعة', value: 'imaging' },
+        { label: 'تحاليل', value: 'lab' }
     ];
 
-    familyHistoryOptions = [
-        { label: 'سرطان', value: 'cancer' },
-        { label: 'أمراض قلب', value: 'heart' },
-        { label: 'السكرة المبكرة', value: 'diabetes' },
-        { label: 'الروماتيزم', value: 'rheumatism' },
+    habitsOptions = [
+        { label: 'التدخين', value: 'smoking' },
+        { label: 'الكحوليات', value: 'alcohol' },
+        { label: 'المكيفات', value: 'stimulants' },
         { label: 'لا يوجد', value: 'none' }
     ];
 
@@ -534,5 +504,30 @@ export class AppointmentsComponent implements OnInit {
         this.syncForm();
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Patient information has been completed successfully.' });
         this.closePatientInfoDialog();
+    }
+
+    // ── Previous injuries (Tab 5) ──────────────────────────────────
+    addPreviousInjury(): void {
+        if (!this.patientForm.previousInjuries) {
+            this.patientForm.previousInjuries = [];
+        }
+        this.patientForm.previousInjuries.push({ name: '', date: '', description: '' });
+        this.syncForm();
+    }
+
+    removePreviousInjury(index: number): void {
+        this.patientForm.previousInjuries?.splice(index, 1);
+        this.syncForm();
+    }
+
+    setBookingForSelf(val: boolean): void {
+        this.patientForm.bookingForSelf = val;
+        if (val) {
+            // Clear the "on behalf of" fields when switching back to "for myself"
+            this.patientForm.injuredRelation = '';
+            this.patientForm.fillerName = '';
+            this.patientForm.fillerRelation = '';
+        }
+        this.syncForm();
     }
 }

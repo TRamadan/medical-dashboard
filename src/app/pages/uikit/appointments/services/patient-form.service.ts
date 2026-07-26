@@ -1,10 +1,9 @@
 import { Injectable, signal } from '@angular/core';
 
 export interface PreviousInjury {
-    area: string;
-    type: string;
+    name: string;
     date: string;
-    healed?: string;
+    description: string;
 }
 
 export interface Surgery {
@@ -25,6 +24,7 @@ export interface PatientForm {
     // Personal
     fullName: string;
     dateOfBirth: Date | null;
+    address: string;
     gender: string | null;
     weight: number;
     height: number;
@@ -33,38 +33,63 @@ export interface PatientForm {
     emergencyPhone: string;
     emergencyRelation: string;
     bookingForSelf: boolean | null;
+    injuredRelation: string;
+    fillerName: string;
+    fillerRelation: string;
     decisionInfluencers: string[];
     // Athletic
     sport: string;
+    position: string;
     club: string;
     team: string;
     center: string;
     role: string;
     practiceYears: number;
+    topAchievement: string;
     competitiveLevel: string | null;
     goal90Days: string;
     activityLevel: string | null;
     // Injury
+    painLocations: string;
     currentPain: number;
     maxPain: number;
+    painEffectOnPerformance: number;
     painEffectOnSport: number;
     injuryDate: Date | null;
+    injuryDescription: string;
+    injuryCauses: string;
+    timeOffFromSport: string;
     injuryCircumstances: string;
     injuryRelatedToSport: boolean | null;
+    // Medical procedures
+    wasExamined: boolean | null;
+    diagnosis: string;
+    doctorName: string;
+    doctorContactMethod: string;
+    procedureType: string | null;
+    diagnosticMethods: string[];
     seenDoctor: boolean | null;
     previousTests: string[];
     previousTreatment: string[];
     avoidMovements: boolean | null;
-    // Medical
+    // Medical history
     chronicConditions: string[];
     familyHistory: string[];
     previousInjuries: PreviousInjury[];
     surgeries: Surgery[];
     regularMedications: Medication[];
     allergies: string;
-    // Lifestyle
+    hasClientMedicalCondition: boolean | null;
+    clientMedicalConditionDetails: string;
+    hasParentsMedicalCondition: boolean | null;
+    parentsMedicalConditionDetails: string;
+    // Lifestyle / Social
     jobTitle: string;
     workNature: string;
+    dailySittingHours: number;
+    isMarried: boolean | null;
+    hasChildren: boolean;
+    habits: string[];
     highWorkStress: boolean | null;
     sleepQuality: string | null;
     usesKinesio: boolean | null;
@@ -78,30 +103,38 @@ export interface PatientForm {
 }
 
 const defaultForm: PatientForm = {
-    fullName: '', dateOfBirth: null, gender: null,
+    fullName: '', dateOfBirth: null, address: '', gender: null,
     weight: 70, height: 170,
     phone: '', phoneConfirm: '',
     emergencyPhone: '', emergencyRelation: '',
-    bookingForSelf: null, decisionInfluencers: [],
-    sport: '', club: '', team: '', center: '', role: '',
-    practiceYears: 0, competitiveLevel: null,
+    bookingForSelf: null, injuredRelation: '', fillerName: '', fillerRelation: '', decisionInfluencers: [],
+    sport: '', position: '', club: '', team: '', center: '', role: '',
+    practiceYears: 0, topAchievement: '', competitiveLevel: null,
     goal90Days: '', activityLevel: null,
-    currentPain: 0, maxPain: 0, painEffectOnSport: 0,
-    injuryDate: null, injuryCircumstances: '',
-    injuryRelatedToSport: null, seenDoctor: null,
+    painLocations: '',
+    currentPain: 0, maxPain: 0, painEffectOnPerformance: 0, painEffectOnSport: 0,
+    injuryDate: null, injuryDescription: '', injuryCauses: '', timeOffFromSport: '',
+    injuryCircumstances: '',
+    injuryRelatedToSport: null,
+    wasExamined: null, diagnosis: '', doctorName: '', doctorContactMethod: '',
+    procedureType: null, diagnosticMethods: [],
+    seenDoctor: null,
     previousTests: [], previousTreatment: [],
     avoidMovements: null,
     chronicConditions: [], familyHistory: [],
-    previousInjuries: [{ area: '', type: '', date: '', healed: '' }],
+    previousInjuries: [],
     surgeries: [{ type: '', part: '', year: '', notes: '' }],
     regularMedications: [{ name: '', dose: '', reason: '', notes: '' }],
     allergies: '',
+    hasClientMedicalCondition: null, clientMedicalConditionDetails: '',
+    hasParentsMedicalCondition: null, parentsMedicalConditionDetails: '',
     jobTitle: '', workNature: '',
+    dailySittingHours: 0, isMarried: null, hasChildren: false, habits: [],
     highWorkStress: null, sleepQuality: null,
     usesKinesio: null, recoveryExpectation: 5,
     dataConsent: false, consentFullName: '', consentDate: null,
     performanceEngineer: null,
-    selectedMuscles: []
+    selectedMuscles: [],
 };
 
 @Injectable({ providedIn: 'root' })
