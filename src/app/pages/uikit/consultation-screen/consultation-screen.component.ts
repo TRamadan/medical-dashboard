@@ -32,7 +32,8 @@ export type ReassessChoice = 'A' | 'B' | 'C' | 'D' | null;
 
 interface Procedure {
     id: number;
-    text: string;
+    name: string;
+    result?: string;
 }
 
 interface AthleteInfo {
@@ -70,7 +71,15 @@ interface AthleteInfo {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsultationScreenComponent {
+    onsetDate: string = '';          // now bound to <input type="date">, stays a plain ISO string e.g. "2026-07-01"
+    impactComment: string = '';      // new comment box under Impact on Performance
 
+    // Step 3 — Impression & Findings
+    generalImpressionNotes: string = '';
+    purchaseInfluencer: string | null = null;
+
+    // Step 4 — Judgment (Write Report branch)
+    generalOpinion: string = '';
     // ── State ──────────────────────────────────────────────────────────────
     readonly entryType = signal<EntryType>(null);
     displayPatientInfoDialog = false;
@@ -84,6 +93,13 @@ export class ConsultationScreenComponent {
     private readonly servicesService = inject(ServicesService);
     private readonly route = inject(ActivatedRoute);
     private readonly router = inject(Router);
+
+    readonly purchaseInfluencerOptions = [
+        { label: 'Athlete themself', value: 'self' },
+        { label: 'Parent / Guardian', value: 'parent' },
+        { label: 'Coach', value: 'coach' },
+        { label: 'Club / Team', value: 'club' }
+    ];
 
     constructor() {
         this.route.queryParams.subscribe(params => {
@@ -227,8 +243,8 @@ export class ConsultationScreenComponent {
 
     // ── Examination form ────────────────────────────────────────────────────
     readonly procedures = signal<Procedure[]>([
-        { id: 1, text: '' },
-        { id: 2, text: '' }
+        { id: 1, name: '' },
+        { id: 2, name: '' }
     ]);
     nextProcId = 3;
 
@@ -252,7 +268,6 @@ export class ConsultationScreenComponent {
     impactTraining: string = '';
     impactCompetition: string = '';
     impactDaily: string = '';
-    onsetDate: string = '';
     aggravating: string = '';
 
     // Clinical Findings
@@ -279,6 +294,14 @@ export class ConsultationScreenComponent {
             copy[index] = !copy[index];
             return copy;
         });
+    }
+
+    daysSinceOnset(): number | null {
+        if (!this.onsetDate) return null;
+        const start = new Date(this.onsetDate);
+        if (isNaN(start.getTime())) return null;
+        const diffMs = Date.now() - start.getTime();
+        return Math.max(0, Math.floor(diffMs / 86400000));
     }
 
     // Behavioral Signals (Internal Only)
@@ -678,7 +701,7 @@ export class ConsultationScreenComponent {
     }
 
     addProcedure(): void {
-        this.procedures.update(procs => [...procs, { id: this.nextProcId++, text: '' }]);
+        this.procedures.update(procs => [...procs, { id: this.nextProcId++, name: '' }]);
     }
 
     updateProcedure(id: number, text: string): void {
@@ -718,6 +741,33 @@ export class ConsultationScreenComponent {
     trackById(_: number, item: Procedure): number {
         return item.id;
     }
+
+    judgmentChoice = signal<'writeReport' | 'extraAssessment' | null>(null);
+
+    setJudgmentChoice(choice: 'writeReport' | 'extraAssessment'): void {
+        this.judgmentChoice.set(choice);
+    }
+
+    // Mirrors the old getDecisionConfirmVisible(), but branches on judgmentChoice()
+    getJudgmentConfirmVisible(): boolean {
+        if (this.judgmentChoice() === 'writeReport') {
+            return !!this.generalOpinion?.trim()
+                && !!this.diagnosisText?.trim()
+                && !!this.goalText?.trim();
+        }
+        if (this.judgmentChoice() === 'extraAssessment') {
+            return this.entryType() === 'reassess'
+                ? !!this.selectedReassessPath()
+                : !!this.selectedPath();
+        }
+        return false;
+    }
+
+
+
+
+
+
 }
 
 // ── Sidebar types ────────────────────────────────────────────────────────────
@@ -729,3 +779,5 @@ interface SidebarData {
     ticketStatus: SidebarItem[];
     activeProtocol: { title: string; rows: { label: string; value: string }[] } | null;
 }
+
+

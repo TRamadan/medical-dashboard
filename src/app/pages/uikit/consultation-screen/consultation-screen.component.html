@@ -111,7 +111,8 @@
 
             @if (entryType() === 'new') {
             <div class="note-banner note-mint mb-3">
-                <strong>New Athlete — Full Blueprint:</strong> Exam → Assessment → Diagnosis → Path → Action.<br />
+                <strong>New Athlete — Full Blueprint:</strong> Complaint → Exam → Impression → Judgment → Report →
+                Action.<br />
                 Data Map complete ✓ · Payment confirmed ✓
             </div>
             <div class="btn-row">
@@ -155,67 +156,10 @@
             }
             }
 
-            <!-- ══ STEP 1 — Clinical Examination ══ -->
+
+            <!-- ══ STEP 1 — Complaint Registration ══ -->
+            <!-- NOTE (TS): add impactComment, and a computed daysSinceOnset signal derived from onsetDate -->
             @if (currentStep() === 1) {
-            <p-card styleClass="mb-3">
-                <ng-template pTemplate="title"> Clinical Examination</ng-template>
-                <div class="procedure-list mb-3">
-                    @for (p of procedures(); track p.id) {
-                    <div class="procedure-item">
-                        <div class="proc-num">{{ p.id }}</div>
-                        <textarea pTextarea [(ngModel)]="p.text" placeholder="Procedure description..." style="flex:1;resize:vertical;min-height:36px;padding:.5rem;border-radius:6px;
-                       border:1px solid var(--p-content-border-color);background:var(--p-content-background);
-                       font-family:inherit;font-size:.85rem;color:inherit;outline:none;"></textarea>
-                        <p-button icon="pi pi-trash" severity="danger" [text]="true"
-                            (onClick)="removeProcedure(p.id)"></p-button>
-                    </div>
-                    }
-                </div>
-                <p-button label="+ Add Procedure" [outlined]="true" severity="secondary" styleClass="w-full"
-                    (onClick)="addProcedure()"></p-button>
-            </p-card>
-
-            <p-card styleClass="mb-3">
-                <ng-template pTemplate="title"> Initial Measurements</ng-template>
-                <div class="form-grid-3 mb-3">
-                    <div>
-                        <div class="field-label">VAS Pain <span class="req">*</span></div>
-                        <p-inputNumber [(ngModel)]="vasPain" [min]="0" [max]="10" placeholder="0-10" styleClass="w-full"
-                            class="w-full"></p-inputNumber>
-                    </div>
-                    <div>
-                        <div class="field-label">ROM Flexion</div>
-                        <input pInputText [(ngModel)]="romFlexion" placeholder="°" class="w-full" />
-                    </div>
-                    <div>
-                        <div class="field-label">ROM Extension</div>
-                        <input pInputText [(ngModel)]="romExtension" placeholder="°" class="w-full" />
-                    </div>
-                </div>
-                <div class="form-grid-3">
-                    <div>
-                        <div class="field-label">Quad LSI %</div>
-                        <input pInputText [(ngModel)]="quadLsi" placeholder="%" class="w-full" />
-                    </div>
-                    <div>
-                        <div class="field-label">Effusion</div>
-                        <p-select [options]="effusionOptions" [(ngModel)]="effusion" optionLabel="label"
-                            optionValue="value" styleClass="w-full" class="w-full" appendTo="body"></p-select>
-                    </div>
-                    <div>
-                        <div class="field-label">Asymmetry %</div>
-                        <input pInputText [(ngModel)]="asymmetry" placeholder="%" class="w-full" />
-                    </div>
-                </div>
-            </p-card>
-
-            <div class="btn-row">
-                <p-button label="Next — Assessment →" (onClick)="go(2)"></p-button>
-            </div>
-            }
-
-            <!-- -- STEP 2  Clinical Assessment (Doctor Form) -- -->
-            @if (currentStep() === 2) {
 
             <!-- Clinical Complaint -->
             <p-card styleClass="mb-3">
@@ -254,13 +198,25 @@
                                 appendTo="body"></p-select>
                         </div>
                     </div>
+                    <div class="mt-2">
+                        <div class="field-label">Additional comment on impact</div>
+                        <textarea pTextarea [(ngModel)]="impactComment"
+                            placeholder="Any extra detail on how the complaint affects training, competition or daily life..."
+                            style="width:100%;min-height:55px;padding:.55rem .7rem;border-radius:8px;
+                       border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                       font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                    </div>
                 </div>
 
-                <div class="form-grid-2">
+                <div class="form-grid-3">
                     <div>
                         <div class="field-label">When did the complaint start? <span class="req">*</span></div>
-                        <input pInputText [(ngModel)]="onsetDate" placeholder="e.g. 3 weeks ago / Jan 2026"
-                            class="w-full" />
+                        <input pInputText type="date" [(ngModel)]="onsetDate" class="w-full" />
+                    </div>
+                    <div>
+                        <div class="field-label">Days since onset</div>
+                        <input pInputText [value]="daysSinceOnset() !== null ? (daysSinceOnset() + ' day(s)') : '—'"
+                            [disabled]="true" class="w-full" style="font-weight:600" />
                     </div>
                     <div>
                         <div class="field-label">What aggravates the pain?</div>
@@ -270,9 +226,69 @@
                 </div>
             </p-card>
 
-            <!-- Clinical Findings -->
+            <div class="btn-row">
+                <p-button label="Next — Exploratory & Confirmatory Procedure" icon="pi pi-arrow-right" iconPos="right"
+                    (onClick)="go(2)"></p-button>
+            </div>
+            }
+
+
+            <!-- ══ STEP 2 — Exploratory & Confirmatory Procedure + Subjective Observation ══ -->
+            <!-- NOTE (TS): change procedures() row shape from { id, text } to { id, name, result } -->
+            @if (currentStep() === 2) {
             <p-card styleClass="mb-3">
-                <ng-template pTemplate="title"> Key Clinical Findings</ng-template>
+                <ng-template pTemplate="title"> Exploratory & Confirmatory Procedure</ng-template>
+                <div class="procedure-list mb-3">
+                    @for (p of procedures(); track p.id) {
+                    <div class="procedure-item">
+                        <div class="proc-num">{{ p.id }}</div>
+                        <input pInputText [(ngModel)]="p.name" placeholder="Procedure name..." style="flex:1;" />
+                        <input pInputText [(ngModel)]="p.result" placeholder="Result..." style="flex:1;" />
+                        <p-button icon="pi pi-trash" severity="danger" [text]="true"
+                            (onClick)="removeProcedure(p.id)"></p-button>
+                    </div>
+                    }
+                </div>
+                <p-button label="+ Add Procedure" [outlined]="true" severity="secondary" styleClass="w-full"
+                    (onClick)="addProcedure()"></p-button>
+            </p-card>
+
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title"> Subjective Observation</ng-template>
+                <div class="form-grid-3">
+                    <div>
+                        <div class="field-label">VAS Pain <span class="req">*</span></div>
+                        <p-inputNumber [(ngModel)]="vasPain" [min]="0" [max]="10" placeholder="0-10" styleClass="w-full"
+                            class="w-full"></p-inputNumber>
+                    </div>
+                    <div>
+                        <div class="field-label">Effusion</div>
+                        <p-select [options]="effusionOptions" [(ngModel)]="effusion" optionLabel="label"
+                            optionValue="value" styleClass="w-full" class="w-full" appendTo="body"></p-select>
+                    </div>
+                    <div>
+                        <div class="field-label">Asymmetry %</div>
+                        <input pInputText [(ngModel)]="asymmetry" placeholder="%" class="w-full" />
+                    </div>
+                </div>
+            </p-card>
+
+            <div class="btn-row">
+                <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
+                    (onClick)="go(1)"></p-button>
+                <p-button label="Next — Impression & Findings" icon="pi pi-arrow-right" iconPos="right"
+                    (onClick)="go(3)"></p-button>
+            </div>
+            }
+
+
+            <!-- ══ STEP 3 — Impression & Findings ══ -->
+            <!-- NOTE (TS): add generalImpressionNotes and purchaseInfluencer properties -->
+            @if (currentStep() === 3) {
+
+            <!-- Findings -->
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title"> Findings</ng-template>
                 <div class="mb-3">
                     <div class="field-label">Dysfunctions and risk factors <span class="req">*</span></div>
                     <textarea pTextarea [(ngModel)]="findingsMain"
@@ -282,20 +298,29 @@
                 </div>
                 <div class="form-grid-2">
                     <div>
-                        <div class="field-label">Observed strengths</div>
+                        <div class="field-label">Strengths observed</div>
                         <textarea pTextarea [(ngModel)]="findingsStrengths"
                             placeholder="e.g. High endurance, good response to therapy..." style="width:100%;min-height:55px;padding:.55rem .7rem;border-radius:8px;
                      border:1px solid var(--p-content-border-color);background:var(--p-content-background);
                      font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
                     </div>
                     <div>
-                        <div class="field-label">Weaknesses and priorities</div>
+                        <div class="field-label">Weaknesses observed</div>
                         <textarea pTextarea [(ngModel)]="findingsWeaknesses"
                             placeholder="e.g. Hamstring weakness, fear of movement..." style="width:100%;min-height:55px;padding:.55rem .7rem;border-radius:8px;
                      border:1px solid var(--p-content-border-color);background:var(--p-content-background);
                      font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
                     </div>
                 </div>
+            </p-card>
+
+            <!-- Notes & General Impression -->
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title"> Notes & General Impression</ng-template>
+                <textarea pTextarea [(ngModel)]="generalImpressionNotes"
+                    placeholder="Overall impression of the session, general notes for the file..." style="width:100%;min-height:65px;padding:.55rem .7rem;border-radius:8px;
+               border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+               font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
             </p-card>
 
             <!-- Yellow Flag Score -->
@@ -383,6 +408,12 @@
                             appendTo="body" [style]="{'border-color':'rgba(107,71,255,.2)'}"></p-select>
                     </div>
                 </div>
+                <div class="mb-3">
+                    <div class="field-label">Who is the main influencer in the purchase decision?</div>
+                    <p-select [options]="purchaseInfluencerOptions" [(ngModel)]="purchaseInfluencer" optionLabel="label"
+                        optionValue="value" placeholder="Select" styleClass="w-full" class="w-full" appendTo="body"
+                        [style]="{'border-color':'rgba(107,71,255,.2)'}"></p-select>
+                </div>
                 <div>
                     <div class="field-label">Additional behavioural notes</div>
                     <textarea pTextarea [(ngModel)]="behavioralNotes" placeholder="Informal signals from the session..."
@@ -394,13 +425,55 @@
 
             <div class="btn-row">
                 <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
-                    (onClick)="go(1)"></p-button>
-                <p-button label="Next Diagnosis" icon="pi pi-arrow-right" iconPos="right" (onClick)="go(3)"></p-button>
+                    (onClick)="go(2)"></p-button>
+                <p-button label="Next — Judgment" icon="pi pi-arrow-right" iconPos="right" (onClick)="go(4)"></p-button>
             </div>
             }
 
-            <!-- -- STEP 3  Diagnosis -- -->
-            @if (currentStep() === 3) {
+
+            <!-- ══ STEP 4 — Judgment ══ -->
+            <!-- NOTE (TS): add judgmentChoice: 'writeReport' | 'extraAssessment', and generalOpinion property -->
+            @if (currentStep() === 4) {
+
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title"> Judgment</ng-template>
+                <p class="field-label mb-3">Based on the examination and impression, choose how to proceed:</p>
+                <div class="path-grid cols-2">
+                    <div class="path-card" [class.sel-p1]="judgmentChoice()==='writeReport'"
+                        (click)="setJudgmentChoice('writeReport')">
+                        <div class="pc-icon" style="color:#1AAD7A">
+                            <i class="pi pi-file-edit"></i>
+                        </div>
+                        <div class="pc-name">Write Report</div>
+                        <div class="pc-desc">Diagnosis is clear — record the general opinion and define the plan.
+                        </div>
+                    </div>
+                    <div class="path-card" [class.sel-p2]="judgmentChoice()==='extraAssessment'"
+                        (click)="setJudgmentChoice('extraAssessment')">
+                        <div class="pc-icon" style="color:#F5A623">
+                            <i class="pi pi-search-plus"></i>
+                        </div>
+                        <div class="pc-name">Extra Assessment</div>
+                        <div class="pc-desc">Need more data first — internal measurement, external referral, or move
+                            straight to Blueprint.</div>
+                    </div>
+                </div>
+            </p-card>
+
+            <!-- Branch A — Write Report -->
+            @if (judgmentChoice() === 'writeReport') {
+
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title"> General Opinion & Recommendation</ng-template>
+                <div class="mb-3">
+                    <div class="field-label">General opinion <span class="req">*</span></div>
+                    <textarea pTextarea [(ngModel)]="generalOpinion"
+                        placeholder="Overall opinion and recommendation for the athlete's plan..." style="width:100%;min-height:65px;padding:.55rem .7rem;border-radius:8px;
+                   border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                   font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                </div>
+            </p-card>
+
             <p-card styleClass="mb-3">
                 <ng-template pTemplate="title"> Diagnosis</ng-template>
                 <div class="mb-3">
@@ -448,193 +521,10 @@
                     </div>
                 </div>
             </p-card>
-
-            <div class="btn-row">
-                <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
-                    (onClick)="go(2)"></p-button>
-                <p-button label="Next — Athlete Report" icon="pi pi-arrow-right" iconPos="right"
-                    (onClick)="go(4)"></p-button>
-            </div>
             }
 
-            <!-- ══ STEP 4 — Athlete Report ══ -->
-            @if (currentStep() === 4) {
-            <form [formGroup]="rehabForm">
-                <p-card styleClass="mb-3">
-                    <ng-template pTemplate="title">
-                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <span>Athlete Report</span>
-
-                        </div>
-                    </ng-template>
-
-                    <!-- Recommended Service / Track — selectable cards, visible to client only -->
-                    <div class="mb-4">
-                        <div class="field-label" style="font-weight: 600; margin-bottom: 0.6rem;">
-                            Recommended Service / Track <span class="req">*</span>
-                        </div>
-
-                        @if (servicesLoading()) {
-                        <!-- Loading skeleton -->
-                        <div class="service-card-grid">
-                            @for (_ of [1,2,3]; track $index) {
-                            <div class="service-card service-card--skeleton">
-                                <div class="sc-skeleton-icon"></div>
-                                <div class="sc-skeleton-line sc-skeleton-line--wide"></div>
-                                <div class="sc-skeleton-line"></div>
-                            </div>
-                            }
-                        </div>
-                        } @else if (servicesError()) {
-                        <div style="padding: 0.5rem 0.8rem; border-radius: 8px;
-                                    border: 1px solid rgba(226,75,74,.3);
-                                    background: rgba(226,75,74,.06);
-                                    color: #E24B4A; font-size: 0.83rem;">
-                            ⚠ {{ servicesError() }}
-                        </div>
-                        } @else if (recommendedTrackOptions().length === 0) {
-                        <div style="padding: 0.6rem 0.8rem; border-radius: 8px;
-                                    border: 1px dashed var(--p-content-border-color);
-                                    color: var(--p-text-muted-color); font-size: 0.83rem;">
-                            No services available.
-                        </div>
-                        } @else {
-                        <div class="service-card-grid" role="radiogroup" aria-label="Recommended Service or Track">
-                            @for (opt of recommendedTrackOptions(); track opt.value) {
-                            <div class="service-card" [class.selected]="selectedServiceId === opt.value" role="radio"
-                                [attr.aria-checked]="selectedServiceId === opt.value"
-                                [attr.tabindex]="selectedServiceId === opt.value ? 0 : -1"
-                                (click)="selectService(opt.value)" (keydown.enter)="selectService(opt.value)"
-                                (keydown.space)="$event.preventDefault(); selectService(opt.value)">
-                                <!-- hidden radio for native form semantics -->
-                                <input type="radio" class="sc-hidden-radio" [id]="'svc-' + opt.value"
-                                    name="recommendedTrack" [value]="opt.value"
-                                    [checked]="selectedServiceId === opt.value" (change)="selectService(opt.value)"
-                                    [attr.aria-hidden]="true" tabindex="-1" />
-                                <div class="sc-check-ring" [class.checked]="selectedServiceId === opt.value"
-                                    aria-hidden="true">
-                                    <i class="pi pi-check" style="font-size: 0.65rem;"></i>
-                                </div>
-                                <div class="sc-icon" aria-hidden="true">
-                                    <i class="pi pi-briefcase"></i>
-                                </div>
-                                <div class="sc-name">{{ opt.label }}</div>
-                            </div>
-                            }
-                        </div>
-                        }
-                    </div>
-
-                    <!-- Priority / Urgency Level — visible to both -->
-                    <div class="mb-4">
-                        <div class="field-label" style="font-weight: 600;">Priority / Urgency Level <span
-                                class="req">*</span></div>
-                        <p-selectButton [options]="priorityOptions" formControlName="priorityLevel" optionLabel="label"
-                            optionValue="value" class="w-full"></p-selectButton>
-                    </div>
-
-                    <!-- Program Duration — visible to both; Custom reveals sessions/week input -->
-                    <div class="form-grid-2 mb-4" style="align-items: flex-end;">
-                        <div>
-                            <div class="field-label" style="font-weight: 600;">Program Duration <span
-                                    class="req">*</span></div>
-                            <p-dropdown [options]="durationOptions" formControlName="programDuration"
-                                optionLabel="label" optionValue="value" styleClass="w-full" class="w-full"
-                                appendTo="body"></p-dropdown>
-                        </div>
-                        @if (rehabForm.get('programDuration')?.value === 'custom') {
-                        <div>
-                            <div class="field-label" style="font-weight: 600;">Sessions per Week <span
-                                    class="req">*</span></div>
-                            <p-inputNumber formControlName="customSessionsPerWeek" [showButtons]="true" [min]="1"
-                                [max]="7" styleClass="w-full" class="w-full"></p-inputNumber>
-                        </div>
-                        }
-                    </div>
-
-                    <!-- Plan Phases — internal only, dynamic FormArray rows via p-table -->
-                    <div class="mb-4">
-                        <div
-                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <div class="field-label" style="font-weight: 600; margin: 0;">Plan Phases
-                                <span style="margin-left: 0.5rem; font-size: 0.7rem; padding: 2px 7px; border-radius: 5px;
-                                     background: rgba(107,71,255,.1); color: #9B7FFF; font-weight: 600;">Internal
-                                    Only</span>
-                            </div>
-                            <p-button label="Add Phase Row" icon="pi pi-plus" [outlined]="true" size="small"
-                                (onClick)="addPhaseRow()"></p-button>
-                        </div>
-
-                        <p-table [value]="phasesArray.controls" styleClass="p-datatable-gridlines mt-1">
-                            <ng-template pTemplate="header">
-                                <tr>
-                                    <th style="width: 25%;">Phase Name</th>
-                                    <th style="width: 30%;">Goal</th>
-                                    <th style="width: 25%;">Transition Criteria</th>
-                                    <th style="width: 12%;">Sessions</th>
-                                    <th style="width: 8%;"></th>
-                                </tr>
-                            </ng-template>
-                            <ng-template pTemplate="body" let-control let-i="rowIndex">
-                                <tr [formGroup]="control">
-                                    <td><input pInputText formControlName="phaseName" placeholder="e.g. Phase 1…"
-                                            class="w-full" style="padding:.35rem .5rem;font-size:.85rem;" /></td>
-                                    <td><input pInputText formControlName="goal" placeholder="e.g. Restore ROM…"
-                                            class="w-full" style="padding:.35rem .5rem;font-size:.85rem;" /></td>
-                                    <td><input pInputText formControlName="transitionCriteria"
-                                            placeholder="e.g. LSI > 80%…" class="w-full"
-                                            style="padding:.35rem .5rem;font-size:.85rem;" /></td>
-                                    <td><p-inputNumber formControlName="sessions" [min]="1" [max]="50" class="w-full"
-                                            styleClass="w-full" [style]="{fontSize:'0.85rem'}"></p-inputNumber></td>
-                                    <td style="text-align:center;">
-                                        <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
-                                            [disabled]="phasesArray.length <= 1"
-                                            (onClick)="removePhaseRow(i)"></p-button>
-                                    </td>
-                                </tr>
-                            </ng-template>
-                        </p-table>
-                    </div>
-
-                    <!-- Sports Recommendations — visible to client -->
-                    <div class="mb-4">
-                        <div class="field-label" style="font-weight: 600;">Sports Recommendations</div>
-                        <p class="field-label" style="margin-top:0;font-size:.78rem;">Visible to the client in their
-                            report.</p>
-                        <textarea pTextarea formControlName="sportsRecommendations"
-                            placeholder="e.g. Resume light jogging after Phase 2, avoid contact sports until graduation…"
-                            [rows]="3" [autoResize]="true" class="w-full" style="resize:vertical;min-height:80px;padding:.55rem .7rem;border-radius:8px;
-                                         border:1px solid var(--p-content-border-color);background:var(--p-content-background);
-                                         font-family:inherit;font-size:.85rem;outline:none;"></textarea>
-                    </div>
-
-                    <!-- Team Notes — internal only, never shown in client view -->
-                    <div class="mb-2">
-                        <div class="field-label" style="font-weight: 600;">Team Notes
-                            <span style="margin-left: 0.5rem; font-size: 0.7rem; padding: 2px 7px; border-radius: 5px;
-                                 background: rgba(107,71,255,.1); color: #9B7FFF; font-weight: 600;">Internal
-                                Only</span>
-                        </div>
-                        <p class="field-label" style="margin-top:0;font-size:.78rem;">Never visible to the client.</p>
-                        <textarea pTextarea formControlName="teamNotes"
-                            placeholder="e.g. Monitor psychological status (Yellow Flag alert). Focus on quad control…"
-                            [rows]="3" [autoResize]="true" class="w-full" style="resize:vertical;min-height:80px;padding:.55rem .7rem;border-radius:8px;
-                                         border:1px solid rgba(107,71,255,.2);background:var(--p-content-background);
-                                         font-family:inherit;font-size:.85rem;outline:none;"></textarea>
-                    </div>
-
-                </p-card>
-            </form>
-
-            <div class="btn-row">
-                <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
-                    (onClick)="go(3)"></p-button>
-                <p-button label="Next — Decision" icon="pi pi-arrow-right" iconPos="right" (onClick)="go(5)"></p-button>
-            </div>
-            }
-
-            <!-- -- STEP 5  Path Decision -- -->
-            @if (currentStep() === 5) {
+            <!-- Branch B — Extra Assessment -->
+            @if (judgmentChoice() === 'extraAssessment') {
             <p-card styleClass="mb-3">
                 <ng-template pTemplate="title">
                     {{ entryType() === 'reassess' ? 'Reassessment Decision what happens to the active program?' :
@@ -839,13 +729,192 @@
                 }
                 }
             </p-card>
+            }
+
+            <div class="btn-row">
+                <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
+                    (onClick)="go(3)"></p-button>
+                @if (getJudgmentConfirmVisible()) {
+                <p-button label="Next — Athlete Report" icon="pi pi-arrow-right" iconPos="right"
+                    (onClick)="go(5)"></p-button>
+                }
+            </div>
+            }
+
+
+            <!-- ══ STEP 5 — Athlete Report ══ -->
+            @if (currentStep() === 5) {
+            <form [formGroup]="rehabForm">
+                <p-card styleClass="mb-3">
+                    <ng-template pTemplate="title">
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                            <span>Athlete Report</span>
+
+                        </div>
+                    </ng-template>
+
+                    <!-- Recommended Service / Track — selectable cards, visible to client only -->
+                    <div class="mb-4">
+                        <div class="field-label" style="font-weight: 600; margin-bottom: 0.6rem;">
+                            Recommended Service / Track <span class="req">*</span>
+                        </div>
+
+                        @if (servicesLoading()) {
+                        <!-- Loading skeleton -->
+                        <div class="service-card-grid">
+                            @for (_ of [1,2,3]; track $index) {
+                            <div class="service-card service-card--skeleton">
+                                <div class="sc-skeleton-icon"></div>
+                                <div class="sc-skeleton-line sc-skeleton-line--wide"></div>
+                                <div class="sc-skeleton-line"></div>
+                            </div>
+                            }
+                        </div>
+                        } @else if (servicesError()) {
+                        <div style="padding: 0.5rem 0.8rem; border-radius: 8px;
+                                    border: 1px solid rgba(226,75,74,.3);
+                                    background: rgba(226,75,74,.06);
+                                    color: #E24B4A; font-size: 0.83rem;">
+                            ⚠ {{ servicesError() }}
+                        </div>
+                        } @else if (recommendedTrackOptions().length === 0) {
+                        <div style="padding: 0.6rem 0.8rem; border-radius: 8px;
+                                    border: 1px dashed var(--p-content-border-color);
+                                    color: var(--p-text-muted-color); font-size: 0.83rem;">
+                            No services available.
+                        </div>
+                        } @else {
+                        <div class="service-card-grid" role="radiogroup" aria-label="Recommended Service or Track">
+                            @for (opt of recommendedTrackOptions(); track opt.value) {
+                            <div class="service-card" [class.selected]="selectedServiceId === opt.value" role="radio"
+                                [attr.aria-checked]="selectedServiceId === opt.value"
+                                [attr.tabindex]="selectedServiceId === opt.value ? 0 : -1"
+                                (click)="selectService(opt.value)" (keydown.enter)="selectService(opt.value)"
+                                (keydown.space)="$event.preventDefault(); selectService(opt.value)">
+                                <!-- hidden radio for native form semantics -->
+                                <input type="radio" class="sc-hidden-radio" [id]="'svc-' + opt.value"
+                                    name="recommendedTrack" [value]="opt.value"
+                                    [checked]="selectedServiceId === opt.value" (change)="selectService(opt.value)"
+                                    [attr.aria-hidden]="true" tabindex="-1" />
+                                <div class="sc-check-ring" [class.checked]="selectedServiceId === opt.value"
+                                    aria-hidden="true">
+                                    <i class="pi pi-check" style="font-size: 0.65rem;"></i>
+                                </div>
+                                <div class="sc-icon" aria-hidden="true">
+                                    <i class="pi pi-briefcase"></i>
+                                </div>
+                                <div class="sc-name">{{ opt.label }}</div>
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Priority / Urgency Level — visible to both -->
+                    <div class="mb-4">
+                        <div class="field-label" style="font-weight: 600;">Priority / Urgency Level <span
+                                class="req">*</span></div>
+                        <p-selectButton [options]="priorityOptions" formControlName="priorityLevel" optionLabel="label"
+                            optionValue="value" class="w-full"></p-selectButton>
+                    </div>
+
+                    <!-- Program Duration — visible to both; Custom reveals sessions/week input -->
+                    <div class="form-grid-2 mb-4" style="align-items: flex-end;">
+                        <div>
+                            <div class="field-label" style="font-weight: 600;">Program Duration <span
+                                    class="req">*</span></div>
+                            <p-dropdown [options]="durationOptions" formControlName="programDuration"
+                                optionLabel="label" optionValue="value" styleClass="w-full" class="w-full"
+                                appendTo="body"></p-dropdown>
+                        </div>
+                        @if (rehabForm.get('programDuration')?.value === 'custom') {
+                        <div>
+                            <div class="field-label" style="font-weight: 600;">Sessions per Week <span
+                                    class="req">*</span></div>
+                            <p-inputNumber formControlName="customSessionsPerWeek" [showButtons]="true" [min]="1"
+                                [max]="7" styleClass="w-full" class="w-full"></p-inputNumber>
+                        </div>
+                        }
+                    </div>
+
+                    <!-- Plan Phases — internal only, dynamic FormArray rows via p-table -->
+                    <div class="mb-4">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <div class="field-label" style="font-weight: 600; margin: 0;">Plan Phases
+                                <span style="margin-left: 0.5rem; font-size: 0.7rem; padding: 2px 7px; border-radius: 5px;
+                                     background: rgba(107,71,255,.1); color: #9B7FFF; font-weight: 600;">Internal
+                                    Only</span>
+                            </div>
+                            <p-button label="Add Phase Row" icon="pi pi-plus" [outlined]="true" size="small"
+                                (onClick)="addPhaseRow()"></p-button>
+                        </div>
+
+                        <p-table [value]="phasesArray.controls" styleClass="p-datatable-gridlines mt-1">
+                            <ng-template pTemplate="header">
+                                <tr>
+                                    <th style="width: 25%;">Phase Name</th>
+                                    <th style="width: 30%;">Goal</th>
+                                    <th style="width: 25%;">Transition Criteria</th>
+                                    <th style="width: 12%;">Sessions</th>
+                                    <th style="width: 8%;"></th>
+                                </tr>
+                            </ng-template>
+                            <ng-template pTemplate="body" let-control let-i="rowIndex">
+                                <tr [formGroup]="control">
+                                    <td><input pInputText formControlName="phaseName" placeholder="e.g. Phase 1…"
+                                            class="w-full" style="padding:.35rem .5rem;font-size:.85rem;" /></td>
+                                    <td><input pInputText formControlName="goal" placeholder="e.g. Restore ROM…"
+                                            class="w-full" style="padding:.35rem .5rem;font-size:.85rem;" /></td>
+                                    <td><input pInputText formControlName="transitionCriteria"
+                                            placeholder="e.g. LSI > 80%…" class="w-full"
+                                            style="padding:.35rem .5rem;font-size:.85rem;" /></td>
+                                    <td><p-inputNumber formControlName="sessions" [min]="1" [max]="50" class="w-full"
+                                            styleClass="w-full" [style]="{fontSize:'0.85rem'}"></p-inputNumber></td>
+                                    <td style="text-align:center;">
+                                        <p-button icon="pi pi-trash" [rounded]="true" [text]="true" severity="danger"
+                                            [disabled]="phasesArray.length <= 1"
+                                            (onClick)="removePhaseRow(i)"></p-button>
+                                    </td>
+                                </tr>
+                            </ng-template>
+                        </p-table>
+                    </div>
+
+                    <!-- Sports Recommendations — visible to client -->
+                    <div class="mb-4">
+                        <div class="field-label" style="font-weight: 600;">Sports Recommendations</div>
+                        <p class="field-label" style="margin-top:0;font-size:.78rem;">Visible to the client in their
+                            report.</p>
+                        <textarea pTextarea formControlName="sportsRecommendations"
+                            placeholder="e.g. Resume light jogging after Phase 2, avoid contact sports until graduation…"
+                            [rows]="3" [autoResize]="true" class="w-full" style="resize:vertical;min-height:80px;padding:.55rem .7rem;border-radius:8px;
+                                         border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                                         font-family:inherit;font-size:.85rem;outline:none;"></textarea>
+                    </div>
+
+                    <!-- Team Notes — internal only, never shown in client view -->
+                    <div class="mb-2">
+                        <div class="field-label" style="font-weight: 600;">Team Notes
+                            <span style="margin-left: 0.5rem; font-size: 0.7rem; padding: 2px 7px; border-radius: 5px;
+                                 background: rgba(107,71,255,.1); color: #9B7FFF; font-weight: 600;">Internal
+                                Only</span>
+                        </div>
+                        <p class="field-label" style="margin-top:0;font-size:.78rem;">Never visible to the client.</p>
+                        <textarea pTextarea formControlName="teamNotes"
+                            placeholder="e.g. Monitor psychological status (Yellow Flag alert). Focus on quad control…"
+                            [rows]="3" [autoResize]="true" class="w-full" style="resize:vertical;min-height:80px;padding:.55rem .7rem;border-radius:8px;
+                                         border:1px solid rgba(107,71,255,.2);background:var(--p-content-background);
+                                         font-family:inherit;font-size:.85rem;outline:none;"></textarea>
+                    </div>
+
+                </p-card>
+            </form>
 
             <div class="btn-row">
                 <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
                     (onClick)="go(4)"></p-button>
-                @if (getDecisionConfirmVisible()) {
-                <p-button label="Confirm Path & Continue" severity="success" (onClick)="go(6)"></p-button>
-                }
+                <p-button label="Next — Action" icon="pi pi-arrow-right" iconPos="right" (onClick)="go(6)"></p-button>
             </div>
             }
 
@@ -994,6 +1063,7 @@
                     (onClick)="go(5)"></p-button>
             </div>
             }
+
 
         </div>
     </div>
@@ -1297,7 +1367,8 @@
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">تاريخ عائلي</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.fatherConditions.concat(mockPatientInfo.motherConditions).join('، ') }}
+                                {{ mockPatientInfo.fatherConditions.concat(mockPatientInfo.motherConditions).join('، ')
+                                }}
                             </div>
                         </div>
                         <div class="col-12 mb-3">
