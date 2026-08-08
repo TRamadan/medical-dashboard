@@ -1,8 +1,7 @@
-import { Component, computed, signal, OnInit, inject, ViewChild, ElementRef, input, effect } from '@angular/core';
+import { Component, computed, signal, OnInit, inject, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { TooltipModule } from 'primeng/tooltip';
-import { PatientFormService } from '../appointments/services/patient-form.service';
+import { FormsModule } from '@angular/forms';
 
 interface BodyPart {
     name: string;
@@ -32,22 +31,37 @@ interface ComponentProperty {
     selector: 'app-contact-us',
     templateUrl: './contact-us.component.html',
     styleUrls: ['./contact-us.component.css'],
-    imports: [CommonModule, TooltipModule],
-    standalone: true
+    imports: [CommonModule, FormsModule]
 })
 export class ContactUsComponent implements OnInit {
-    readonly = input<boolean>(false);
-    private readonly patientFormService = inject(PatientFormService, { optional: true });
-
     public mouseX = 0;
     public mouseY = 0;
     public hoveredPart: string = 'None';
-    public selectedParts: { [key: string]: boolean } = {};
     bodyParts: BodyPart[] = [];
     public polygonSelectionActive = false;
     public currentPolygon: { x: number; y: number }[] = [];
     public imageWidth = 0;
     public imageHeight = 0;
+
+    // Polygon drawing mode: 'click' places one vertex per click (original behavior),
+    // 'freehand' traces a continuous outline while the mouse button is held down.
+    public drawMode: 'click' | 'freehand' = 'click';
+    public isFreehandDrawing = false;
+    /** Minimum pixel distance between two captured freehand points (keeps the raw stroke from being thousands of points). */
+    private readonly freehandMinDistance = 4;
+    /** Ramer–Douglas–Peucker tolerance (px) used to thin a finished freehand stroke down to clean vertices. */
+    private readonly freehandSimplifyTolerance = 2.5;
+
+    // Redraw (update existing muscle polygon) properties
+    public isRedrawMode = false;
+    public redrawTargetName: string = '';
+
+    // Point-drag edit (move individual polygon vertices) properties
+    @ViewChild('anatomyImage', { static: false }) anatomyImage!: ElementRef<HTMLImageElement>;
+    public isPointEditMode = false;
+    public draggingPoint: { partName: string; index: number } | null = null;
+    private pointEditBackup: { x: number; y: number }[] | null = null;
+
     private readonly http = inject(HttpClient);
 
     // Feature Toggle Properties
@@ -62,35 +76,65 @@ export class ContactUsComponent implements OnInit {
     isDragging = false;
     dragOffset = { x: 0, y: 0 };
 
-    constructor() {
-        if (this.patientFormService) {
-            effect(() => {
-                const muscles = this.patientFormService?.form().selectedMuscles || [];
-                const newSelected: { [key: string]: boolean } = {};
-                muscles.forEach((m) => {
-                    newSelected[m] = true;
-                });
-                this.selectedParts = newSelected;
-            });
+    // Component templates
+    private componentTemplates: { [key: string]: any } = {
+        header: {
+            title: 'Your Website Title',
+            subtitle: 'Your tagline here'
+        },
+        text: {
+            content: 'Add your text content here...'
+        },
+        image: {
+            src: 'assets/placeholder-image.jpg',
+            alt: 'Image'
+        },
+        button: {
+            text: 'Click Me',
+            link: '#'
+        },
+        form: {
+            title: 'Contact Us',
+            fields: ['name', 'email', 'message']
+        },
+        gallery: {
+            items: [1, 2, 3, 4]
+        },
+        navbar: {
+            links: ['Home', 'About', 'Services', 'Contact']
+        },
+        footer: {
+            text: '© 2024 Your Company. All rights reserved.'
         }
-    }
+    };
 
     ngOnInit(): void {
-        this.http.get<BodyPart[]>('assets/muscle-polygns.json').subscribe((parts) => {
-            this.bodyParts = parts;
+        this.http.get<BodyPart[]>('assets/muscle-polygons.json').subscribe({
+            next: (parts) => {
+                this.bodyParts = parts;
+            },
+            error: (err) => {
+                console.error('Error loading muscle polygons asset:', err);
+            }
         });
     }
 
-    onPartClick(part: BodyPart, event: MouseEvent): void {
-        event.stopPropagation();
-        if (this.readonly()) {
+    startPolygonSelection(): void {
+        this.polygonSelectionActive = true;
+        this.currentPolygon = [];
+        if (this.drawMode === 'freehand') {
+            alert('Freehand selection started. Press and hold the mouse button, trace the outline of the muscle, then release. Click "Finish Polygon" when done.');
+        } else {
+            alert('Polygon selection started. Click each vertex of the region. Click "Finish Polygon" when done.');
+        }
+    }
+
+    /** Switches between click-per-vertex and click-and-drag freehand drawing. Locked once a drawing is in progress. */
+    setDrawMode(mode: 'click' | 'freehand'): void {
+        if (this.polygonSelectionActive) {
             return;
         }
-        this.selectedParts[part.name] = !this.selectedParts[part.name];
-        if (this.patientFormService) {
-            const selectedArray = Object.keys(this.selectedParts).filter(key => this.selectedParts[key]);
-            this.patientFormService.patch({ selectedMuscles: selectedArray });
-        }
+        this.drawMode = mode;
     }
 
     finishPolygon(): void {
@@ -102,6 +146,248 @@ export class ContactUsComponent implements OnInit {
         this.bodyParts.push({ name, polygon: [...this.currentPolygon] });
         this.polygonSelectionActive = false;
         this.currentPolygon = [];
+    }
+
+    // --- Redraw (update) an existing muscle's polygon ---
+
+    /** Called when the user picks a muscle to redraw from the dropdown. */
+    selectRedrawTarget(name: string): void {
+        this.redrawTargetName = name;
+    }
+
+    /** Starts redraw mode for the currently selected target muscle. */
+    startRedrawPolygon(): void {
+        if (!this.redrawTargetName) {
+            alert('Select a muscle to redraw first.');
+            return;
+        }
+        this.isRedrawMode = true;
+        this.polygonSelectionActive = true;
+        this.currentPolygon = [];
+        const instructions = this.drawMode === 'freehand'
+            ? `Redrawing "${this.redrawTargetName}". Press and hold, trace the new outline, then release. Click "Finish Redraw" when done.`
+            : `Redrawing "${this.redrawTargetName}". Click each new vertex on the image, then click "Finish Redraw".`;
+        alert(instructions);
+    }
+
+    /** Saves the newly drawn points over the target muscle's existing polygon. */
+    finishRedraw(): void {
+        if (this.currentPolygon.length < 3) {
+            alert('A polygon needs at least 3 points.');
+            return;
+        }
+        const part = this.bodyParts.find((p) => p.name === this.redrawTargetName);
+        if (part) {
+            part.polygon = [...this.currentPolygon];
+        } else {
+            alert(`Could not find muscle "${this.redrawTargetName}" to update.`);
+        }
+        this.isRedrawMode = false;
+        this.polygonSelectionActive = false;
+        this.currentPolygon = [];
+        this.redrawTargetName = '';
+
+        if (part) {
+            this.downloadPolygons();
+        }
+    }
+
+    /** Cancels redraw mode without modifying the existing polygon. */
+    cancelRedraw(): void {
+        this.isRedrawMode = false;
+        this.polygonSelectionActive = false;
+        this.currentPolygon = [];
+    }
+
+    /** Deletes the currently selected muscle entirely. */
+    deleteSelectedMuscle(): void {
+        if (!this.redrawTargetName) {
+            alert('Select a muscle to delete first.');
+            return;
+        }
+        const confirmed = confirm(`Delete muscle "${this.redrawTargetName}"? This cannot be undone.`);
+        if (!confirmed) {
+            return;
+        }
+        const index = this.bodyParts.findIndex((p) => p.name === this.redrawTargetName);
+        if (index > -1) {
+            this.bodyParts.splice(index, 1);
+        }
+        if (this.hoveredPart === this.redrawTargetName) {
+            this.hoveredPart = 'None';
+        }
+        // If we were mid-redraw on the deleted muscle, cancel that too.
+        if (this.isRedrawMode) {
+            this.cancelRedraw();
+        }
+        this.redrawTargetName = '';
+
+        if (index > -1) {
+            this.downloadPolygons();
+        }
+    }
+
+    // --- Drag-to-move individual polygon points for the selected muscle ---
+
+    /** Enters point-edit mode for the currently selected muscle. */
+    startPointEditMode(): void {
+        if (!this.redrawTargetName) {
+            alert('Select a muscle to edit first.');
+            return;
+        }
+        const part = this.bodyParts.find((p) => p.name === this.redrawTargetName);
+        if (!part || !part.polygon || part.polygon.length < 3) {
+            alert('That muscle has no polygon to edit.');
+            return;
+        }
+        this.isPointEditMode = true;
+        this.pointEditBackup = part.polygon.map((pt) => ({ ...pt }));
+    }
+
+    /** Called on mousedown over a vertex handle; begins tracking a drag if editing is active. */
+    onPointMouseDown(event: MouseEvent, part: BodyPart, index: number): void {
+        if (!this.isPointEditMode || part.name !== this.redrawTargetName) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        this.draggingPoint = { partName: part.name, index };
+    }
+
+    @HostListener('document:mousemove', ['$event'])
+    onDocumentMouseMove(event: MouseEvent): void {
+        if (this.isFreehandDrawing && this.anatomyImage) {
+            const rect = this.anatomyImage.nativeElement.getBoundingClientRect();
+            const x = Math.round(event.clientX - rect.left);
+            const y = Math.round(event.clientY - rect.top);
+            // Clamp to the image bounds so a fast drag off the edge doesn't record points outside the artwork.
+            const clampedX = Math.max(0, Math.min(x, this.imageWidth));
+            const clampedY = Math.max(0, Math.min(y, this.imageHeight));
+            this.addFreehandPoint(clampedX, clampedY);
+            return;
+        }
+
+        if (!this.draggingPoint || !this.anatomyImage) {
+            return;
+        }
+        const rect = this.anatomyImage.nativeElement.getBoundingClientRect();
+        const x = Math.round(event.clientX - rect.left);
+        const y = Math.round(event.clientY - rect.top);
+        const part = this.bodyParts.find((p) => p.name === this.draggingPoint!.partName);
+        if (part && part.polygon && part.polygon[this.draggingPoint.index]) {
+            part.polygon[this.draggingPoint.index] = { x, y };
+        }
+    }
+
+    @HostListener('document:mouseup')
+    onDocumentMouseUp(): void {
+        this.draggingPoint = null;
+        if (this.isFreehandDrawing) {
+            this.isFreehandDrawing = false;
+            // Thin the raw stroke (often hundreds of points) down to a clean polygon before the user reviews/finishes it.
+            if (this.currentPolygon.length > 3) {
+                this.currentPolygon = this.simplifyPolygon(this.currentPolygon, this.freehandSimplifyTolerance);
+            }
+        }
+    }
+
+    /** Starts a freehand stroke on mousedown over the image, if freehand mode + a selection/redraw is active. */
+    onImageMouseDown(event: MouseEvent): void {
+        if (!this.polygonSelectionActive || this.drawMode !== 'freehand') {
+            return;
+        }
+        event.preventDefault();
+        const img = event.target as HTMLImageElement;
+        const rect = img.getBoundingClientRect();
+        const x = Math.round(event.clientX - rect.left);
+        const y = Math.round(event.clientY - rect.top);
+        this.isFreehandDrawing = true;
+        this.currentPolygon = [{ x, y }];
+    }
+
+    /** Appends a point to the in-progress freehand stroke, skipping points too close to the last one captured. */
+    private addFreehandPoint(x: number, y: number): void {
+        const last = this.currentPolygon[this.currentPolygon.length - 1];
+        if (last) {
+            const dx = x - last.x;
+            const dy = y - last.y;
+            if (dx * dx + dy * dy < this.freehandMinDistance * this.freehandMinDistance) {
+                return;
+            }
+        }
+        this.currentPolygon.push({ x, y });
+    }
+
+    /**
+     * Ramer–Douglas–Peucker simplification. A freehand stroke can easily produce hundreds of points;
+     * this keeps only the vertices needed to preserve the traced shape within `tolerance` px.
+     */
+    private simplifyPolygon(points: { x: number; y: number }[], tolerance: number): { x: number; y: number }[] {
+        if (points.length < 3) {
+            return points;
+        }
+        const sqTolerance = tolerance * tolerance;
+
+        const sqSegDist = (p: { x: number; y: number }, p1: { x: number; y: number }, p2: { x: number; y: number }): number => {
+            let x = p1.x;
+            let y = p1.y;
+            let dx = p2.x - x;
+            let dy = p2.y - y;
+            if (dx !== 0 || dy !== 0) {
+                const t = ((p.x - x) * dx + (p.y - y) * dy) / (dx * dx + dy * dy);
+                if (t > 1) {
+                    x = p2.x;
+                    y = p2.y;
+                } else if (t > 0) {
+                    x += dx * t;
+                    y += dy * t;
+                }
+            }
+            dx = p.x - x;
+            dy = p.y - y;
+            return dx * dx + dy * dy;
+        };
+
+        const simplifySection = (pts: { x: number; y: number }[], first: number, last: number, out: { x: number; y: number }[]): void => {
+            let maxDist = sqTolerance;
+            let index = -1;
+            for (let i = first + 1; i < last; i++) {
+                const dist = sqSegDist(pts[i], pts[first], pts[last]);
+                if (dist > maxDist) {
+                    index = i;
+                    maxDist = dist;
+                }
+            }
+            if (index > -1) {
+                if (index - first > 1) simplifySection(pts, first, index, out);
+                out.push(pts[index]);
+                if (last - index > 1) simplifySection(pts, index, last, out);
+            }
+        };
+
+        const result: { x: number; y: number }[] = [points[0]];
+        simplifySection(points, 0, points.length - 1, result);
+        result.push(points[points.length - 1]);
+        return result;
+    }
+
+    /** Confirms the dragged point positions and downloads the updated JSON. */
+    finishPointEdit(): void {
+        this.isPointEditMode = false;
+        this.draggingPoint = null;
+        this.pointEditBackup = null;
+        this.downloadPolygons();
+    }
+
+    /** Reverts any dragged points back to their positions before edit mode started. */
+    cancelPointEdit(): void {
+        const part = this.bodyParts.find((p) => p.name === this.redrawTargetName);
+        if (part && this.pointEditBackup) {
+            part.polygon = this.pointEditBackup.map((pt) => ({ ...pt }));
+        }
+        this.isPointEditMode = false;
+        this.draggingPoint = null;
+        this.pointEditBackup = null;
     }
 
     onMouseMove(event: MouseEvent): void {
@@ -131,13 +417,21 @@ export class ContactUsComponent implements OnInit {
     }
 
     onImageClick(event: MouseEvent): void {
-        const img = event.target as HTMLImageElement;
-        const rect = img.getBoundingClientRect();
-        const x = Math.round(event.clientX - rect.left);
-        const y = Math.round(event.clientY - rect.top);
         if (this.polygonSelectionActive) {
-            this.currentPolygon.push({ x, y });
-            alert(`Point added: x: ${x}, y: ${y}`);
+            if (this.drawMode === 'click') {
+                const img = event.target as HTMLImageElement;
+                const rect = img.getBoundingClientRect();
+                const x = Math.round(event.clientX - rect.left);
+                const y = Math.round(event.clientY - rect.top);
+                this.currentPolygon.push({ x, y });
+                alert(`Point added: x: ${x}, y: ${y}`);
+            }
+            // In freehand mode, points are captured by onImageMouseDown / onDocumentMouseMove instead.
+            return;
+        }
+        if (this.hoveredPart !== 'None') {
+            // Not currently drawing: clicking a highlighted muscle selects it for redraw.
+            this.redrawTargetName = this.hoveredPart;
         }
     }
 
@@ -167,12 +461,56 @@ export class ContactUsComponent implements OnInit {
         window.URL.revokeObjectURL(url);
     }
 
+    // Feature Toggle Methods
+    setActiveFeature(feature: 'polygon' | 'website'): void {
+        this.activeFeature = feature;
+    }
 
+    // Website Generator Methods
+    onDragStart(event: DragEvent, componentType: string): void {
+        if (event.dataTransfer) {
+            event.dataTransfer.setData('text/plain', componentType);
+            event.dataTransfer.effectAllowed = 'copy';
+        }
+    }
 
+    onDragOver(event: DragEvent): void {
+        event.preventDefault();
+        event.dataTransfer!.dropEffect = 'copy';
+    }
 
+    onDrop(event: DragEvent): void {
+        event.preventDefault();
+        const componentType = event.dataTransfer!.getData('text/plain');
+        this.addComponent(componentType);
+    }
 
+    addComponent(type: string): void {
+        const newComponent: WebsiteComponent = {
+            id: this.generateId(),
+            type: type,
+            data: { ...this.componentTemplates[type] },
+            styles: {}
+        };
+        this.websiteComponents.push(newComponent);
+        this.selectComponent(newComponent);
+    }
 
+    selectComponent(component: WebsiteComponent, event?: Event): void {
+        if (event) {
+            event.stopPropagation();
+        }
+        this.selectedComponent = component;
+    }
 
+    deselectAll(): void {
+        this.selectedComponent = null;
+    }
+
+    editComponent(component: WebsiteComponent, event: Event): void {
+        event.stopPropagation();
+        this.selectComponent(component);
+    }
 
     duplicateComponent(component: WebsiteComponent, event: Event): void {
         event.stopPropagation();
@@ -181,6 +519,7 @@ export class ContactUsComponent implements OnInit {
             id: this.generateId()
         };
         this.websiteComponents.push(duplicated);
+        this.selectComponent(duplicated);
     }
 
     deleteComponent(component: WebsiteComponent, event: Event): void {

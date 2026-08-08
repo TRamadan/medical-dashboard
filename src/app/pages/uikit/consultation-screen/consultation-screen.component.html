@@ -63,6 +63,15 @@
         <!-- Main -->
         <div class="consultation-main">
 
+            @if (sessionLoading()) {
+            <div class="note-banner note-mint mb-3">
+                <i class="pi pi-spin pi-spinner mr-2"></i>Loading consultation session…
+            </div>
+            }
+            @if (sessionError() && !flowStarted()) {
+            <div class="note-banner note-coral mb-3">⚠ {{ sessionError() }}</div>
+            }
+
             <!-- Step Bar -->
             @if (flowStarted()) {
             <div class="step-bar">
@@ -86,22 +95,23 @@
             </p>
 
             <div class="entry-grid mb-4">
-                <div class="entry-card" [class.selected-new]="entryType()==='new'" (click)="selectEntry('new')">
+                <div class="entry-card" [class.selected-new]="entryType()===EntryType.New"
+                    (click)="selectEntry(EntryType.New)">
                     <div class="entry-icon" style="color:#1AAD7A">+</div>
                     <div class="entry-name">New Athlete</div>
                     <div class="entry-desc">First visit — Full Blueprint. Data Map complete &amp; payment confirmed.
                     </div>
                     <div class="entry-sub" style="color:#1AAD7A">NEW_LEAD → BLUEPRINT</div>
                 </div>
-                <div class="entry-card" [class.selected-return]="entryType()==='return'"
-                    (click)="selectEntry('return')">
+                <div class="entry-card" [class.selected-return]="entryType()===EntryType.Return"
+                    (click)="selectEntry(EntryType.Return)">
                     <div class="entry-icon" style="color:#C9A84C">↩</div>
                     <div class="entry-name">Returning Athlete</div>
                     <div class="entry-desc">Previously graduated or file closed. Returns with new complaint.</div>
                     <div class="entry-sub" style="color:#C9A84C">GRADUATED / CLOSED → RE-ENTRY</div>
                 </div>
-                <div class="entry-card" [class.selected-reassess]="entryType()==='reassess'"
-                    (click)="selectEntry('reassess')">
+                <div class="entry-card" [class.selected-reassess]="entryType()===EntryType.Reassess"
+                    (click)="selectEntry(EntryType.Reassess)">
                     <div class="entry-icon" style="color:#FC6B44">!</div>
                     <div class="entry-name">Reassessment</div>
                     <div class="entry-desc">Athlete on an active program — new injury or deterioration appeared.</div>
@@ -109,7 +119,7 @@
                 </div>
             </div>
 
-            @if (entryType() === 'new') {
+            @if (entryType() === EntryType.New) {
             <div class="note-banner note-mint mb-3">
                 <strong>New Athlete — Full Blueprint:</strong> Complaint → Exam → Impression → Judgment → Report →
                 Action.<br />
@@ -119,7 +129,7 @@
                 <p-button label="Start Consultation →" severity="success" (onClick)="startFlow()"></p-button>
             </div>
             }
-            @if (entryType() === 'return') {
+            @if (entryType() === EntryType.Return) {
             <div class="note-banner note-gold mb-3">
                 <strong>Returning Athlete — Validity Check:</strong> System checks Data Map validity (12 months). If
                 valid:
@@ -138,7 +148,7 @@
                     (onClick)="startFlow()"></p-button>
             </div>
             }
-            @if (entryType() === 'reassess') {
+            @if (entryType() === EntryType.Reassess) {
             <div class="note-banner note-coral mb-3">
                 <strong>Reassessment — Active Program:</strong> Athlete is in Phase 3 of ACL RTP. New shoulder injury
                 appeared during training. 4 paths available after assessment.
@@ -226,9 +236,12 @@
                 </div>
             </p-card>
 
+            @if (sessionError()) {
+            <div class="note-banner note-coral mb-3">⚠ {{ sessionError() }}</div>
+            }
             <div class="btn-row">
                 <p-button label="Next — Exploratory & Confirmatory Procedure" icon="pi pi-arrow-right" iconPos="right"
-                    (onClick)="go(2)"></p-button>
+                    [loading]="sessionSaving()" [disabled]="sessionSaving()" (onClick)="submitStep1()"></p-button>
             </div>
             }
 
@@ -273,11 +286,14 @@
                 </div>
             </p-card>
 
+            @if (sessionError()) {
+            <div class="note-banner note-coral mb-3">⚠ {{ sessionError() }}</div>
+            }
             <div class="btn-row">
                 <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
-                    (onClick)="go(1)"></p-button>
+                    [disabled]="sessionSaving()" (onClick)="go(1)"></p-button>
                 <p-button label="Next — Impression & Findings" icon="pi pi-arrow-right" iconPos="right"
-                    (onClick)="go(3)"></p-button>
+                    [loading]="sessionSaving()" [disabled]="sessionSaving()" (onClick)="submitStep2()"></p-button>
             </div>
             }
 
@@ -527,14 +543,15 @@
             @if (judgmentChoice() === 'extraAssessment') {
             <p-card styleClass="mb-3">
                 <ng-template pTemplate="title">
-                    {{ entryType() === 'reassess' ? 'Reassessment Decision what happens to the active program?' :
+                    {{ entryType() === EntryType.Reassess ? 'Reassessment Decision what happens to the active program?'
+                    :
                     'Path
                     Selection what is the next step?' }}
                 </ng-template>
                 <p class="field-label mb-3">Based on examination and diagnosis:</p>
 
                 <!-- Reassess paths -->
-                @if (entryType() === 'reassess') {
+                @if (entryType() === EntryType.Reassess) {
                 <div class="path-grid cols-2">
                     <div class="path-card" [class.sel-A]="selectedReassessPath()==='A'" (click)="pickReassessPath('A')">
                         <div class="pc-icon" style="color:#1AAD7A">
@@ -631,7 +648,7 @@
                 }
 
                 <!-- New / Return paths -->
-                @if (entryType() !== 'reassess') {
+                @if (entryType() !== EntryType.Reassess) {
                 <div class="path-grid cols-3">
                     <div class="path-card" [class.sel-p1]="selectedPath()===1" (click)="pickPath(1)">
                         <div class="pc-icon" style="color:#1AAD7A">
@@ -705,6 +722,17 @@
                                     class="w-full" />
                             </div>
                         </div>
+                        <div class="mb-3">
+                            <div class="field-label">Referral Specialty <span class="req">*</span></div>
+                            <input pInputText [(ngModel)]="referralSpecialty"
+                                placeholder="e.g. Orthopedic Surgeon, Radiologist" class="w-full" />
+                        </div>
+                        <div>
+                            <div class="field-label" style="display:flex;align-items:center;gap:.5rem;">
+                                <input type="checkbox" [(ngModel)]="referralNeedFollowUp" id="referralNeedFollowUp" />
+                                <label for="referralNeedFollowUp">Needs follow-up after results</label>
+                            </div>
+                        </div>
                         <div class="reminder-row">
                             <div class="rem-item">
                                 <div class="rem-day" style="color:#F5A623">2</div>
@@ -731,12 +759,16 @@
             </p-card>
             }
 
+            @if (sessionError()) {
+            <div class="note-banner note-coral mb-3">⚠ {{ sessionError() }}</div>
+            }
             <div class="btn-row">
                 <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
-                    (onClick)="go(3)"></p-button>
+                    [disabled]="sessionSaving()" (onClick)="go(3)"></p-button>
                 @if (getJudgmentConfirmVisible()) {
-                <p-button label="Next — Athlete Report" icon="pi pi-arrow-right" iconPos="right"
-                    (onClick)="go(5)"></p-button>
+                <p-button [label]="judgmentChoice() === 'writeReport' ? 'Next — Athlete Report' : 'Confirm Judgment'"
+                    icon="pi pi-arrow-right" iconPos="right" [loading]="sessionSaving()" [disabled]="sessionSaving()"
+                    (onClick)="submitJudgment()"></p-button>
                 }
             </div>
             }
@@ -911,17 +943,35 @@
                 </p-card>
             </form>
 
+            @if (sessionError()) {
+            <div class="note-banner note-coral mb-3">⚠ {{ sessionError() }}</div>
+            }
             <div class="btn-row">
                 <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
-                    (onClick)="go(4)"></p-button>
-                <p-button label="Next — Action" icon="pi pi-arrow-right" iconPos="right" (onClick)="go(6)"></p-button>
+                    [disabled]="sessionSaving()" (onClick)="go(4)"></p-button>
+                <p-button label="Next — Action" icon="pi pi-arrow-right" iconPos="right" [loading]="sessionSaving()"
+                    [disabled]="sessionSaving()" (onClick)="submitStep4()"></p-button>
             </div>
             }
 
             <!-- -- STEP 6  Action / Confirmation -- -->
             @if (currentStep() === 6) {
 
-            @if (entryType() === 'reassess') {
+            @if (!actionDone()) {
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title">Decision Notes</ng-template>
+                <div class="field-label">Notes <span class="req">*</span></div>
+                <textarea pTextarea [(ngModel)]="decisionNotes" placeholder="Notes to accompany this decision..." style="width:100%;min-height:60px;padding:.55rem .7rem;border-radius:8px;
+                   border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                   font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+            </p-card>
+            }
+
+            @if (sessionError()) {
+            <div class="note-banner note-coral mb-3">⚠ {{ sessionError() }}</div>
+            }
+
+            @if (entryType() === EntryType.Reassess) {
             @if (selectedReassessPath() === 'A') {
             <div class="confirm-box">
                 <div class="confirm-icon" style="color:#1AAD7A">~</div>
@@ -931,7 +981,7 @@
                 <div class="btn-row" style="justify-content:center">
                     <p-button [label]="actionDone() ? '? Done' : 'Open Protocol Editor ?'"
                         [severity]="actionDone() ? 'secondary' : 'success'" (onClick)="confirmAction()"
-                        [disabled]="actionDone()"></p-button>
+                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-mint mt-3">
@@ -948,7 +998,7 @@
                 <div class="btn-row" style="justify-content:center">
                     <p-button [label]="actionDone() ? '? Done' : 'Confirm Pause ?'"
                         [severity]="actionDone() ? 'secondary' : 'warn'" (onClick)="confirmAction()"
-                        [disabled]="actionDone()"></p-button>
+                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-amber mt-3">
@@ -967,7 +1017,7 @@
                 <div class="btn-row" style="justify-content:center">
                     <p-button [label]="actionDone() ? '? Done' : 'Confirm Replacement &amp; Create Protocol ?'"
                         [severity]="actionDone() ? 'secondary' : 'danger'" (onClick)="confirmAction()"
-                        [disabled]="actionDone()"></p-button>
+                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-coral mt-3">
@@ -984,7 +1034,7 @@
                 <div class="btn-row" style="justify-content:center">
                     <p-button [label]="actionDone() ? '? Done' : 'Create Parallel Protocol ?'"
                         [severity]="actionDone() ? 'secondary' : 'info'" (onClick)="confirmAction()"
-                        [disabled]="actionDone()"></p-button>
+                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-purple mt-3">
@@ -995,7 +1045,7 @@
             }
             }
 
-            @if (entryType() !== 'reassess') {
+            @if (entryType() !== EntryType.Reassess) {
             @if (selectedPath() === 1) {
             <div class="confirm-box">
                 <div class="confirm-icon" style="color:#1AAD7A">
@@ -1006,7 +1056,7 @@
                 <div class="btn-row" style="justify-content:center">
                     <p-button [label]="actionDone() ? 'Done' : 'Open Protocol Builder'"
                         [severity]="actionDone() ? 'secondary' : 'success'" (onClick)="confirmAction()"
-                        [disabled]="actionDone()"></p-button>
+                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-mint mt-3">
@@ -1026,7 +1076,7 @@
                 <div class="btn-row" style="justify-content:center">
                     <p-button [label]="actionDone() ? 'Done' : 'Confirm '"
                         [severity]="actionDone() ? 'secondary' : 'warn'" (onClick)="confirmAction()"
-                        [disabled]="actionDone()"></p-button>
+                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-amber mt-3">
@@ -1047,7 +1097,7 @@
                 <div class="btn-row" style="justify-content:center">
                     <p-button [label]="actionDone() ? 'Done' : 'Confirm'"
                         [severity]="actionDone() ? 'secondary' : 'danger'" (onClick)="confirmAction()"
-                        [disabled]="actionDone()"></p-button>
+                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-coral mt-3">
@@ -1060,7 +1110,7 @@
 
             <div class="btn-row mt-4">
                 <p-button label="Back" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
-                    (onClick)="go(5)"></p-button>
+                    [disabled]="sessionSaving()" (onClick)="go(5)"></p-button>
             </div>
             }
 
@@ -1084,19 +1134,21 @@
                     <i class="pi pi-user text-3xl"></i>
                 </div>
                 <div>
-                    <div class="text-900 font-bold text-2xl mb-2">{{ mockPatientInfo.fullName }}</div>
+                    <div class="text-900 font-bold text-2xl mb-2">{{ mockPatientInfo.personalData.fullName }}</div>
                     <div class="text-500 font-medium flex flex-wrap gap-4 text-sm mt-1">
                         <span class="flex align-items-center gap-2"><i class="pi pi-calendar text-primary"></i> {{
-                            mockPatientInfo.dateOfBirth | date: 'dd/MM/yyyy' }}</span>
+                            mockPatientInfo.personalData.dateOfBirth | date: 'dd/MM/yyyy' }}</span>
                         <span class="flex align-items-center gap-2"><i class="pi pi-phone text-primary"></i> <span
-                                dir="ltr">{{ mockPatientInfo.phone }}</span></span>
+                                dir="ltr">{{ mockPatientInfo.personalData.phoneNumber }}</span></span>
                         <span class="flex align-items-center gap-2"><i class="pi pi-briefcase text-primary"></i> {{
-                            mockPatientInfo.jobTitle }} ({{ mockPatientInfo.workNature }})</span>
+                            mockPatientInfo.socialProfile.occupation }} ({{ mockPatientInfo.ui.workNatureLabel
+                            }})</span>
                     </div>
                 </div>
             </div>
             <div>
-                <p-tag [value]="mockPatientInfo.sport + ' - ' + mockPatientInfo.competitiveLevel" severity="info"
+                <p-tag [value]="mockPatientInfo.sportsData.sport + ' - ' + mockPatientInfo.sportsData.playCenter"
+                    severity="info"
                     styleClass="px-3 py-2 text-sm border-round-2xl font-bold bg-blue-50 text-blue-600 border-1 border-blue-100"></p-tag>
             </div>
         </div>
@@ -1178,43 +1230,43 @@
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">الاسم</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.fullName }}</div>
+                                {{ mockPatientInfo.personalData.fullName }}</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">تاريخ الميلاد</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.dateOfBirth | date: 'dd/MM/yyyy' }}</div>
+                                {{ mockPatientInfo.personalData.dateOfBirth | date: 'dd/MM/yyyy' }}</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">الجنس</span>
+                            <span class="text-500 font-medium text-sm block mb-1">العنوان</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.gender }}</div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">الوزن / الطول</span>
-                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.weight }} كجم / {{ mockPatientInfo.height }} سم</div>
+                                {{ mockPatientInfo.personalData.address }}</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">رقم الموبايل</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold"
-                                dir="ltr" style="text-align: right;">{{ mockPatientInfo.phone }}</div>
+                                dir="ltr" style="text-align: right;">{{ mockPatientInfo.personalData.phoneNumber }}
+                            </div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">رقم الطوارئ / الصلة</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold"
-                                dir="ltr" style="text-align: right;">{{ mockPatientInfo.emergencyPhone }} ({{
-                                mockPatientInfo.emergencyRelation }})</div>
+                                dir="ltr" style="text-align: right;">{{ mockPatientInfo.personalData.emergencyPhone }}
+                                ({{
+                                mockPatientInfo.personalData.emergencyRelation }})</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">حجز شخصي؟</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.bookingForSelf ? 'نعم' : 'لا' }}</div>
+                                {{ mockPatientInfo.personalData.bookingForSelf ? 'نعم' : 'لا' }}</div>
                         </div>
-                        <div class="col-12 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">مؤثرون في قرار الاشتراك</span>
+                        <div class="col-12 mb-3" *ngIf="!mockPatientInfo.personalData.bookingForSelf">
+                            <span class="text-500 font-medium text-sm block mb-1">القائم بملء الاستمارة</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.decisionInfluencers.join('، ') }}</div>
+                                {{ mockPatientInfo.personalData.fillerName }} — {{
+                                mockPatientInfo.personalData.fillerRelation }}
+                                <span dir="ltr">({{ mockPatientInfo.personalData.fillerMobile }})</span>
+                            </div>
                         </div>
                     </div>
                 </p-card>
@@ -1234,34 +1286,30 @@
                     </ng-template>
                     <div class="row g-3">
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">الرياضة والدور</span>
+                            <span class="text-500 font-medium text-sm block mb-1">الرياضة والمركز</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.sport }} ({{ mockPatientInfo.role }})</div>
+                                {{ mockPatientInfo.sportsData.sport }} ({{ mockPatientInfo.sportsData.playCenter }})
+                            </div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">النادي</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.club }}</div>
+                                {{ mockPatientInfo.sportsData.clubName }}</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">سنوات الممارسة</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.practiceYears }} سنوات</div>
+                                {{ mockPatientInfo.sportsData.yearsOfPractice }} سنوات</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">المستوي التنافسي</span>
+                            <span class="text-500 font-medium text-sm block mb-1">أعلى إنجاز</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.competitiveLevel }}</div>
+                                {{ mockPatientInfo.sportsData.highestAchievement }}</div>
                         </div>
                         <div class="col-12 col-lg-4 col-xl-3 col-sm-6 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">الهدف بعد 90 يوماً</span>
+                            <span class="text-500 font-medium text-sm block mb-1">مستوى النشاط اليومي</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.goal90Days }}</div>
-                        </div>
-                        <div class="col-12 col-lg-4 col-xl-3 col-sm-6 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">مستوى النشاط البدني</span>
-                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.activityLevel }}</div>
+                                {{ mockPatientInfo.injuryData.dailyActivityLevel }}/10</div>
                         </div>
                     </div>
                 </p-card>
@@ -1282,65 +1330,57 @@
                     <div class="row g-3">
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">مستوي الالم الحالي</span>
-                            <div
-                                class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold flex justify-content-between">
-                                <span>{{ mockPatientInfo.currentPain }}/10</span>
-                                <i class="pi pi-info-circle text-orange-500"
-                                    pTooltip="أقصى ألم: {{ mockPatientInfo.maxPain }}/10"></i>
-                            </div>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.injuryData.painLevel }}/10</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">اقصي الم</span>
+                            <span class="text-500 font-medium text-sm block mb-1">المستوى الوظيفي</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.painEffectOnSport }}/10</div>
+                                {{ mockPatientInfo.injuryData.functionalLevel }}/10</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">تأثير الألم على الرياضة</span>
+                            <span class="text-500 font-medium text-sm block mb-1">مستوى النشاط اليومي</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.painEffectOnSport }}/10</div>
+                                {{ mockPatientInfo.injuryData.dailyActivityLevel }}/10</div>
                         </div>
                         <div class="col-12 mb-1">
                             <span class="text-500 font-medium text-sm block mb-2">خريطة موقع الإصابة</span>
                             <div class="border-1 surface-border border-round-lg overflow-hidden bg-white">
-                                <app-contact-us [readonly]="true"></app-contact-us>
+                                <!-- <app-contact-us [readonly]="true"></app-contact-us> -->
                             </div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">تاريخ الإصابة</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.injuryDate | date: 'dd/MM/yyyy' }}</div>
+                                {{ mockPatientInfo.injuryData.injuryDate | date: 'dd/MM/yyyy' }}</div>
                         </div>
                         <div class="col-12 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">ظروف الإصابة / آلية الحدوث</span>
+                            <span class="text-500 font-medium text-sm block mb-1">وصف الإصابة</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.injuryCircumstances }}</div>
+                                {{ mockPatientInfo.injuryData.injuryDescription }}</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">هل الإصابة مرتبطة بالنشاط
                                 الرياضي؟</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.injuryRelatedToSport ? 'نعم' : 'لا' }}</div>
+                                {{ mockPatientInfo.injuryData.isSportRelated ? 'نعم' : 'لا' }}</div>
                         </div>
 
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">هل عرضت على طبيب؟</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.seenDoctor ? 'نعم' : 'لا' }}</div>
+                                {{ mockPatientInfo.injuryData.seenSpecialist ? 'نعم' : 'لا' }}</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">الفحوصات المجراة</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.previousTests.join('، ') }}</div>
+                                {{ mockPatientInfo.ui.diagnosticTestsSelected.join('، ') ||
+                                (mockPatientInfo.injuryData.hadDiagnosticTests ? 'نعم' : 'لا') }}</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">العلاج السابق</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.previousTreatment.join('، ') }}</div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">هل تتجنب حركات خوفاً من الألم؟</span>
-                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.avoidMovements ? 'نعم' : 'لا' }}</div>
+                                {{ mockPatientInfo.ui.prescribedTreatmentsSelected.join('، ') }}</div>
                         </div>
                     </div>
                 </p-card>
@@ -1362,23 +1402,26 @@
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">الحالات الطبية المزمنة</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.chronicConditions.join('، ') }}</div>
+                                {{ mockPatientInfo.ui.chronicConditionsSelected.join('، ') }}</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">تاريخ عائلي</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.fatherConditions.concat(mockPatientInfo.motherConditions).join('، ')
+                                {{
+                                mockPatientInfo.ui.fatherConditionsSelected.concat(mockPatientInfo.ui.motherConditionsSelected).join('،
+                                ')
                                 }}
                             </div>
                         </div>
                         <div class="col-12 mb-3">
                             <span class="text-500 font-medium text-sm block mb-2">إصابات سابقة </span>
                             <div class="flex flex-wrap gap-2">
-                                <ng-container *ngFor="let inj of mockPatientInfo.previousInjuries">
+                                <ng-container *ngFor="let inj of mockPatientInfo.injuryHistory.previousInjuries">
                                     <div
                                         class="p-2 border-1 surface-border border-round-lg bg-yellow-50 text-yellow-800 font-bold flex align-items-center gap-2">
                                         <i class="pi pi-exclamation-triangle"></i>
-                                        <span>{{ inj.name }} ({{ inj.date }}<ng-container *ngIf="inj.description"> -
+                                        <span>{{ inj.bodyPart }} ({{ inj.injuryDate | date: 'dd/MM/yyyy' }}<ng-container
+                                                *ngIf="inj.description"> -
                                                 {{ inj.description }}</ng-container>)</span>
                                     </div>
                                 </ng-container>
@@ -1387,13 +1430,14 @@
                         <div class="col-12 mb-3">
                             <span class="text-500 font-medium text-sm block mb-2">العمليات الجراحية</span>
                             <div class="flex flex-wrap gap-2">
-                                <ng-container *ngFor="let s of mockPatientInfo.surgeries">
+                                <ng-container *ngFor="let s of mockPatientInfo.injuryHistory.previousSurgeries">
                                     <div
                                         class="p-2 border-1 surface-border border-round-lg bg-blue-50 text-blue-800 font-bold flex align-items-center gap-2">
                                         <i class="pi pi-wrench"></i>
-                                        <span>{{ s.type }} ({{ s.part }} <ng-container *ngIf="s.year">-
-                                                {{s.year}}</ng-container><ng-container *ngIf="s.notes"> -
-                                                {{s.notes}}</ng-container>)</span>
+                                        <span>{{ s.surgeryType }}<ng-container *ngIf="s.surgeryDate"> -
+                                                {{ s.surgeryDate | date: 'dd/MM/yyyy' }}</ng-container><ng-container
+                                                *ngIf="s.description"> -
+                                                {{ s.description }}</ng-container></span>
                                     </div>
                                 </ng-container>
                             </div>
@@ -1401,13 +1445,11 @@
                         <div class="col-12 mb-3">
                             <span class="text-500 font-medium text-sm block mb-2">أدوية دورية</span>
                             <div class="flex flex-wrap gap-2">
-                                <ng-container *ngFor="let m of mockPatientInfo.regularMedications">
+                                <ng-container *ngFor="let m of mockPatientInfo.medicalHistory.medications">
                                     <div
                                         class="p-2 border-1 surface-border border-round-lg bg-green-50 text-green-800 font-bold flex align-items-center gap-2">
                                         <i class="pi pi-filter"></i>
-                                        <span>{{ m.name }} ({{ m.dose }} - {{ m.duration }}<ng-container
-                                                *ngIf="m.notes">
-                                                - {{m.notes}}</ng-container>)</span>
+                                        <span>{{ m.name }} ({{ m.dose }} - {{ m.frequency }})</span>
                                     </div>
                                 </ng-container>
                             </div>
@@ -1416,7 +1458,7 @@
                             <span class="text-500 font-medium text-sm block mb-1">حساسية أطعمة / مواد / أدوية</span>
                             <div
                                 class="p-2 surface-50 border-round-lg border-1 surface-border text-pink-500 font-semibold">
-                                {{ mockPatientInfo.allergies }}</div>
+                                {{ mockPatientInfo.medicalHistory.knownAllergies }}</div>
                         </div>
                     </div>
                 </p-card>
@@ -1438,76 +1480,61 @@
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">الوظيفة / طبيعة العمل</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.jobTitle || 'غير محدد' }} / {{ mockPatientInfo.workNature || 'غير
+                                {{ mockPatientInfo.socialProfile.occupation || 'غير محدد' }} / {{
+                                mockPatientInfo.ui.workNatureLabel || 'غير
                                 محدد' }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">عدد ساعات الجلوس اليومية</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.socialProfile.dailySittingHours }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">الحالة الاجتماعية</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.socialProfile.maritalStatus ? 'متزوج' : 'أعزب' }}</div>
+                        </div>
+                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
+                            <span class="text-500 font-medium text-sm block mb-1">هل لديه أطفال؟</span>
+                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
+                                {{ mockPatientInfo.socialProfile.hasChildren ? 'نعم' : 'لا' }}</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
                             <span class="text-500 font-medium text-sm block mb-1">هل يوجد ضغط نفسي عال في العمل؟</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.highWorkStress ? 'نعم' : 'لا' }}</div>
+                                {{ mockPatientInfo.socialProfile.isWorkStressful ? 'نعم' : 'لا' }}</div>
                         </div>
                         <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">جودة النوم</span>
+                            <span class="text-500 font-medium text-sm block mb-1">العادات</span>
                             <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.sleepQuality }}</div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">استخدام الكيموليات؟</span>
-                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.usesKinesio ? 'نعم' : 'لا' }}</div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">توقع التعافي (1-10)</span>
-                            <div
-                                class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold flex align-items-center gap-2">
-                                <p-progressBar [value]="mockPatientInfo.recoveryExpectation * 10" [showValue]="false"
-                                    styleClass="w-full h-1rem"></p-progressBar>
-                                <span class="text-sm">{{ mockPatientInfo.recoveryExpectation }}</span>
-                            </div>
+                                {{ mockPatientInfo.ui.habitsSelected.join('، ') || 'لا يوجد' }}</div>
                         </div>
                     </div>
                 </p-card>
             </div>
 
-            <!-- 6. الإقرار والموافقة -->
-            <div class="col-12 mb-3">
+            <!-- 6. الأطباء المستشارون -->
+            <div class="col-12 mb-3" *ngIf="mockPatientInfo.injuryData.seenSpecialist">
                 <p-card styleClass="border-round-2xl shadow-1 border-1 surface-border h-full ">
                     <ng-template pTemplate="title">
                         <div class="flex align-items-center gap-3 pb-3 border-bottom-1 surface-border">
                             <div class="bg-cyan-50 text-cyan-600 border-round-lg flex align-items-center justify-content-center p-2"
                                 style="width:2.5rem; height:2.5rem;">
-                                <i class="pi pi-pencil text-xl"></i>
+                                <i class="pi pi-user-edit text-xl"></i>
                             </div>
-                            <span class="text-xl font-bold text-900">الإقرار والموافقة</span>
+                            <span class="text-xl font-bold text-900">الأطباء المستشارون</span>
                         </div>
                     </ng-template>
-                    <div class="row g-3">
-                        <div class="col-12 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">موافقة المعالجة وحفظ البيانات</span>
-                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                <i class="pi"
-                                    [ngClass]="mockPatientInfo.dataConsent ? 'pi-check text-green-500' : 'pi-times text-red-500'"></i>
-                                {{ mockPatientInfo.dataConsent ? 'موافق' : 'غير موافق' }}
-                            </div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">الاسم الثلاثي الموّقع</span>
-                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.consentFullName }}</div>
-                        </div>
-                        <div class="col-12 col-sm-6 col-lg-4 col-xl-3 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">تاريخ التوقيع</span>
-                            <div class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold">
-                                {{ mockPatientInfo.consentDate | date: 'dd/MM/yyyy' }}</div>
-                        </div>
-                        <div class="col-12 mb-3">
-                            <span class="text-500 font-medium text-sm block mb-1">مهندس الأداء المسؤول</span>
+                    <div class="flex flex-wrap gap-2">
+                        <ng-container *ngFor="let doc of mockPatientInfo.injuryData.specialistsConsulted">
                             <div
-                                class="p-2 surface-50 border-round-lg border-1 surface-border text-900 font-semibold flex align-items-center gap-2">
-                                <i class="pi pi-user-edit text-primary"></i>
-                                <span>{{ mockPatientInfo.performanceEngineer }}</span>
+                                class="p-2 border-1 surface-border border-round-lg bg-cyan-50 text-cyan-800 font-bold flex align-items-center gap-2">
+                                <i class="pi pi-user-edit"></i>
+                                <span>{{ doc.doctorName }} ({{ doc.specialty }})</span>
                             </div>
-                        </div>
+                        </ng-container>
+                        <span *ngIf="!mockPatientInfo.injuryData.specialistsConsulted?.length" class="text-500">لا
+                            يوجد</span>
                     </div>
                 </p-card>
             </div>

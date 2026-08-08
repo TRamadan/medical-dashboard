@@ -196,6 +196,11 @@ export default [
         loadComponent: () => import('../../email-form/email-form.component').then(m => m.EmailFormComponent)
     },
     {
+        path: 'muscle-skeleton-builder',
+        data: { breadcrumb: 'Muscle Skeleton Builder' },
+        loadComponent: () => import('./muscle-skeleton-builder/muscle-skeleton-builder.component').then(m => m.MuscleSkeletonBuilderComponent)
+    },
+    {
         path: 'athleteprofile',
         data: { breadcrumb: 'Athlete Profile' },
         loadComponent: () => import('./athelete-profile/athelete-profile.component').then(m => m.AtheleteProfileComponent)

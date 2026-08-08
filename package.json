@@ -21,6 +21,7 @@
         "@angular/router": "^19.0.0",
         "@ng-select/ng-select": "^14.0.0",
         "@primeng/themes": "^19.0.5",
+        "body-muscles": "^1.0.0",
         "bootstrap": "^5.3.6",
         "bootstrap-icons": "^1.13.1",
         "chart.js": "^4.5.0",

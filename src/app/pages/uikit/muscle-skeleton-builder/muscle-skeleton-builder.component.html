@@ -1,0 +1,156 @@
+<!-- Muscle Polygon Feature -->
+<div class="app-shell" *ngIf="activeFeature === 'polygon'">
+
+    <!-- Page header -->
+    <header class="page-header">
+        <div class="page-header__title">
+            <i class="pi pi-image page-header__icon"></i>
+            <div>
+                <h1>Muscle Polygon Annotator</h1>
+                <p>Trace, edit and export anatomical muscle regions</p>
+            </div>
+        </div>
+        <p-button label="Download Polygons JSON" icon="pi pi-download" severity="success" (onClick)="downloadPolygons()"
+            pTooltip="Download all saved polygons as JSON" tooltipPosition="bottom" />
+    </header>
+
+    <div class="tool-grid">
+        <!-- Draw a new muscle -->
+        <p-card header="Draw a new muscle" styleClass="tool-card">
+            <div class="field-row">
+                <span class="field-label">Draw mode</span>
+                <p-selectbutton [options]="drawModeOptions" [ngModel]="drawMode"
+                    (onChange)="onDrawModeChange($event.value)" optionLabel="label" optionValue="value"
+                    [disabled]="polygonSelectionActive" />
+            </div>
+
+            <div class="button-row">
+                <p-button label="Select Muscle Polygon" icon="pi pi-plus" [outlined]="true"
+                    (onClick)="startPolygonSelection()" [disabled]="polygonSelectionActive" />
+                <p-button label="Finish Polygon" icon="pi pi-check" (onClick)="finishPolygon()"
+                    [disabled]="!polygonSelectionActive" />
+            </div>
+
+            @if(polygonSelectionActive && drawMode === 'freehand'){
+            <p-message severity="info" styleClass="status-message">
+                Free draw mode — press and hold on the image, trace the muscle outline, then release.
+                ({{ currentPolygon.length }} points captured)
+            </p-message>
+            }
+            @if(polygonSelectionActive && drawMode === 'click'){
+            <p-message severity="info" styleClass="status-message">
+                Click each vertex of the region on the image, then press "Finish Polygon".
+                ({{ currentPolygon.length }} points added)
+            </p-message>
+            }
+        </p-card>
+
+        <!-- Update / redraw / delete an existing muscle -->
+        <p-card header="Update an existing muscle" styleClass="tool-card">
+            <div class="field-row">
+                <span class="field-label">Muscle</span>
+                <p-select [options]="muscleOptions" [ngModel]="redrawTargetName"
+                    (onChange)="selectRedrawTarget($event.value)" optionLabel="label" optionValue="value"
+                    placeholder="Select a muscle" [filter]="true" filterBy="label" [showClear]="true"
+                    [disabled]="polygonSelectionActive || isPointEditMode" styleClass="muscle-select" />
+            </div>
+
+            <div class="button-row">
+                <p-button label="Redraw" icon="pi pi-pencil" [outlined]="true" (onClick)="startRedrawPolygon()"
+                    [disabled]="!redrawTargetName || polygonSelectionActive || isPointEditMode"
+                    pTooltip="Retrace this muscle's outline from scratch" tooltipPosition="bottom" />
+                <p-button label="Finish Redraw" icon="pi pi-check" (onClick)="finishRedraw()"
+                    [disabled]="!isRedrawMode" />
+                <p-button label="Move Points" icon="pi pi-arrows-alt" [outlined]="true" (onClick)="startPointEditMode()"
+                    [disabled]="!redrawTargetName || polygonSelectionActive || isRedrawMode || isPointEditMode"
+                    pTooltip="Drag individual vertices instead of retracing the whole shape" tooltipPosition="bottom" />
+                <p-button label="Finish Moving" icon="pi pi-check" (onClick)="finishPointEdit()"
+                    [disabled]="!isPointEditMode" />
+                <p-button label="Cancel" icon="pi pi-times" severity="secondary" [text]="true"
+                    (onClick)="isPointEditMode ? cancelPointEdit() : cancelRedraw()"
+                    [disabled]="!isRedrawMode && !isPointEditMode" />
+                <p-button label="Delete Muscle" icon="pi pi-trash" severity="danger" [outlined]="true"
+                    (onClick)="deleteSelectedMuscle()"
+                    [disabled]="!redrawTargetName || polygonSelectionActive || isPointEditMode" />
+            </div>
+
+            @if(isPointEditMode){
+            <p-message severity="warn" styleClass="status-message">
+                Editing "{{ redrawTargetName }}" — drag any orange dot to reposition it, then click "Finish Moving".
+            </p-message>
+            }
+            @if(isRedrawMode){
+            <p-message severity="warn" styleClass="status-message">
+                Redrawing "{{ redrawTargetName }}" — click new points on the image
+                ({{ currentPolygon.length }} added)
+            </p-message>
+            }
+        </p-card>
+    </div>
+
+    <!-- Anatomy map -->
+    <p-card header="Anatomy map" styleClass="map-card">
+        <div class="map-status">
+            <p-tag severity="secondary" [value]="'X: ' + mouseX + '   Y: ' + mouseY" icon="pi pi-map-marker" />
+            <p-tag [severity]="hoveredPart === 'None' ? 'secondary' : 'info'" [value]="'Hovered: ' + hoveredPart"
+                icon="pi pi-eye" />
+        </div>
+
+        <div class="image-map-container" (mousemove)="onMouseMove($event)">
+            <img #anatomyImage src="../../../../assets/Capture.PNG"
+                alt="Anatomical illustration of the human muscular system" (click)="onImageClick($event)"
+                (mousedown)="onImageMouseDown($event)" (load)="onImageLoad($event)"
+                [style.cursor]="polygonSelectionActive && drawMode === 'freehand' ? 'crosshair' : 'default'" />
+
+            <!-- SVG overlay for all saved polygons -->
+            <svg [attr.width]="imageWidth" [attr.height]="imageHeight" class="polygon-overlay">
+                @for(part of bodyParts; track part){
+                @if(part.polygon && part.polygon.length > 1){
+                <polygon [attr.points]="getPolygonPointsString(part.polygon)"
+                    [attr.fill]="hoveredPart === part.name ? 'rgba(255,0,0,0.5)' : 'rgba(0,123,255,0.3)'"
+                    [attr.stroke]="hoveredPart === part.name ? 'red' : '#007bff'" stroke-width="2" />
+                @for(pt of part.polygon; track pt; let i = $index){
+                <circle [attr.cx]="pt.x" [attr.cy]="pt.y"
+                    [attr.r]="isPointEditMode && part.name === redrawTargetName ? 7 : 4"
+                    [attr.fill]="isPointEditMode && part.name === redrawTargetName ? '#ffa500' : '#007bff'"
+                    [attr.stroke]="isPointEditMode && part.name === redrawTargetName ? '#ff8c00' : 'none'"
+                    stroke-width="2"
+                    [style.cursor]="isPointEditMode && part.name === redrawTargetName ? 'grab' : 'default'"
+                    (mousedown)="onPointMouseDown($event, part, i)" />
+                }
+                @if(hoveredPart === part.name){
+                <!-- Show name label at first point of polygon -->
+                <text [attr.x]="part.polygon[0].x + 10" [attr.y]="part.polygon[0].y - 10" fill="red" font-size="16"
+                    font-weight="bold">
+                    {{ part.name }}
+                </text>
+                }
+                }
+                }
+            </svg>
+
+            <!-- SVG overlay for polygon selection (in-progress) -->
+            @if(polygonSelectionActive && currentPolygon.length > 1){
+            <svg [attr.width]="imageWidth" [attr.height]="imageHeight" class="polygon-overlay">
+                <polygon [attr.points]="polygonPointsString" fill="rgba(0,123,255,0.3)" stroke="#007bff"
+                    stroke-width="2" />
+                @if(!isFreehandDrawing){
+                @for(pt of currentPolygon; track pt){
+                <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="4" fill="#007bff" />
+                }
+                }
+            </svg>
+            }
+
+            @for(part of bodyParts; track part){
+            @if(part.x_min !== undefined && part.x_max !== undefined && part.y_min !== undefined && part.y_max !==
+            undefined)
+            {
+            <div class="body-part-overlay" [class.hovered]="hoveredPart === part.name" [style.left.px]="part.x_min"
+                [style.top.px]="part.y_min" [style.width.px]="part.x_max - part.x_min"
+                [style.height.px]="part.y_max - part.y_min"></div>
+            }
+            }
+        </div>
+    </p-card>
+</div>

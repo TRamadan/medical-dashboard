@@ -1,8 +1,18 @@
 <div class="dc-dash" dir="ltr">
 
+  <!-- ── Loading / error states ─────────────────────────────── -->
+  @if (loading()) {
+  <div class="dc-status-message" role="status">Loading dashboard…</div>
+  } @else if (error()) {
+  <div class="dc-status-message dc-status-message--error" role="alert">
+    {{ error() }}
+    <button type="button" class="dc-action-btn dc-action-btn--primary" (click)="loadDashboard()">Retry</button>
+  </div>
+  }
+
   <!-- ── 4 Stat cards ───────────────────────────────────────── -->
   <div class="dc-stats-grid" role="list" aria-label="Today's stats">
-    @for (s of stats; track s.label) {
+    @for (s of stats(); track s.label) {
     <p-card styleClass="dc-stat-card" [style]="{'--accent': s.accent}" role="listitem">
       <div class="dc-stat-card__bar"></div>
       <div class="dc-stat-card__body">
@@ -21,7 +31,18 @@
   <div class="dc-section-title">Today's Schedule</div>
 
   <div class="dc-patient-list" aria-label="Today's schedule">
-    @for (p of patients; track p.name) {
+    @if (!loading() && !error() && patients().length === 0) {
+    <p-card styleClass="dc-empty-state">
+      <div
+        style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:0.5rem; padding:1.5rem 1rem;">
+        <i class="pi pi-calendar" style="font-size:1.75rem; color:#94a3b8;" aria-hidden="true"></i>
+        <div style="font-weight:600; color:#475569;">No consultations scheduled</div>
+        <div style="font-size:0.875rem; color:#94a3b8;">Today's schedule will appear here once appointments are added.
+        </div>
+      </div>
+    </p-card>
+    }
+    @for (p of patients(); track p.name) {
     <p-card styleClass="dc-patient-p-card" [style]="{'border-left': '4px solid ' + p.badgeAccent, 'cursor': 'pointer'}"
       (click)="navigateToConsultation(p.badge)">
       <div class="dc-patient-row">
@@ -49,7 +70,17 @@
 
   <!-- ── Priority action rows ──────────────────────────────── -->
   <div class="dc-action-list" aria-label="Priority actions">
-    @for (row of priorityRows; track row.name) {
+    @if (!loading() && !error() && priorityRows().length === 0) {
+    <p-card styleClass="dc-empty-state">
+      <div
+        style="display:flex; flex-direction:column; align-items:center; text-align:center; gap:0.5rem; padding:1.5rem 1rem;">
+        <i class="pi pi-check-circle" style="font-size:1.75rem; color:#94a3b8;" aria-hidden="true"></i>
+        <div style="font-weight:600; color:#475569;">Nothing needs your decision</div>
+        <div style="font-size:0.875rem; color:#94a3b8;">Priority items will show up here as they come in.</div>
+      </div>
+    </p-card>
+    }
+    @for (row of priorityRows(); track row.name) {
     <p-card styleClass="dc-action-p-card" [style]="{'border-top': '4px solid ' + row.dot}">
       <div class="dc-action-row">
         <div class="dc-action-row__left">

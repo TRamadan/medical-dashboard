@@ -74,4 +74,15 @@ export class AppointmentService {
     getAppointmentsCountByStatus(locationId: number): Observable<any> {
         return this.http.get(this.apiUrl + this.baseUrl + '/dashboard/status-summary/' + locationId);
     }
+
+    /** POST /api/ConsultationProfile/{consultationProfileId}/mark-paid
+     *  Toggles the isPaid flag on a consultation profile row. */
+    markAsPaid(consultationProfileId: number): Observable<void> {
+        return this.http.patch<void>(
+            `${this.apiUrl}ConsultationProfile/${consultationProfileId}/mark-paid`,
+            {}
+        ).pipe(
+            catchError((err: HttpErrorResponse) => throwError(() => err))
+        );
+    }
 }

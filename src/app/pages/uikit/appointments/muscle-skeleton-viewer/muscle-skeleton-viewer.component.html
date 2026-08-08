@@ -1,0 +1,73 @@
+<div class="w-full">
+  <!-- Selected Muscles Section (Top Card) -->
+  <div class="selected-muscles-card p-4 mb-4 rounded-xl border border-gray-200 bg-slate-50 shadow-sm">
+    <div class="flex items-center justify-between gap-3 mb-3 flex-wrap">
+      <div class="flex items-center gap-3">
+        <i class="pi pi-list text-primary text-xl font-bold"></i>
+        <h3 class="m-0 text-lg font-bold text-gray-800">Selected Muscles</h3>
+        <p-badge [value]="selectedCount()" severity="success" styleClass="text-sm" />
+      </div>
+
+      @if (hasSelection() && !readOnly()) {
+      <p-button label="Clear All" icon="pi pi-trash" severity="danger" [outlined]="true" size="small"
+        (onClick)="clearSelectedMuscles()" pTooltip="Deselect all muscles" tooltipPosition="bottom" />
+      }
+    </div>
+
+    @if (hasSelection()) {
+    <div class="flex flex-wrap gap-2">
+      @for (muscle of selectedMuscles(); track muscle) {
+      <p-tag [value]="muscle" severity="success" icon="pi pi-check" [rounded]="true"
+        styleClass="cursor-pointer text-sm py-2 px-3 hover:shadow-sm transition-all"
+        (click)="toggleMuscleSelection(muscle)" pTooltip="Click to deselect {{ muscle }}" tooltipPosition="top" />
+      }
+    </div>
+    } @else {
+    <p-message severity="info" styleClass="w-full">
+      No muscles selected. Click on any muscle region on the anatomical map below to select it.
+    </p-message>
+    }
+  </div>
+
+  <!-- Anatomical Map Section (Full Width) -->
+  <div class="map-card w-full p-4 rounded-xl border border-gray-200 bg-white shadow-sm">
+
+
+    <!-- Map Container with Responsive viewBox SVG -->
+    <div class="image-map-wrapper relative w-full overflow-hidden rounded-lg border border-gray-100"
+      (mousemove)="onMouseMove($event)" (mouseleave)="onMouseLeave()">
+      <img #anatomyImage src="assets/Capture.PNG" alt="Anatomical illustration of the human muscular system"
+        class="w-full h-auto block select-none rounded-lg" (click)="onImageClick($event)" (load)="onImageLoad($event)"
+        [style.cursor]="readOnly() ? 'default' : 'pointer'" />
+
+      <!-- Responsive SVG Overlay with viewBox -->
+      @if (naturalWidth() > 0 && naturalHeight() > 0) {
+      <svg [attr.viewBox]="'0 0 ' + naturalWidth() + ' ' + naturalHeight()"
+        class="absolute top-0 left-0 w-full h-full pointer-events-none">
+        @for (part of bodyParts(); track part.name) {
+        @if (part.polygon && part.polygon.length > 1) {
+        <polygon [attr.points]="getPolygonPointsString(part.polygon)" [attr.fill]="getPolygonFill(part.name)"
+          [attr.stroke]="getPolygonStroke(part.name)"
+          [attr.stroke-width]="isMuscleSelected(part.name) ? '2.5' : (hoveredPart() === part.name ? '2' : '0')"
+          [style.cursor]="readOnly() ? 'default' : 'pointer'"
+          style="pointer-events: fill; transition: fill 0.15s ease, stroke 0.15s ease;"
+          (mouseenter)="onPolygonMouseEnter(part.name)" (mouseleave)="onPolygonMouseLeave(part.name)"
+          (click)="onPolygonClick(part.name, $event)">
+          <title>{{ part.name }}</title>
+        </polygon>
+
+        <!-- Show name label at first point of polygon on hover or selection -->
+        @if (hoveredPart() === part.name || isMuscleSelected(part.name)) {
+        <text [attr.x]="part.polygon[0].x + 10" [attr.y]="part.polygon[0].y - 10"
+          [attr.fill]="isMuscleSelected(part.name) ? '#15803d' : '#ef4444'" font-size="16" font-weight="bold"
+          style="pointer-events: none; text-shadow: 0 1px 3px rgba(255,255,255,0.95);">
+          {{ part.name }}
+        </text>
+        }
+        }
+        }
+      </svg>
+      }
+    </div>
+  </div>
+</div>

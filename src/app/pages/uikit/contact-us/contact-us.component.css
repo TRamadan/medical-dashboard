@@ -53,11 +53,6 @@
     z-index: 10;
 }
 
-.polygon-overlay polygon {
-    pointer-events: auto;
-    cursor: pointer;
-}
-
 /* Feature Toggle Styles */
 .feature-toggle {
     display: flex;
