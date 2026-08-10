@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, ViewChild, inject } from '@angular/core';
+
+import { Router } from '@angular/router';
 import { ConfirmationService, MessageService } from 'primeng/api';
-import { PaginatorState } from 'primeng/paginator';
 import { Table } from 'primeng/table';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -8,13 +9,10 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { ToolbarModule } from 'primeng/toolbar';
 import { InputTextModule } from 'primeng/inputtext';
-import { TextareaModule } from 'primeng/textarea';
 import { DropdownModule } from 'primeng/dropdown';
-import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { PaginatorModule } from 'primeng/paginator';
-import { TabsModule } from 'primeng/tabs';
 import { TagModule } from 'primeng/tag';
 import { InputIconModule } from 'primeng/inputicon';
 import { IconFieldModule } from 'primeng/iconfield';
@@ -32,19 +30,10 @@ import { CardModule } from "primeng/card";
 import { BadgeModule } from 'primeng/badge';
 import { AppointmentsDetailsComponent } from './appointments-details/appointments-details.component';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-import { SliderModule } from 'primeng/slider';
-import { SelectButtonModule } from 'primeng/selectbutton';
-import { ContactUsComponent } from '../contact-us/contact-us.component';
-import { MuscleSkeletonViewerComponent } from './muscle-skeleton-viewer/muscle-skeleton-viewer.component';
-import { PatientFormService } from './services/patient-form.service';
-import { PATIENT_FORM_MOCKS, MockPatientPreset } from './mock-data/patient-form-mocks';
-import { SelectModule } from 'primeng/select';
-import { ViewSide, BodyState } from 'body-muscles';
 
 
 @Component({
     selector: 'app-appointments',
-    standalone: true,
     imports: [
         CardModule,
         ProgressSpinnerModule,
@@ -57,56 +46,28 @@ import { ViewSide, BodyState } from 'body-muscles';
         ToastModule,
         ToolbarModule,
         InputTextModule,
-        TextareaModule,
         DropdownModule,
-        RadioButtonModule,
         InputNumberModule,
         DialogModule,
         TagModule,
         InputIconModule,
         IconFieldModule,
         ConfirmDialogModule,
-        TabsModule,
         DatePickerModule,
         BadgeModule,
         AppointmentsDetailsComponent,
         PaginatorModule,
         TooltipModule,
         CheckboxModule,
-        SliderModule,
-        SelectButtonModule,
-        SelectModule,
-        ContactUsComponent,
-        MuscleSkeletonViewerComponent
     ],
     providers: [MessageService, ConfirmationService],
     templateUrl: './appointments.component.html',
     styleUrls: ['./appointments.component.css']
 })
 export class AppointmentsComponent implements OnInit {
-    ViewSide = ViewSide;
-    currentView: ViewSide = ViewSide.FRONT;
+    private readonly router = inject(Router);
 
-    muscleState: BodyState = {
-        'biceps-left': { intensity: 7, selected: true },
-        'chest-upper-right': { intensity: 4, selected: false }
-    };
 
-    toggleView(): void {
-        this.currentView = this.currentView === ViewSide.FRONT ? ViewSide.BACK : ViewSide.FRONT;
-    }
-
-    onMuscleClicked(event: { id: string; name: string }): void {
-        const currentState = this.muscleState[event.id] || { intensity: 0, selected: false };
-
-        this.muscleState = {
-            ...this.muscleState,
-            [event.id]: {
-                ...currentState,
-                selected: !currentState.selected
-            }
-        };
-    }
     allAppointments = signal<Appointment[]>([]);
     filteredAppointments: Appointment[] = []; // Store filtered appointments
     groupedUrgentAppointments: { date: string; appointments: Appointment[] }[] = [];
@@ -156,49 +117,15 @@ export class AppointmentsComponent implements OnInit {
     rowsPerPageOptions: number[] = [10, 20, 30];
     totalRecords: number = 0;
 
-    constructor(
-        private _appointmentService: AppointmentService,
-        private _locationService: LocationService,
-        private messageService: MessageService,
-        private confirmationService: ConfirmationService
-    ) { }
+    private readonly _appointmentService = inject(AppointmentService);
+    private readonly _locationService = inject(LocationService);
+    private readonly messageService = inject(MessageService);
+    private readonly confirmationService = inject(ConfirmationService);
 
     ngOnInit() {
         this.initializeTable();
         this.getAllLocations();
     }
-    diagnosticTestOptions = [
-        { label: 'أشعة X', value: 'xray' },
-        { label: 'رنين مغناطيسي (MRI)', value: 'mri' },
-        { label: 'مقطعية (CT)', value: 'ct' },
-        { label: 'رسم عضلات', value: 'emg_muscle' },
-        { label: 'رسم عصب', value: 'emg_nerve' },
-        { label: 'موجات صوتية (سونار)', value: 'ultrasound' },
-        { label: 'مسح عظام', value: 'bone_scan' },
-        { label: 'أخرى', value: 'other' }
-    ];
-
-    prescribedTreatmentOptions = [
-        { label: 'علاج دوائي', value: 'medication' },
-        { label: 'علاج فيزيائي', value: 'physio' },
-        { label: 'تأهيل رياضي', value: 'rehab' },
-        { label: 'راحة', value: 'rest' },
-        { label: 'أخرى', value: 'other' }
-    ];
-
-    // Shared fixed disease list for the client / father / mother chip pickers (Tab 6)
-    diseaseOptions = [
-        'ارتفاع ضغط الدم',
-        'أمراض القلب',
-        'اضطرابات السكر',
-        'الأورام',
-        'الصرع',
-        'الجلطات',
-        'اضطرابات الغدة الدرقية',
-        'الربو',
-        'اضطرابات الكلى',
-        'أمراض جلدية'
-    ];
 
     initializeTable() {
         this.tableHeaders = [
@@ -223,20 +150,6 @@ export class AppointmentsComponent implements OnInit {
                 onClick: (row: any) => this.openCompletePatientInfo(row)
             }
         ];
-    }
-
-    // ── Specialists consulted (Tab 4) — now injuryData.specialistsConsulted, matching the API 1:1 ──
-    addSpecialist(): void {
-        if (!this.patientForm.injuryData.specialistsConsulted) {
-            this.patientForm.injuryData.specialistsConsulted = [];
-        }
-        this.patientForm.injuryData.specialistsConsulted.push({ id: 0, doctorName: '', specialty: '', diagnosis: '', communicationMethod: '' });
-        this.syncForm();
-    }
-
-    removeSpecialist(index: number): void {
-        this.patientForm.injuryData.specialistsConsulted?.splice(index, 1);
-        this.syncForm();
     }
 
     getAllLocations() {
@@ -542,11 +455,7 @@ export class AppointmentsComponent implements OnInit {
         return s ? s.label : 'Unknown';
     }
 
-    displayCompletePatientInfoDialog: boolean = false;
-    currentPatientRow: any = null;
-
     // ── Dropdown / Checkbox / Radio Options ───────────────────────
-    // Kept from the original form in case other parts of the app still reference them.
     genderOptions = [{ label: 'ذكر', value: 'male' }, { label: 'أنثى', value: 'female' }];
 
     performanceEngineerOptions = [
@@ -554,315 +463,13 @@ export class AppointmentsComponent implements OnInit {
         { label: 'مهندس 2', value: '2' }
     ];
 
-    // ── Options for the new tabbed patient-info form ──────────────
-    bookingForSelfOptions = [
-        { label: 'نعم — لي', value: true },
-        { label: 'لا — لشخص آخر', value: false }
-    ];
-
-    yesNoOptions = [
-        { label: 'نعم', value: true },
-        { label: 'لا', value: false }
-    ];
-
-    workNatureOptions = [
-        { label: 'مكتبي', value: 'مكتبي' },
-        { label: 'ميداني', value: 'ميداني' }
-    ];
-
-    // NOTE: socialProfile.maritalStatus is typed as `number` in the API contract
-    // (ConsultationProfileRequest), not boolean — CONFIRM the real numeric values
-    // with the backend team, same as the other enum-like fields below.
-    maritalStatusOptions = [
-        { label: 'متزوج', value: 1 },
-        { label: 'أعزب', value: 0 }
-    ];
-
-    // ui.injurySideLabel options — feeds INJURY_SIDE_MAP in the service (right=0, left=1, both=2)
-    injurySideOptions = [
-        { label: 'يمين', value: 'right' },
-        { label: 'يسار', value: 'left' },
-        { label: 'كلاهما', value: 'both' }
-    ];
-
-    // ui.inactivityDurationUnitLabel options — feeds INACTIVITY_UNIT_MAP in the service (days=0, weeks=1, months=2)
-    inactivityDurationUnitOptions = [
-        { label: 'أيام', value: 'days' },
-        { label: 'أسابيع', value: 'weeks' },
-        { label: 'أشهر', value: 'months' }
-    ];
-
-    procedureTypeOptions = [
-        { label: 'دواء', value: 'medication' },
-        { label: 'علاج طبيعي', value: 'physio' },
-        { label: 'تأهيل', value: 'rehab' },
-        { label: 'راحة', value: 'rest' }
-    ];
-
-    diagnosticMethodsOptions = [
-        { label: 'فحص سريري', value: 'clinical' },
-        { label: 'أشعة', value: 'imaging' },
-        { label: 'تحاليل', value: 'lab' }
-    ];
-
-    habitsOptions = [
-        { label: 'التدخين', value: 'smoking' },
-        { label: 'الكحوليات', value: 'alcohol' },
-        { label: 'المكيفات', value: 'stimulants' },
-        { label: 'لا يوجد', value: 'none' }
-    ];
-
-    // ── Patient Form Model ── shared via PatientFormService ───────────────────
-    protected readonly _patientFormService = inject(PatientFormService);
-    /** Local mutable copy — bound via ngModel. Synced to service on change. */
-    patientForm = this._patientFormService.form();
-
-    // ── Test / Mock data presets ─────────────────────────────────────────────
-    readonly mockPresets: MockPatientPreset[] = PATIENT_FORM_MOCKS;
-    selectedMockId: string | null = null;
-    dateOfBirthValue: Date | null = null;
-    injuryDateValue: Date | null = null;
-
-    /** Load a mock preset into the form for quick testing.
-     *  Uses JSON deep-clone to avoid shared object references, and
-     *  defers the local patientForm refresh to the next tick so the
-     *  signal settles before Angular re-renders the bound templates. */
-    loadMock(id: string | null): void {
-        debugger
-        if (!id) return;
-        const preset = this.mockPresets.find(p => p.id === id);
-        if (!preset) return;
-        // Deep-clone to prevent shared references between the mock constant and live form
-        const clone = JSON.parse(JSON.stringify(preset.data));
-        this._patientFormService.form.set(clone);
-        // Defer patientForm re-assignment so the current CD cycle finishes first.
-        // Without this the ngModel two-way bindings on nested objects crash Angular.
-        setTimeout(() => this.refreshFromService(), 0);
-    }
-
-    /** Call this from (ngModelChange) or any change event to keep the service in sync. */
-    syncForm(): void {
-        this._patientFormService.form.set({ ...this.patientForm });
-    }
-
-    /** Pull the freshest state back from the service — needed after calling any
-     *  service method that recomputes a field itself (chip toggles, date setters). */
-    private refreshFromService(): void {
-        this.patientForm = this._patientFormService.form();
-
-        // Synchronize dateOfBirth safely without creating redundant Date references
-        const newDobStr = this.patientForm.personalData.dateOfBirth;
-        if (newDobStr) {
-            const newTime = new Date(newDobStr).getTime();
-            const oldTime = this.dateOfBirthValue ? this.dateOfBirthValue.getTime() : null;
-            if (newTime !== oldTime) {
-                this.dateOfBirthValue = new Date(newDobStr);
-            }
+    openCompletePatientInfo(row: unknown): void {
+        const id = (row as Record<string, number>)?.['id'];
+        if (id) {
+            this.router.navigate(['/uikit/appointment-consultation-form', id]);
         } else {
-            this.dateOfBirthValue = null;
+            this.router.navigate(['/uikit/appointment-consultation-form']);
         }
-
-        // Synchronize injuryDate safely without creating redundant Date references
-        const newInjStr = this.patientForm.injuryData.injuryDate;
-        if (newInjStr) {
-            const newTime = new Date(newInjStr).getTime();
-            const oldTime = this.injuryDateValue ? this.injuryDateValue.getTime() : null;
-            if (newTime !== oldTime) {
-                this.injuryDateValue = new Date(newInjStr);
-            }
-        } else {
-            this.injuryDateValue = null;
-        }
-    }
-
-    openCompletePatientInfo(row: any) {
-        this.currentPatientRow = row;
-        this._patientFormService.reset();
-        this._patientFormService.patch({
-            personalData: {
-                ...this._patientFormService.form().personalData,
-                fullName: row.patientNameEn || ''
-            }
-        });
-        this.refreshFromService();
-        this.displayCompletePatientInfoDialog = true;
-    }
-
-    closePatientInfoDialog() {
-        this.displayCompletePatientInfoDialog = false;
-        this.currentPatientRow = null;
-    }
-
-    savePatientInfo(): void {
-        if (!this.currentPatientRow) return;
-        this.syncForm();
-        this._patientFormService.submitConsultationProfile(this.currentPatientRow.id).subscribe({
-            next: () => this.closePatientInfoDialog()
-        });
-    }
-
-    // ── Booking context (Tab 1) ────────────────────────────────────
-    setBookingForSelf(val: boolean): void {
-        this.patientForm.personalData.bookingForSelf = val;
-        if (val) {
-            // Clear the "on behalf of" fields when switching back to "for myself"
-            this.patientForm.personalData.fillerRelation = '';
-            this.patientForm.personalData.fillerName = '';
-            this.patientForm.personalData.fillerMobile = '';
-        }
-        this.syncForm();
-    }
-
-    /**
-     * Strips everything but digits as the person types, caps the length at 11
-     * (Egyptian mobile format: 01XXXXXXXXX), and keeps the leading zero intact —
-     * something p-inputNumber cannot do since it stores values as JS numbers.
-     */
-    sanitizePhoneInput(event: Event, field: 'phone' | 'emergencyPhone' | 'fillerMobile'): void {
-        const input = event.target as HTMLInputElement;
-        const digitsOnly = input.value.replace(/\D/g, '').slice(0, 11);
-        input.value = digitsOnly;
-
-        if (field === 'phone') {
-            this.patientForm.personalData.phoneNumber = digitsOnly;
-        } else if (field === 'emergencyPhone') {
-            this.patientForm.personalData.emergencyPhone = digitsOnly;
-        } else {
-            this.patientForm.personalData.fillerMobile = digitsOnly;
-        }
-        this.syncForm();
-    }
-
-    // ── Date pickers (Tab 1 / Tab 3) — service converts Date -> ISO string ──
-    // p-datepicker needs a Date object, but the form stores an ISO 'YYYY-MM-DD'
-    // string (to match the API contract), converted back safely via refreshFromService.
-
-
-    onDateOfBirthChange(date: Date | null): void {
-        this._patientFormService.setDateOfBirth(date);
-        this.refreshFromService();
-    }
-
-    onInjuryDateChange(date: Date | null): void {
-        this._patientFormService.setInjuryDate(date);
-        this.refreshFromService();
-    }
-
-    // ── Previous injuries (Tab 5) — now matches injuryHistory.previousInjuries shape ──
-    addPreviousInjury(): void {
-        if (!this.patientForm.injuryHistory.previousInjuries) {
-            this.patientForm.injuryHistory.previousInjuries = [];
-        }
-        this.patientForm.injuryHistory.previousInjuries.push({
-            id: 0, description: '', bodyPart: '', injuryDate: '', treatmentReceived: ''
-        });
-        this.syncForm();
-    }
-
-    removePreviousInjury(index: number): void {
-        this.patientForm.injuryHistory.previousInjuries?.splice(index, 1);
-        this.syncForm();
-    }
-
-    // ── Previous surgeries (Tab 5) — now matches injuryHistory.previousSurgeries shape ──
-    addSurgery(): void {
-        if (!this.patientForm.injuryHistory.previousSurgeries) {
-            this.patientForm.injuryHistory.previousSurgeries = [];
-        }
-        this.patientForm.injuryHistory.previousSurgeries.push({
-            id: 0, description: '', surgeryType: '', surgeryDate: ''
-        });
-        this.syncForm();
-    }
-
-    removeSurgery(index: number): void {
-        this.patientForm.injuryHistory.previousSurgeries?.splice(index, 1);
-        this.syncForm();
-    }
-
-    // ── Muscle skeleton map (Tab 4) — delegates to the service, which keeps
-    // selectedMuscles and injuryData.painLocations (MuscleName enum values) in sync ──
-    onMusclesChange(muscles: string[]): void {
-        this._patientFormService.setSelectedMuscles(muscles);
-        this.refreshFromService();
-    }
-
-    // ── Multi-select chips / checkboxes (Tabs 4, 6, 7) ──────────────
-    // Delegated to the service, which recomputes the API's single numeric
-    // field (currentConditions / prescribedTreatments / habits, etc.) for you.
-    togglePrescribedTreatment(value: string): void {
-        this._patientFormService.togglePrescribedTreatment(value);
-        this.refreshFromService();
-    }
-
-    isPrescribedTreatmentSelected(value: string): boolean {
-        return !!this.patientForm.ui.prescribedTreatmentsSelected?.includes(value);
-    }
-
-    toggleChronicCondition(value: string): void {
-        this._patientFormService.toggleChronicCondition(value);
-        this.refreshFromService();
-    }
-
-    toggleFatherCondition(value: string): void {
-        this._patientFormService.toggleFatherCondition(value);
-        this.refreshFromService();
-    }
-
-    toggleMotherCondition(value: string): void {
-        this._patientFormService.toggleMotherCondition(value);
-        this.refreshFromService();
-    }
-
-    isChipSelected(field: 'chronicConditionsSelected' | 'fatherConditionsSelected' | 'motherConditionsSelected', value: string): boolean {
-        return !!this.patientForm.ui[field]?.includes(value);
-    }
-
-    toggleHabit(value: string): void {
-        this._patientFormService.toggleHabit(value);
-        this.refreshFromService();
-    }
-
-    isHabitSelected(value: string): boolean {
-        return !!this.patientForm.ui.habitsSelected?.includes(value);
-    }
-
-    // ── Diagnostic tests (Tab 4) — delegates to service, which computes diagnosticTests bitmask ──
-    toggleDiagnosticTest(value: string): void {
-        this._patientFormService.toggleDiagnosticTest(value);
-        this.refreshFromService();
-    }
-
-    isDiagnosticTestSelected(value: string): boolean {
-        return !!this.patientForm.ui.diagnosticTestsSelected?.includes(value);
-    }
-
-    onWorkNatureChange(label: string): void {
-        this._patientFormService.setWorkNature(label);
-        this.refreshFromService();
-    }
-
-    onInjurySideChange(label: 'right' | 'left' | 'both'): void {
-        this._patientFormService.setInjurySide(label);
-        this.refreshFromService();
-    }
-
-    onInactivityDurationUnitChange(label: 'days' | 'weeks' | 'months'): void {
-        this._patientFormService.setInactivityDurationUnit(label);
-        this.refreshFromService();
-    }
-
-    // ── Regular medications (Tab 6) — now matches medicalHistory.medications shape ──
-    addMedication(): void {
-        if (!this.patientForm.medicalHistory.medications) {
-            this.patientForm.medicalHistory.medications = [];
-        }
-        this.patientForm.medicalHistory.medications.push({ id: 0, name: '', dose: '', frequency: '' });
-        this.syncForm();
-    }
-
-    removeMedication(index: number): void {
-        this.patientForm.medicalHistory.medications?.splice(index, 1);
-        this.syncForm();
     }
 }
+

@@ -238,6 +238,11 @@ export class AppMenu {
                     label: 'Consultation Form Config',
                     icon: 'pi pi-fw pi-file-edit',
                     routerLink: ['/uikit/consultation-form-configuration']
+                },
+                {
+                    label: 'Patient Consultation Form',
+                    icon: 'pi pi-fw pi-user-edit',
+                    routerLink: ['/uikit/appointment-consultation-form']
                 }
             ]
         });

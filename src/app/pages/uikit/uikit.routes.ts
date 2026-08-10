@@ -209,5 +209,16 @@ export default [
         path: 'legacy-launch',
         data: { breadcrumb: 'Legacy Launch' },
         loadComponent: () => import('./legacy-launch/legacy-launch.component').then(m => m.LegacyLaunchComponent)
+    },
+    {
+        path: 'appointment-consultation-form',
+        data: { breadcrumb: 'Appointment Consultation Form' },
+        loadComponent: () => import('./appointment-consultation-form/appointment-consultation-form.component').then(m => m.AppointmentConsultationFormComponent)
+    },
+    {
+        path: 'appointment-consultation-form/:id',
+        data: { breadcrumb: 'Appointment Consultation Form' },
+        loadComponent: () => import('./appointment-consultation-form/appointment-consultation-form.component').then(m => m.AppointmentConsultationFormComponent)
     }
 ] as Routes;
+
