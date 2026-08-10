@@ -38,6 +38,9 @@ export interface SpecialistConsulted {
     communicationMethod: string;
 }
 
+import { MuscleName, mapMusclesToPainLocations, mapMuscleNameToEnum } from '../models/muscle-names.enum';
+export { MuscleName, mapMusclesToPainLocations, mapMuscleNameToEnum };
+
 export interface InjuryData {
     bodyMapData: string;
     painLevel: number;
@@ -57,6 +60,7 @@ export interface InjuryData {
     hadDiagnosticTests: boolean;
     diagnosticTests: number;   // bitmask
     otherDiagnosticTest: string;
+    painLocations: number[];
 }
 
 export interface PreviousInjuryEntry {
@@ -205,7 +209,8 @@ const defaultForm: PatientForm = {
         inactivityDurationValue: 0, inactivityDurationUnit: 0,
         isSportRelated: true, seenSpecialist: false, specialistsConsulted: [],
         prescribedTreatments: 0, otherPrescribedTreatment: '',
-        hadDiagnosticTests: false, diagnosticTests: 0, otherDiagnosticTest: ''
+        hadDiagnosticTests: false, diagnosticTests: 0, otherDiagnosticTest: '',
+        painLocations: []
     },
     injuryHistory: { previousInjuries: [], previousSurgeries: [] },
     medicalHistory: {
@@ -343,15 +348,35 @@ export class PatientFormService {
         return idx > -1 ? list.filter(v => v !== value) : [...list, value];
     }
 
+    // ── Body-map muscle selection — keeps `selectedMuscles` (UI labels) and
+    // `injuryData.painLocations` (numeric MuscleName values) in sync ──
+    toggleMuscle(name: string): void {
+        const list = this.toggle(this.form().selectedMuscles ?? [], name);
+        this.setSelectedMuscles(list);
+    }
+
+    setSelectedMuscles(muscles: string[]): void {
+        this.form.update(f => ({
+            ...f,
+            selectedMuscles: muscles,
+            injuryData: { ...f.injuryData, painLocations: mapMusclesToPainLocations(muscles) }
+        }));
+    }
+
     // ── Submit — the six groups already match the API 1:1, so no separate mapper needed ──
     submitConsultationProfile(consultationId: number): Observable<void> {
         this.submitLoading.set(true);
         this.submitError.set(null);
         this.submitSuccess.set(false);
 
-        const { personalData, sportsData, injuryData, injuryHistory, medicalHistory, socialProfile } = this.form();
+        const { personalData, sportsData, injuryData, injuryHistory, medicalHistory, socialProfile, selectedMuscles } = this.form();
         const body: ConsultationProfileRequest = {
-            personalData, sportsData, injuryData, injuryHistory, medicalHistory, socialProfile
+            personalData,
+            sportsData,
+            injuryData: { ...injuryData, painLocations: mapMusclesToPainLocations(selectedMuscles ?? []) },
+            injuryHistory,
+            medicalHistory,
+            socialProfile
         };
 
         return this.http.put<void>(`${this.baseUrl}/${consultationId}`, body).pipe(

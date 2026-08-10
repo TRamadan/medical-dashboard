@@ -672,6 +672,7 @@ export class ConsultationScreenComponent {
                     clubName: 'Al Ahly', highestAchievement: 'League Cup 2024'
                 },
                 injuryData: {
+                    painLocations: [1, 2, 3],
                     bodyMapData: '', painLevel: 4, functionalLevel: 6, dailyActivityLevel: 5,
                     injuryDescription: 'Twisting knee while changing direction on turf',
                     injuryName: 'Right knee sprain', injurySide: 0, injuryDate: '2026-04-10',
@@ -715,6 +716,7 @@ export class ConsultationScreenComponent {
                     clubName: 'Gezira Sporting Club', highestAchievement: 'National amateur champion 2022'
                 },
                 injuryData: {
+                    painLocations: [1, 2, 3],
                     bodyMapData: '', painLevel: 3, functionalLevel: 5, dailyActivityLevel: 5,
                     injuryDescription: 'Overhead serve pain in shoulder',
                     injuryName: 'Rotator Cuff Tendinopathy', injurySide: 0, injuryDate: '2026-06-01',
@@ -758,6 +760,7 @@ export class ConsultationScreenComponent {
                     clubName: 'Zamalek', highestAchievement: 'African Championship 2025'
                 },
                 injuryData: {
+                    painLocations: [1, 2, 3],
                     bodyMapData: '', painLevel: 5, functionalLevel: 7, dailyActivityLevel: 6,
                     injuryDescription: 'Sudden shoulder stretch during defensive block',
                     injuryName: 'Rotator Cuff Strain', injurySide: 0, injuryDate: '2026-07-15',

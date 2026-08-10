@@ -1,4 +1,5 @@
 import { PatientForm } from '../services/patient-form.service';
+import { MuscleName } from '../models/muscle-names.enum';
 
 export interface MockPatientPreset {
     id: string;
@@ -32,6 +33,7 @@ const scenario_new_simple: PatientForm = {
         highestAchievement: 'بطولة الهواة 2023'
     },
     injuryData: {
+        painLocations: [MuscleName.RightQuadriceps, MuscleName.RightAdductor],
         bodyMapData: '',
         painLevel: 4,
         functionalLevel: 6,
@@ -90,7 +92,7 @@ const scenario_new_simple: PatientForm = {
         injurySideLabel: 'right',
         workNatureLabel: 'مكتبي'
     },
-    selectedMuscles: ['muscle 5', 'muscle 6']
+    selectedMuscles: ['Right Quadriceps', 'Right Adductor']
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -118,6 +120,7 @@ const scenario_new_complex: PatientForm = {
         highestAchievement: 'بطولة أفريقيا للشباب 2024'
     },
     injuryData: {
+        painLocations: [MuscleName.RightQuadriceps, MuscleName.RightAdductor, MuscleName.LateralHamstringsBicepsRight],
         bodyMapData: '',
         painLevel: 7,
         functionalLevel: 4,
@@ -183,7 +186,7 @@ const scenario_new_complex: PatientForm = {
         injurySideLabel: 'right',
         workNatureLabel: 'ميداني'
     },
-    selectedMuscles: ['muscle 3', 'muscle 4', 'muscle 12']
+    selectedMuscles: ['Right Quadriceps', 'Right Adductor', 'Lateral Hamstrings (Biceps) Right']
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -211,6 +214,7 @@ const scenario_return_shoulder: PatientForm = {
         highestAchievement: 'بطل هواة وطني 2022'
     },
     injuryData: {
+        painLocations: [MuscleName.RightShoulderFront, MuscleName.RightShoulderSide, MuscleName.RightBiceps],
         bodyMapData: '',
         painLevel: 3,
         functionalLevel: 6,
@@ -273,7 +277,7 @@ const scenario_return_shoulder: PatientForm = {
         injurySideLabel: 'right',
         workNatureLabel: 'ميداني'
     },
-    selectedMuscles: ['muscle 1', 'muscle 2', 'muscle 3']
+    selectedMuscles: ['Right Sholder Front', 'Right Sholder (Side)', 'Right Biceps']
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -301,6 +305,7 @@ const scenario_chronic_conditions: PatientForm = {
         highestAchievement: 'بطولة إقليمية ماسترز 2021'
     },
     injuryData: {
+        painLocations: [MuscleName.LeftLatsLower, MuscleName.RightLatsLower, MuscleName.LeftLatsMid, MuscleName.RightLatsMid],
         bodyMapData: '',
         painLevel: 5,
         functionalLevel: 5,
@@ -371,7 +376,7 @@ const scenario_chronic_conditions: PatientForm = {
         injurySideLabel: 'both',
         workNatureLabel: 'مكتبي'
     },
-    selectedMuscles: ['muscle 7', 'muscle 8', 'muscle 9', 'muscle 10']
+    selectedMuscles: ['Left Lats (Lower)', 'Right Lats (Lower)', 'Left Mats (Mid)', 'Right Mats (Mid)']
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -399,6 +404,7 @@ const scenario_female_athlete: PatientForm = {
         highestAchievement: 'بطولة مصر للسيدات 2023'
     },
     injuryData: {
+        painLocations: [MuscleName.LeftShoulderFront, MuscleName.RightShoulderFront],
         bodyMapData: '',
         painLevel: 6,
         functionalLevel: 5,
@@ -461,7 +467,7 @@ const scenario_female_athlete: PatientForm = {
         injurySideLabel: 'left',
         workNatureLabel: 'ميداني'
     },
-    selectedMuscles: ['muscle 1', 'muscle 2']
+    selectedMuscles: ['Left Shoulder Front', 'Right Sholder Front']
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -489,6 +495,7 @@ const scenario_post_surgery_reassess: PatientForm = {
         highestAchievement: 'الدوري الممتاز 2025'
     },
     injuryData: {
+        painLocations: [MuscleName.RightShoulderFront, MuscleName.RightShoulderSide, MuscleName.RightQuadriceps],
         bodyMapData: '',
         painLevel: 5,
         functionalLevel: 6,
@@ -553,7 +560,7 @@ const scenario_post_surgery_reassess: PatientForm = {
         injurySideLabel: 'right',
         workNatureLabel: 'ميداني'
     },
-    selectedMuscles: ['muscle 1', 'muscle 3', 'muscle 4']
+    selectedMuscles: ['Right Sholder Front', 'Right Sholder (Side)', 'Right Quadriceps']
 };
 
 // ─────────────────────────────────────────────────────────────
@@ -581,6 +588,7 @@ const scenario_youth_proxy: PatientForm = {
         highestAchievement: 'بطولة ناشئين مصر 2025 — المركز الثاني'
     },
     injuryData: {
+        painLocations: [MuscleName.RightShoulderFront],
         bodyMapData: '',
         painLevel: 3,
         functionalLevel: 7,
@@ -639,7 +647,7 @@ const scenario_youth_proxy: PatientForm = {
         injurySideLabel: 'right',
         workNatureLabel: 'ميداني'
     },
-    selectedMuscles: ['muscle 1']
+    selectedMuscles: ['Right Sholder Front']
 };
 
 // ─────────────────────────────────────────────────────────────

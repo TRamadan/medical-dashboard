@@ -780,6 +780,13 @@ export class AppointmentsComponent implements OnInit {
         this.syncForm();
     }
 
+    // ── Muscle skeleton map (Tab 4) — delegates to the service, which keeps
+    // selectedMuscles and injuryData.painLocations (MuscleName enum values) in sync ──
+    onMusclesChange(muscles: string[]): void {
+        this._patientFormService.setSelectedMuscles(muscles);
+        this.refreshFromService();
+    }
+
     // ── Multi-select chips / checkboxes (Tabs 4, 6, 7) ──────────────
     // Delegated to the service, which recomputes the API's single numeric
     // field (currentConditions / prescribedTreatments / habits, etc.) for you.
