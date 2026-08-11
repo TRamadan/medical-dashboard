@@ -1,72 +1,87 @@
 <div class="dc-na" dir="ltr">
 
   <!-- ── Header ─────────────────────────────────────────────── -->
-  <div class="dc-na__header">
+  <div class="dc-na__header flex items-center justify-between mb-4">
     <div class="dc-na__title-group">
-      <h1 class="dc-na__title">
-        <i class="pi pi-bell" aria-hidden="true"></i>
+      <h1 class="dc-na__title text-2xl font-bold flex items-center gap-2 m-0">
+        <i class="pi pi-bell text-primary" aria-hidden="true"></i>
         Notifications & Alerts
       </h1>
     </div>
 
+    <div class="flex items-center gap-2">
+      <p-button
+        label="Mark all as read"
+        icon="pi pi-check-circle"
+        [outlined]="true"
+        size="small"
+        (onClick)="markAllRead()"
+      ></p-button>
+    </div>
   </div>
 
-
-
   <!-- ── Notification list ──────────────────────────────────── -->
-  <div class="dc-na__list" role="list" aria-label="Notifications">
-    @for (n of notifications(); track n.id) {
-    <p-card styleClass="dc-consult-p-card">
-      <div class="dc-notif" [class.dc-notif--critical]="n.level === 'critical'"
-        [class.dc-notif--warning]="n.level === 'warning'" [class.dc-notif--info]="n.level === 'info'"
-        [class.dc-notif--success]="n.level === 'success'" [class.dc-notif--protocol]="n.level === 'protocol'"
-        role="listitem" [style.--notif-color]="levelConfig[n.level].color" [style.--notif-bg]="levelConfig[n.level].bg"
-        [style.--notif-border]="levelConfig[n.level].border">
+  <div class="dc-na__list flex flex-col gap-3" role="list" aria-label="Notifications">
+    @if (loading()) {
+      <div class="text-center p-6 text-gray-500">
+        <i class="pi pi-spin pi-spinner text-2xl mb-2 block"></i>
+        <span>Loading notifications...</span>
+      </div>
+    } @else {
+      @for (n of notificationsList(); track n.id) {
+        <p-card styleClass="dc-consult-p-card shadow-xs cursor-pointer hover:shadow-md transition-all" (click)="onNotificationClick(n)">
+          <div
+            class="dc-notif p-3 border-round flex items-start gap-3 relative"
+            [class.dc-notif--critical]="n.level === 'critical'"
+            [class.dc-notif--warning]="n.level === 'warning'"
+            [class.dc-notif--info]="n.level === 'info'"
+            [class.dc-notif--success]="n.level === 'success'"
+            [class.dc-notif--protocol]="n.level === 'protocol'"
+            role="listitem"
+            [style.--notif-color]="levelConfig[n.level].color"
+            [style.--notif-bg]="levelConfig[n.level].bg"
+            [style.--notif-border]="levelConfig[n.level].border"
+          >
+            <!-- Unread Dot -->
+            @if (!n.isRead) {
+              <span class="absolute top-2 right-2 w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+            }
 
+            <!-- Icon -->
+            <div class="dc-notif__icon-wrap flex-shrink-0" aria-hidden="true">
+              <i class="pi" [class]="n.icon"></i>
+            </div>
 
+            <!-- Content -->
+            <div class="dc-notif__content flex-1">
+              <div class="dc-notif__top flex items-center justify-between gap-2 mb-1">
+                <span class="dc-notif__title font-semibold text-base" [class.font-bold]="!n.isRead">
+                  {{ n.title }}
+                </span>
+                <div class="dc-notif__right flex items-center gap-2">
+                  @if (n.tag) {
+                    <span class="dc-notif__tag text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium">
+                      {{ n.tag }}
+                    </span>
+                  }
+                  <span class="dc-notif__time text-xs text-gray-400">{{ n.time }}</span>
+                </div>
+              </div>
 
-        <!-- Icon -->
-        <div class="dc-notif__icon-wrap" aria-hidden="true">
-          <i class="pi" [class]="n.icon"></i>
-        </div>
-
-        <!-- Content -->
-        <div class="dc-notif__content">
-          <div class="dc-notif__top">
-            <span class="dc-notif__title">{{ n.title }}</span>
-            <div class="dc-notif__right">
-              @if (n.tag) {
-              <span class="dc-notif__tag">{{ n.tag }}</span>
-              }
-              <span class="dc-notif__time">{{ n.time }}</span>
+              <div class="dc-notif__body text-sm text-gray-600 dark:text-gray-300">
+                {{ n.body }}
+              </div>
             </div>
           </div>
-          <div class="dc-notif__body">{{ n.body }}</div>
+        </p-card>
+      }
 
-          @if (n.primaryAction || n.secondaryAction) {
-          <div class="dc-notif__actions">
-            @if (n.secondaryAction) {
-            <p-button [label]="n.secondaryAction" size="small" severity="danger" [outlined]="true"
-              (onClick)="handleAction(n.secondaryAction, n)"></p-button>
-            }
-            @if (n.primaryAction) {
-            <p-button [label]="n.primaryAction" size="small" [outlined]="true"
-              (onClick)="handleAction(n.primaryAction, n)"></p-button>
-            }
-          </div>
-          }
+      @if (notificationsList().length === 0) {
+        <div class="dc-na__empty text-center p-8 text-gray-400" aria-live="polite">
+          <i class="pi pi-bell-slash text-4xl mb-2 block" aria-hidden="true"></i>
+          <p class="m-0">No notifications found</p>
         </div>
-
-
-      </div>
-    </p-card>
-    }
-
-    @if (notifications().length === 0) {
-    <div class="dc-na__empty" aria-live="polite">
-      <i class="pi pi-bell-slash dc-na__empty-icon" aria-hidden="true"></i>
-      <p>No notifications</p>
-    </div>
+      }
     }
   </div>
 
