@@ -38,8 +38,8 @@ export interface SpecialistConsulted {
     communicationMethod: string;
 }
 
-import { MuscleName, mapMusclesToPainLocations, mapMuscleNameToEnum } from '../models/muscle-names.enum';
-export { MuscleName, mapMusclesToPainLocations, mapMuscleNameToEnum };
+import { MuscleName, mapMusclesToPainLocations, mapMuscleNameToEnum, mapPainLocationsToMuscleNames } from '../models/muscle-names.enum';
+export { MuscleName, mapMusclesToPainLocations, mapMuscleNameToEnum, mapPainLocationsToMuscleNames };
 
 export interface InjuryData {
     bodyMapData: string;
@@ -406,5 +406,123 @@ export class PatientFormService {
                 return throwError(() => err);
             })
         );
+    }
+
+    // ── Fetch profile by appointmentId ──
+    getConsultationProfile(appointmentId: number): Observable<any> {
+        this.submitLoading.set(true);
+        this.submitError.set(null);
+        return this.http.get<{ data: any; isSuccess: boolean; error: any }>(`${this.baseUrl}/${appointmentId}`).pipe(
+            tap(res => {
+                this.submitLoading.set(false);
+                if (res && res.isSuccess && res.data) {
+                    this.applyProfileData(res.data);
+                }
+            }),
+            catchError((err: HttpErrorResponse) => {
+                this.submitLoading.set(false);
+                const errorMsg = err?.error?.error || 'فشل تحميل بيانات الملف الشخصي للمريض.';
+                this.submitError.set(errorMsg);
+                return throwError(() => err);
+            })
+        );
+    }
+
+    applyProfileData(data: any): void {
+        if (!data) return;
+        const p = data.personalData || {};
+        const s = data.sportsData || {};
+        const i = data.injuryData || {};
+        const h = data.injuryHistory || {};
+        const m = data.medicalHistory || {};
+        const soc = data.socialProfile || {};
+
+        this.form.set({
+            personalData: {
+                fullName: p.fullName ?? '',
+                dateOfBirth: p.dateOfBirth ?? '',
+                address: p.address ?? '',
+                phoneNumber: p.phoneNumber ?? '',
+                emergencyPhone: p.emergencyPhone ?? '',
+                emergencyRelation: p.emergencyRelation ?? '',
+                bookingForSelf: p.bookingForSelf ?? true,
+                fillerRelation: p.fillerRelation ?? '',
+                fillerName: p.fillerName ?? '',
+                fillerMobile: p.fillerMobile ?? ''
+            },
+            sportsData: {
+                sport: s.sport ?? '',
+                playCenter: s.playCenter ?? '',
+                yearsOfPractice: s.yearsOfPractice ?? 0,
+                clubName: s.clubName ?? '',
+                highestAchievement: s.highestAchievement ?? ''
+            },
+            injuryData: {
+                bodyMapData: i.bodyMapData ?? '',
+                painLevel: i.painLevel ?? 0,
+                functionalLevel: i.functionalLevel ?? 0,
+                dailyActivityLevel: i.dailyActivityLevel ?? 0,
+                injuryDescription: i.injuryDescription ?? '',
+                injuryName: i.injuryName ?? '',
+                injurySide: i.injurySide ?? 0,
+                injuryDate: i.injuryDate ?? '',
+                inactivityDurationValue: i.inactivityDurationValue ?? 0,
+                inactivityDurationUnit: i.inactivityDurationUnit ?? 0,
+                isSportRelated: i.isSportRelated ?? true,
+                seenSpecialist: i.seenSpecialist ?? false,
+                specialistsConsulted: i.specialistsConsulted ?? [],
+                prescribedTreatments: i.prescribedTreatments ?? 0,
+                otherPrescribedTreatment: i.otherPrescribedTreatment ?? '',
+                hadDiagnosticTests: i.hadDiagnosticTests ?? false,
+                diagnosticTests: i.diagnosticTests ?? 0,
+                otherDiagnosticTest: i.otherDiagnosticTest ?? '',
+                painLocations: i.painLocations ?? []
+            },
+            injuryHistory: {
+                previousInjuries: h.previousInjuries ?? [],
+                previousSurgeries: h.previousSurgeries ?? []
+            },
+            medicalHistory: {
+                currentConditions: m.currentConditions ?? 0,
+                otherConditions: m.otherConditions ?? '',
+                medications: m.medications ?? [],
+                knownAllergies: m.knownAllergies ?? '',
+                hadCovid: m.hadCovid ?? false,
+                covidTimesCount: m.covidTimesCount ?? 0,
+                covidVaccinated: m.covidVaccinated ?? false,
+                vaccineType: m.vaccineType ?? '',
+                vaccineDoses: m.vaccineDoses ?? 0,
+                fatherConditions: m.fatherConditions ?? 0,
+                fatherOtherConditions: m.fatherOtherConditions ?? '',
+                motherConditions: m.motherConditions ?? 0,
+                motherOtherConditions: m.motherOtherConditions ?? ''
+            },
+            socialProfile: {
+                occupation: soc.occupation ?? '',
+                workNature: soc.workNature ?? 0,
+                dailySittingHours: soc.dailySittingHours ?? 0,
+                maritalStatus: soc.maritalStatus ?? 0,
+                habits: soc.habits ?? 0,
+                isWorkStressful: soc.isWorkStressful ?? false,
+                hasChildren: soc.hasChildren ?? false
+            },
+            ui: {
+                prescribedTreatmentsSelected: this.decodeBitmask(i.prescribedTreatments, PRESCRIBED_TREATMENT_FLAGS),
+                diagnosticTestsSelected: this.decodeBitmask(i.diagnosticTests, DIAGNOSTIC_TEST_FLAGS),
+                chronicConditionsSelected: this.decodeBitmask(m.currentConditions, DISEASE_CONDITION_FLAGS),
+                fatherConditionsSelected: this.decodeBitmask(m.fatherConditions, DISEASE_CONDITION_FLAGS),
+                motherConditionsSelected: this.decodeBitmask(m.motherConditions, DISEASE_CONDITION_FLAGS),
+                habitsSelected: this.decodeBitmask(soc.habits, HABIT_FLAGS),
+                inactivityDurationUnitLabel: i.inactivityDurationUnit === 0 ? 'days' : i.inactivityDurationUnit === 2 ? 'months' : 'weeks',
+                injurySideLabel: i.injurySide === 0 ? 'right' : i.injurySide === 1 ? 'left' : 'both',
+                workNatureLabel: soc.workNature === 0 ? 'مكتبي' : 'ميداني'
+            },
+            selectedMuscles: mapPainLocationsToMuscleNames(i.painLocations ?? [])
+        });
+    }
+
+    private decodeBitmask(mask: number, map: Record<string, number>): string[] {
+        if (!mask) return [];
+        return Object.keys(map).filter(key => (mask & map[key]) === map[key]);
     }
 }

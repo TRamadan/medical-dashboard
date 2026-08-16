@@ -22,6 +22,7 @@ import { TableModule } from 'primeng/table';
 import { DialogModule } from 'primeng/dialog';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ContactUsComponent } from '../contact-us/contact-us.component';
+import { MuscleSkeletonViewerComponent } from '../appointments/muscle-skeleton-viewer/muscle-skeleton-viewer.component';
 import { PatientFormService } from '../appointments/services/patient-form.service';
 import { ServicesService } from '../add-service/services/services.service';
 import {
@@ -76,7 +77,8 @@ interface AthleteInfo {
         DropdownModule,
         TableModule,
         DialogModule,
-        ContactUsComponent
+        ContactUsComponent,
+        MuscleSkeletonViewerComponent
     ],
     templateUrl: './consultation-screen.component.html',
     styleUrl: './consultation-screen.component.scss',
@@ -97,11 +99,90 @@ export class ConsultationScreenComponent {
     /** Exposes the enum to the template so it can compare/bind against EntryType.New etc. instead of raw strings. */
     readonly EntryType = EntryType;
     displayPatientInfoDialog = false;
+    readonly patientProfileLoading = signal(false);
+    readonly patientProfileError = signal<string | null>(null);
+    readonly rawPatientProfile = signal<any>(null);
+
+    openPatientProfileDialog(): void {
+        this.displayPatientInfoDialog = true;
+        const id = this.appointmentId();
+        if (id) {
+            this.patientProfileLoading.set(true);
+            this.patientProfileError.set(null);
+            this._patientFormService.getConsultationProfile(id).subscribe({
+                next: (res) => {
+                    this.patientProfileLoading.set(false);
+                    if (res && res.data) {
+                        this.rawPatientProfile.set(res.data);
+                    }
+                },
+                error: () => {
+                    this.patientProfileLoading.set(false);
+                    this.patientProfileError.set('فشل تحميل بيانات الملف الشخصي للمريض');
+                }
+            });
+        }
+    }
 
     // ── Patient form — live signal from the shared PatientFormService ──────
     private readonly _patientFormService = inject(PatientFormService);
     /** Reactive alias: template uses mockPatientInfo() or mockPatientInfo directly */
     get mockPatientInfo() { return this._patientFormService.form(); }
+
+    get patientInfo() {
+        const form = this._patientFormService.form();
+        const raw = this.rawPatientProfile() || {};
+
+        const fullName = form.personalData?.fullName || '';
+        const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+        const initials = nameParts.length >= 2
+            ? (nameParts[0][0] + nameParts[1][0]).toUpperCase()
+            : nameParts[0] ? nameParts[0][0].toUpperCase() : '—';
+
+        let age: number | null = null;
+        if (form.personalData?.dateOfBirth) {
+            const birthDate = new Date(form.personalData.dateOfBirth);
+            if (!isNaN(birthDate.getTime())) {
+                const today = new Date();
+                age = today.getFullYear() - birthDate.getFullYear();
+                const m = today.getMonth() - birthDate.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                    age--;
+                }
+            }
+        }
+
+        const maritalStatusLabel = form.socialProfile?.maritalStatus === 1 ? 'متزوج' : form.socialProfile?.maritalStatus === 0 ? 'أعزب' : 'غير محدد';
+
+        return {
+            appointmentId: raw.appointmentId ?? this.appointmentId(),
+            isPaid: raw.isPaid ?? true,
+            isProfileComplete: raw.isProfileComplete ?? true,
+            personalData: form.personalData,
+            sportsData: form.sportsData,
+            injuryData: form.injuryData,
+            injuryHistory: form.injuryHistory,
+            medicalHistory: form.medicalHistory,
+            socialProfile: form.socialProfile,
+            selectedMuscles: form.selectedMuscles || [],
+            ui: {
+                ...(form.ui || {}),
+                initials,
+                age,
+                maritalStatusLabel
+            }
+        };
+    }
+
+    scrollToSection(sectionId: string, event?: Event): void {
+        if (event) {
+            event.preventDefault();
+        }
+        const element = document.getElementById(sectionId);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
 
     private readonly fb = inject(FormBuilder);
     private readonly servicesService = inject(ServicesService);
