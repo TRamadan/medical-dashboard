@@ -128,13 +128,9 @@ export class ConsultationScreenComponent {
             if (params['type']) {
                 this.selectEntry(params['type'] as EntryType);
             }
-        });
-
-        this.route.paramMap.subscribe(pm => {
-            debugger
-            const raw = pm.get('appointmentId');
+            const raw = params['appointmentId'] ?? this.route.snapshot.paramMap.get('appointmentId');
             const id = raw ? Number(raw) : null;
-            if (id) {
+            if (id && id !== this.appointmentId()) {
                 this.appointmentId.set(id);
                 this.loadSession(id);
             }
@@ -833,8 +829,7 @@ export class ConsultationScreenComponent {
 
     /** HTML Step 1 (Complaint Registration) → PUT /step/1 */
     submitStep1(): void {
-        debugger
-        const id = 2;
+        const id = this.appointmentId();
         if (!id) { this.go(2); return; }
         this.sessionSaving.set(true);
         this.sessionError.set(null);
@@ -857,7 +852,7 @@ export class ConsultationScreenComponent {
 
     /** HTML Step 2 (Assessment) → PUT /step/2. `order` is the row's array index — not its display id. */
     submitStep2(): void {
-        const id = 2;
+        const id = this.appointmentId();
         if (!id) { this.go(3); return; }
         this.sessionSaving.set(true);
         this.sessionError.set(null);
@@ -889,7 +884,7 @@ export class ConsultationScreenComponent {
      */
     submitJudgment(): void {
         const isWriteReport = this.judgmentChoice() === 'writeReport';
-        const id = 2;
+        const id = this.appointmentId();
         const nextStep: FlowStep = isWriteReport ? 5 : 6;
         if (!id) { this.go(nextStep); return; }
 

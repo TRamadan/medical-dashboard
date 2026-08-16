@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, of } from 'rxjs';
+import { Observable, tap, map, catchError, of } from 'rxjs';
 import * as signalR from '@microsoft/signalr';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../pages/auth/services/auth.service';
@@ -192,12 +192,14 @@ export class NotificationService {
      */
     loadUnreadNotifications(): Observable<NotificationDTO[]> {
         this.loading.set(true);
-        return this.http.get<NotificationDTO[]>(`${this.baseUrl}/unread`).pipe(
-            tap(items => {
-                this.notifications.set(items ?? []);
-                this.unreadCount.set(items?.length ?? 0);
+        return this.http.get<NotificationDTO[] | PaginatedNotificationsResponse>(`${this.baseUrl}/unread`).pipe(
+            tap(res => {
+                const items = Array.isArray(res) ? res : ((res as any)?.items ?? []);
+                this.notifications.set(items);
+                this.unreadCount.set(items.length);
                 this.loading.set(false);
             }),
+            map(res => Array.isArray(res) ? res : ((res as any)?.items ?? [])),
             catchError(() => {
                 this.loading.set(false);
                 return of([]);
@@ -208,16 +210,18 @@ export class NotificationService {
     /**
      * REST: Fetch paginated notifications history
      */
-    loadNotificationsHistory(page = 1, pageSize = 20): Observable<PaginatedNotificationsResponse> {
+    loadNotificationsHistory(page = 1, pageSize = 50): Observable<NotificationDTO[]> {
         this.loading.set(true);
-        return this.http.get<PaginatedNotificationsResponse>(`${this.baseUrl}?page=${page}&pageSize=${pageSize}`).pipe(
+        return this.http.get<NotificationDTO[] | PaginatedNotificationsResponse>(`${this.baseUrl}?page=${page}&pageSize=${pageSize}`).pipe(
             tap(res => {
-                this.notifications.set(res?.items ?? []);
+                const items = Array.isArray(res) ? res : ((res as any)?.items ?? []);
+                this.notifications.set(items);
                 this.loading.set(false);
             }),
+            map(res => Array.isArray(res) ? res : ((res as any)?.items ?? [])),
             catchError(() => {
                 this.loading.set(false);
-                return of({ items: [], totalCount: 0, page, pageSize });
+                return of([]);
             })
         );
     }

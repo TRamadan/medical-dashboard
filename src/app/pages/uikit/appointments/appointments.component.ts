@@ -628,7 +628,7 @@ export class AppointmentsComponent implements OnInit {
      *  defers the local patientForm refresh to the next tick so the
      *  signal settles before Angular re-renders the bound templates. */
     loadMock(id: string | null): void {
-        debugger
+
         if (!id) return;
         const preset = this.mockPresets.find(p => p.id === id);
         if (!preset) return;

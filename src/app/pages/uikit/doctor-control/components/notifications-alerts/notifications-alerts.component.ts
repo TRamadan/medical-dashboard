@@ -1,6 +1,5 @@
 import { Component, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { CommonModule } from '@angular/common';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from "primeng/card";
 import { TagModule } from 'primeng/tag';
@@ -24,8 +23,7 @@ interface UiNotification {
 
 @Component({
   selector: 'app-dc-notifications-alerts',
-  standalone: true,
-  imports: [CommonModule, ButtonModule, CardModule, TagModule],
+  imports: [ButtonModule, CardModule, TagModule],
   templateUrl: './notifications-alerts.component.html',
   styleUrl: './notifications-alerts.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -52,17 +50,13 @@ export class NotificationsAlertsComponent implements OnInit {
   loadData(): void {
     this.loading.set(true);
     this.notificationService.loadNotificationsHistory(1, 50).subscribe({
-      next: (res) => {
-        if (res && res.items && res.items.length > 0) {
-          this.notificationsList.set(res.items.map(n => this.mapDtoToUi(n)));
-        } else {
-          // Fallback to sample presets if API history is empty
-          this.notificationsList.set(this.getMockNotifications());
-        }
+      next: (items) => {
+        const list = Array.isArray(items) ? items : ((items as any)?.items ?? []);
+        this.notificationsList.set(list.map((n: NotificationDTO) => this.mapDtoToUi(n)));
         this.loading.set(false);
       },
       error: () => {
-        this.notificationsList.set(this.getMockNotifications());
+        this.notificationsList.set([]);
         this.loading.set(false);
       }
     });

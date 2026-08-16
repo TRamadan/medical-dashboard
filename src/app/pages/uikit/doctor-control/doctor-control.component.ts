@@ -17,7 +17,6 @@ interface DcNavItem {
 
 @Component({
   selector: 'app-doctor-control',
-  standalone: true,
   imports: [CardModule, ProtocolConfigComponent, DashboardComponent, TodaysConsultationsComponent, PendingTicketsComponent, NotificationsAlertsComponent],
   templateUrl: './doctor-control.component.html',
   styleUrl: './doctor-control.component.scss',

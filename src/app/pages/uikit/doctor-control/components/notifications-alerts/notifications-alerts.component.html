@@ -77,10 +77,15 @@
       }
 
       @if (notificationsList().length === 0) {
-        <div class="dc-na__empty text-center p-8 text-gray-400" aria-live="polite">
-          <i class="pi pi-bell-slash text-4xl mb-2 block" aria-hidden="true"></i>
-          <p class="m-0">No notifications found</p>
-        </div>
+        <p-card styleClass="dc-consult-p-card">
+          <div class="dc-na__empty text-center p-8 flex flex-col items-center justify-center gap-2" aria-live="polite">
+            <div class="w-16 h-16 rounded-full bg-blue-50 dark:bg-gray-800 text-primary flex items-center justify-center mb-2">
+              <i class="pi pi-bell-slash text-3xl" aria-hidden="true"></i>
+            </div>
+            <h3 class="m-0 text-lg font-bold text-gray-700 dark:text-gray-200">No Notifications Found</h3>
+            <p class="m-0 text-sm text-gray-400 max-w-sm">You are all caught up! New appointment updates and system alerts will appear here automatically.</p>
+          </div>
+        </p-card>
       }
     }
   </div>

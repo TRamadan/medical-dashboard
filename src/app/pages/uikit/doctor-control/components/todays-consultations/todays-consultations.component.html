@@ -1,18 +1,38 @@
 <div class="dc-tc" dir="ltr">
 
+  <!-- ── Loading state ─────────────────────────────────────────────── -->
+  @if (loading()) {
+  <div class="dc-tc__loading" aria-live="polite" aria-busy="true">
+    <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+    <span>Loading calendar…</span>
+  </div>
+  }
+
+  <!-- ── Error state ───────────────────────────────────────────────── -->
+  @if (error()) {
+  <div class="dc-tc__error" role="alert">
+    <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+    <span>{{ error() }}</span>
+    <button type="button" class="dc-week-btn" (click)="ngOnInit()">Retry</button>
+  </div>
+  }
+
+  <!-- ── Main content (only when not loading and no error) ─────────── -->
+  @if (!loading() && !error()) {
+
   <!-- ── Header ─────────────────────────────────────────────── -->
   <div class="dc-tc__header">
     <div class="dc-tc__title-group">
-      <h1 class="dc-tc__title">{{ monthLabel }} — {{ weekLabel() }}</h1>
+      <h1 class="dc-tc__title">{{ weekRangeLabel() }}</h1>
       <div class="dc-tc__legend">
         <span class="dc-tc__legend-dot" style="background:#10b981" aria-hidden="true"></span>
-        <span class="dc-tc__legend-label">Confirmed Consultation</span>
+        <span class="dc-tc__legend-label">Confirmed</span>
         <span class="dc-tc__legend-dot" style="background:#f59e0b; margin-right:0.75rem;" aria-hidden="true"></span>
-        <span class="dc-tc__legend-label">Needs your decision </span>
+        <span class="dc-tc__legend-label">Needs decision</span>
       </div>
     </div>
     <div class="dc-tc__nav" role="group" aria-label="Week navigation">
-      <button type="button" class="dc-week-btn" (click)="prevWeek()" [disabled]="weekOffset() === 0"
+      <button type="button" class="dc-week-btn" (click)="prevWeek()" [disabled]="isFirstWeek()"
         aria-label="Previous week">
         <i class="pi pi-chevron-left" aria-hidden="true"></i>
         Previous
@@ -26,32 +46,43 @@
 
   <!-- ── Week calendar grid ────────────────────────────────── -->
   <div class="dc-cal-grid" role="grid" aria-label="Weekly calendar">
+
     <!-- Day headers -->
     <div class="dc-cal-grid__header" role="row">
-      @for (day of weekDays; track day.key) {
+      @for (day of days(); track day.date) {
       <div class="dc-cal-day-header" role="columnheader">
-        <div class="dc-cal-day-header__name">{{ day.name }}</div>
-        <div class="dc-cal-day-header__date">{{ day.date }}</div>
+        <div class="dc-cal-day-header__name">{{ day.dayOfWeek | slice:0:3 }}</div>
+        <div class="dc-cal-day-header__date">{{ day.dayNumber }}</div>
       </div>
       }
     </div>
 
-    <!-- Slot rows -->
-    @for (slotIdx of slotIndices; track slotIdx) {
+    <!-- Slot rows — one row per slot index -->
+    @for (idx of slotIndices(); track idx) {
     <div class="dc-cal-grid__row" role="row">
-      @for (day of weekDays; track day.key) {
-      <div class="dc-cal-cell" role="gridcell" [attr.aria-label]="day.name + ' slot ' + (slotIdx + 1)">
-        @if (day.slots[slotIdx]?.doctor) {
-        <div class="dc-cal-chip" [style.border-left]="'3px solid ' + day.slots[slotIdx].color"
-          [style.color]="day.slots[slotIdx].color">
+      @for (day of days(); track day.date) {
+      <div class="dc-cal-cell" role="gridcell"
+        [attr.aria-label]="day.dayOfWeek + ' slot ' + (idx + 1)">
+        @if (day.slots[idx]) {
+        <div class="dc-cal-chip"
+          [style.border-left]="'3px solid ' + slotColor(day.slots[idx])"
+          [style.color]="slotColor(day.slots[idx])">
           <i class="pi pi-user" aria-hidden="true"></i>
-          <span>{{ day.slots[slotIdx].doctor }}</span>
+          <span class="dc-cal-chip__name">{{ day.slots[idx].patientName }}</span>
+          <span class="dc-cal-chip__time">{{ day.slots[idx].time }}</span>
         </div>
         } @else {
-        <div class="dc-cal-empty">No slots</div>
+        <div class="dc-cal-empty">—</div>
         }
       </div>
       }
+    </div>
+    }
+
+    <!-- Empty calendar state -->
+    @if (slotIndices().length === 0) {
+    <div class="dc-cal-empty-week" role="row">
+      <div role="gridcell">No appointments scheduled this week.</div>
     </div>
     }
   </div>
@@ -63,26 +94,26 @@
 
   <!-- ── Upcoming consultations ─────────────────────────────── -->
   <div class="dc-tc__list" aria-label="Upcoming consultations">
-    @for (c of upcomingConsultations; track c.name) {
+    @for (item of nextTwoWeeks(); track item.appointmentId) {
     <p-card styleClass="dc-consult-p-card">
       <div class="dc-consult-row">
         <div class="dc-consult-row__indicator">
-          <span class="dc-consult-row__dot" [style.background-color]="c.dot" aria-hidden="true"></span>
-          <span class="dc-consult-row__type">{{ c.type }}</span>
+          <span class="dc-consult-row__dot" style="background:#38bdf8" aria-hidden="true"></span>
+          <span class="dc-consult-row__type">{{ item.date }}</span>
         </div>
         <div class="dc-consult-row__info">
-          <div class="dc-consult-row__name">{{ c.name }}</div>
-          <div class="dc-consult-row__details">{{ c.details }}</div>
+          <div class="dc-consult-row__name">{{ item.patientName }}</div>
+          <div class="dc-consult-row__details">{{ item.description }} — {{ item.service }}</div>
         </div>
-        <!-- @if (c.badge) {
-        <span class="dc-badge" [style.color]="c.badgeAccent" [style.border-color]="c.badgeAccent + '44'"
-          [style.background-color]="c.badgeAccent + '18'">
-          {{ c.badge }}
-        </span>
-        } -->
       </div>
     </p-card>
     }
+
+    @if (nextTwoWeeks().length === 0) {
+    <p class="dc-tc__empty-msg">No upcoming consultations in the next two weeks.</p>
+    }
   </div>
+
+  } <!-- end !loading && !error -->
 
 </div>

@@ -1,46 +1,37 @@
 import { Component, ChangeDetectionStrategy, signal, inject, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
-import { catchError, finalize, of } from 'rxjs';
-import { DashboardService } from './services/dashboard.service';
+import { finalize } from 'rxjs';
+import { DashboardService, ApiScheduleItem, ApiPriorityItem, ApiPriorityAction, DoctorDashboardResponse } from './services/dashboard.service';
 
 interface StatCard { label: string; value: string; sub: string; accent: string; icon: string; }
-interface PatientRow { name: string; time: string; badge: string; badgeAccent: string; dot: string; details: string; }
-interface ActionRow { name: string; dot: string; summary: string; details: string; actions: { label: string; style: 'primary' | 'ghost' | 'danger' }[]; }
-
-// ── Shapes returned by GET /api/DoctorDashboard ──────────────────────
-// todaySchedule / priorityItems came back empty in the sample response,
-// so the field names below are best-guess placeholders based on the
-// existing PatientRow / ActionRow shapes. Confirm/adjust once real
-// populated items are available from the API.
-interface ApiScheduleItem {
-  name?: string;          // TODO: confirm actual field name (e.g. patientName)
-  time?: string;
-  status?: string;        // e.g. 'New' | 'Revise' | 'Plan' -> drives badge
-  details?: string;
+interface PatientRow { appointmentId: number; name: string; time: string; type: string; badge: string; badgeAccent: string; dot: string; details: string; }
+interface ActionRow {
+  ticketId: string;
+  appointmentId: number | null;
+  patientId: number;
+  typeLabel: string;
+  name: string;
+  dot: string;
+  summary: string;
+  details: string;
+  created: string;
+  actions: { label: string; action: string; style: 'primary' | 'secondary' | 'warning' | 'danger' }[];
 }
 
-interface ApiPriorityItem {
-  name?: string;          // TODO: confirm actual field name (e.g. patientName)
-  summary?: string;
-  details?: string;
-  priority?: string;      // e.g. 'Urgent' | 'Waiting' | 'Ready' -> drives dot/action label
-}
+// ── Types are imported from dashboard.service.ts ─────────────────────
 
-interface DoctorDashboardResponse {
-  todayConsultationsCount: number;
-  remainingFromYesterday: number;
-  pendingDecisionsCount: number;
-  clarityScoreNPS: number;
-  negativeFeedbackCount: number;
-  todaySchedule: ApiScheduleItem[];
-  priorityItems: ApiPriorityItem[];
-}
+// Named colors coming back on schedule items (colorIndicator)
+const COLOR_MAP: Record<string, string> = {
+  yellow: '#f59e0b',
+  green: '#10b981',
+  red: '#ef4444',
+  blue: '#38bdf8',
+  gray: '#94a3b8',
+};
 
-
-// Shared color/badge lookup so schedule + priority rows stay visually consistent
+// Urgency/status labels on priority items drive their dot color
 const STATUS_ACCENTS: Record<string, string> = {
   New: '#10b981',
   Revise: '#f59e0b',
@@ -52,7 +43,6 @@ const STATUS_ACCENTS: Record<string, string> = {
 
 @Component({
   selector: 'app-dc-dashboard',
-  standalone: true,
   imports: [CardModule, ButtonModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -61,6 +51,7 @@ const STATUS_ACCENTS: Record<string, string> = {
 export class DashboardComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly dashboardService = inject(DashboardService);
+
 
 
   activeFilter = signal('all');
@@ -131,28 +122,34 @@ export class DashboardComponent implements OnInit {
   }
 
   private mapScheduleItem(item: ApiScheduleItem): PatientRow {
-    const status = item.status ?? '';
-    const accent = STATUS_ACCENTS[status] ?? '#94a3b8';
+    const badge = item.statusBadge ?? '';
+    const accent = COLOR_MAP[item.colorIndicator ?? ''] ?? STATUS_ACCENTS[badge] ?? '#94a3b8';
     return {
-      name: item.name ?? '',
+      appointmentId: item.appointmentId,
+      name: item.patientName ?? '',
       time: item.time ?? '',
-      badge: status,
+      type: item.appointmentType ?? '',
+      badge,
       badgeAccent: accent,
       dot: accent,
-      details: item.details ?? ''
+      details: item.appointmentType ?? ''
     };
   }
 
   private mapPriorityItem(item: ApiPriorityItem): ActionRow {
-    const priority = item.priority ?? '';
-    const accent = STATUS_ACCENTS[priority] ?? '#94a3b8';
-    const style: 'primary' | 'ghost' | 'danger' = priority === 'Urgent' ? 'danger' : 'ghost';
+    const urgency = item.urgencyLabel ?? '';
+    const accent = STATUS_ACCENTS[urgency] ?? '#94a3b8';
     return {
-      name: item.name ?? '',
+      ticketId: item.ticketId,
+      appointmentId: item.appointmentId,
+      patientId: item.patientId,
+      typeLabel: item.typeLabel ?? '',
+      name: item.patientName ?? '',
       dot: accent,
-      summary: item.summary ?? '',
-      details: item.details ?? '',
-      actions: priority ? [{ label: priority, style }] : []
+      summary: item.description ?? '',
+      details: item.subDescription ?? '',
+      created: item.createdAt ? new Date(item.createdAt).toLocaleString() : '',
+      actions: item.actions ?? []
     };
   }
 
@@ -166,6 +163,54 @@ export class DashboardComponent implements OnInit {
       this.router.navigate(['/uikit/consultation-type'], { queryParams: { type } });
     } else {
       this.router.navigate(['/uikit/consultation-type']);
+    }
+  }
+
+  // Routes a priority-row action button based on the `action` id the API sent back.
+  onPriorityAction(row: ActionRow, action: string, event: Event): void {
+    event.stopPropagation();
+    switch (action) {
+      case 'open-consultation':
+        this.router.navigate(['/uikit/consultation-type'], {
+          queryParams: { patientId: row.patientId, appointmentId: row.appointmentId ?? undefined }
+        });
+        break;
+
+      case 'approve-modification':
+        if (row.appointmentId != null) {
+          // modificationRequestId is embedded in ticketId for priority items;
+          // use the service if modificationRequestId is available on the row
+          console.log('Approve modification for ticket', row.ticketId);
+        }
+        break;
+
+      case 'revert-modification':
+        console.log('Revert modification for ticket', row.ticketId);
+        break;
+
+      case 'view-modification':
+        console.log('View modification detail:', row.ticketId, row.details);
+        break;
+
+      case 'open-legacy-launch':
+        this.router.navigate(['/uikit/phases-sessions']);
+        break;
+
+      case 'review-criteria':
+        this.router.navigate(['/uikit/phases-sessions']);
+        break;
+
+      case 'athlete-call':
+      case 'extend-package':
+      case 'temporary-pause':
+      case 're-evaluate':
+      case 'request-remeasurement':
+      case 'approve-clinical':
+        console.log(`Action "${action}" on ticket`, row.ticketId);
+        break;
+
+      default:
+        console.warn('Unhandled priority action:', action, row);
     }
   }
 }

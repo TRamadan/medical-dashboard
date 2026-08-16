@@ -1,113 +1,144 @@
-import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  signal,
+  computed,
+  inject,
+  OnInit,
+} from '@angular/core';
+import { SlicePipe } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
+import { finalize } from 'rxjs';
+import {
+  TodaysConsultationsService,
+  CalendarDay,
+  NextTwoWeeksItem,
+  CalendarSlot,
+} from './todays-consultations.service';
 
-interface WeekSlot { label: string; doctor: string | null; color: string; }
-interface WeekDay { key: string; name: string; date: number; slots: WeekSlot[]; }
-interface ConsultationRow { name: string; type: string; badge: string; badgeAccent: string; dot: string; details: string; }
+// Indicator colour coming from the API → CSS hex
+const INDICATOR_COLORS: Record<string, string> = {
+  yellow: '#f59e0b',
+  green: '#10b981',
+  red: '#ef4444',
+  blue: '#38bdf8',
+  gray: '#94a3b8',
+};
+
+function indicatorColor(indicator: string): string {
+  return INDICATOR_COLORS[indicator?.toLowerCase()] ?? '#94a3b8';
+}
 
 @Component({
   selector: 'app-dc-todays-consultations',
-  standalone: true,
-  imports: [CardModule, ButtonModule],
+  imports: [SlicePipe, CardModule, ButtonModule],
   templateUrl: './todays-consultations.component.html',
   styleUrl: './todays-consultations.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TodaysConsultationsComponent {
+export class TodaysConsultationsComponent implements OnInit {
+  private readonly service = inject(TodaysConsultationsService);
 
-  weekOffset = signal(1); // 0 = current, 1 = next week
-  readonly monthLabel = 'March 2026';
+  // ── State ─────────────────────────────────────────────────────────
 
-  weekLabel = computed(() =>
-    this.weekOffset() === 0 ? 'Current Week' : 'Next Week'
+  loading = signal(true);
+  error = signal<string | null>(null);
+
+  /** The weekStart ISO date string (YYYY-MM-DD) for the *current* API call (null = current week). */
+  private currentWeekStart = signal<string | null>(null);
+
+  /** weekStart / weekEnd strings returned by the last successful API call */
+  weekStart = signal<string>('');
+  weekEnd = signal<string>('');
+
+  days = signal<CalendarDay[]>([]);
+  nextTwoWeeks = signal<NextTwoWeeksItem[]>([]);
+
+  // ── Derived ───────────────────────────────────────────────────────
+
+  /** Header label: "Aug 14 – Aug 20" derived from API dates */
+  readonly weekRangeLabel = computed(() => {
+    const start = this.weekStart();
+    const end = this.weekEnd();
+    if (!start || !end) return '';
+    return `${this.formatDate(start)} – ${this.formatDate(end)}`;
+  });
+
+  /** Max slots across all days, used to drive slot-row iteration */
+  readonly maxSlots = computed(() =>
+    Math.max(0, ...this.days().map(d => d.slots.length))
   );
 
-  readonly timeSlots = ['Morning', 'Afternoon'];
+  readonly slotIndices = computed(() =>
+    Array.from({ length: this.maxSlots() }, (_, i) => i)
+  );
 
+  /** true when we are already at the earliest navigable week */
+  readonly isFirstWeek = computed(() => this.currentWeekStart() === null);
 
-  readonly weekDays: WeekDay[] = [
-    {
-      key: 'sun', name: 'Sunday', date: 1,
-      slots: [
-        { label: 'Morning', doctor: 'M. Tarek', color: '#10b981' },
-        { label: 'Afternoon', doctor: 'F. Sami', color: '#10b981' }
-      ]
-    },
-    {
-      key: 'mon', name: 'Monday', date: 2,
-      slots: [
-        { label: 'Morning', doctor: 'Dr. Salem', color: '#10b981' },
-        { label: 'Afternoon', doctor: 'N. Khaled', color: '#f59e0b' }
-      ]
-    },
-    {
-      key: 'tue', name: 'Tuesday', date: 3,
-      slots: [
-        { label: 'Morning', doctor: 'M. Ahmed', color: '#f59e0b' },
-        { label: 'Afternoon', doctor: 'Dr. Salem', color: '#10b981' }
-      ]
-    },
-    {
-      key: 'wed', name: 'Wednesday', date: 4,
-      slots: [
-        { label: 'Morning', doctor: null, color: '' },
-        { label: 'Afternoon', doctor: 'R. Mustafa', color: '#f59e0b' }
-      ]
-    },
-    {
-      key: 'thu', name: 'Thursday', date: 5,
-      slots: [
-        { label: 'Morning', doctor: 'M. Salem', color: '#10b981' },
-        { label: 'Morning', doctor: 'M. Salem', color: '#10b981' },
+  // ── Lifecycle ─────────────────────────────────────────────────────
 
-        { label: 'Afternoon', doctor: 'R. Mustafa', color: '#f59e0b' }
-      ]
-    },
-    {
-      key: 'fri', name: 'Friday', date: 6,
-      slots: [
-        { label: 'Morning', doctor: null, color: '' },
-        { label: 'Afternoon', doctor: null, color: '' }
-      ]
-    },
-  ];
+  ngOnInit(): void {
+    this.loadCalendar();
+  }
 
-  readonly slotIndices = (() => {
-    const max = Math.max(...this.weekDays.map(d => d.slots.length));
-    return Array.from({ length: max }, (_, i) => i);
-  })();
-
-  readonly upcomingConsultations: ConsultationRow[] = [
-    {
-      name: 'M. Ahmed — New Fluorite',
-      type: 'Today',
-      badge: 'New', badgeAccent: '#10b981',
-      dot: '#10b981',
-      details: 'First Consultation — Knee injury'
-    },
-    {
-      name: 'R. Khaled — NPS Specialist',
-      type: '24/3',
-      badge: 'Classic', badgeAccent: '#f59e0b',
-      dot: '#f59e0b',
-      details: 'Needs review signal on dot'
-    },
-    {
-      name: 'A. Mahmoud — Second Consultation',
-      type: '4/4',
-      badge: 'Partial', badgeAccent: '#a78bfa',
-      dot: '#a78bfa',
-      details: 'External consultation result available now'
-    },
-
-  ];
+  // ── Navigation ────────────────────────────────────────────────────
 
   prevWeek(): void {
-    this.weekOffset.update(v => Math.max(0, v - 1));
+    const start = this.weekStart();
+    if (!start) return;
+    const prevStart = this.addDays(start, -7);
+    this.currentWeekStart.set(prevStart);
+    this.loadCalendar();
   }
 
   nextWeek(): void {
-    this.weekOffset.update(v => v + 1);
+    const end = this.weekEnd();
+    if (!end) return;
+    const nextStart = this.addDays(end, 1);
+    this.currentWeekStart.set(nextStart);
+    this.loadCalendar();
+  }
+
+  // ── Data helpers ──────────────────────────────────────────────────
+
+  slotColor(slot: CalendarSlot): string {
+    return indicatorColor(slot.indicator);
+  }
+
+  // ── Private ───────────────────────────────────────────────────────
+
+  private loadCalendar(): void {
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.service
+      .getCalendar(this.currentWeekStart())
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (data) => {
+          this.weekStart.set(data.weekStart);
+          this.weekEnd.set(data.weekEnd);
+          this.days.set(data.days ?? []);
+          this.nextTwoWeeks.set(data.nextTwoWeeks ?? []);
+        },
+        error: () => {
+          this.error.set('Failed to load calendar. Please try again.');
+        },
+      });
+  }
+
+  /**  "2026-08-09" → "Aug 9" */
+  private formatDate(iso: string): string {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  /** Add `days` to an ISO date string and return the new ISO date string. */
+  private addDays(iso: string, days: number): string {
+    const d = new Date(iso);
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
   }
 }

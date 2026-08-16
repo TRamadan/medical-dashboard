@@ -1,549 +1,216 @@
-import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  signal,
+  computed,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { BadgeModule } from 'primeng/badge';
+import { finalize } from 'rxjs';
 import {
-  TicketPriority,
-  TicketType, ActionType, ActionStyle
-} from './constants/ticket.enums';
-import { Ticket, PhaseTransitionTicket } from "./models/ticket.models";
-export type PtTab = 'waiting' | 'followup' | 'all';
+  PendingTicketsService,
+  ApiTicket,
+  ApiTicketType,
+  ApiUrgency,
+  PendingTicketsTab,
+} from './pending-tickets.service';
 
-interface TicketAction { label: string; style: 'primary' | 'ghost' | 'danger' | 'warning' | 'purple' | 'defer'; id?: string; }
+// ── UI-level tab ids (mapped to API tab param) ──────────────────────────────
+export type PtTab = 'decision' | 'urgent' | 'all';
 
-interface PendingTicket {
-  id: string;
-  urgency: string;
-  urgencyAccent: string;
-  name: string;
-  type: string;
-  complaint: string;
-  meta: string;
-  actions: TicketAction[];
-  extraBadge?: string;
-  extraBadgeAccent?: string;
-}
+// ── Urgency badge helpers ────────────────────────────────────────────────────
+const URGENCY_COLORS: Record<ApiUrgency, string> = {
+  [ApiUrgency.Urgent]:      '#ef4444',
+  [ApiUrgency.NeedsReview]: '#f59e0b',
+  [ApiUrgency.Waiting]:     '#94a3b8',
+  [ApiUrgency.Ready]:       '#38bdf8',
+  [ApiUrgency.Graduation]:  '#c9a84c',
+};
 
-interface FollowupTicket {
-  id: string;
-  urgencyIcon: string;
-  urgencyAccent: string;
-  type: string;
-  name: string;
-  quote: string;
-  meta: string;
-  actions: TicketAction[];
-}
+// Action-string → PrimeNG button severity / custom style class
+type BtnStyle = 'primary' | 'ghost' | 'danger' | 'warning' | 'purple';
 
-interface AllTicketRow {
-  id: number;
-  name: string;
-  summary: string;
-  status: string;
-  session?: string | null;
-  time_ago: string;
-  program: string | null;
-  sla?: string;
+const ACTION_STYLES: Record<string, BtnStyle> = {
+  'open-consultation':      'primary',
+  'approve-modification':   'primary',
+  'open-legacy-launch':     'warning',
+  'view-modification':      'ghost',
+  'revert-modification':    'danger',
+  're-evaluate':            'danger',
+  'athlete-call':           'purple',
+  'extend-package':         'warning',
+  'temporary-pause':        'purple',
+  'review-criteria':        'ghost',
+  'request-remeasurement':  'purple',
+  'approve-clinical':       'primary',
+};
+
+function actionStyle(action: string): BtnStyle {
+  return ACTION_STYLES[action] ?? 'ghost';
 }
 
 @Component({
   selector: 'app-dc-pending-tickets',
-  standalone: true,
   imports: [ButtonModule, CardModule, BadgeModule],
   templateUrl: './pending-tickets.component.html',
   styleUrl: './pending-tickets.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class PendingTicketsComponent {
-  private readonly router = inject(Router);
+export class PendingTicketsComponent implements OnInit {
+  private readonly router  = inject(Router);
+  private readonly service = inject(PendingTicketsService);
 
+  // ── State ────────────────────────────────────────────────────────────────
 
-  activeTab = signal<PtTab>('waiting');
+  activeTab = signal<PtTab>('decision');
 
-  expandedDeferTicketId = signal<string | null>(null);
-  deferNote = signal('');
-  notifyPlayer = signal(true);
-  notifyTeamLeader = signal(true);
-  notifyAdmin = signal(false);
-  notifyMentors = signal(false);
+  loading = signal(false);
+  error   = signal<string | null>(null);
 
-  readonly tabs: { id: PtTab; label: string; count: number }[] = [
-    { id: 'waiting', label: 'Needs your descision', count: 4 },
-    { id: 'followup', label: 'Urgent alerts', count: 2 },
-    { id: 'all', label: 'All Notifications', count: 8 }
+  /** Raw API tickets for the current tab */
+  private rawTickets = signal<ApiTicket[]>([]);
+
+  // ── Derived ──────────────────────────────────────────────────────────────
+
+  /** Tickets sorted by urgency (Urgent first), then createdAt descending */
+  readonly tickets = computed(() =>
+    [...this.rawTickets()].sort((a, b) => {
+      if (a.urgency !== b.urgency) return a.urgency - b.urgency;
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    })
+  );
+
+  /** Tab counts — decision + urgent driven by API badges; all is total */
+  readonly tabs: { id: PtTab; label: string }[] = [
+    { id: 'decision', label: 'Needs your decision' },
+    { id: 'urgent',   label: 'Urgent alerts'       },
+    { id: 'all',      label: 'All tickets'          },
   ];
 
-  // ── Tab 1: Waiting ──────────────────────────────────────────
-  readonly waitingTickets: any[] = [
-    {
-      "id": 1,
-      "type": "Phase Transition",
-      "priority": "urgent",
-      "sla": "Expires in 2:15",
-      "client": "H. Salem",
-      "program": "Return to Play",
-      "description": "All criteria met — Phase 2 → Phase 3 ready to activate",
-      "metrics": {
-        "LSI": "83%",
-        "VAS": 2,
-        "ROM": "124°"
-      },
-      "time_ago": "1:45 hours ago",
-      "badge": "Urgent",
-      "actions": [
-        {
-          "label": "Confirm Transition",
-          "type": "approve"
-        },
-        {
-          "label": "Defer + Note",
-          "type": "defer"
-        },
-        {
-          "label": "Athlete Profile",
-          "type": "view_profile"
-        }
-      ],
-      "defer_options": {
-        "notify": [
-          { "label": "Athlete", "default_checked": true },
-          { "label": "Team Leader", "default_checked": true },
-          { "label": "Admin", "default_checked": false },
-          { "label": "Engineers", "default_checked": false }
-        ]
-      }
-    },
-    {
-      "id": 2,
-      "type": "Blueprint Consultation",
-      "priority": "urgent",
-      "sla": "Expires in 4:30",
-      "client": "M. Ahmed",
-      "issue": "Right Knee Pain",
-      "description": "Clinical assessment completed — data ready",
-      "notes": "New Blueprint",
-      "time_ago": "45 minutes ago",
-      "badge": "Urgent",
-      "actions": [
-        {
-          "label": "Open Consultation",
-          "type": "open_consultation"
-        }
-      ]
-    },
-    {
-      "id": 3,
-      "type": "Protocol Modification",
-      "priority": "warning",
-      "client": "H. Salem",
-      "program": "Return to Play",
-      "description": "M. Khaled (Team Leader) added Terminal Knee Extension · 3×12 to Phase 2",
-      "time_ago": "45 minutes ago",
-      "modification_status": "Currently Applied",
-      "badge": "Needs Review",
-      "actions": [
-        {
-          "label": "Approve",
-          "type": "approve_edit"
-        },
-        {
-          "label": "Revert",
-          "type": "revert_edit"
-        },
-        {
-          "label": "View Changes",
-          "type": "view_diff"
-        }
-      ],
-      "protocol_diff": {
-        "added": [
-          {
-            "exercise": "Terminal Knee Extension",
-            "sets": 3,
-            "reps": 12,
-            "resistance": "Band Resistance",
-            "phase": 2,
-            "added_by": "M. Khaled (Team Leader)",
-            "time_ago": "45 minutes ago"
-          }
-        ],
-        "modified": [
-          {
-            "exercise": "Quad Set Isometric",
-            "before": "3×10",
-            "after": "4×15",
-            "reason": "Athlete tolerates current load easily — increasing challenge"
-          }
-        ],
-        "unchanged_exercises_count": 6
-      }
-    },
-    {
-      "id": 4,
-      "type": "Graduation Ready",
-      "priority": "normal",
-      "client": "B. Salem",
-      "program": "ACL Protocol",
-      "description": "All Phase 5 criteria met — ready for Legacy Launch",
-      "metrics": {
-        "LSI": "95%",
-        "VAS": 0.5,
-        "Hop_Test": "92%"
-      },
-      "time_ago": "1 day ago",
-      "badge": "Graduation",
-      "actions": [
-        {
-          "label": "Open Legacy Launch",
-          "type": "open_legacy_launch"
-        }
-      ]
-    },
-    {
-      "id": 5,
-      "type": "Phase Timeout Alert",
-      "priority": "urgent",
-      "client": "H. Salem",
-      "description": "Phase 2 exceeded 150% of expected duration",
-      "metrics": {
-        "expected_duration": "3-4 weeks",
-        "actual_duration": "6 weeks",
-        "ROM": {
-          "current": "108°",
-          "target": "120°"
-        },
-        "Quad_LSI": {
-          "current": "35%",
-          "target": "40%"
-        }
-      },
-      "actions": [
-        {
-          "label": "Review Criteria",
-          "type": "review_criteria"
-        },
-        {
-          "label": "Adjust Thresholds",
-          "type": "adjust_thresholds"
-        },
-        {
-          "label": "Request Measurement",
-          "type": "request_measurement"
-        },
-        {
-          "label": "Re-evaluate",
-          "type": "re_evaluate"
-        }
-      ]
-    },
-    {
-      "id": 6,
-      "type": "Compliance Alert",
-      "priority": "urgent",
-      "client": "A. Tariq",
-      "description": "33% attendance in the last two weeks",
-      "compliance_rate": "33%",
-      "threshold": "< 60%",
-      "sessions": {
-        "attended": 2,
-        "total": 6
-      },
-      "package_impact": {
-        "unused_sessions": 7,
-        "estimated_loss_egp": 3700
-      },
-      "time_ago": "1 day ago",
-      "actions": [
-        {
-          "label": "Admin → Athlete Call",
-          "type": "admin_call"
-        },
-        {
-          "label": "Extend Package",
-          "type": "extend_package"
-        },
-        {
-          "label": "Temporary Pause",
-          "type": "pause"
-        }
-      ]
-    },
-    {
-      "id": 7,
-      "type": "Stale Data Warning",
-      "priority": "warning",
-      "client": "K. Mahmoud",
-      "description": "Phase 2→3 transition with 42-day-old data",
-      "metrics": {
-        "VAS": {
-          "last_measured_days_ago": 42,
-          "max_allowed_days": 14,
-          "status": "expired"
-        },
-        "Quad_LSI": {
-          "last_measured_days_ago": 28,
-          "max_allowed_days": 14,
-          "status": "expired"
-        },
-        "ROM": {
-          "last_measured_days_ago": 3,
-          "max_allowed_days": 14,
-          "status": "valid"
-        }
-      },
-      "actions": [
-        {
-          "label": "Request Re-measurement",
-          "type": "request_remeasurement"
-        },
-        {
-          "label": "Approve with Clinical Justification",
-          "type": "approve_with_justification"
-        }
-      ]
-    }
-  ];
+  // ── Lifecycle ────────────────────────────────────────────────────────────
 
-  // ── Tab 2: Followup ─────────────────────────────────────────
-  readonly followupTickets: any[] = [
-    {
-      id: 'f1',
-      urgencyIcon: '⚠',
-      urgencyAccent: '#ef4444',
-      type: 'Low NPS 5 / 10',
-      name: 'N. Khaled',
-      quote: 'Exercises are not suited for my level',
-      meta: 'Appointment on Friday • 3 hours ago',
-      actions: [
-        { label: 'View Athlete Profile', style: 'purple', type: ActionType.VIEW_PROFILE },
-        { label: 'Add follow up mark', style: 'warning', id: 'followup' }
-      ]
-    },
-    {
-      id: 'f2',
-      urgencyIcon: '⚠',
-      urgencyAccent: '#ef4444',
-      type: 'Negative Feedback',
-      name: 'F. Sami',
-      quote: 'Feeling increased fatigue and seeing no difference',
-      meta: 'Attendance 70% this month • 1 day ago',
-      actions: [
-        { label: 'View Session Log', style: 'purple', type: ActionType.VIEW_PROFILE },
-        { label: 'Add follow up mark', style: 'warning', id: 'followup' }
-      ]
-    }
-  ];
-
-  followedUpTickets = signal<Set<string>>(new Set());
-
-  toggleFollowUp(ticketId: string): void {
-    const current = new Set(this.followedUpTickets());
-    if (current.has(ticketId)) {
-      current.delete(ticketId);
-    } else {
-      current.add(ticketId);
-    }
-    this.followedUpTickets.set(current);
+  ngOnInit(): void {
+    this.loadTickets();
   }
 
-  // ── Tab 3: All ──────────────────────────────────────────────
-  readonly allTickets: AllTicketRow[] = [
-    {
-      "id": 1,
-      "name": "M. Tariq",
-      "summary": "68% improvement in knee strength",
-      "status": "Positive",
-      "session": "Session 12",
-      "time_ago": "3 days ago",
-      "program": null
-    },
-    {
-      "id": 2,
-      "name": "B. Salem",
-      "summary": "All graduation criteria met ✦",
-      "status": "Awaiting My Decision",
-      "session": null,
-      "time_ago": "1 day ago",
-      "program": "Legacy Launch"
-    },
-    {
-      "id": 3,
-      "name": "F. Sami",
-      "summary": "Negative feedback after session 18",
-      "status": "Urgent",
-      "session": null,
-      "time_ago": "1 day ago",
-      "program": null
-    },
-    {
-      "id": 4,
-      "name": "N. Khaled",
-      "summary": "NPS 5/10 in monthly review",
-      "status": "Urgent",
-      "session": null,
-      "time_ago": "3 hours ago",
-      "program": null
-    },
-    {
-      "id": 5,
-      "name": "H. Salem — M. Khaled",
-      "summary": "Modified an exercise in the protocol",
-      "status": "Awaiting My Decision",
-      "session": null,
-      "time_ago": "45 minutes ago",
-      "program": null
-    },
-    {
-      "id": 6,
-      "name": "H. Salem",
-      "summary": "2M→3M criteria achieved",
-      "status": "Awaiting My Decision",
-      "sla": "2:15",
-      "time_ago": "1:45 ago",
-      "program": null
-    },
-    {
-      "id": 7,
-      "name": "M. Ahmed",
-      "summary": "Blueprint consultation pending",
-      "status": "Awaiting My Decision",
-      "sla": "4:30",
-      "time_ago": "45 minutes ago",
-      "program": null
-    },
-    {
-      "id": 8,
-      "name": "R. Mustafa",
-      "summary": "Approved the rehabilitation plan",
-      "status": "Positive",
-      "session": null,
-      "time_ago": "2 hours ago",
-      "program": "Return to Play"
-    }
+  // ── Tab switching ────────────────────────────────────────────────────────
 
-  ];
-
-  setTab(t: PtTab): void {
-    this.activeTab.set(t);
-    this.expandedDeferTicketId.set(null);
-    this.deferNote.set('');
+  setTab(tab: PtTab): void {
+    this.activeTab.set(tab);
+    this.loadTickets();
   }
 
-  toggleDefer(id: string): void {
-    this.expandedDeferTicketId.update(cur => cur === id ? null : id);
-    this.deferNote.set('');
+  // ── Data loading ─────────────────────────────────────────────────────────
+
+  private loadTickets(): void {
+    this.loading.set(true);
+    this.error.set(null);
+
+    this.service
+      .getTickets(this.activeTab() as PendingTicketsTab)
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: (tickets) => this.rawTickets.set(tickets ?? []),
+        error: () => this.error.set('Failed to load pending tickets. Please try again.'),
+      });
   }
 
-  submitDefer(id: string): void {
-    // TODO: send to service
-    this.expandedDeferTicketId.set(null);
-    this.deferNote.set('');
+  // ── Template helpers ─────────────────────────────────────────────────────
+
+  urgencyColor(t: ApiTicket): string {
+    return URGENCY_COLORS[t.urgency as ApiUrgency] ?? '#94a3b8';
   }
 
-  toggleNotifyPlayer(): void { this.notifyPlayer.update(v => !v); }
-  toggleNotifyTeamLeader(): void { this.notifyTeamLeader.update(v => !v); }
-  toggleNotifyAdmin(): void { this.notifyAdmin.update(v => !v); }
-  toggleNotifyMentors(): void { this.notifyMentors.update(v => !v); }
-
-
-  // ─── Color Helper ─────────────────────────────────────────────────────────────
-
-  getPriorityColor(priority: TicketPriority): string {
-    const map: Record<TicketPriority, string> = {
-      [TicketPriority.URGENT]: '#E24B4A',
-      [TicketPriority.WARNING]: '#9B7FFF',
-      [TicketPriority.NORMAL]: '#C9A84C',
-    };
-    return map[priority] ?? '#94a3b8';
+  getActionStyle(action: string): BtnStyle {
+    return actionStyle(action);
   }
 
-  // ─── Type Narrowing Helpers ───────────────────────────────────────────────────
-
-  hasSLA(t: Ticket): string | null {
-    return 'sla' in t ? (t as any).sla : null;
-  }
-
-  hasProgram(t: Ticket): string | null {
-    return 'program' in t ? (t as any).program : null;
-  }
-
-  hasDefer(t: Ticket): PhaseTransitionTicket['defer_options'] | null {
-    return t.type === TicketType.PHASE_TRANSITION
-      ? (t as PhaseTransitionTicket).defer_options
-      : null;
-  }
-
-  // ─── Button Style Helper ──────────────────────────────────────────────────────
-
-  getButtonStyle(actionType: string): string {
-    switch (actionType) {
-      case ActionType.APPROVE:
-      case ActionType.APPROVE_EDIT:
-      case ActionType.OPEN_CONSULTATION:
-        return ActionStyle.PRIMARY;
-      case ActionType.DEFER:
-        return ActionStyle.DEFER;
-      case ActionType.VIEW_PROFILE:
-      case ActionType.VIEW_DIFF:
-        return ActionStyle.GHOST;
-      case ActionType.REVERT_EDIT:
-      case ActionType.RE_EVALUATE:
-        return ActionStyle.DANGER;
-      case ActionType.OPEN_LEGACY_LAUNCH:
-      case ActionType.ADJUST_THRESHOLDS:
-      case ActionType.EXTEND_PACKAGE:
-      case ActionType.APPROVE_WITH_JUSTIFICATION:
-        return ActionStyle.WARNING;
-      case ActionType.REVIEW_CRITERIA:
-      case ActionType.REQUEST_MEASUREMENT:
-      case ActionType.REQUEST_REMEASUREMENT:
-      case ActionType.ADMIN_CALL:
-      case ActionType.PAUSE:
-        return ActionStyle.PURPLE;
-      default:
-        return ActionStyle.PRIMARY;
-    }
-  }
-
-  // ─── Metrics Formatter ────────────────────────────────────────────────────────
-
-  formatMetrics(t: Ticket): string {
-    if (!('metrics' in t) || !t.metrics) return '';
-
-    const m = (t as any).metrics;
-    return Object.entries(m)
-      .map(([key, val]) => {
-        if (typeof val === 'object' && val !== null && 'current' in val) {
-          return `${key}: ${(val as any).current} (target ${(val as any).target})`;
-        }
-        if (typeof val === 'object' && val !== null && 'last_measured_days_ago' in val) {
-          return `${key}: ${(val as any).last_measured_days_ago}d ago`;
-        }
-        return `${key}: ${val}`;
-      })
+  /** Format metrics Dictionary<string,string> into a readable string */
+  formatMetrics(metrics: Record<string, string> | null): string {
+    if (!metrics) return '';
+    return Object.entries(metrics)
+      .map(([k, v]) => `${k}: ${v}`)
       .join(' · ');
   }
 
-  // ─── Action Handler ───────────────────────────────────────────────────────────
+  formatDate(iso: string): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return d.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
 
-  handleAction(type: ActionType | string, ticket?: any): void {
-    if (type === ActionType.VIEW_PROFILE) {
-      this.goToAthleteProfile();
-      return;
+  /** Check if the ticket is a ProtocolModification type */
+  isProtocolModification(t: ApiTicket): boolean {
+    return t.ticketType === ApiTicketType.ProtocolModification;
+  }
+
+  // ── Action handler ───────────────────────────────────────────────────────
+
+  handleAction(action: string, ticket: ApiTicket, event: Event): void {
+    event.stopPropagation();
+
+    switch (action) {
+      case 'open-consultation':
+        this.router.navigate(['/uikit/consultation-type'], {
+          queryParams: {
+            patientId: ticket.patientId,
+            appointmentId: ticket.appointmentId ?? undefined,
+          },
+        });
+        break;
+
+      case 'approve-modification':
+        if (ticket.modificationRequestId != null) {
+          this.service.approveModification(ticket.modificationRequestId).subscribe({
+            next: () => this.loadTickets(),
+            error: (err) => console.error('Approve failed', err),
+          });
+        }
+        break;
+
+      case 'revert-modification':
+        if (ticket.modificationRequestId != null) {
+          this.service.revertModification(ticket.modificationRequestId).subscribe({
+            next: () => this.loadTickets(),
+            error: (err) => console.error('Revert failed', err),
+          });
+        }
+        break;
+
+      case 'view-modification':
+        // Show detail via ticket description / subDescription (handled in template)
+        console.log('View modification:', ticket.ticketId, ticket.subDescription);
+        break;
+
+      case 'open-legacy-launch':
+        this.router.navigate(['/uikit/phases-sessions'], {
+          queryParams: { treatmentPlanId: ticket.treatmentPlanId ?? undefined },
+        });
+        break;
+
+      case 'review-criteria':
+        this.router.navigate(['/uikit/phases-sessions'], {
+          queryParams: { treatmentPlanId: ticket.treatmentPlanId ?? undefined },
+        });
+        break;
+
+      case 'athlete-call':
+      case 'extend-package':
+      case 'temporary-pause':
+      case 're-evaluate':
+      case 'request-remeasurement':
+      case 'approve-clinical':
+        // Future flows — log for now
+        console.log(`Action "${action}" on ticket`, ticket.ticketId);
+        break;
+
+      default:
+        console.warn('Unhandled ticket action:', action, ticket);
     }
-    console.log(`Action: ${type} on ticket #${ticket?.id}`);
-    // dispatch or route based on type
   }
-
-  // ─── Notify Toggle ────────────────────────────────────────────────────────────
-
-  toggleNotify(label: string): void {
-    // handle per-label toggle from defer_options.notify
-  }
-
-  goToAthleteProfile(): void {
-    this.router.navigate(['/uikit/athleteprofile']);
-  }
-
 }
