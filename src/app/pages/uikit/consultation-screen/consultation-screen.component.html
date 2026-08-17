@@ -1870,13 +1870,13 @@
 
         <!-- Section nav — mirrors the intake form's 7 tabs -->
         <div class="dossier-nav">
-            <a href="#sec-personal"><i class="pi pi-id-card"></i> ١. البيانات الشخصية</a>
-            <a href="#sec-sport" data-tone="sport"><i class="pi pi-bolt"></i> ٢. بيانات الرياضة</a>
-            <a href="#sec-injury" data-tone="injury"><i class="pi pi-heart"></i> ٣. بيانات الاصابة</a>
-            <a href="#sec-treatment" data-tone="treatment"><i class="pi pi-user-edit"></i> ٤. التاريخ الطبي</a>
-            <a href="#sec-injury-history" data-tone="history"><i class="pi pi-history"></i> ٥. التاريخ الإصابي</a>
-            <a href="#sec-medical-history" data-tone="medical"><i class="pi pi-file-plus"></i> ٦. التاريخ المرضي</a>
-            <a href="#sec-social" data-tone="social"><i class="pi pi-sparkles"></i> ٧. الحالة الاجتماعية</a>
+            <a (click)="scrollToSection('sec-personal', $event)" style="cursor: pointer;"><i class="pi pi-id-card"></i> ١. البيانات الشخصية</a>
+            <a (click)="scrollToSection('sec-sport', $event)" data-tone="sport" style="cursor: pointer;"><i class="pi pi-bolt"></i> ٢. بيانات الرياضة</a>
+            <a (click)="scrollToSection('sec-injury', $event)" data-tone="injury" style="cursor: pointer;"><i class="pi pi-heart"></i> ٣. بيانات الاصابة</a>
+            <a (click)="scrollToSection('sec-treatment', $event)" data-tone="treatment" style="cursor: pointer;"><i class="pi pi-user-edit"></i> ٤. التاريخ الطبي</a>
+            <a (click)="scrollToSection('sec-injury-history', $event)" data-tone="history" style="cursor: pointer;"><i class="pi pi-history"></i> ٥. التاريخ الإصابي</a>
+            <a (click)="scrollToSection('sec-medical-history', $event)" data-tone="medical" style="cursor: pointer;"><i class="pi pi-file-plus"></i> ٦. التاريخ المرضي</a>
+            <a (click)="scrollToSection('sec-social', $event)" data-tone="social" style="cursor: pointer;"><i class="pi pi-sparkles"></i> ٧. الحالة الاجتماعية</a>
         </div>
 
         <div class="dossier-body">
@@ -2015,9 +2015,9 @@
                 <div class="d-field full mb-3">
                     <span class="d-label">خريطة موقع الإصابة</span>
                     <div class="d-musclemap">
-                        @if (patientInfo.injuryData?.painLocations?.length) {
+                        @if (patientInfo.selectedMuscles?.length || patientInfo.injuryData?.painLocations?.length) {
                         <app-muscle-skeleton-viewer [readOnly]="true"
-                            [selectedMuscles]="patientInfo.injuryData.painLocations"></app-muscle-skeleton-viewer>
+                            [selectedMuscles]="patientInfo.selectedMuscles"></app-muscle-skeleton-viewer>
                         } @else {
                         <div class="d-empty"><i class="pi pi-map"></i> لم يتم تحديد مواقع الألم</div>
                         }
