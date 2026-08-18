@@ -910,6 +910,7 @@ export class ConsultationScreenComponent {
 
     /** HTML Step 1 (Complaint Registration) → PUT /step/1 */
     submitStep1(): void {
+        debugger
         const id = this.appointmentId();
         if (!id) { this.go(2); return; }
         this.sessionSaving.set(true);

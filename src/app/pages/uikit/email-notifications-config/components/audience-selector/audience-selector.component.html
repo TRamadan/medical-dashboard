@@ -1,0 +1,30 @@
+<div class="audience-selector">
+  <div class="audience-selector__field">
+    <label class="audience-selector__label" for="userTypes">User types</label>
+    <p-multiSelect inputId="userTypes" [options]="userTypes" [ngModel]="_selectedUserTypeIds()"
+      (ngModelChange)="onUserTypeChange($event)" optionLabel="name" optionValue="id" placeholder="Select user types"
+      [filter]="userTypes.length > 6" filterPlaceHolder="Search user types" display="chip"
+      styleClass="audience-multiselect" />
+  </div>
+
+  <div class="audience-selector__field">
+    <label class="audience-selector__label" for="users">Users</label>
+    <p-multiSelect inputId="users" [options]="availableUsers()" [ngModel]="_selectedUserIds()"
+      (ngModelChange)="onUserChange($event)" optionLabel="name" optionValue="id"
+      [placeholder]="availableUsers().length ? 'Select users' : 'Select a user type first'"
+      [filter]="availableUsers().length > 6" filterPlaceHolder="Search users" [disabled]="availableUsers().length === 0"
+      display="chip" styleClass="audience-multiselect">
+      <ng-template let-user pTemplate="item">
+        <div class="user-item">
+          <span class="user-item__name">{{ user.name }}</span>
+          <span class="user-item__email" *ngIf="user.email">{{ user.email }}</span>
+        </div>
+      </ng-template>
+    </p-multiSelect>
+  </div>
+
+  <div class="reach-summary">
+    <span class="reach-summary__label">Selected recipients</span>
+    <p-tag [severity]="selectedUsersCount() > 0 ? 'info' : 'warn'" [value]="selectedUsersCount() + ' users'" />
+  </div>
+</div>

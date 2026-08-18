@@ -26,14 +26,13 @@ import { OurSolutionsComponent } from './our-solutions/our-solutions.component';
 import { PatientreportComponent } from './patientreport/patientreport.component';
 import { PhasesSessionsComponent } from './phases-sessions/phases-sessions.component';
 import { MeasurementsConfigComponent } from './measurements-config/measurements-config.component';
-import { EmailNotificationsConfigComponent } from './email-notifications-config/email-notifications-config.component';
 import { ConsultationFormConfigurationComponent } from './consultation-form-configuration/consultation-form-configuration.component';
 
 export default [
     {
         path: 'email-notifications-config',
         data: { breadcrumb: 'Email & Notifications Config' },
-        component: EmailNotificationsConfigComponent
+        loadComponent: () => import('./email-notifications-config/notification-triggers-page.component').then(m => m.NotificationTriggersPageComponent)
     },
     {
         path: 'adduser',

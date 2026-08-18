@@ -1,0 +1,38 @@
+:host {
+  /* A couple of feature-local tokens still used for mono type and
+     falling back where a PrimeNG theme variable isn't set. Everything
+     else (color, radius, spacing scale) now comes from the active
+     PrimeNG theme via its --p-* variables. */
+  --nt-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  display: block;
+  padding: 24px;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+.page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.page__title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 2px;
+}
+
+.page__subtitle {
+  font-size: 13px;
+  color: var(--p-text-muted-color, #6b7280);
+  margin: 0;
+  font-family: var(--nt-font-mono);
+}

@@ -1,0 +1,20 @@
+<p-card>
+  <div class="page">
+    <header class="page__header">
+      <div>
+        <h1 class="page__title">Recurring notifications</h1>
+        <p class="page__subtitle">{{ activeCount() }} active of {{ triggers().length }} triggers</p>
+      </div>
+      <button *ngIf="view() === 'list'" pButton type="button" label="New trigger" icon="pi pi-plus"
+        (click)="openCreate()"></button>
+      <button *ngIf="view() === 'form'" pButton type="button" label="Back to list" class="p-button-outlined"
+        icon="pi pi-arrow-left" (click)="backToList()"></button>
+    </header>
+
+    <app-trigger-list *ngIf="view() === 'list'" [triggers]="triggers()" [segments]="segments()"
+      (edit)="openEdit($event)" (toggleActive)="onToggleActive($event)" (remove)="onRemove($event)" />
+
+    <app-trigger-form *ngIf="view() === 'form'" [trigger]="editingTrigger()" (save)="onSave($event)"
+      (cancel)="backToList()" />
+  </div>
+</p-card>

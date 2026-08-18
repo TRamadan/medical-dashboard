@@ -1,0 +1,39 @@
+<form class="trigger-form" (ngSubmit)="onSubmit()">
+  <div class="trigger-form__main">
+    <p-card header="Message">
+      <div class="field">
+        <label for="trigger-title">Title</label>
+        <input id="trigger-title" pInputText type="text" placeholder="Weekly digest" [ngModel]="title()"
+          (ngModelChange)="title.set($event)" name="title" maxlength="80" />
+      </div>
+
+      <div class="field">
+        <label for="trigger-message">Message</label>
+        <textarea id="trigger-message" pInputTextarea rows="3" placeholder="What the recipient will see"
+          [ngModel]="message()" (ngModelChange)="message.set($event)" name="message" maxlength="240"
+          [autoResize]="true"></textarea>
+        <span class="field__count">{{ message().length }}/240</span>
+      </div>
+    </p-card>
+
+    <p-card header="Schedule">
+      <app-recurrence-picker [rule]="recurrence()" (ruleChange)="recurrence.set($event)" />
+    </p-card>
+
+    <p-card header="Audience">
+      <app-audience-selector [segments]="segments" [selectedIds]="audienceSegmentIds()"
+        (selectedIdsChange)="audienceSegmentIds.set($event)" />
+    </p-card>
+
+    <p-card styleClass="active-card">
+      <div class="active-row">
+        <p-inputSwitch [ngModel]="active()" (ngModelChange)="active.set($event)" name="active"
+          inputId="active-switch" />
+        <div>
+          <label for="active-switch" class="active-row__label">Trigger is active</label>
+          <p class="active-row__hint">Inactive triggers are saved but never send.</p>
+        </div>
+      </div>
+    </p-card>
+  </div>
+</form>

@@ -1,0 +1,62 @@
+.recurrence-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.field-row--end {
+  align-items: flex-start;
+}
+
+.field-label {
+  flex: none;
+  width: 76px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--p-text-muted-color, #6b7280);
+}
+
+.field-hint {
+  font-size: 11.5px;
+  color: var(--p-text-muted-color, #9ca3af);
+}
+
+.inline-fields {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.unit-label {
+  font-size: 13px;
+  color: var(--p-text-muted-color, #6b7280);
+}
+
+:host ::ng-deep .interval-input {
+  width: 48px;
+  text-align: center;
+}
+
+.end-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radio-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+
+  label {
+    min-width: 52px;
+  }
+}
