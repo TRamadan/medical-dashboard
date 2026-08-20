@@ -224,9 +224,9 @@ export class AppMenu {
             label: 'Communications',
             items: [
                 {
-                    label: 'Email & Notifications Config',
+                    label: 'Notifications Config',
                     icon: 'pi pi-fw pi-envelope',
-                    routerLink: ['/uikit/email-notifications-config']
+                    routerLink: ['/uikit/notifications-config']
                 }
             ]
         });

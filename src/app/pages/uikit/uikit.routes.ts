@@ -30,8 +30,8 @@ import { ConsultationFormConfigurationComponent } from './consultation-form-conf
 
 export default [
     {
-        path: 'email-notifications-config',
-        data: { breadcrumb: 'Email & Notifications Config' },
+        path: 'notifications-config',
+        data: { breadcrumb: 'Notifications Config' },
         loadComponent: () => import('./email-notifications-config/notification-triggers-page.component').then(m => m.NotificationTriggersPageComponent)
     },
     {

@@ -3,9 +3,28 @@ import { Observable, of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 import {
   AudienceSegment,
+  AudienceUser,
   NotificationTrigger,
+  UserType,
   defaultRecurrenceRule,
 } from '../models/notification-trigger.model';
+
+const MOCK_USER_TYPES: UserType[] = [
+  { id: 'ut-doctors', name: 'Doctors & Physicians' },
+  { id: 'ut-therapists', name: 'Physical Therapists' },
+  { id: 'ut-athletes', name: 'Athletes & Patients' },
+  { id: 'ut-admins', name: 'System Administrators' },
+];
+
+const MOCK_USERS: AudienceUser[] = [
+  { id: 'usr-1', name: 'Dr. Sarah Connor', email: 'sarah.c@medical.org', userTypeId: 'ut-doctors' },
+  { id: 'usr-2', name: 'Dr. John Doe', email: 'john.d@medical.org', userTypeId: 'ut-doctors' },
+  { id: 'usr-3', name: 'Alex Smith (PT)', email: 'alex.pt@medical.org', userTypeId: 'ut-therapists' },
+  { id: 'usr-4', name: 'Maria Garcia (PT)', email: 'maria.pt@medical.org', userTypeId: 'ut-therapists' },
+  { id: 'usr-5', name: 'Michael Jordan', email: 'mj@athletes.org', userTypeId: 'ut-athletes' },
+  { id: 'usr-6', name: 'Serena Williams', email: 'serena@athletes.org', userTypeId: 'ut-athletes' },
+  { id: 'usr-7', name: 'Admin User', email: 'admin@medical.org', userTypeId: 'ut-admins' },
+];
 
 const MOCK_SEGMENTS: AudienceSegment[] = [
   { id: 'seg-all', name: 'All users', description: 'Everyone with notifications enabled', estimatedSize: 128_400 },
@@ -22,9 +41,13 @@ function uid(prefix: string): string {
 
 @Injectable({ providedIn: 'root' })
 export class NotificationTriggerService {
+  private readonly _userTypes = signal<UserType[]>(MOCK_USER_TYPES);
+  private readonly _users = signal<AudienceUser[]>(MOCK_USERS);
   private readonly _segments = signal<AudienceSegment[]>(MOCK_SEGMENTS);
   private readonly _triggers = signal<NotificationTrigger[]>(seedTriggers());
 
+  readonly userTypes = this._userTypes.asReadonly();
+  readonly users = this._users.asReadonly();
   readonly segments = this._segments.asReadonly();
   readonly triggers = this._triggers.asReadonly();
 
@@ -36,8 +59,6 @@ export class NotificationTriggerService {
   }
 
   estimateAudienceSize(ids: string[]): number {
-    // Segments can overlap in real systems; for this mock we sum with a
-    // simple dedupe-by-id and no cross-segment overlap correction.
     return this.getSegmentsByIds(ids).reduce((sum, s) => sum + s.estimatedSize, 0);
   }
 
@@ -79,7 +100,9 @@ function seedTriggers(): NotificationTrigger[] {
       title: 'Weekly digest',
       message: 'Your weekly summary is ready to view.',
       recurrence: { ...defaultRecurrenceRule(), frequency: 'weekly', daysOfWeek: [1], time: '08:00' },
-      audienceSegmentIds: ['seg-all'],
+      userTypeIds: ['ut-doctors', 'ut-therapists'],
+      userIds: ['usr-1', 'usr-3'],
+      notificationType: 'report_released',
       active: true,
       createdAt: now,
       updatedAt: now,
@@ -89,7 +112,9 @@ function seedTriggers(): NotificationTrigger[] {
       title: 'Trial ending reminder',
       message: 'Your trial ends soon — upgrade to keep your data.',
       recurrence: { ...defaultRecurrenceRule(), frequency: 'daily', interval: 3, time: '10:30' },
-      audienceSegmentIds: ['seg-trial'],
+      userTypeIds: ['ut-athletes'],
+      userIds: ['usr-5'],
+      notificationType: 'program_completion',
       active: true,
       createdAt: now,
       updatedAt: now,
@@ -99,7 +124,9 @@ function seedTriggers(): NotificationTrigger[] {
       title: 'Win-back nudge',
       message: 'We miss you. Here is what is new since your last visit.',
       recurrence: { ...defaultRecurrenceRule(), frequency: 'monthly', dayOfMonth: 1, time: '09:00' },
-      audienceSegmentIds: ['seg-inactive-30'],
+      userTypeIds: ['ut-athletes'],
+      userIds: ['usr-6'],
+      notificationType: 'birthday',
       active: false,
       createdAt: now,
       updatedAt: now,

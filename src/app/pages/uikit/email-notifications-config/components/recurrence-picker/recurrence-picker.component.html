@@ -29,13 +29,13 @@
 
   <div class="field-row">
     <span class="field-label">At</span>
-    <p-calendar [ngModel]="timeAsDate()" (ngModelChange)="setTimeFromDate($event)" [timeOnly]="true" hourFormat="24"
+    <p-datepicker [ngModel]="timeAsDate()" (ngModelChange)="setTimeFromDate($event)" [timeOnly]="true" hourFormat="24"
       appendTo="body" />
   </div>
 
   <div class="field-row">
     <span class="field-label">Starting</span>
-    <p-calendar [ngModel]="startDateAsDate()" (ngModelChange)="setStartDateFromDate($event)" dateFormat="M d, yy"
+    <p-datepicker [ngModel]="startDateAsDate()" (ngModelChange)="setStartDateFromDate($event)" dateFormat="M d, yy"
       appendTo="body" [showIcon]="true" />
   </div>
 
@@ -52,7 +52,7 @@
         <p-radioButton name="endMode" value="onDate" [ngModel]="rule.endMode" (ngModelChange)="setEndMode($event)"
           inputId="end-onDate" />
         <label for="end-onDate">On date</label>
-        <p-calendar [ngModel]="endDateAsDate()" (ngModelChange)="setEndDateFromDate($event)" dateFormat="M d, yy"
+        <p-datepicker [ngModel]="endDateAsDate()" (ngModelChange)="setEndDateFromDate($event)" dateFormat="M d, yy"
           appendTo="body" [showIcon]="true" [disabled]="rule.endMode !== 'onDate'" />
       </div>
 

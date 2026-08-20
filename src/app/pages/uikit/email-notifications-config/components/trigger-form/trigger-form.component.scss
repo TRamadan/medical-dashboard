@@ -42,6 +42,54 @@
   font-family: var(--nt-font-mono, ui-monospace, monospace);
 }
 
+.notif-type-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.notif-type-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--p-surface-border, #e5e7eb);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease, transform .1s ease;
+  background: var(--p-surface-0, #fff);
+
+  &:hover {
+    border-color: var(--p-primary-color, #3454d1);
+  }
+
+  &:active {
+    transform: scale(0.99);
+  }
+
+  &--selected {
+    border-color: var(--p-primary-color, #3454d1);
+    background: var(--p-primary-50, #eef2ff);
+    box-shadow: 0 0 0 1px var(--p-primary-color, #3454d1);
+  }
+
+  ::ng-deep .p-radiobutton {
+    flex: none;
+  }
+}
+
+.notif-type-option__label {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .notif-type-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .active-row {
   display: flex;
   align-items: center;

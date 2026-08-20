@@ -16,13 +16,27 @@
       </div>
     </p-card>
 
+    <p-card header="Notification Type">
+      <div class="notif-type-grid">
+        @for (opt of notificationTypes; track opt.value) {
+        <label class="notif-type-option" [class.notif-type-option--selected]="notificationType() === opt.value"
+          [for]="'notif-' + opt.value">
+          <p-radioButton [inputId]="'notif-' + opt.value" name="notificationType" [value]="opt.value"
+            [ngModel]="notificationType()" (ngModelChange)="notificationType.set($event)" />
+          <span class="notif-type-option__label">{{ opt.label }}</span>
+        </label>
+        }
+      </div>
+    </p-card>
+
     <p-card header="Schedule">
       <app-recurrence-picker [rule]="recurrence()" (ruleChange)="recurrence.set($event)" />
     </p-card>
 
     <p-card header="Audience">
-      <app-audience-selector [segments]="segments" [selectedIds]="audienceSegmentIds()"
-        (selectedIdsChange)="audienceSegmentIds.set($event)" />
+      <app-audience-selector [userTypes]="userTypes" [users]="users" [selectedUserTypeIds]="selectedUserTypeIds()"
+        [selectedUserIds]="selectedUserIds()" (selectedUserTypeIdsChange)="selectedUserTypeIds.set($event)"
+        (selectedUserIdsChange)="selectedUserIds.set($event)" />
     </p-card>
 
     <p-card styleClass="active-card">
@@ -36,4 +50,5 @@
       </div>
     </p-card>
   </div>
+
 </form>

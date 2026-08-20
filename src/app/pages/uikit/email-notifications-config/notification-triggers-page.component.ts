@@ -19,6 +19,8 @@ export class NotificationTriggersPageComponent {
   private readonly service = inject(NotificationTriggerService);
 
   readonly triggers = this.service.triggers;
+  readonly userTypes = this.service.userTypes;
+  readonly users = this.service.users;
   readonly segments = this.service.segments;
   readonly activeCount = this.service.activeCount;
 

@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { InputNumberModule } from 'primeng/inputnumber';
-import { CalendarModule } from 'primeng/calendar';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { DAY_LABELS, RecurrenceFrequency, RecurrenceRule } from '../../models/notification-trigger.model';
+import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-recurrence-picker',
   standalone: true,
-  imports: [CommonModule, FormsModule, SelectButtonModule, InputNumberModule, CalendarModule, RadioButtonModule],
+  imports: [CommonModule, FormsModule, SelectButtonModule, InputNumberModule, DatePickerModule, RadioButtonModule],
   templateUrl: './recurrence-picker.component.html',
   styleUrl: './recurrence-picker.component.scss',
 })

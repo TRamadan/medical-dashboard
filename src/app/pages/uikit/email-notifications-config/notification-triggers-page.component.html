@@ -11,8 +11,8 @@
         icon="pi pi-arrow-left" (click)="backToList()"></button>
     </header>
 
-    <app-trigger-list *ngIf="view() === 'list'" [triggers]="triggers()" [segments]="segments()"
-      (edit)="openEdit($event)" (toggleActive)="onToggleActive($event)" (remove)="onRemove($event)" />
+    <app-trigger-list *ngIf="view() === 'list'" [triggers]="triggers()" [userTypes]="userTypes()"
+      [users]="users()" (edit)="openEdit($event)" (toggleActive)="onToggleActive($event)" (remove)="onRemove($event)" />
 
     <app-trigger-form *ngIf="view() === 'form'" [trigger]="editingTrigger()" (save)="onSave($event)"
       (cancel)="backToList()" />

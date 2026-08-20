@@ -5,7 +5,7 @@ import { TableModule } from 'primeng/table';
 import { InputSwitchModule } from 'primeng/inputswitch';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
-import { AudienceSegment, NotificationTrigger } from '../../models/notification-trigger.model';
+import { AudienceUser, NotificationTrigger, UserType } from '../../models/notification-trigger.model';
 import { describeRecurrence } from '../../models/recurrence.util';
 
 @Component({
@@ -17,18 +17,42 @@ import { describeRecurrence } from '../../models/recurrence.util';
 })
 export class TriggerListComponent {
   @Input({ required: true }) triggers: NotificationTrigger[] = [];
-  @Input({ required: true }) segments: AudienceSegment[] = [];
+  @Input() userTypes: UserType[] = [];
+  @Input() users: AudienceUser[] = [];
   @Output() edit = new EventEmitter<NotificationTrigger>();
   @Output() toggleActive = new EventEmitter<string>();
   @Output() remove = new EventEmitter<string>();
+
+  private readonly notificationTypeLabels: Record<string, string> = {
+    session_booking: 'حجز جلسة',
+    session_confirmation: 'تأكيد جلسة',
+    session_reschedule_cancel: 'الغاء او اعادة جدولة الجلسة',
+    stage_transition: 'الانتقال لمرحلة جديدة في البرنامج',
+    measurement_results: 'نتائج قياسات',
+    report_released: 'نزول تقرير',
+    session_delay: 'تأخير عن بداية الجلسة',
+    program_completion: 'انتهاء البرنامج',
+    birthday: 'اعياد الميلاد',
+  };
+
+  typeLabel(value: string): string {
+    return this.notificationTypeLabels[value] ?? value;
+  }
 
   describe(t: NotificationTrigger): string {
     return describeRecurrence(t.recurrence);
   }
 
   audienceNames(t: NotificationTrigger): string {
-    const idSet = new Set(t.audienceSegmentIds);
-    const names = this.segments.filter((s) => idSet.has(s.id)).map((s) => s.name);
-    return names.length ? names.join(', ') : 'No audience selected';
+    const parts: string[] = [];
+    if (t.userTypeIds?.length) {
+      const typeSet = new Set(t.userTypeIds);
+      const names = this.userTypes.filter((ut) => typeSet.has(ut.id)).map((ut) => ut.name);
+      if (names.length) parts.push(...names);
+    }
+    if (t.userIds?.length) {
+      parts.push(`${t.userIds.length} user(s)`);
+    }
+    return parts.length ? parts.join(', ') : 'No audience selected';
   }
 }

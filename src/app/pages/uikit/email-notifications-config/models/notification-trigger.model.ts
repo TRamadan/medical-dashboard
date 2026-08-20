@@ -39,9 +39,12 @@ export interface NotificationTrigger {
   title: string;
   message: string;
   recurrence: RecurrenceRule;
-  audienceSegmentIds: string[];
+  userTypeIds?: string[];
+  userIds?: string[];
+  audienceSegmentIds?: string[];
   active: boolean;
   createdAt: string;
+  notificationType: string;
   updatedAt: string;
 }
 

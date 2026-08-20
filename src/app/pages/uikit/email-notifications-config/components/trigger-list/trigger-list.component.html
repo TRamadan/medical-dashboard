@@ -3,6 +3,7 @@
     <tr>
       <th style="width: 60px">Active</th>
       <th>Title</th>
+      <th>Type</th>
       <th>Schedule</th>
       <th>Audience</th>
       <th style="width: 120px"></th>
@@ -17,6 +18,9 @@
       <td class="clickable" (click)="edit.emit(t)">
         <span class="trigger-title">{{ t.title }}</span>
       </td>
+      <td class="clickable" (click)="edit.emit(t)">
+        <span class="type-tag">{{ typeLabel(t.notificationType) }}</span>
+      </td>
       <td class="clickable mono" (click)="edit.emit(t)">{{ describe(t) }}</td>
       <td class="clickable" (click)="edit.emit(t)">{{ audienceNames(t) }}</td>
       <td class="actions">
@@ -30,7 +34,7 @@
 
   <ng-template pTemplate="emptymessage">
     <tr>
-      <td colspan="5">
+      <td colspan="6">
         <div class="empty-state">
           <p class="empty-state__title">No triggers yet</p>
           <p class="empty-state__body">Create one to start sending on a schedule.</p>
