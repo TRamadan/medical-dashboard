@@ -920,7 +920,15 @@ export class ConsultationScreenComponent {
     }
 
     go(step: any): void {
-        this.currentStep.set(step);
+        const targetStep = Number(step) as FlowStep;
+        this.currentStep.set(targetStep);
+        if (targetStep === 6) {
+            if (this.entryType() !== EntryType.Reassess && !this.selectedPath()) {
+                this.selectedPath.set(1);
+            } else if (this.entryType() === EntryType.Reassess && !this.selectedReassessPath()) {
+                this.selectedReassessPath.set('A');
+            }
+        }
     }
 
     /** Handles clicks on the PrimeNG p-step headers. [linear]="true" already blocks

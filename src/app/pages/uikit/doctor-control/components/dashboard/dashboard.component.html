@@ -43,20 +43,26 @@
     </p-card>
     }
     @for (p of patients(); track p.appointmentId) {
-    <p-card styleClass="dc-patient-p-card" [style]="{'border-left': '4px solid ' + p.badgeAccent, 'cursor': 'pointer'}"
-      (click)="navigateToConsultation(p.badge)">
-      <div class="dc-patient-row">
-        <span class="dc-patient-row__dot" [style.background-color]="p.dot" aria-hidden="true"></span>
-        <div class="dc-patient-row__info">
-          <div class="dc-patient-row__name">{{ p.name }}</div>
-          <div class="dc-patient-row__details">{{ p.type }}</div>
+    <p-card styleClass="dc-action-p-card" [style]="{'border-left': '4px solid ' + p.badgeAccent}">
+      <div class="dc-action-row">
+        <div class="dc-action-row__left">
+          <span class="dc-action-row__dot" [style.background-color]="p.dot" aria-hidden="true"></span>
+          <div class="dc-action-row__info">
+            <div class="dc-action-row__name">
+              {{ p.name }}
+              <span class="dc-badge" [style.color]="p.badgeAccent" [style.border-color]="p.badgeAccent + '44'"
+                [style.background-color]="p.badgeAccent + '18'">
+                {{ p.badge }}
+              </span>
+            </div>
+            <div class="dc-action-row__summary">{{ p.type }}</div>
+            <div class="dc-action-row__details">{{ p.time }}</div>
+          </div>
         </div>
-        <div class="dc-patient-row__meta">
-          <span class="dc-badge" [style.color]="p.badgeAccent" [style.border-color]="p.badgeAccent + '44'"
-            [style.background-color]="p.badgeAccent + '18'">
-            {{ p.badge }}
-          </span>
-          <span class="dc-patient-row__time">{{ p.time }}</span>
+        <div class="dc-action-row__actions">
+          <button type="button" class="dc-action-btn dc-action-btn--primary" (click)="navigateToConsultation(p, $event)">
+            Open Consultation
+          </button>
         </div>
       </div>
     </p-card>

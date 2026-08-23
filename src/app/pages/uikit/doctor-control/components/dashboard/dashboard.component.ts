@@ -153,17 +153,23 @@ export class DashboardComponent implements OnInit {
     };
   }
 
-  navigateToConsultation(status: string) {
+  navigateToConsultation(p: PatientRow | string, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    const status = typeof p === 'string' ? p : p.badge;
+    const appointmentId = typeof p === 'string' ? undefined : p.appointmentId;
+
     let type = '';
     if (status === 'New') type = 'new';
     else if (status === 'Revise') type = 'return';
     else if (status === 'Plan') type = 'reassess';
 
-    if (type) {
-      this.router.navigate(['/uikit/consultation-type'], { queryParams: { type } });
-    } else {
-      this.router.navigate(['/uikit/consultation-type']);
-    }
+    const queryParams: Record<string, any> = {};
+    if (type) queryParams['type'] = type;
+    if (appointmentId != null) queryParams['appointmentId'] = appointmentId;
+
+    this.router.navigate(['/uikit/consultation-type'], { queryParams });
   }
 
   // Routes a priority-row action button based on the `action` id the API sent back.

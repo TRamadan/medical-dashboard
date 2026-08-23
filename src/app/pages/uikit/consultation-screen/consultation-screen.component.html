@@ -994,18 +994,118 @@
             </div>
             }
 
-            <!-- -- STEP 6  Action / Confirmation -- -->
+            <!-- ══ STEP 6 — Action / Confirmation ══ -->
             @if (currentStep() === 6) {
 
-            @if (!actionDone()) {
             <p-card styleClass="mb-3">
-                <ng-template pTemplate="title">Decision Notes</ng-template>
-                <div class="field-label">Notes <span class="req">*</span></div>
-                <textarea pTextarea [(ngModel)]="decisionNotes" placeholder="Notes to accompany this decision..." style="width:100%;min-height:60px;padding:.55rem .7rem;border-radius:8px;
-                   border:1px solid var(--p-content-border-color);background:var(--p-content-background);
-                   font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                <ng-template pTemplate="title">
+                    {{ entryType() === EntryType.Reassess ? 'Reassessment Decision — What happens to the active program?' : 'Action Path Selection — Final Decision' }}
+                </ng-template>
+                <p class="field-label mb-3">Select the final action path based on examination and report:</p>
+
+                <!-- Reassess paths -->
+                @if (entryType() === EntryType.Reassess) {
+                <div class="path-grid cols-2 mb-4">
+                    <div class="path-card" [class.sel-A]="selectedReassessPath()==='A'" (click)="pickReassessPath('A')">
+                        <div class="pc-icon" style="color:#1AAD7A"><i class="pi pi-pen-to-square"></i></div>
+                        <div class="pc-name">Edit Protocol</div>
+                        <div class="pc-desc">Injury is mild — adjust exercises or add restrictions. Program continues without pause.</div>
+                    </div>
+                    <div class="path-card" [class.sel-B]="selectedReassessPath()==='B'" (click)="pickReassessPath('B')">
+                        <div class="pc-icon" style="color:#F5A623">||</div>
+                        <div class="pc-name">Pause + Investigate</div>
+                        <div class="pc-desc">Need investigation before deciding. Sessions frozen (not cancelled).</div>
+                    </div>
+                    <div class="path-card" [class.sel-C]="selectedReassessPath()==='C'" (click)="pickReassessPath('C')">
+                        <div class="pc-icon" style="color:#FC6B44"><i class="pi pi-arrow-up-right-and-arrow-down-left-from-center"></i></div>
+                        <div class="pc-name">Replace Protocol</div>
+                        <div class="pc-desc">New injury takes over. Current protocol closed. Remaining credit transferred.</div>
+                    </div>
+                    <div class="path-card" [class.sel-D]="selectedReassessPath()==='D'" (click)="pickReassessPath('D')">
+                        <div class="pc-icon" style="color:#6B47FF"><i class="pi pi-arrow-right-arrow-left"></i></div>
+                        <div class="pc-name">Parallel Protocol</div>
+                        <div class="pc-desc">New injury is unrelated. Two programs run in parallel.</div>
+                    </div>
+                </div>
+                }
+
+                <!-- New / Return paths -->
+                @if (entryType() !== EntryType.Reassess) {
+                <div class="path-grid cols-3 mb-4">
+                    <div class="path-card" [class.sel-p1]="selectedPath()===1" (click)="pickPath(1)">
+                        <div class="pc-icon" style="color:#1AAD7A"><i class="pi pi-play"></i></div>
+                        <div class="pc-name">Direct Blueprint</div>
+                        <div class="pc-desc">Diagnosis is clear — start the protocol immediately.</div>
+                    </div>
+                    <div class="path-card" [class.sel-p2]="selectedPath()===2" (click)="pickPath(2)">
+                        <div class="pc-icon" style="color:#F5A623"><i class="pi pi-bullseye"></i></div>
+                        <div class="pc-name">Internal Measurements</div>
+                        <div class="pc-desc">Need additional lab or force-plate tests first.</div>
+                    </div>
+                    <div class="path-card" [class.sel-p3]="selectedPath()===3" (click)="pickPath(3)">
+                        <div class="pc-icon" style="color:#FC6B44"><i class="pi pi-arrow-up-right"></i></div>
+                        <div class="pc-name">External Referral</div>
+                        <div class="pc-desc">Need external imaging (MRI, X-Ray, CT).</div>
+                    </div>
+                </div>
+
+                @if (selectedPath() === 2) {
+                <div class="note-banner note-amber mb-3">
+                    <strong>Internal Measurements:</strong> A measurement ticket is created for the engineer.
+                </div>
+                <div class="form-grid-3 mb-3">
+                    <div>
+                        <div class="field-label">Type</div>
+                        <p-multiselect [options]="measurementTypeOptions()" [(ngModel)]="measurementType"
+                            optionLabel="label" optionValue="value" [filter]="true"
+                            filterPlaceholder="Search types..." display="chip" styleClass="w-full"
+                            class="w-full" appendTo="body"></p-multiselect>
+                    </div>
+                    <div>
+                        <div class="field-label">Side</div>
+                        <p-selectButton [options]="measurementSideOptions" [(ngModel)]="measurementSide"
+                            optionLabel="label" optionValue="value" styleClass="w-full"></p-selectButton>
+                    </div>
+                    <div>
+                        <div class="field-label">Date</div>
+                        <p-datepicker [(ngModel)]="measurementDate" [showIcon]="true" dateFormat="yy-mm-dd"
+                            [showButtonBar]="true" styleClass="w-full" class="w-full" appendTo="body"
+                            placeholder="Select date"></p-datepicker>
+                    </div>
+                </div>
+                }
+
+                @if (selectedPath() === 3) {
+                <div class="note-banner note-coral mb-3">
+                    <strong>External Referral:</strong> Athlete receives instructions via notifications.
+                </div>
+                <div class="form-grid-3 mb-3">
+                    <div>
+                        <div class="field-label">Test</div>
+                        <p-select [options]="referralTestOptions" [(ngModel)]="referralTest" optionLabel="label"
+                            optionValue="value" styleClass="w-full" class="w-full" appendTo="body"></p-select>
+                    </div>
+                    <div>
+                        <div class="field-label">Region</div>
+                        <input pInputText [(ngModel)]="referralRegion" placeholder="e.g. Right Shoulder" class="w-full" />
+                    </div>
+                    <div>
+                        <div class="field-label">Specialty <span class="req">*</span></div>
+                        <input pInputText [(ngModel)]="referralSpecialty" placeholder="e.g. Orthopedic Surgeon" class="w-full" />
+                    </div>
+                </div>
+                }
+                }
+
+                @if (!actionDone()) {
+                <div class="mt-3">
+                    <div class="field-label">Decision Notes <span class="req">*</span></div>
+                    <textarea pTextarea [(ngModel)]="decisionNotes" placeholder="Notes to accompany this decision..." style="width:100%;min-height:60px;padding:.55rem .7rem;border-radius:8px;
+                       border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                       font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                </div>
+                }
             </p-card>
-            }
 
             @if (sessionError()) {
             <div class="note-banner note-coral mb-3">⚠ {{ sessionError() }}</div>
@@ -1014,73 +1114,50 @@
             @if (entryType() === EntryType.Reassess) {
             @if (selectedReassessPath() === 'A') {
             <div class="confirm-box">
-                <div class="confirm-icon" style="color:#1AAD7A">~</div>
+                <div class="confirm-icon" style="color:#1AAD7A">⚙</div>
                 <div class="confirm-title">Protocol will open in Edit Mode</div>
-                <div class="confirm-desc">You can add restrictions, change exercises or add a recovery phase. Program
-                    continues without stopping. The change is logged in the Audit Trail.</div>
+                <div class="confirm-desc">You can add restrictions, change exercises or add a recovery phase. Program continues without stopping.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? '? Done' : 'Open Protocol Editor ?'"
+                    <p-button [label]="actionDone() ? '✓ Done' : 'Open Protocol Editor'"
                         [severity]="actionDone() ? 'secondary' : 'success'" (onClick)="confirmAction()"
                         [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
-            </div>
-            <div class="note-banner note-mint mt-3">
-                <strong>What will happen:</strong> Protocol stays <span class="code-badge">ACTIVE_PROGRAM</span>. Edit
-                logged in Audit Trail. Lead and engineers notified of the change.
             </div>
             }
             @if (selectedReassessPath() === 'B') {
             <div class="confirm-box">
                 <div class="confirm-icon" style="color:#F5A623">||</div>
                 <div class="confirm-title">Program Paused</div>
-                <div class="confirm-desc">Sessions are frozen (not cancelled). You will receive a notification when the
-                    investigation is complete to make a final decision.</div>
+                <div class="confirm-desc">Sessions are frozen (not cancelled). You will receive a notification when investigation is complete.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? '? Done' : 'Confirm Pause ?'"
+                    <p-button [label]="actionDone() ? '✓ Done' : 'Confirm Pause'"
                         [severity]="actionDone() ? 'secondary' : 'warn'" (onClick)="confirmAction()"
                         [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
             </div>
-            <div class="note-banner note-amber mt-3">
-                <strong>What will happen:</strong> <span class="code-badge">ACTIVE_PROGRAM ? PROGRAM_PAUSED</span>.
-                Sessions
-                frozen. After investigation: doctor decides (resume / edit / replace).
-            </div>
             }
             @if (selectedReassessPath() === 'C') {
             <div class="confirm-box">
-                <div class="confirm-icon" style="color:#FC6B44">?</div>
-                <div class="confirm-title">Current Protocol Closed New One Will Be Created</div>
-                <div class="confirm-desc">18 remaining sessions will be transferred. S02 opens to write the new
-                    protocol.
-                </div>
+                <div class="confirm-icon" style="color:#FC6B44">↺</div>
+                <div class="confirm-title">Current Protocol Closed & New One Created</div>
+                <div class="confirm-desc">Remaining sessions will be transferred. S02 opens to write the new protocol.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? '? Done' : 'Confirm Replacement &amp; Create Protocol ?'"
+                    <p-button [label]="actionDone() ? '✓ Done' : 'Confirm Replacement & Create Protocol'"
                         [severity]="actionDone() ? 'secondary' : 'danger'" (onClick)="confirmAction()"
                         [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
             </div>
-            <div class="note-banner note-coral mt-3">
-                <strong>What will happen:</strong> <span class="code-badge">ACTIVE_PROGRAM ?
-                    REPLACED_BY_REASSESSMENT</span>. credit_transfer_log: 18 sessions. S02 opens with athlete data.
-            </div>
             }
             @if (selectedReassessPath() === 'D') {
             <div class="confirm-box">
-                <div class="confirm-icon" style="color:#6B47FF">?</div>
-                <div class="confirm-title">A Second Parallel Protocol Will Be Created</div>
-                <div class="confirm-desc">Both protocols will be active simultaneously. Lead assigns engineers for each.
-                </div>
+                <div class="confirm-icon" style="color:#6B47FF">⇄</div>
+                <div class="confirm-title">Second Parallel Protocol Created</div>
+                <div class="confirm-desc">Both protocols will be active simultaneously. Lead assigns engineers for each.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? '? Done' : 'Create Parallel Protocol ?'"
+                    <p-button [label]="actionDone() ? '✓ Done' : 'Create Parallel Protocol'"
                         [severity]="actionDone() ? 'secondary' : 'info'" (onClick)="confirmAction()"
                         [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
-            </div>
-            <div class="note-banner note-purple mt-3">
-                <strong>What will happen:</strong> Protocol 1 stays ACTIVE. Protocol 2 created as DRAFT ? doctor writes
-                it ?
-                activated ? lead assigns engineers.
             </div>
             }
             }
@@ -1094,14 +1171,10 @@
                 <div class="confirm-title">Ready to Write the Protocol</div>
                 <div class="confirm-desc">S02 opens with all athlete data pre-loaded.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? 'Done' : 'Open Protocol Builder'"
+                    <p-button [label]="actionDone() ? '✓ Done' : 'Open Protocol Builder'"
                         [severity]="actionDone() ? 'secondary' : 'success'" (onClick)="confirmAction()"
                         [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
-            </div>
-            <div class="note-banner note-mint mt-3">
-                <strong>What will happen:</strong> Ticket status ? <span class="code-badge">CLIENT_APPROVED</span> ? S02
-                opens.
             </div>
             }
             @if (selectedPath() === 2) {
@@ -1110,19 +1183,12 @@
                     <i class="pi pi-bullseye"></i>
                 </div>
                 <div class="confirm-title">Measurement Ticket Created</div>
-                <div class="confirm-desc">Ticket appears in the engineer's interface. Doctor is notified when results
-                    are
-                    ready.</div>
+                <div class="confirm-desc">Ticket appears in the engineer's interface. Doctor is notified when results are ready.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? 'Done' : 'Confirm '"
+                    <p-button [label]="actionDone() ? '✓ Done' : 'Confirm Measurement Ticket'"
                         [severity]="actionDone() ? 'secondary' : 'warn'" (onClick)="confirmAction()"
                         [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
-            </div>
-            <div class="note-banner note-amber mt-3">
-                <strong>What will happen:</strong> <span class="code-badge">PENDING_INTERNAL</span> ? engineer measures
-                ?
-                notification to doctor.
             </div>
             }
             @if (selectedPath() === 3) {
@@ -1131,25 +1197,18 @@
                     <i class="pi pi-arrow-up-right"></i>
                 </div>
                 <div class="confirm-title">External Referral Ticket Created</div>
-                <div class="confirm-desc">Athlete receives instructions via SMS. Automated follow-up reminders will be
-                    sent.
-                </div>
+                <div class="confirm-desc">Athlete receives instructions via SMS. Automated follow-up reminders will be sent.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? 'Done' : 'Confirm'"
+                    <p-button [label]="actionDone() ? '✓ Done' : 'Confirm Referral Ticket'"
                         [severity]="actionDone() ? 'secondary' : 'danger'" (onClick)="confirmAction()"
                         [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
-            </div>
-            <div class="note-banner note-coral mt-3">
-                <strong>What will happen:</strong> <span class="code-badge">PENDING_EXTERNAL</span> ? Reminder day
-                2/5/10 ?
-                After upload: doctor notification.
             </div>
             }
             }
 
             <div class="btn-row mt-4">
-                <p-button label="Back" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
+                <p-button label="Back to Report" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
                     [disabled]="sessionSaving()" (onClick)="go(5)"></p-button>
             </div>
             }
