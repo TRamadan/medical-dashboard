@@ -1,0 +1,219 @@
+{
+  "tab_decision": [
+    {
+      "ticketId": "blueprint-101",
+      "ticketType": 0,
+      "typeLabel": "Blueprint Consultation",
+      "patientId": 42,
+      "patientName": "M. Ahmed",
+      "description": "Clinical assessment completed — data ready",
+      "subDescription": null,
+      "urgency": 2,
+      "urgencyLabel": "Waiting",
+      "createdAt": "2026-08-23T06:00:00Z",
+      "slaLabel": null,
+      "metrics": null,
+      "actions": [{ "label": "Open Consultation", "action": "open-consultation", "style": "primary" }],
+      "appointmentId": 101,
+      "treatmentPlanId": null,
+      "modificationRequestId": null
+    },
+    {
+      "ticketId": "blueprint-104",
+      "ticketType": 0,
+      "typeLabel": "Blueprint Consultation",
+      "patientId": 47,
+      "patientName": "A. Youssef",
+      "description": "Clinical assessment completed — data ready",
+      "subDescription": "Marked urgent by receptionist",
+      "urgency": 0,
+      "urgencyLabel": "Urgent",
+      "createdAt": "2026-08-23T05:30:00Z",
+      "slaLabel": null,
+      "metrics": null,
+      "actions": [{ "label": "Open Consultation", "action": "open-consultation", "style": "primary" }],
+      "appointmentId": 104,
+      "treatmentPlanId": null,
+      "modificationRequestId": null
+    },
+    {
+      "ticketId": "graduation-118",
+      "ticketType": 3,
+      "typeLabel": "Graduation Ready",
+      "patientId": 55,
+      "patientName": "B. Salem",
+      "description": "All 30 hamstring sessions logged",
+      "subDescription": "Protocol 100% complete",
+      "urgency": 4,
+      "urgencyLabel": "Graduation",
+      "createdAt": "2026-08-21T09:00:00Z",
+      "slaLabel": null,
+      "metrics": { "Sessions": "30/30" },
+      "actions": [{ "label": "Open Legacy Launch", "action": "open-legacy-launch", "style": "primary" }],
+      "appointmentId": 118,
+      "treatmentPlanId": 902,
+      "modificationRequestId": null
+    }
+  ],
+  "tab_urgent": [
+    {
+      "ticketId": "compliance-121",
+      "ticketType": 2,
+      "typeLabel": "Compliance Alert",
+      "patientId": 60,
+      "patientName": "A. Tariq",
+      "description": "Attendance 33% in last 14 days (2/6 sessions)",
+      "subDescription": null,
+      "urgency": 0,
+      "urgencyLabel": "Urgent",
+      "createdAt": "2026-08-22T10:00:00Z",
+      "slaLabel": null,
+      "metrics": { "AttendanceRate": "33%", "SessionsAttended": "2/6" },
+      "actions": [
+        { "label": "Admin Call", "action": "athlete-call", "style": "warning" },
+        { "label": "Extend Package", "action": "extend-package", "style": "secondary" },
+        { "label": "Temporary Pause", "action": "temporary-pause", "style": "danger" }
+      ],
+      "appointmentId": 121,
+      "treatmentPlanId": 905,
+      "modificationRequestId": null
+    }
+  ],
+  "tab_all": [
+    {
+      "ticketId": "protocol-mod-501",
+      "ticketType": 1,
+      "typeLabel": "Protocol Modification",
+      "patientId": 61,
+      "patientName": "H. Salem",
+      "description": "Coach added an exercise to Phase 2",
+      "subDescription": "Submitted by Coach Team Leader — Ahmed R.",
+      "urgency": 1,
+      "urgencyLabel": "NeedsReview",
+      "createdAt": "2026-08-22T11:00:00Z",
+      "slaLabel": null,
+      "metrics": null,
+      "actions": [
+        { "label": "View Changes", "action": "view-modification", "style": "primary" }
+      ],
+      "_note": "Per workflow spec §3 revision: opening 'View Changes' should surface Approve/Reject. The API only documents approve/revert endpoints — see README gap analysis before wiring 'Reject'.",
+      "appointmentId": null,
+      "treatmentPlanId": 900,
+      "modificationRequestId": 501
+    },
+    {
+      "ticketId": "phase-timeout-901",
+      "ticketType": 4,
+      "typeLabel": "Phase Timeout Alert",
+      "patientId": 61,
+      "patientName": "H. Salem",
+      "description": "Plan active 40 weeks on a 24-week protocol (167% of expected duration)",
+      "subDescription": null,
+      "urgency": 1,
+      "urgencyLabel": "NeedsReview",
+      "createdAt": "2026-08-20T09:00:00Z",
+      "slaLabel": null,
+      "metrics": { "ExpectedDuration": "24 weeks", "ElapsedDuration": "40 weeks" },
+      "actions": [
+        { "label": "Review Criteria", "action": "review-criteria", "style": "secondary" }
+      ],
+      "appointmentId": null,
+      "treatmentPlanId": 900,
+      "modificationRequestId": null
+    },
+    {
+      "ticketId": "stale-142",
+      "ticketType": 5,
+      "typeLabel": "Stale Data Warning",
+      "patientId": 70,
+      "patientName": "K. Mahmoud",
+      "description": "No session logged in 22 days",
+      "subDescription": null,
+      "urgency": 2,
+      "urgencyLabel": "Waiting",
+      "createdAt": "2026-08-15T09:00:00Z",
+      "slaLabel": null,
+      "metrics": { "DaysSinceLastSession": "22" },
+      "actions": [
+        { "label": "Athlete Call", "action": "athlete-call", "style": "warning" }
+      ],
+      "appointmentId": null,
+      "treatmentPlanId": 907,
+      "modificationRequestId": null
+    }
+  ],
+  "proposed_gap_fill": [
+    {
+      "ticketId": "phase-transition-910",
+      "ticketType": 6,
+      "typeLabel": "Phase Transition Ready",
+      "_proposed": true,
+      "_gapRef": "athlete-transition-workflows.md §1 — no ticketType exists for 'athlete met transition criteria'; closest documented type (4, PhaseTimeoutAlert) means the opposite (overdue, not ready)",
+      "patientId": 72,
+      "patientName": "O. Fathy",
+      "description": "Meets criteria to move from Phase 1 → Phase 2",
+      "subDescription": null,
+      "urgency": 2,
+      "urgencyLabel": "Waiting",
+      "createdAt": "2026-08-23T07:00:00Z",
+      "slaLabel": null,
+      "metrics": { "CriteriaMet": "3/3" },
+      "actions": [
+        { "label": "Confirm Transition", "action": "confirm-transition", "style": "primary" },
+        { "label": "Defer", "action": "defer-transition", "style": "secondary" }
+      ],
+      "appointmentId": null,
+      "treatmentPlanId": 910,
+      "modificationRequestId": null
+    },
+    {
+      "ticketId": "phase-transition-911-over50",
+      "ticketType": 6,
+      "typeLabel": "Phase Transition Ready (High Threshold)",
+      "_proposed": true,
+      "_gapRef": "athlete-transition-workflows.md §5 — 'Adjust Threshold' has no documented action string at all",
+      "patientId": 73,
+      "patientName": "Y. Adel",
+      "description": "Proposed adjustment exceeds 50% of total protocol threshold",
+      "subDescription": null,
+      "urgency": 1,
+      "urgencyLabel": "NeedsReview",
+      "createdAt": "2026-08-23T07:10:00Z",
+      "slaLabel": null,
+      "metrics": { "ThresholdExceeded": "62%" },
+      "actions": [
+        { "label": "Review Criteria", "action": "review-criteria", "style": "secondary" },
+        { "label": "Adjust Threshold", "action": "adjust-threshold", "style": "warning" },
+        { "label": "Request Measurement", "action": "request-remeasurement", "style": "secondary" },
+        { "label": "Re-evaluate", "action": "re-evaluate", "style": "secondary" }
+      ],
+      "appointmentId": null,
+      "treatmentPlanId": 911,
+      "modificationRequestId": null
+    },
+    {
+      "ticketId": "compliance-921-2consecutive",
+      "ticketType": 2,
+      "typeLabel": "Compliance Alert (2 Consecutive Misses)",
+      "_proposed": true,
+      "_gapRef": "athlete-transition-workflows.md §6 defines non-compliance as 2 consecutive missed sessions; DoctorControl.md defines ComplianceAlert as <70% attendance in 14 days. This fixture uses the workflow-doc definition — reconcile with backend before asserting on it.",
+      "patientId": 80,
+      "patientName": "N. Fouad",
+      "description": "Missed 2 consecutive sessions (Aug 18, Aug 20)",
+      "subDescription": null,
+      "urgency": 0,
+      "urgencyLabel": "Urgent",
+      "createdAt": "2026-08-21T09:00:00Z",
+      "slaLabel": null,
+      "metrics": { "ConsecutiveMisses": "2" },
+      "actions": [
+        { "label": "Admin Call", "action": "athlete-call", "style": "warning" },
+        { "label": "Extend Package", "action": "extend-package", "style": "secondary" },
+        { "label": "Hold Plan", "action": "temporary-pause", "style": "danger" }
+      ],
+      "appointmentId": null,
+      "treatmentPlanId": 921,
+      "modificationRequestId": null
+    }
+  ]
+}

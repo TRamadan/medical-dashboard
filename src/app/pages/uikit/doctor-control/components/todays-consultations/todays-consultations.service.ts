@@ -1,6 +1,6 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { environment } from '../../../../../../environments/environment';
+import { map } from 'rxjs';
 
 // ── API response shapes ────────────────────────────────────────────────
 
@@ -33,23 +33,39 @@ export interface CalendarResponse {
   nextTwoWeeks: NextTwoWeeksItem[];
 }
 
+interface CalendarJsonRoot {
+  [weekKey: string]: CalendarResponse;
+}
+
 // ── Service ───────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
 export class TodaysConsultationsService {
-  private readonly BASE_URL = environment.apiUrl + 'DoctorDashboard/calendar';
   private readonly http = inject(HttpClient);
 
   /**
-   * Fetches the weekly calendar.
-   * @param weekStart Optional ISO date string (YYYY-MM-DD) for the first day of
-   *                  the week to display. Omit or pass null for the current week.
+   * Fetches the weekly calendar from the local JSON asset.
+   * @param weekStart Optional ISO date string (YYYY-MM-DD) used to look up a
+   *                  specific week scenario in the JSON. Omit for the first
+   *                  (default) week.
    */
   getCalendar(weekStart?: string | null) {
-    const params = weekStart
-      ? new HttpParams().set('weekStart', weekStart)
-      : undefined;
+    return this.http.get<CalendarJsonRoot>('/assets/calendar.json').pipe(
+      map(json => {
+        const weeks = Object.values(json);
+        if (!weeks.length) {
+          return { weekStart: '', weekEnd: '', days: [], nextTwoWeeks: [] } as CalendarResponse;
+        }
 
-    return this.http.get<CalendarResponse>(this.BASE_URL, { params });
+        // If a weekStart was requested, try to find a matching scenario.
+        if (weekStart) {
+          const match = weeks.find(w => w.weekStart === weekStart);
+          if (match) return match;
+        }
+
+        // Otherwise return the first scenario (primary / current week).
+        return weeks[0];
+      })
+    );
   }
 }

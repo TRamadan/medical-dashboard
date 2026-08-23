@@ -1,0 +1,61 @@
+{
+  "documented": [
+    { "id": 1001, "type": 1, "typeName": "AppointmentBooked", "title": "New Booking — M. Ahmed", "body": "M. Ahmed booked an Initial Consultation for 9:00 AM.", "createdAt": "2026-08-22T14:00:00Z", "read": false, "appointmentId": 101 },
+    { "id": 1002, "type": 2, "typeName": "ProfileDataCompleted", "title": "Profile Completed — M. Ahmed", "body": "M. Ahmed finished filling out their intake profile.", "createdAt": "2026-08-22T14:10:00Z", "read": true, "appointmentId": 101 },
+    { "id": 1003, "type": 3, "typeName": "AppointmentPaid", "title": "Payment Received — A. Youssef", "body": "Receptionist marked A. Youssef's appointment as paid.", "createdAt": "2026-08-23T05:30:00Z", "read": false, "appointmentId": 104 },
+    { "id": 1004, "type": 4, "typeName": "AppointmentCancelled", "title": "Appointment Cancelled — S. Omar", "body": "S. Omar cancelled their 2:30 PM Plan Session.", "createdAt": "2026-08-22T20:00:00Z", "read": true, "appointmentId": 105 },
+    { "id": 1005, "type": 5, "typeName": "AppointmentRescheduled", "title": "Rescheduled — K. Ali", "body": "K. Ali moved their Revise appointment to 4:00 PM.", "createdAt": "2026-08-22T18:00:00Z", "read": true, "appointmentId": 106 },
+    { "id": 1006, "type": 6, "typeName": "ReviseAppointmentReady", "title": "Revise Ready — M. Salem", "body": "M. Salem's revise appointment is ready for review.", "createdAt": "2026-08-23T06:00:00Z", "read": false, "appointmentId": 102 },
+    { "id": 1007, "type": 7, "typeName": "PlanAppointmentReady", "title": "Plan Ready — R. Mustafa", "body": "R. Mustafa's plan session is ready for review.", "createdAt": "2026-08-23T06:15:00Z", "read": false, "appointmentId": 103 },
+    { "id": 1008, "type": 8, "typeName": "ReferralReminder2Days", "title": "Referral Reminder (2d) — J. Nasser", "body": "External referral for J. Nasser is 2 days old with no update.", "createdAt": "2026-08-21T09:00:00Z", "read": false, "appointmentId": 130 },
+    { "id": 1009, "type": 9, "typeName": "ReferralReminder5Days", "title": "Referral Reminder (5d) — J. Nasser", "body": "External referral for J. Nasser is 5 days old with no update.", "createdAt": "2026-08-24T09:00:00Z", "read": false, "appointmentId": 130 },
+    { "id": 1010, "type": 10, "typeName": "ReferralEscalated", "title": "Referral Escalated (10d) — J. Nasser", "body": "External referral for J. Nasser hit the 10-day escalation mark.", "createdAt": "2026-08-29T09:00:00Z", "read": false, "appointmentId": 130 },
+    { "id": 1011, "type": 11, "typeName": "ReferralCancelled", "title": "Referral Auto-Cancelled (30d) — J. Nasser", "body": "External referral for J. Nasser was auto-cancelled at the 30-day mark.", "createdAt": "2026-09-18T09:00:00Z", "read": false, "appointmentId": 130 },
+    { "id": 1012, "type": 12, "typeName": "ProtocolModificationPending", "title": "Protocol Modification — H. Salem", "body": "Coach proposed a plan change for H. Salem awaiting your review.", "createdAt": "2026-08-22T11:00:00Z", "read": false, "modificationRequestId": 501, "treatmentPlanId": 900 },
+    { "id": 1013, "type": 13, "typeName": "LowNPSAlert", "title": "Low NPS — N. Khaled", "body": "N. Khaled rated their session 4/10.", "createdAt": "2026-08-21T16:00:00Z", "read": false, "appointmentId": 140 },
+    { "id": 1014, "type": 14, "typeName": "NegativeSessionFeedback", "title": "Negative Session Feedback — F. Sami", "body": "F. Sami left a negative note after their session.", "createdAt": "2026-08-21T17:00:00Z", "read": false, "appointmentId": 141 },
+    { "id": 1015, "type": 15, "typeName": "LowBlueprintRating", "title": "Low Blueprint Rating — K. Mahmoud", "body": "K. Mahmoud rated blueprint clarity 2/10.", "createdAt": "2026-08-20T10:00:00Z", "read": false, "appointmentId": 142 },
+    { "id": 1016, "type": 16, "typeName": "NoticeableImprovement", "title": "Noticeable Improvement — M. Tarek", "body": "M. Tarek's latest measurement session shows a major gain.", "createdAt": "2026-08-19T08:00:00Z", "read": true, "appointmentId": 143 }
+  ],
+  "proposed_gap_fill": [
+    {
+      "id": 2017,
+      "type": 17,
+      "typeName": "PhaseTransitionReady",
+      "_proposed": true,
+      "_gapRef": "athlete-transition-workflows.md §1 — no matching NotificationType exists today",
+      "title": "Phase Transition Ready — O. Fathy",
+      "body": "O. Fathy has met the criteria to move from Phase 1 to Phase 2.",
+      "createdAt": "2026-08-23T07:00:00Z",
+      "read": false,
+      "treatmentPlanId": 910,
+      "actions": ["confirm-transition", "defer-transition"]
+    },
+    {
+      "id": 2018,
+      "type": 18,
+      "typeName": "ProtocolModificationResolved",
+      "_proposed": true,
+      "_gapRef": "athlete-transition-workflows.md §3 — spec says every Agree/Reject/Approve/Revert should fire its own notification; no NotificationType documents the resolution event",
+      "title": "Protocol Modification Approved — H. Salem",
+      "body": "You approved the coach's plan change for H. Salem.",
+      "createdAt": "2026-08-22T12:00:00Z",
+      "read": true,
+      "modificationRequestId": 501,
+      "resolution": "Approved"
+    },
+    {
+      "id": 2019,
+      "type": 19,
+      "typeName": "PackageExtendedAthleteNotice",
+      "_proposed": true,
+      "_gapRef": "athlete-transition-workflows.md §6 — 'Extend Package' is documented as sending the athlete (not the doctor) a notification; no NotificationType covers this athlete-facing message today, and the action itself is marked (future) in DoctorControl.md",
+      "title": "Your Package Has Been Extended",
+      "body": "Your training package has been extended and your plan stepped back one phase.",
+      "createdAt": "2026-08-23T08:00:00Z",
+      "read": false,
+      "recipient": "patient",
+      "patientId": 55
+    }
+  ]
+}

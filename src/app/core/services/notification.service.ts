@@ -5,7 +5,26 @@ import { Observable, tap, map, catchError, of } from 'rxjs';
 import * as signalR from '@microsoft/signalr';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../pages/auth/services/auth.service';
-import { NotificationDTO, PaginatedNotificationsResponse } from './notification.model';
+import { NotificationDTO, NotificationType, PaginatedNotificationsResponse } from './notification.model';
+
+/** Shape of each entry in /assets/notifications.json */
+interface AssetNotification {
+  id: number;
+  type: number;
+  typeName: string;
+  title: string;
+  body: string;
+  createdAt: string;
+  read: boolean;
+  appointmentId?: number | null;
+  modificationRequestId?: number | null;
+  treatmentPlanId?: number | null;
+}
+
+interface NotificationsJsonRoot {
+  documented: AssetNotification[];
+  proposed_gap_fill: AssetNotification[];
+}
 
 @Injectable({
     providedIn: 'root'
@@ -188,7 +207,8 @@ export class NotificationService {
     }
 
     /**
-     * REST: Fetch unread notifications
+     * REST: Fetch unread notifications.
+     * Falls back to /assets/notifications.json (unread only) when the API is unreachable.
      */
     loadUnreadNotifications(): Observable<NotificationDTO[]> {
         this.loading.set(true);
@@ -200,6 +220,44 @@ export class NotificationService {
                 this.loading.set(false);
             }),
             map(res => Array.isArray(res) ? res : ((res as any)?.items ?? [])),
+            catchError(() => this.loadFromAssets().pipe(
+                map(dtos => dtos.filter(n => !n.isRead))
+            ))
+        );
+    }
+
+    /**
+     * REST: Fetch paginated notifications history.
+     * Falls back to /assets/notifications.json when the API is unreachable.
+     */
+    loadNotificationsHistory(page = 1, pageSize = 50): Observable<NotificationDTO[]> {
+        this.loading.set(true);
+        return this.http
+            .get<NotificationDTO[] | PaginatedNotificationsResponse>(`${this.baseUrl}?page=${page}&pageSize=${pageSize}`)
+            .pipe(
+                tap(res => {
+                    const items = Array.isArray(res) ? res : ((res as any)?.items ?? []);
+                    this.notifications.set(items);
+                    this.loading.set(false);
+                }),
+                map(res => Array.isArray(res) ? res : ((res as any)?.items ?? [])),
+                catchError(() => this.loadFromAssets())
+            );
+    }
+
+    // ── Asset fallback helpers ──────────────────────────────────────────
+
+    /** Load notifications from the local JSON asset and map to NotificationDTO. */
+    private loadFromAssets(): Observable<NotificationDTO[]> {
+        return this.http.get<NotificationsJsonRoot>('/assets/notifications.json').pipe(
+            map(json => {
+                const raw = json.documented ?? [];
+                const dtos = raw.map(n => this.assetToDto(n));
+                this.notifications.set(dtos);
+                this.unreadCount.set(dtos.filter(n => !n.isRead).length);
+                this.loading.set(false);
+                return dtos;
+            }),
             catchError(() => {
                 this.loading.set(false);
                 return of([]);
@@ -207,23 +265,25 @@ export class NotificationService {
         );
     }
 
-    /**
-     * REST: Fetch paginated notifications history
-     */
-    loadNotificationsHistory(page = 1, pageSize = 50): Observable<NotificationDTO[]> {
-        this.loading.set(true);
-        return this.http.get<NotificationDTO[] | PaginatedNotificationsResponse>(`${this.baseUrl}?page=${page}&pageSize=${pageSize}`).pipe(
-            tap(res => {
-                const items = Array.isArray(res) ? res : ((res as any)?.items ?? []);
-                this.notifications.set(items);
-                this.loading.set(false);
-            }),
-            map(res => Array.isArray(res) ? res : ((res as any)?.items ?? [])),
-            catchError(() => {
-                this.loading.set(false);
-                return of([]);
-            })
-        );
+    /** Map a compact JSON notification entry to the full NotificationDTO shape. */
+    private assetToDto(n: AssetNotification): NotificationDTO {
+        const entityType = n.appointmentId != null ? 'Appointment'
+            : n.treatmentPlanId != null ? 'TreatmentPlan'
+            : n.modificationRequestId != null ? 'ModificationRequest'
+            : null;
+        const entityId = n.appointmentId ?? n.treatmentPlanId ?? n.modificationRequestId ?? null;
+        return {
+            id: n.id,
+            titleEn: n.title,
+            titleAr: n.title,
+            messageEn: n.body,
+            messageAr: n.body,
+            type: n.type as NotificationType,
+            isRead: n.read,
+            relatedEntityType: entityType,
+            relatedEntityId: entityId,
+            createdAt: n.createdAt,
+        };
     }
 
     /**

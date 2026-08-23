@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { environment } from '../../../../../../environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 // ── API enums ──────────────────────────────────────────────────────────
 
@@ -53,31 +52,47 @@ export interface ApiTicket {
 
 export type PendingTicketsTab = 'decision' | 'urgent' | 'all';
 
+interface PendingTicketsJson {
+  tab_decision: ApiTicket[];
+  tab_urgent: ApiTicket[];
+  tab_all: ApiTicket[];
+  proposed_gap_fill: ApiTicket[];
+}
+
 // ── Service ───────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
 export class PendingTicketsService {
-  private readonly BASE_URL = environment.apiUrl + 'PendingTickets';
   private readonly http = inject(HttpClient);
 
-  /** Fetch pending tickets for the given tab filter. */
+  /** Fetch pending tickets for the given tab filter from the local JSON asset. */
   getTickets(tab: PendingTicketsTab = 'decision'): Observable<ApiTicket[]> {
-    return this.http.get<ApiTicket[]>(this.BASE_URL, { params: { tab } });
+    return this.http.get<PendingTicketsJson>('/assets/pending-tickets.json').pipe(
+      map(json => {
+        switch (tab) {
+          case 'urgent':   return json.tab_urgent   ?? [];
+          case 'all':      return [
+            ...(json.tab_decision ?? []),
+            ...(json.tab_urgent   ?? []),
+            ...(json.tab_all      ?? []),
+          ];
+          case 'decision':
+          default:
+            return json.tab_decision ?? [];
+        }
+      })
+    );
   }
 
-  /** Approve a protocol modification by its modificationRequestId. */
+  /** Approve a protocol modification (no-op in asset mode — logs to console). */
   approveModification(modificationRequestId: number, note: string | null = null): Observable<void> {
-    const url = `${this.BASE_URL}/protocol-modification/${modificationRequestId}/approve`;
-    return this.http.post<void>(url, note !== null ? JSON.stringify(note) : null, {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.log('[PendingTicketsService] approveModification', modificationRequestId, note);
+    return new Observable<void>(obs => { obs.next(); obs.complete(); });
   }
 
-  /** Revert a protocol modification by its modificationRequestId. */
+  /** Revert a protocol modification (no-op in asset mode — logs to console). */
   revertModification(modificationRequestId: number, reason: string | null = null): Observable<void> {
-    const url = `${this.BASE_URL}/protocol-modification/${modificationRequestId}/revert`;
-    return this.http.post<void>(url, reason !== null ? JSON.stringify(reason) : null, {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.log('[PendingTicketsService] revertModification', modificationRequestId, reason);
+    return new Observable<void>(obs => { obs.next(); obs.complete(); });
   }
 }

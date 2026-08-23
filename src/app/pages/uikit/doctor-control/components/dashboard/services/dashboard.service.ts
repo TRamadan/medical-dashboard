@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { environment } from '../../../../../../../environments/environment';
+import { map } from 'rxjs';
 
 export interface ApiScheduleItem {
   appointmentId: number;
@@ -46,14 +46,20 @@ export interface DoctorDashboardResponse {
   priorityItems: ApiPriorityItem[];
 }
 
+interface DashboardJsonRoot {
+  primary_seeded_scenario: DoctorDashboardResponse;
+  [key: string]: DoctorDashboardResponse;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class DashboardService {
-  private readonly DASHBOARD_API_URL = environment.apiUrl + 'DoctorDashboard';
   private readonly http = inject(HttpClient);
 
   getDashboardData() {
-    return this.http.get<DoctorDashboardResponse>(this.DASHBOARD_API_URL);
+    return this.http
+      .get<DashboardJsonRoot>('/assets/dashboard.json')
+      .pipe(map(json => json['primary_seeded_scenario']));
   }
 }

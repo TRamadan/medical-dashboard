@@ -1,0 +1,149 @@
+{
+  "primary_seeded_scenario": {
+    "todayConsultationsCount": 6,
+    "remainingFromYesterday": 10,
+    "pendingDecisionsCount": 2,
+    "clarityScoreNPS": 8.7,
+    "negativeFeedbackCount": 2,
+    "todaySchedule": [
+      {
+        "appointmentId": 101,
+        "patientName": "M. Ahmed",
+        "appointmentType": "Initial Consultation",
+        "statusBadge": "New",
+        "time": "9:00 AM",
+        "colorIndicator": "yellow"
+      },
+      {
+        "appointmentId": 102,
+        "patientName": "M. Salem",
+        "appointmentType": "Revise Consultation",
+        "statusBadge": "Revise",
+        "time": "10:30 AM",
+        "colorIndicator": "gray"
+      },
+      {
+        "appointmentId": 103,
+        "patientName": "R. Mustafa",
+        "appointmentType": "Plan Session",
+        "statusBadge": "Plan",
+        "time": "12:00 PM",
+        "colorIndicator": "gray"
+      },
+      {
+        "appointmentId": 104,
+        "patientName": "A. Youssef",
+        "appointmentType": "Initial Consultation",
+        "statusBadge": "New",
+        "time": "1:00 PM",
+        "colorIndicator": "yellow"
+      },
+      {
+        "appointmentId": 105,
+        "patientName": "S. Omar",
+        "appointmentType": "Plan Session",
+        "statusBadge": "Plan",
+        "time": "2:30 PM",
+        "colorIndicator": "gray"
+      },
+      {
+        "appointmentId": 106,
+        "patientName": "K. Ali",
+        "appointmentType": "Revise Consultation",
+        "statusBadge": "Revise",
+        "time": "4:00 PM",
+        "colorIndicator": "gray"
+      }
+    ],
+    "priorityItems": [
+      {
+        "ticketId": "blueprint-101",
+        "ticketType": 0,
+        "typeLabel": "Blueprint Consultation",
+        "patientId": 42,
+        "patientName": "M. Ahmed",
+        "description": "Clinical assessment completed — data ready",
+        "subDescription": null,
+        "urgency": 2,
+        "urgencyLabel": "Waiting",
+        "createdAt": "2026-08-23T06:00:00Z",
+        "slaLabel": null,
+        "metrics": null,
+        "actions": [
+          { "label": "Open Consultation", "action": "open-consultation", "style": "primary" }
+        ],
+        "appointmentId": 101,
+        "treatmentPlanId": null,
+        "modificationRequestId": null
+      },
+      {
+        "ticketId": "blueprint-104",
+        "ticketType": 0,
+        "typeLabel": "Blueprint Consultation",
+        "patientId": 47,
+        "patientName": "A. Youssef",
+        "description": "Clinical assessment completed — data ready",
+        "subDescription": "Marked urgent by receptionist",
+        "urgency": 0,
+        "urgencyLabel": "Urgent",
+        "createdAt": "2026-08-23T05:30:00Z",
+        "slaLabel": null,
+        "metrics": null,
+        "actions": [
+          { "label": "Open Consultation", "action": "open-consultation", "style": "primary" }
+        ],
+        "appointmentId": 104,
+        "treatmentPlanId": null,
+        "modificationRequestId": null
+      }
+    ]
+  },
+  "edge_case_empty_schedule": {
+    "todayConsultationsCount": 0,
+    "remainingFromYesterday": 0,
+    "pendingDecisionsCount": 0,
+    "clarityScoreNPS": 0,
+    "negativeFeedbackCount": 0,
+    "todaySchedule": [],
+    "priorityItems": []
+  },
+  "edge_case_anonymous_patient": {
+    "todayConsultationsCount": 1,
+    "remainingFromYesterday": 0,
+    "pendingDecisionsCount": 1,
+    "clarityScoreNPS": 9.1,
+    "negativeFeedbackCount": 0,
+    "todaySchedule": [
+      {
+        "appointmentId": 220,
+        "patientName": "Anonymous",
+        "appointmentType": "Initial Consultation",
+        "statusBadge": "New",
+        "time": "11:00 AM",
+        "colorIndicator": "yellow"
+      }
+    ],
+    "priorityItems": [
+      {
+        "ticketId": "blueprint-220",
+        "ticketType": 0,
+        "typeLabel": "Blueprint Consultation",
+        "patientId": 88,
+        "patientName": "Anonymous",
+        "description": "Clinical assessment completed — data ready",
+        "subDescription": null,
+        "urgency": 2,
+        "urgencyLabel": "Waiting",
+        "createdAt": "2026-08-23T07:00:00Z",
+        "slaLabel": null,
+        "metrics": null,
+        "actions": [
+          { "label": "Open Consultation", "action": "open-consultation", "style": "primary" }
+        ],
+        "appointmentId": 220,
+        "treatmentPlanId": null,
+        "modificationRequestId": null
+      }
+    ]
+  }
+}

@@ -421,9 +421,154 @@ const SESSION_510_EDIT_EXISTING: ConsultationSessionDto = {
   ...EMPTY_DECISION
 };
 
+// ── Sessions seeded from /assets/consultation-sessions.json ────────────────
+// Cross-referenced with dashboard.json, pending-tickets.json and calendar.json.
+// These IDs must match exactly so navigation from dashboard → consultation works.
+
+/** session_A: M. Ahmed full blueprint (appointmentId 101, patientId 42) */
+const SESSION_101_M_AHMED: ConsultationSessionDto = {
+  id: 10101, appointmentId: 101, isCompleted: false, currentStep: 2,
+  complaintInAthleteWords: 'Sharp pain in the right knee when pivoting during training.',
+  impactOnTraining: 2, impactOnCompetition: 1, impactOnDailyLife: 0,
+  additionalImpactComment: 'Pain worsens after 20 minutes of running.',
+  complaintStartDate: '2026-07-01',
+  daysSinceOnset: null,
+  whatAggravatesPain: 'Pivoting, stairs, deep squats',
+  procedures: [
+    { id: null, procedureName: 'Lachman Test', result: 'Negative', order: 1 },
+    { id: null, procedureName: 'McMurray Test', result: 'Positive - medial click', order: 2 }
+  ] as ConsultationProcedureDto[],
+  vASPain: 6, effusion: 2, asymmetryPercent: 12,
+  ...EMPTY_STEP3, ...EMPTY_STEP4, ...EMPTY_DECISION
+};
+
+/** session_E: A. Youssef full blueprint (appointmentId 104, patientId 47) */
+const SESSION_104_A_YOUSSEF: ConsultationSessionDto = {
+  id: 10104, appointmentId: 104, isCompleted: false, currentStep: 2,
+  complaintInAthleteWords: 'Nagging shoulder discomfort during overhead lifts, started after a heavy training block.',
+  impactOnTraining: 1, impactOnCompetition: 0, impactOnDailyLife: 0,
+  additionalImpactComment: 'Worse on push-press days.',
+  complaintStartDate: '2026-08-10',
+  daysSinceOnset: null,
+  whatAggravatesPain: 'Overhead pressing, sleeping on that side',
+  procedures: [
+    { id: null, procedureName: 'Neer Impingement Test', result: 'Positive', order: 1 },
+    { id: null, procedureName: 'Empty Can Test', result: 'Mild weakness, no pain', order: 2 }
+  ] as ConsultationProcedureDto[],
+  vASPain: 4, effusion: 0, asymmetryPercent: 6,
+  ...EMPTY_STEP3, ...EMPTY_STEP4, ...EMPTY_DECISION
+};
+
+/** session_F: M. Salem revise consultation (appointmentId 102, patientId 43) */
+const SESSION_102_M_SALEM: ConsultationSessionDto = {
+  id: 10102, appointmentId: 102, isCompleted: false, currentStep: 2,
+  complaintInAthleteWords: 'Overall feeling stronger, occasional mild soreness after long sessions.',
+  impactOnTraining: 0, impactOnCompetition: 0, impactOnDailyLife: 0,
+  additionalImpactComment: null,
+  complaintStartDate: null, daysSinceOnset: null,
+  whatAggravatesPain: 'None significant',
+  procedures: [
+    { id: null, procedureName: 'Functional Movement Re-Screen', result: 'Improved across all patterns', order: 1 }
+  ] as ConsultationProcedureDto[],
+  vASPain: 1, effusion: 0, asymmetryPercent: 5,
+  ...EMPTY_STEP3, ...EMPTY_STEP4, ...EMPTY_DECISION
+};
+
+/** session_G: R. Mustafa plan session (appointmentId 103, patientId 44) */
+const SESSION_103_R_MUSTAFA: ConsultationSessionDto = {
+  id: 10103, appointmentId: 103, isCompleted: false, currentStep: 2,
+  complaintInAthleteWords: 'No new complaints, ready to discuss next phase.',
+  impactOnTraining: 0, impactOnCompetition: 0, impactOnDailyLife: 0,
+  additionalImpactComment: null,
+  complaintStartDate: null, daysSinceOnset: null,
+  whatAggravatesPain: 'None',
+  procedures: [
+    { id: null, procedureName: 'Phase 1 Exit Criteria Check', result: 'Passed all thresholds', order: 1 }
+  ] as ConsultationProcedureDto[],
+  vASPain: 0, effusion: 0, asymmetryPercent: 3,
+  ...EMPTY_STEP3, ...EMPTY_STEP4, ...EMPTY_DECISION
+};
+
+/** session_H: S. Omar plan session (appointmentId 105, patientId 45) */
+const SESSION_105_S_OMAR: ConsultationSessionDto = {
+  id: 10105, appointmentId: 105, isCompleted: false, currentStep: 2,
+  complaintInAthleteWords: 'Slight fatigue but no pain, adjusting well to current load.',
+  impactOnTraining: 0, impactOnCompetition: 0, impactOnDailyLife: 0,
+  additionalImpactComment: null,
+  complaintStartDate: null, daysSinceOnset: null,
+  whatAggravatesPain: 'None',
+  procedures: [
+    { id: null, procedureName: 'Phase 1 Exit Criteria Check', result: 'Passed with minor caution on hip flexor tightness', order: 1 }
+  ] as ConsultationProcedureDto[],
+  vASPain: 1, effusion: 0, asymmetryPercent: 7,
+  ...EMPTY_STEP3, ...EMPTY_STEP4, ...EMPTY_DECISION
+};
+
+/** session_I: K. Ali revise consultation (appointmentId 106, patientId 46) */
+const SESSION_106_K_ALI: ConsultationSessionDto = {
+  id: 10106, appointmentId: 106, isCompleted: false, currentStep: 2,
+  complaintInAthleteWords: 'Feeling good overall, no new issues to report.',
+  impactOnTraining: 0, impactOnCompetition: 0, impactOnDailyLife: 0,
+  additionalImpactComment: null,
+  complaintStartDate: null, daysSinceOnset: null,
+  whatAggravatesPain: 'None',
+  procedures: [
+    { id: null, procedureName: 'Functional Movement Re-Screen', result: 'Within normal limits', order: 1 }
+  ] as ConsultationProcedureDto[],
+  vASPain: 0, effusion: 0, asymmetryPercent: 4,
+  ...EMPTY_STEP3, ...EMPTY_STEP4, ...EMPTY_DECISION
+};
+
+/** session_D: H. Salem original blueprint that created treatmentPlan 900 (appointmentId 110, patientId 61) */
+const SESSION_110_H_SALEM: ConsultationSessionDto = {
+  id: 10110, appointmentId: 110, isCompleted: false, currentStep: 2,
+  complaintInAthleteWords: 'Recurring lower back tightness after heavy squat sessions.',
+  impactOnTraining: 1, impactOnCompetition: 0, impactOnDailyLife: 0,
+  additionalImpactComment: 'Worse on back squat days specifically.',
+  complaintStartDate: '2026-06-20', daysSinceOnset: null,
+  whatAggravatesPain: 'Heavy axial loading, prolonged sitting',
+  procedures: [
+    { id: null, procedureName: 'Straight Leg Raise', result: 'Negative bilaterally', order: 1 },
+    { id: null, procedureName: 'Prone Instability Test', result: 'Positive', order: 2 }
+  ] as ConsultationProcedureDto[],
+  vASPain: 4, effusion: 0, asymmetryPercent: null,
+  ...EMPTY_STEP3, ...EMPTY_STEP4, ...EMPTY_DECISION
+};
+
+/** session_C: O. Mostafa internal referral (appointmentId 160, patientId 90) */
+const SESSION_160_O_MOSTAFA: ConsultationSessionDto = {
+  id: 10160, appointmentId: 160, isCompleted: false, currentStep: 2,
+  complaintInAthleteWords: 'Persistent tightness behind the right thigh during sprint work.',
+  impactOnTraining: 1, impactOnCompetition: 0, impactOnDailyLife: 0,
+  additionalImpactComment: 'Only noticeable at >90% sprint effort.',
+  complaintStartDate: '2026-08-15', daysSinceOnset: null,
+  whatAggravatesPain: 'Max-velocity sprinting',
+  procedures: [
+    { id: null, procedureName: 'Active Knee Extension Test', result: 'Mild deficit, 10° limited', order: 1 }
+  ] as ConsultationProcedureDto[],
+  vASPain: 3, effusion: 0, asymmetryPercent: 8,
+  ...EMPTY_STEP3, ...EMPTY_STEP4, ...EMPTY_DECISION
+};
+
+/** session_C_revisit: O. Mostafa follow-up (appointmentId 165, patientId 90) */
+const SESSION_165_O_MOSTAFA_REVISIT: ConsultationSessionDto = {
+  id: 10165, appointmentId: 165, isCompleted: false, currentStep: 2,
+  complaintInAthleteWords: 'Feeling much better, minimal tightness now.',
+  impactOnTraining: 0, impactOnCompetition: 0, impactOnDailyLife: 0,
+  additionalImpactComment: null,
+  complaintStartDate: '2026-08-15', daysSinceOnset: null,
+  whatAggravatesPain: 'None reported',
+  procedures: [
+    { id: null, procedureName: 'Active Knee Extension Test', result: 'Within normal limits', order: 1 }
+  ] as ConsultationProcedureDto[],
+  vASPain: 0, effusion: 0, asymmetryPercent: 4,
+  ...EMPTY_STEP3, ...EMPTY_STEP4, ...EMPTY_DECISION
+};
+
 // ── Master export ───────────────────────────────────────────────────────────
 
 export const MOCK_CONSULTATION_SESSIONS: Record<number, ConsultationSessionDto> = {
+  // Original scenario set (IDs 501-510)
   501: SESSION_501_NOT_STARTED,
   502: SESSION_502_STEP1_DONE,
   503: SESSION_503_STEP2_DONE,
@@ -433,7 +578,17 @@ export const MOCK_CONSULTATION_SESSIONS: Record<number, ConsultationSessionDto> 
   507: SESSION_507_COMPLETED_DIRECT,
   508: SESSION_508_COMPLETED_REFERRAL,
   509: SESSION_509_COMPLETED_MEASUREMENTS,
-  510: SESSION_510_EDIT_EXISTING
+  510: SESSION_510_EDIT_EXISTING,
+  // Seeded from consultation-sessions.json (matched to dashboard & calendar IDs)
+  101: SESSION_101_M_AHMED,
+  102: SESSION_102_M_SALEM,
+  103: SESSION_103_R_MUSTAFA,
+  104: SESSION_104_A_YOUSSEF,
+  105: SESSION_105_S_OMAR,
+  106: SESSION_106_K_ALI,
+  110: SESSION_110_H_SALEM,
+  160: SESSION_160_O_MOSTAFA,
+  165: SESSION_165_O_MOSTAFA_REVISIT,
 };
 
 /** Quick human-readable index — handy for a picker screen or console.table(). */

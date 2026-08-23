@@ -1,0 +1,74 @@
+{
+  "full_week_2026-08-02": {
+    "weekStart": "2026-08-02",
+    "weekEnd": "2026-08-08",
+    "days": [
+      { "date": "2026-08-02", "dayOfWeek": "SUNDAY", "dayNumber": 2, "slots": [] },
+      {
+        "date": "2026-08-03",
+        "dayOfWeek": "MONDAY",
+        "dayNumber": 3,
+        "slots": [
+          { "appointmentId": 101, "patientName": "M. Ahmed", "time": "9:00 AM", "indicator": "yellow" },
+          { "appointmentId": 102, "patientName": "M. Salem", "time": "10:30 AM", "indicator": "gray" }
+        ]
+      },
+      {
+        "date": "2026-08-04",
+        "dayOfWeek": "TUESDAY",
+        "dayNumber": 4,
+        "slots": [
+          { "appointmentId": 110, "patientName": "H. Salem", "time": "9:30 AM", "indicator": "green" }
+        ]
+      },
+      { "date": "2026-08-05", "dayOfWeek": "WEDNESDAY", "dayNumber": 5, "slots": [] },
+      {
+        "date": "2026-08-06",
+        "dayOfWeek": "THURSDAY",
+        "dayNumber": 6,
+        "slots": [
+          { "appointmentId": 115, "patientName": "R. Khaled", "time": "1:00 PM", "indicator": "yellow" }
+        ]
+      },
+      { "date": "2026-08-07", "dayOfWeek": "FRIDAY", "dayNumber": 7, "slots": [] },
+      { "date": "2026-08-08", "dayOfWeek": "SATURDAY", "dayNumber": 8, "slots": [] }
+    ],
+    "nextTwoWeeks": [
+      {
+        "appointmentId": 115,
+        "patientName": "R. Khaled",
+        "service": "Initial Consultation",
+        "description": "First Consultation",
+        "date": "6/8"
+      },
+      {
+        "appointmentId": 118,
+        "patientName": "B. Salem",
+        "service": "Graduation Review",
+        "description": "Legacy Launch review",
+        "date": "Today"
+      },
+      {
+        "appointmentId": 121,
+        "patientName": "A. Tariq",
+        "service": "Compliance Check-in",
+        "description": "Attendance follow-up",
+        "date": "9/8"
+      }
+    ]
+  },
+  "empty_week_2026-09-06": {
+    "weekStart": "2026-09-06",
+    "weekEnd": "2026-09-12",
+    "days": [
+      { "date": "2026-09-06", "dayOfWeek": "SUNDAY", "dayNumber": 6, "slots": [] },
+      { "date": "2026-09-07", "dayOfWeek": "MONDAY", "dayNumber": 7, "slots": [] },
+      { "date": "2026-09-08", "dayOfWeek": "TUESDAY", "dayNumber": 8, "slots": [] },
+      { "date": "2026-09-09", "dayOfWeek": "WEDNESDAY", "dayNumber": 9, "slots": [] },
+      { "date": "2026-09-10", "dayOfWeek": "THURSDAY", "dayNumber": 10, "slots": [] },
+      { "date": "2026-09-11", "dayOfWeek": "FRIDAY", "dayNumber": 11, "slots": [] },
+      { "date": "2026-09-12", "dayOfWeek": "SATURDAY", "dayNumber": 12, "slots": [] }
+    ],
+    "nextTwoWeeks": []
+  }
+}

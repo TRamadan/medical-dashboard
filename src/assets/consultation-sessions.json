@@ -1,0 +1,606 @@
+{
+  "session_A_full_blueprint_direct": {
+    "_scenario": "New athlete, full clinical judgment, direct blueprint (decisionType 0). Exercises steps 1-5 end to end.",
+    "_crossRef": "appointmentId 101 = M. Ahmed, same person/appointment as dashboard.json todaySchedule[0] and priorityItems[0]. Completing step5 here is what should flip this ticket from ticketType 0 (BlueprintConsultation) to a live treatment plan.",
+    "appointmentId": 101,
+    "patientId": 42,
+    "resultingTreatmentPlanId": 950,
+    "step1": {
+      "complaintInAthleteWords": "Sharp pain in the right knee when pivoting during training.",
+      "impactOnTraining": 2,
+      "impactOnCompetition": 1,
+      "impactOnDailyLife": 0,
+      "additionalImpactComment": "Pain worsens after 20 minutes of running.",
+      "complaintStartDate": "2026-07-01",
+      "whatAggravatesPain": "Pivoting, stairs, deep squats"
+    },
+    "step2": {
+      "procedures": [
+        { "id": null, "procedureName": "Lachman Test", "result": "Negative", "order": 1 },
+        { "id": null, "procedureName": "McMurray Test", "result": "Positive - medial click", "order": 2 }
+      ],
+      "vASPain": 6,
+      "effusion": 2,
+      "asymmetryPercent": 12
+    },
+    "step3": {
+      "dysfunctionsAndRiskFactors": "Reduced quad activation, mild valgus collapse on single-leg squat.",
+      "strengthsObserved": "Good core stability, full ankle mobility.",
+      "weaknessesObserved": "Quad LSI at 68%, delayed glute med firing.",
+      "notesAndGeneralImpression": "Consistent with early-stage patellofemoral pain syndrome.",
+      "yellowFlags": 5,
+      "emotionalTrigger": "Missed the regional qualifier last season due to injury.",
+      "experienceWithOtherProviders": "Saw a physio for 2 weeks with no improvement.",
+      "expectationsAndFears": "Afraid this will end his season again.",
+      "complianceIndex": 0,
+      "personaClassification": 1,
+      "purchaseInfluencer": 2,
+      "additionalBehavioralNotes": "Coach is very involved in decision-making.",
+      "judgmentType": 0,
+      "generalOpinion": "Manageable with structured rehab, no red flags for surgical referral.",
+      "diagnosisText": "Grade I MCL sprain with secondary quad inhibition.",
+      "injuryGrade": 0,
+      "injuryPhase": 0,
+      "clinicalNotes": "Reassess ROM in 2 weeks.",
+      "therapeuticGoal": "Return to full training within 6 weeks.",
+      "expectedDuration": "6 weeks",
+      "therapeuticGoalType": 0
+    },
+    "step4": {
+      "recommendedServiceId": 4,
+      "priorityLevel": 1,
+      "programDuration": "8 Weeks",
+      "planPhases": [
+        { "id": null, "phaseName": "Phase 1: Mobility & Control", "goal": "Restore full range of motion", "transitionCriteria": "ROM flexion > 120°", "sessions": 8, "order": 1 },
+        { "id": null, "phaseName": "Phase 2: Strength & Load", "goal": "Equalize limb strength", "transitionCriteria": "LSI > 80%", "sessions": 12, "order": 2 }
+      ],
+      "sportsRecommendations": "Resume light jogging after Phase 2, avoid contact sports until graduation.",
+      "teamNotes": "Monitor psychological status (Yellow Flag alert). Focus on quad control."
+    },
+    "step5_complete": {
+      "decisionType": 0,
+      "notes": "Proceeding directly with the rehab blueprint, no further referral needed."
+    }
+  },
+
+  "session_B_extra_assessment_external_referral": {
+    "_scenario": "Findings inconclusive (judgmentType 1) — skips step 4 entirely, goes straight to Confirmation with an external referral (decisionType 1).",
+    "appointmentId": 130,
+    "step1": {
+      "complaintInAthleteWords": "Deep, non-specific ankle pain after landing awkwardly two weeks ago.",
+      "impactOnTraining": 2,
+      "impactOnCompetition": 2,
+      "impactOnDailyLife": 1,
+      "additionalImpactComment": "Swelling comes and goes.",
+      "complaintStartDate": "2026-08-09",
+      "whatAggravatesPain": "Weight-bearing on uneven ground"
+    },
+    "step2": {
+      "procedures": [
+        { "id": null, "procedureName": "Anterior Drawer Test", "result": "Equivocal", "order": 1 },
+        { "id": null, "procedureName": "Talar Tilt Test", "result": "Equivocal", "order": 2 }
+      ],
+      "vASPain": 5,
+      "effusion": 3,
+      "asymmetryPercent": null
+    },
+    "step3": {
+      "dysfunctionsAndRiskFactors": "Reduced quad activation, mild valgus collapse on single-leg squat.",
+      "strengthsObserved": "Good core stability, full ankle mobility.",
+      "weaknessesObserved": "Quad LSI at 68%, delayed glute med firing.",
+      "notesAndGeneralImpression": "Findings inconclusive, structural involvement not ruled out.",
+      "yellowFlags": 0,
+      "emotionalTrigger": "",
+      "experienceWithOtherProviders": "",
+      "expectationsAndFears": "",
+      "complianceIndex": 0,
+      "personaClassification": 0,
+      "purchaseInfluencer": 0,
+      "additionalBehavioralNotes": "",
+      "judgmentType": 1,
+      "generalOpinion": null,
+      "diagnosisText": null,
+      "injuryGrade": 0,
+      "injuryPhase": 0,
+      "clinicalNotes": "Recommend MRI before finalizing diagnosis.",
+      "therapeuticGoal": null,
+      "expectedDuration": "",
+      "therapeuticGoalType": 0
+    },
+    "step4": null,
+    "step5_complete": {
+      "decisionType": 1,
+      "notes": "Referring for imaging before finalizing rehab plan.",
+      "referralSpecialty": "Orthopedic Surgeon",
+      "referralDescription": "MRI — Right Ankle",
+      "referralNeedFollowUp": true
+    }
+  },
+
+  "session_C_internal_referral_revisit": {
+    "_scenario": "Maps to athlete-transition-workflows.md §2: client is given an internal referral for a re-visit. This is the FIRST session that produces decisionType 2 (Internal Measurements) — the returning appointment is session_C_revisit below.",
+    "_crossRef": "Uses a fresh patient (O. Mostafa, appointmentId 160/165) deliberately NOT reusing 141 — appointmentId 141 already belongs to F. Sami in notifications.json (NegativeSessionFeedback), a different, unrelated scenario. Keeping them separate avoids a same-ID-different-patient collision.",
+    "appointmentId": 160,
+    "patientId": 90,
+    "patientName": "O. Mostafa",
+    "step1": {
+      "complaintInAthleteWords": "Persistent tightness behind the right thigh during sprint work.",
+      "impactOnTraining": 1,
+      "impactOnCompetition": 0,
+      "impactOnDailyLife": 0,
+      "additionalImpactComment": "Only noticeable at >90% sprint effort.",
+      "complaintStartDate": "2026-08-15",
+      "whatAggravatesPain": "Max-velocity sprinting"
+    },
+    "step2": {
+      "procedures": [
+        { "id": null, "procedureName": "Active Knee Extension Test", "result": "Mild deficit, 10° limited", "order": 1 }
+      ],
+      "vASPain": 3,
+      "effusion": 0,
+      "asymmetryPercent": 8
+    },
+    "step3": {
+      "dysfunctionsAndRiskFactors": "Mild posterior chain tightness, no red flags.",
+      "strengthsObserved": "Full strength on manual testing.",
+      "weaknessesObserved": "Slight asymmetry on AKE test.",
+      "notesAndGeneralImpression": "Baseline strength testing needed before clearing for full sprint load.",
+      "yellowFlags": 0,
+      "emotionalTrigger": "",
+      "experienceWithOtherProviders": "",
+      "expectationsAndFears": "Wants to be cleared before next meet.",
+      "complianceIndex": 0,
+      "personaClassification": 1,
+      "purchaseInfluencer": 0,
+      "additionalBehavioralNotes": "",
+      "judgmentType": 0,
+      "generalOpinion": "Precautionary — confirm with objective strength data before clearing.",
+      "diagnosisText": "Suspected mild hamstring strain, Grade I, resolving.",
+      "injuryGrade": 0,
+      "injuryPhase": 1,
+      "clinicalNotes": "Baseline force-plate testing recommended.",
+      "therapeuticGoal": "Confirm readiness for full sprint load.",
+      "expectedDuration": "1 week",
+      "therapeuticGoalType": 0
+    },
+    "step4": {
+      "recommendedServiceId": 7,
+      "priorityLevel": 0,
+      "programDuration": "Custom",
+      "planPhases": [],
+      "sportsRecommendations": "Hold at 80% sprint volume until measurement session confirms symmetry.",
+      "teamNotes": "Book internal force-plate measurement before next sprint block."
+    },
+    "step5_complete": {
+      "decisionType": 2,
+      "notes": "Baseline strength testing before confirming return-to-play timeline. (Measurement: Force Plate on 2026-08-30)"
+    },
+    "resulting_internal_referral": {
+      "_gapRef": "athlete-transition-workflows.md §2 says the internal measurement should show as 'checked' with visible results on the revisit Consultation screen. No dedicated field/endpoint documents this — it's currently just free text inside `notes` above.",
+      "referralType": "internal",
+      "originatingAppointmentId": 160,
+      "measurementType": "Force Plate",
+      "scheduledDate": "2026-08-30",
+      "revisitAppointmentId": 165
+    }
+  },
+
+  "session_C_revisit": {
+    "_scenario": "The follow-up appointment created by session_C_internal_referral_revisit's referral. Doctor opens Consultation again; internal measurement now shows as checked with results.",
+    "appointmentId": 165,
+    "patientId": 90,
+    "patientName": "O. Mostafa",
+    "linkedFromAppointmentId": 160,
+    "internalMeasurement": {
+      "type": "Force Plate",
+      "date": "2026-08-30",
+      "checked": true,
+      "results": { "LSI": "91%", "PeakForceAsymmetry": "9%" }
+    },
+    "step1": {
+      "complaintInAthleteWords": "Feeling much better, minimal tightness now.",
+      "impactOnTraining": 0,
+      "impactOnCompetition": 0,
+      "impactOnDailyLife": 0,
+      "additionalImpactComment": null,
+      "complaintStartDate": "2026-08-15",
+      "whatAggravatesPain": "None reported"
+    },
+    "step2": {
+      "procedures": [
+        { "id": null, "procedureName": "Active Knee Extension Test", "result": "Within normal limits", "order": 1 }
+      ],
+      "vASPain": 0,
+      "effusion": 0,
+      "asymmetryPercent": 4
+    },
+    "step3": {
+      "dysfunctionsAndRiskFactors": "None significant.",
+      "strengthsObserved": "LSI improved to 91%.",
+      "weaknessesObserved": "Minor residual asymmetry, within acceptable range.",
+      "notesAndGeneralImpression": "Cleared for full sprint load.",
+      "yellowFlags": 0,
+      "emotionalTrigger": "",
+      "experienceWithOtherProviders": "",
+      "expectationsAndFears": "",
+      "complianceIndex": 0,
+      "personaClassification": 1,
+      "purchaseInfluencer": 0,
+      "additionalBehavioralNotes": "",
+      "judgmentType": 0,
+      "generalOpinion": "Cleared to return to full training load.",
+      "diagnosisText": "Resolved mild hamstring strain.",
+      "injuryGrade": 0,
+      "injuryPhase": 2,
+      "clinicalNotes": "No further restrictions.",
+      "therapeuticGoal": "Maintain full sprint load, monitor for recurrence.",
+      "expectedDuration": "Ongoing monitoring",
+      "therapeuticGoalType": 2
+    },
+    "step4": null,
+    "step5_complete": {
+      "decisionType": 0,
+      "notes": "Cleared for full training load following internal measurement follow-up."
+    }
+  },
+
+  "session_D_h_salem_original_blueprint": {
+    "_scenario": "The original consultation that created H. Salem's treatment plan. This is the full lifecycle example: this session's resultingTreatmentPlanId (900) is the SAME 900 referenced later by pending-tickets.json (protocol-mod-501, phase-timeout-901), notifications.json (ProtocolModificationPending, id 1012), and calendar.json (appointmentId 110, Aug 4). Use this chain to test dashboard → calendar → consultation → treatment plan → downstream tickets/notifications as one continuous flow for a single patient.",
+    "appointmentId": 110,
+    "patientId": 61,
+    "patientName": "H. Salem",
+    "resultingTreatmentPlanId": 900,
+    "step1": {
+      "complaintInAthleteWords": "Recurring lower back tightness after heavy squat sessions.",
+      "impactOnTraining": 1,
+      "impactOnCompetition": 0,
+      "impactOnDailyLife": 0,
+      "additionalImpactComment": "Worse on back squat days specifically.",
+      "complaintStartDate": "2026-06-20",
+      "whatAggravatesPain": "Heavy axial loading, prolonged sitting"
+    },
+    "step2": {
+      "procedures": [
+        { "id": null, "procedureName": "Straight Leg Raise", "result": "Negative bilaterally", "order": 1 },
+        { "id": null, "procedureName": "Prone Instability Test", "result": "Positive", "order": 2 }
+      ],
+      "vASPain": 4,
+      "effusion": 0,
+      "asymmetryPercent": null
+    },
+    "step3": {
+      "dysfunctionsAndRiskFactors": "Poor lumbo-pelvic control under load, limited hip extension.",
+      "strengthsObserved": "Strong overall trunk strength.",
+      "weaknessesObserved": "Delayed multifidus activation.",
+      "notesAndGeneralImpression": "Mechanical low back pain, load-management and motor control issue, no red flags.",
+      "yellowFlags": 0,
+      "emotionalTrigger": "",
+      "experienceWithOtherProviders": "",
+      "expectationsAndFears": "Worried about missing the next competition block.",
+      "complianceIndex": 0,
+      "personaClassification": 1,
+      "purchaseInfluencer": 2,
+      "additionalBehavioralNotes": "Coach requested an accelerated timeline.",
+      "judgmentType": 0,
+      "generalOpinion": "Straightforward load-management case, good prognosis.",
+      "diagnosisText": "Non-specific mechanical low back pain with motor control deficit.",
+      "injuryGrade": 0,
+      "injuryPhase": 0,
+      "clinicalNotes": "Reassess lumbo-pelvic control at 4 weeks.",
+      "therapeuticGoal": "Return to full squat load pain-free.",
+      "expectedDuration": "24 weeks",
+      "therapeuticGoalType": 0
+    },
+    "step4": {
+      "recommendedServiceId": 4,
+      "priorityLevel": 1,
+      "programDuration": "24 Weeks",
+      "planPhases": [
+        { "id": null, "phaseName": "Phase 1: Motor Control", "goal": "Restore lumbo-pelvic control", "transitionCriteria": "Pain-free prone instability test", "sessions": 10, "order": 1 },
+        { "id": null, "phaseName": "Phase 2: Progressive Loading", "goal": "Rebuild tolerance to axial load", "transitionCriteria": "Pain-free at 80% 1RM squat", "sessions": 14, "order": 2 }
+      ],
+      "sportsRecommendations": "Deload axial work, maintain lower-body unilateral training.",
+      "teamNotes": "This is the plan a coach team-leader later proposes a modification to (see protocol-mod-501) and that runs long into a phase-timeout alert (see phase-timeout-901)."
+    },
+    "step5_complete": {
+      "decisionType": 0,
+      "notes": "Proceeding with a 24-week structured load-management plan."
+    }
+  },
+
+  "session_E_a_youssef_full_blueprint": {
+    "_scenario": "Completes the chain for A. Youssef — the other 'New/paid/urgent' patient in today's dashboard schedule (appointmentId 104, colorIndicator yellow, marked urgent). Full step 1-5, direct blueprint.",
+    "_crossRef": "appointmentId 104 = A. Youssef, same appointment as dashboard.json todaySchedule[3]/priorityItems[1] and pending-tickets.json tab_decision[1] (blueprint-104).",
+    "appointmentId": 104,
+    "patientId": 47,
+    "resultingTreatmentPlanId": 951,
+    "step1": {
+      "complaintInAthleteWords": "Nagging shoulder discomfort during overhead lifts, started after a heavy training block.",
+      "impactOnTraining": 1,
+      "impactOnCompetition": 0,
+      "impactOnDailyLife": 0,
+      "additionalImpactComment": "Worse on push-press days.",
+      "complaintStartDate": "2026-08-10",
+      "whatAggravatesPain": "Overhead pressing, sleeping on that side"
+    },
+    "step2": {
+      "procedures": [
+        { "id": null, "procedureName": "Neer Impingement Test", "result": "Positive", "order": 1 },
+        { "id": null, "procedureName": "Empty Can Test", "result": "Mild weakness, no pain", "order": 2 }
+      ],
+      "vASPain": 4,
+      "effusion": 0,
+      "asymmetryPercent": 6
+    },
+    "step3": {
+      "dysfunctionsAndRiskFactors": "Scapular dyskinesis, reduced rotator cuff endurance.",
+      "strengthsObserved": "Good overall shoulder ROM.",
+      "weaknessesObserved": "Rotator cuff endurance deficit, especially external rotation.",
+      "notesAndGeneralImpression": "Consistent with early subacromial impingement, load-management driven.",
+      "yellowFlags": 0,
+      "emotionalTrigger": "",
+      "experienceWithOtherProviders": "",
+      "expectationsAndFears": "Wants to keep training through it if possible.",
+      "complianceIndex": 0,
+      "personaClassification": 4,
+      "purchaseInfluencer": 0,
+      "additionalBehavioralNotes": "",
+      "judgmentType": 0,
+      "generalOpinion": "Good prognosis with targeted cuff/scapular work and temporary load reduction.",
+      "diagnosisText": "Subacromial impingement syndrome, mild.",
+      "injuryGrade": 0,
+      "injuryPhase": 0,
+      "clinicalNotes": "Reassess overhead pressing tolerance at 3 weeks.",
+      "therapeuticGoal": "Pain-free overhead pressing at full load.",
+      "expectedDuration": "6 weeks",
+      "therapeuticGoalType": 0
+    },
+    "step4": {
+      "recommendedServiceId": 4,
+      "priorityLevel": 2,
+      "programDuration": "6 Weeks",
+      "planPhases": [
+        { "id": null, "phaseName": "Phase 1: Cuff Activation & Load Reduction", "goal": "Reduce irritability, restore cuff activation", "transitionCriteria": "Pain-free Empty Can Test", "sessions": 6, "order": 1 },
+        { "id": null, "phaseName": "Phase 2: Progressive Overhead Loading", "goal": "Return to full overhead pressing load", "transitionCriteria": "Pain-free at working weight for 3 sessions", "sessions": 6, "order": 2 }
+      ],
+      "sportsRecommendations": "Cap overhead pressing at 60% for phase 1, no behind-neck work.",
+      "teamNotes": "Marked urgent by receptionist — prioritize scheduling."
+    },
+    "step5_complete": {
+      "decisionType": 0,
+      "notes": "Proceeding directly with a 6-week shoulder load-management blueprint."
+    }
+  },
+
+  "session_F_m_salem_revise": {
+    "_scenario": "Represents the 'Revise' appointment for M. Salem once it's marked paid and opened. Not a brand-new blueprint — this is a returning patient being re-assessed against an existing plan.",
+    "_crossRef": "appointmentId 102 = M. Salem, same appointment as dashboard.json todaySchedule[1] (statusBadge 'Revise', colorIndicator gray — currently unpaid, so this payload represents the session as it will look once payment clears) and calendar.json full_week_2026-08-02 (Aug 3 slot).",
+    "_note": "This patient already has a treatment plan from a prior blueprint consultation that predates this mock data window — only the existing plan ID is referenced here, not a full original session.",
+    "appointmentId": 102,
+    "patientId": 43,
+    "existingTreatmentPlanId": 960,
+    "step1": {
+      "complaintInAthleteWords": "Overall feeling stronger, occasional mild soreness after long sessions.",
+      "impactOnTraining": 0,
+      "impactOnCompetition": 0,
+      "impactOnDailyLife": 0,
+      "additionalImpactComment": null,
+      "complaintStartDate": null,
+      "whatAggravatesPain": "None significant"
+    },
+    "step2": {
+      "procedures": [
+        { "id": null, "procedureName": "Functional Movement Re-Screen", "result": "Improved across all patterns", "order": 1 }
+      ],
+      "vASPain": 1,
+      "effusion": 0,
+      "asymmetryPercent": 5
+    },
+    "step3": {
+      "dysfunctionsAndRiskFactors": "Minor residual asymmetry, otherwise resolved.",
+      "strengthsObserved": "Consistent progress across phases.",
+      "weaknessesObserved": "Slight left-side deficit remaining.",
+      "notesAndGeneralImpression": "On track, continue current plan with minor phase adjustment.",
+      "yellowFlags": 0,
+      "emotionalTrigger": "",
+      "experienceWithOtherProviders": "",
+      "expectationsAndFears": "",
+      "complianceIndex": 0,
+      "personaClassification": 0,
+      "purchaseInfluencer": 0,
+      "additionalBehavioralNotes": "",
+      "judgmentType": 0,
+      "generalOpinion": "Continue existing plan, no diagnosis change needed.",
+      "diagnosisText": "N/A — routine plan re-assessment.",
+      "injuryGrade": 0,
+      "injuryPhase": 2,
+      "clinicalNotes": "Re-check in 3 weeks.",
+      "therapeuticGoal": "Maintain progress toward full return to play.",
+      "expectedDuration": "3 weeks",
+      "therapeuticGoalType": 0
+    },
+    "step4": null,
+    "step5_complete": {
+      "decisionType": 0,
+      "notes": "Continuing existing plan 960 with no structural changes."
+    }
+  },
+
+  "session_G_r_mustafa_plan": {
+    "_scenario": "Represents the 'Plan' appointment for R. Mustafa once paid and opened — the doctor is delivering/updating the rehab plan (step 4 focus) rather than doing a fresh diagnostic workup.",
+    "_crossRef": "appointmentId 103 = R. Mustafa, same appointment as dashboard.json todaySchedule[2] (statusBadge 'Plan', colorIndicator gray).",
+    "_note": "Existing patient — earlier steps abbreviated since the diagnostic work already happened in a prior session outside this data window.",
+    "appointmentId": 103,
+    "patientId": 44,
+    "existingTreatmentPlanId": 961,
+    "step1": {
+      "complaintInAthleteWords": "No new complaints, ready to discuss next phase.",
+      "impactOnTraining": 0,
+      "impactOnCompetition": 0,
+      "impactOnDailyLife": 0,
+      "additionalImpactComment": null,
+      "complaintStartDate": null,
+      "whatAggravatesPain": "None"
+    },
+    "step2": {
+      "procedures": [
+        { "id": null, "procedureName": "Phase 1 Exit Criteria Check", "result": "Passed all thresholds", "order": 1 }
+      ],
+      "vASPain": 0,
+      "effusion": 0,
+      "asymmetryPercent": 3
+    },
+    "step3": {
+      "dysfunctionsAndRiskFactors": "None remaining.",
+      "strengthsObserved": "Met all Phase 1 exit criteria.",
+      "weaknessesObserved": "None significant.",
+      "notesAndGeneralImpression": "Ready to progress to Phase 2 loading.",
+      "yellowFlags": 0,
+      "emotionalTrigger": "",
+      "experienceWithOtherProviders": "",
+      "expectationsAndFears": "",
+      "complianceIndex": 0,
+      "personaClassification": 0,
+      "purchaseInfluencer": 0,
+      "additionalBehavioralNotes": "",
+      "judgmentType": 0,
+      "generalOpinion": "Cleared to progress phases.",
+      "diagnosisText": "N/A — plan progression session.",
+      "injuryGrade": 0,
+      "injuryPhase": 2,
+      "clinicalNotes": "Progress to Phase 2 as scheduled.",
+      "therapeuticGoal": "Advance to Phase 2 loading.",
+      "expectedDuration": "Ongoing",
+      "therapeuticGoalType": 0
+    },
+    "step4": {
+      "recommendedServiceId": 4,
+      "priorityLevel": 1,
+      "programDuration": "Continuing existing plan 961",
+      "planPhases": [
+        { "id": null, "phaseName": "Phase 2: Progressive Loading", "goal": "Advance load tolerance", "transitionCriteria": "Pass strength symmetry test", "sessions": 10, "order": 2 }
+      ],
+      "sportsRecommendations": "Increase training volume by 10% per week.",
+      "teamNotes": "Phase 1 exit criteria met — approved to progress."
+    },
+    "step5_complete": {
+      "decisionType": 0,
+      "notes": "Progressing to Phase 2 of existing plan 961."
+    }
+  },
+
+  "session_H_s_omar_plan": {
+    "_scenario": "Same shape as R. Mustafa's — a 'Plan' appointment focused on plan delivery/progression rather than a fresh diagnostic workup.",
+    "_crossRef": "appointmentId 105 = S. Omar, same appointment as dashboard.json todaySchedule[4] (statusBadge 'Plan', colorIndicator gray).",
+    "appointmentId": 105,
+    "patientId": 45,
+    "existingTreatmentPlanId": 962,
+    "step1": {
+      "complaintInAthleteWords": "Slight fatigue but no pain, adjusting well to current load.",
+      "impactOnTraining": 0,
+      "impactOnCompetition": 0,
+      "impactOnDailyLife": 0,
+      "additionalImpactComment": null,
+      "complaintStartDate": null,
+      "whatAggravatesPain": "None"
+    },
+    "step2": {
+      "procedures": [
+        { "id": null, "procedureName": "Phase 1 Exit Criteria Check", "result": "Passed with minor caution on hip flexor tightness", "order": 1 }
+      ],
+      "vASPain": 1,
+      "effusion": 0,
+      "asymmetryPercent": 7
+    },
+    "step3": {
+      "dysfunctionsAndRiskFactors": "Mild hip flexor tightness, otherwise clear.",
+      "strengthsObserved": "Good overall strength gains.",
+      "weaknessesObserved": "Hip flexor mobility slightly limited.",
+      "notesAndGeneralImpression": "Ready to progress with added mobility work.",
+      "yellowFlags": 0,
+      "emotionalTrigger": "",
+      "experienceWithOtherProviders": "",
+      "expectationsAndFears": "",
+      "complianceIndex": 0,
+      "personaClassification": 0,
+      "purchaseInfluencer": 0,
+      "additionalBehavioralNotes": "",
+      "judgmentType": 0,
+      "generalOpinion": "Cleared to progress phases with added mobility focus.",
+      "diagnosisText": "N/A — plan progression session.",
+      "injuryGrade": 0,
+      "injuryPhase": 2,
+      "clinicalNotes": "Add hip flexor mobility work to Phase 2.",
+      "therapeuticGoal": "Advance to Phase 2 loading with improved hip mobility.",
+      "expectedDuration": "Ongoing",
+      "therapeuticGoalType": 0
+    },
+    "step4": {
+      "recommendedServiceId": 4,
+      "priorityLevel": 1,
+      "programDuration": "Continuing existing plan 962",
+      "planPhases": [
+        { "id": null, "phaseName": "Phase 2: Progressive Loading + Mobility", "goal": "Advance load tolerance, resolve hip flexor tightness", "transitionCriteria": "Pass strength symmetry test, hip flexor length within normal range", "sessions": 10, "order": 2 }
+      ],
+      "sportsRecommendations": "Add daily hip flexor mobility work alongside strength progression.",
+      "teamNotes": "Phase 1 exit criteria met with a minor caution flag on hip mobility."
+    },
+    "step5_complete": {
+      "decisionType": 0,
+      "notes": "Progressing to Phase 2 of existing plan 962, added mobility focus."
+    }
+  },
+
+  "session_I_k_ali_revise": {
+    "_scenario": "Same shape as M. Salem's — a 'Revise' re-assessment appointment against an existing plan.",
+    "_crossRef": "appointmentId 106 = K. Ali, same appointment as dashboard.json todaySchedule[5] (statusBadge 'Revise', colorIndicator gray).",
+    "appointmentId": 106,
+    "patientId": 46,
+    "existingTreatmentPlanId": 963,
+    "step1": {
+      "complaintInAthleteWords": "Feeling good overall, no new issues to report.",
+      "impactOnTraining": 0,
+      "impactOnCompetition": 0,
+      "impactOnDailyLife": 0,
+      "additionalImpactComment": null,
+      "complaintStartDate": null,
+      "whatAggravatesPain": "None"
+    },
+    "step2": {
+      "procedures": [
+        { "id": null, "procedureName": "Functional Movement Re-Screen", "result": "Within normal limits", "order": 1 }
+      ],
+      "vASPain": 0,
+      "effusion": 0,
+      "asymmetryPercent": 4
+    },
+    "step3": {
+      "dysfunctionsAndRiskFactors": "None remaining.",
+      "strengthsObserved": "Full recovery of movement quality.",
+      "weaknessesObserved": "None significant.",
+      "notesAndGeneralImpression": "On track, continue current plan unchanged.",
+      "yellowFlags": 0,
+      "emotionalTrigger": "",
+      "experienceWithOtherProviders": "",
+      "expectationsAndFears": "",
+      "complianceIndex": 0,
+      "personaClassification": 0,
+      "purchaseInfluencer": 0,
+      "additionalBehavioralNotes": "",
+      "judgmentType": 0,
+      "generalOpinion": "Continue existing plan, no diagnosis change needed.",
+      "diagnosisText": "N/A — routine plan re-assessment.",
+      "injuryGrade": 0,
+      "injuryPhase": 2,
+      "clinicalNotes": "Re-check in 4 weeks.",
+      "therapeuticGoal": "Maintain progress toward full return to play.",
+      "expectedDuration": "4 weeks",
+      "therapeuticGoalType": 0
+    },
+    "step4": null,
+    "step5_complete": {
+      "decisionType": 0,
+      "notes": "Continuing existing plan 963 with no structural changes."
+    }
+  }
+}
