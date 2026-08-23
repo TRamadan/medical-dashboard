@@ -72,20 +72,16 @@
             <div class="note-banner note-coral mb-3">⚠ {{ sessionError() }}</div>
             }
 
-            <!-- Step Bar -->
+            <!-- Step Bar (PrimeNG Stepper — steps-only mode; step content stays in the
+                 existing @if (currentStep() === N) blocks below, unchanged) -->
             @if (flowStarted()) {
-            <div class="step-bar">
-                @for (label of stepLabels(); track $index; let i = $index) {
-                @if (i > 0) {
-                <div class="step-line" [class.done]="isStepCompleted(i + 1)"></div>
-                }
-                <div class="step-item">
-                    <div class="step-dot" [class.active]="isStepActive(i + 1)" [class.done]="isStepCompleted(i + 1)"
-                        (click)="go(i + 1)">{{ i + 1 }}</div>
-                    <div class="step-label">{{ label }}</div>
-                </div>
-                }
-            </div>
+            <p-stepper [value]="currentStep()" [linear]="true" class="mb-4">
+                <p-step-list>
+                    @for (label of stepLabels(); track $index; let i = $index) {
+                    <p-step [value]="i + 1" (click)="onStepClick(i + 1)">{{ label }}</p-step>
+                    }
+                </p-step-list>
+            </p-stepper>
             }
 
             <!-- ══ STEP 0 — Entry Type Selection ══ -->
@@ -687,16 +683,24 @@
                     </div>
                     <p-card>
                         <ng-template pTemplate="title">Measurement Details</ng-template>
-                        <div class="form-grid-2">
+                        <div class="form-grid-3">
                             <div>
                                 <div class="field-label">Type</div>
-                                <p-select [options]="measurementTypeOptions" [(ngModel)]="measurementType"
-                                    optionLabel="label" optionValue="value" styleClass="w-full" class="w-full"
-                                    appendTo="body"></p-select>
+                                <p-multiselect [options]="measurementTypeOptions()" [(ngModel)]="measurementType"
+                                    optionLabel="label" optionValue="value" [filter]="true"
+                                    filterPlaceholder="Search types..." display="chip" styleClass="w-full"
+                                    class="w-full" appendTo="body"></p-multiselect>
+                            </div>
+                            <div>
+                                <div class="field-label">Side</div>
+                                <p-selectButton [options]="measurementSideOptions" [(ngModel)]="measurementSide"
+                                    optionLabel="label" optionValue="value" styleClass="w-full"></p-selectButton>
                             </div>
                             <div>
                                 <div class="field-label">Date</div>
-                                <input pInputText type="date" [(ngModel)]="measurementDate" class="w-full" />
+                                <p-datepicker [(ngModel)]="measurementDate" [showIcon]="true" dateFormat="yy-mm-dd"
+                                    [showButtonBar]="true" styleClass="w-full" class="w-full" appendTo="body"
+                                    placeholder="Select date"></p-datepicker>
                             </div>
                         </div>
                     </p-card>
@@ -710,7 +714,7 @@
                     </div>
                     <p-card>
                         <ng-template pTemplate="title">Referral Details</ng-template>
-                        <div class="form-grid-2 mb-3">
+                        <div class="form-grid-3 mb-3">
                             <div>
                                 <div class="field-label">Test</div>
                                 <p-select [options]="referralTestOptions" [(ngModel)]="referralTest" optionLabel="label"
@@ -721,12 +725,48 @@
                                 <input pInputText [(ngModel)]="referralRegion" placeholder="e.g. Right Shoulder"
                                     class="w-full" />
                             </div>
+                            <div>
+                                <div class="field-label">Specialty <span class="req">*</span></div>
+                                <input pInputText [(ngModel)]="referralSpecialty"
+                                    placeholder="e.g. Orthopedic Surgeon, Radiologist" class="w-full" />
+                            </div>
                         </div>
+
                         <div class="mb-3">
-                            <div class="field-label">Referral Specialty <span class="req">*</span></div>
-                            <input pInputText [(ngModel)]="referralSpecialty"
-                                placeholder="e.g. Orthopedic Surgeon, Radiologist" class="w-full" />
+                            <div class="field-label">Purpose</div>
+                            <input pInputText [(ngModel)]="referralPurpose"
+                                placeholder="e.g. Confirm ligament tear & evaluate joint integrity" class="w-full" />
                         </div>
+
+                        <div class="mb-3">
+                            <div class="field-label">Professional Note</div>
+                            <textarea pTextarea [(ngModel)]="referralProfessionalNote"
+                                placeholder="Clinical observations and specific diagnostic instructions..."
+                                style="width:100%;min-height:60px;padding:.55rem .7rem;border-radius:8px;
+                               border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                               font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                        </div>
+
+                        <!-- Recommendation Section (توصيات) -->
+                        <div class="mb-3 pt-2" style="border-top: 1px dashed var(--p-content-border-color);">
+                            <div class="field-label"
+                                style="font-weight: 600; font-size: 0.95rem; margin-bottom: 0.75rem;">
+                                Recommendation Contact (توصيات)
+                            </div>
+                            <div class="form-grid-2">
+                                <div>
+                                    <div class="field-label">Recommended Doctor / Center Name</div>
+                                    <input pInputText [(ngModel)]="referralRecommendationName"
+                                        placeholder="e.g. Dr. Ahmed Hassan" class="w-full" />
+                                </div>
+                                <div>
+                                    <div class="field-label">Mobile Number</div>
+                                    <input pInputText [(ngModel)]="referralRecommendationMobile"
+                                        placeholder="e.g. +20 100 123 4567" class="w-full" />
+                                </div>
+                            </div>
+                        </div>
+
                         <div>
                             <div class="field-label" style="display:flex;align-items:center;gap:.5rem;">
                                 <input type="checkbox" [(ngModel)]="referralNeedFollowUp" id="referralNeedFollowUp" />
@@ -1870,13 +1910,20 @@
 
         <!-- Section nav — mirrors the intake form's 7 tabs -->
         <div class="dossier-nav">
-            <a (click)="scrollToSection('sec-personal', $event)" style="cursor: pointer;"><i class="pi pi-id-card"></i> ١. البيانات الشخصية</a>
-            <a (click)="scrollToSection('sec-sport', $event)" data-tone="sport" style="cursor: pointer;"><i class="pi pi-bolt"></i> ٢. بيانات الرياضة</a>
-            <a (click)="scrollToSection('sec-injury', $event)" data-tone="injury" style="cursor: pointer;"><i class="pi pi-heart"></i> ٣. بيانات الاصابة</a>
-            <a (click)="scrollToSection('sec-treatment', $event)" data-tone="treatment" style="cursor: pointer;"><i class="pi pi-user-edit"></i> ٤. التاريخ الطبي</a>
-            <a (click)="scrollToSection('sec-injury-history', $event)" data-tone="history" style="cursor: pointer;"><i class="pi pi-history"></i> ٥. التاريخ الإصابي</a>
-            <a (click)="scrollToSection('sec-medical-history', $event)" data-tone="medical" style="cursor: pointer;"><i class="pi pi-file-plus"></i> ٦. التاريخ المرضي</a>
-            <a (click)="scrollToSection('sec-social', $event)" data-tone="social" style="cursor: pointer;"><i class="pi pi-sparkles"></i> ٧. الحالة الاجتماعية</a>
+            <a (click)="scrollToSection('sec-personal', $event)" style="cursor: pointer;"><i class="pi pi-id-card"></i>
+                ١. البيانات الشخصية</a>
+            <a (click)="scrollToSection('sec-sport', $event)" data-tone="sport" style="cursor: pointer;"><i
+                    class="pi pi-bolt"></i> ٢. بيانات الرياضة</a>
+            <a (click)="scrollToSection('sec-injury', $event)" data-tone="injury" style="cursor: pointer;"><i
+                    class="pi pi-heart"></i> ٣. بيانات الاصابة</a>
+            <a (click)="scrollToSection('sec-treatment', $event)" data-tone="treatment" style="cursor: pointer;"><i
+                    class="pi pi-user-edit"></i> ٤. التاريخ الطبي</a>
+            <a (click)="scrollToSection('sec-injury-history', $event)" data-tone="history" style="cursor: pointer;"><i
+                    class="pi pi-history"></i> ٥. التاريخ الإصابي</a>
+            <a (click)="scrollToSection('sec-medical-history', $event)" data-tone="medical" style="cursor: pointer;"><i
+                    class="pi pi-file-plus"></i> ٦. التاريخ المرضي</a>
+            <a (click)="scrollToSection('sec-social', $event)" data-tone="social" style="cursor: pointer;"><i
+                    class="pi pi-sparkles"></i> ٧. الحالة الاجتماعية</a>
         </div>
 
         <div class="dossier-body">

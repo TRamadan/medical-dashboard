@@ -19,12 +19,16 @@ import { RippleModule } from 'primeng/ripple';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { DropdownModule } from 'primeng/dropdown';
 import { TableModule } from 'primeng/table';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
+import { StepperModule } from 'primeng/stepper';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ContactUsComponent } from '../contact-us/contact-us.component';
 import { MuscleSkeletonViewerComponent } from '../appointments/muscle-skeleton-viewer/muscle-skeleton-viewer.component';
 import { PatientFormService } from '../appointments/services/patient-form.service';
 import { ServicesService } from '../add-service/services/services.service';
+import { MeasurementTemplatesService } from "../measurements-config/services/measurement-templates.service";
 import {
     ConsultationSessionService,
     ConsultationSessionDto,
@@ -75,8 +79,11 @@ interface AthleteInfo {
         RippleModule,
         SelectButtonModule,
         DropdownModule,
+        MultiSelectModule,
+        DatePickerModule,
         TableModule,
         DialogModule,
+        StepperModule,
         ContactUsComponent,
         MuscleSkeletonViewerComponent
     ],
@@ -607,14 +614,43 @@ export class ConsultationScreenComponent {
         { label: 'Recharger', value: '3' }
     ];
 
-    // ── Measurement path detail fields ──────────────────────────────────────
-    measurementType: string = 'Force Plate';
-    measurementDate: string = '';
-    readonly measurementTypeOptions = [
-        { label: 'Force Plate', value: 'Force Plate' },
-        { label: 'Isokinetic', value: 'Isokinetic' },
-        { label: 'VBT', value: 'VBT' }
+    // ── Measurement path detail fields — options loaded from /api/MeasurementTemplates ──
+    measurementType: string[] | null = null;
+    measurementSide: string | null = null;
+    measurementDate: Date | null = null;
+
+    readonly measurementSideOptions = [
+        { label: 'Left', value: 'left' },
+        { label: 'Right', value: 'right' },
+        { label: 'Bilateral', value: 'bilateral' }
     ];
+
+    readonly measurementTemplatesLoading = signal(true);
+    readonly measurementTemplatesError = signal<string | null>(null);
+
+    readonly measurementsService = inject(MeasurementTemplatesService);
+
+    private readonly _measurementTemplatesRaw = toSignal(
+        this.measurementsService.getAllTemplates().pipe(
+            map(data => { this.measurementTemplatesLoading.set(false); return data; }),
+            catchError(err => {
+                this.measurementTemplatesLoading.set(false);
+                this.measurementTemplatesError.set(err?.message ?? 'Failed to load measurement templates');
+                return of([]);
+            }),
+            startWith([])
+        ),
+        { initialValue: [] }
+    );
+
+    // ⚠ Template shape assumed to mirror getServices()'s {id, nameEn, nameAr} —
+    // adjust the field names below if MeasurementTemplates returns something else.
+    readonly measurementTypeOptions = computed(() =>
+        (this._measurementTemplatesRaw() ?? []).map((t: any) => ({
+            label: t.nameEn ?? t.nameAr ?? t.name ?? `Template ${t.id}`,
+            value: t.id ?? t.name
+        }))
+    );
 
     // ── Referral path detail fields ─────────────────────────────────────────
     referralTest: string = 'MRI';
@@ -629,6 +665,10 @@ export class ConsultationScreenComponent {
     // are combined into `referralDescription` on submit; `referralSpecialty` is a
     // separate "who" field the current HTML has no input for yet.
     referralSpecialty: string = '';
+    referralPurpose: string = '';
+    referralProfessionalNote: string = '';
+    referralRecommendationName: string = '';
+    referralRecommendationMobile: string = '';
     referralNeedFollowUp: boolean = true;
 
     // ── Decision notes (Step 6) ─────────────────────────────────────────────
@@ -881,6 +921,17 @@ export class ConsultationScreenComponent {
 
     go(step: any): void {
         this.currentStep.set(step);
+    }
+
+    /** Handles clicks on the PrimeNG p-step headers. [linear]="true" already blocks
+     * jumping to a future step visually, but this guard keeps go() the single
+     * source of truth and stops any click past the current step from firing.
+     * Takes `number` (not FlowStep) because the template computes `i + 1` as a
+     * plain number — the cast to FlowStep happens here, in one place. */
+    onStepClick(step: number): void {
+        if (step <= this.currentStep()) {
+            this.go(step as FlowStep);
+        }
     }
 
     addProcedure(): void {
