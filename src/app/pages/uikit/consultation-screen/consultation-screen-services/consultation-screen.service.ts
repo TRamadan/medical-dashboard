@@ -15,13 +15,8 @@ import {
 const API_BASE = environment.apiUrl;
 
 // ── Quick local testing switch ──────────────────────────────────────────────
-// Flip to `false` (or delete this block + the mock branches below) to go back
-// to hitting the real backend. While `true`, every method below serves data
-// from `consultation-session.mock-data.ts` instead of calling `this.http`, so
-// the whole wizard is clickable end-to-end with no backend running.
-// Try appointmentId 501–510 for the different scenarios, and 599 to see the
-// error banner. See consultation-session.mock-data.ts for the full list.
-const USE_MOCK_DATA = true;
+// Set to `false` to hit the real backend integration.
+const USE_MOCK_DATA = false;
 const MOCK_LATENCY_MS = 400;
 
 // ── Shared row shapes ───────────────────────────────────────────────────────

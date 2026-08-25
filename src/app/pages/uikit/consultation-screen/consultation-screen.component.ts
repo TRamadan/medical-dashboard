@@ -329,6 +329,10 @@ export class ConsultationScreenComponent {
         // Step 5 — Decision
         if (session.decision) {
             this.decisionNotes = session.decision.notes ?? '';
+            const pathToSelectMap: Record<number, PathChoice> = { 0: 1, 1: 3, 2: 2 };
+            if (session.decision.decisionType != null) {
+                this.selectedPath.set(pathToSelectMap[session.decision.decisionType] ?? 1);
+            }
         }
 
         // Resume on the right screen. API steps (1–6) line up with the local
@@ -338,9 +342,15 @@ export class ConsultationScreenComponent {
         if (session.isCompleted) {
             this.flowStarted.set(true);
             this.actionDone.set(true);
+            if (!this.selectedPath()) {
+                this.selectedPath.set(1);
+            }
             this.currentStep.set(6);
         } else if (resumeStep >= 1) {
             this.flowStarted.set(true);
+            if (resumeStep === 6 && !this.selectedPath()) {
+                this.selectedPath.set(1);
+            }
             this.currentStep.set(resumeStep);
         }
     }

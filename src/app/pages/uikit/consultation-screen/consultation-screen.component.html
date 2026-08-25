@@ -1200,6 +1200,31 @@
         font-size: 1rem;
     }
 
+    .dossier-dialog:not(.p-dialog-maximized) {
+        width: 94vw !important;
+        max-width: 1040px !important;
+    }
+
+    .dossier-dialog.p-dialog-maximized {
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        top: 0 !important;
+        left: 0 !important;
+    }
+
+    .dossier-dialog.p-dialog-maximized .p-dialog-content {
+        max-height: calc(100vh - 65px) !important;
+        height: calc(100vh - 65px) !important;
+    }
+
+    .dossier-dialog.p-dialog-maximized .dossier-body {
+        max-height: calc(100vh - 250px) !important;
+    }
+
     .dossier-dialog .p-dialog-header-icon {
         color: #F7F5EF !important;
     }
@@ -1270,8 +1295,8 @@
     .dossier-hero {
         position: relative;
         padding: 1.6rem 1.5rem 1.4rem;
-        background: linear-gradient(135deg, var(--ink) 0%, #1E362F 65%, var(--turf-ink) 130%);
-        color: #F7F5EF;
+        background: linear-gradient(135deg, #131337 0%, #1c1c4f 60%, #131337 100%);
+        color: #ffffff;
         overflow: hidden;
     }
 
@@ -1283,7 +1308,7 @@
         width: 220px;
         height: 220px;
         border-radius: 50%;
-        background: radial-gradient(circle, rgba(26, 173, 122, .35), transparent 70%);
+        background: radial-gradient(circle, rgba(80, 226, 180, .35), transparent 70%);
         pointer-events: none;
     }
 
@@ -1300,8 +1325,9 @@
         height: 4.4rem;
         border-radius: 16px;
         flex: none;
-        background: rgba(247, 245, 239, .12);
-        border: 1px solid rgba(247, 245, 239, .25);
+        background: #50e2b4;
+        color: #131337;
+        border: 2px solid rgba(80, 226, 180, .6);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1309,6 +1335,7 @@
         font-weight: 800;
         font-size: 1.5rem;
         letter-spacing: .5px;
+        box-shadow: 0 4px 12px rgba(80, 226, 180, .25);
     }
 
     .dossier-id {
@@ -1321,6 +1348,7 @@
         font-weight: 800;
         font-size: 1.4rem;
         line-height: 1.25;
+        color: #ffffff;
     }
 
     .dossier-sub {
@@ -1329,13 +1357,17 @@
         gap: .35rem 1rem;
         margin-top: .45rem;
         font-size: .82rem;
-        color: #D9E3DE;
+        color: #e0fbf2;
     }
 
     .dossier-sub span {
         display: flex;
         align-items: center;
         gap: .4rem;
+    }
+
+    .dossier-sub i {
+        color: #50e2b4;
     }
 
     .dossier-badges {
@@ -1349,8 +1381,9 @@
         font-family: 'Cairo', sans-serif;
         font-weight: 800;
         font-size: .8rem;
-        background: rgba(247, 245, 239, .14);
-        border: 1px solid rgba(247, 245, 239, .28);
+        background: rgba(80, 226, 180, .15);
+        border: 1px solid rgba(80, 226, 180, .35);
+        color: #50e2b4;
         padding: .4rem .85rem;
         border-radius: 999px;
         white-space: nowrap;
@@ -1821,8 +1854,7 @@
 </style>
 
 <p-dialog [(visible)]="displayPatientInfoDialog" [modal]="true" header="ملف المريض الشامل"
-    [style]="{ width: '94vw', maxWidth: '1040px' }" [draggable]="false" [resizable]="false"
-    [contentStyle]="{ 'max-height': '88vh', overflow: 'hidden' }" styleClass="dossier-dialog" dir="rtl">
+    [draggable]="false" [resizable]="false" [maximizable]="true" styleClass="dossier-dialog" dir="rtl">
 
     <div class="dossier" dir="rtl">
 
