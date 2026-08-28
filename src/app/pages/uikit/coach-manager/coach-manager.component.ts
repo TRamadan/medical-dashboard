@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToolbarModule } from 'primeng/toolbar';
 import { TabsModule } from 'primeng/tabs';
@@ -52,10 +52,20 @@ import { EngineerEvaluationComponent } from './egineer-evaluation/egineer-evalua
 export class CoachManagerComponent implements OnInit {
     currentTab = 'overview';
     selectedPatient: any = null;
-
+    selectedPlanId = signal<number | null>(null);
+    username = signal<string>('');
 
     onPatientSelected(patient: any) {
         this.selectedPatient = patient;
+    }
+
+    onOpenPlanDetails(planId?: number): void {
+        if (planId) {
+            this.selectedPlanId.set(planId);
+        } else {
+            this.selectedPlanId.set(3); // Default fallback plan ID
+        }
+        this.currentTab = 'edit';
     }
     data = {
         sessionsDone: 12,
@@ -70,13 +80,30 @@ export class CoachManagerComponent implements OnInit {
         { id: 'edit', label: 'Engineering Protocol' },
         { id: 'teamPerformance', label: 'Team performance' },
         { id: 'engineerEvaluation', label: 'Engineer Evaluation' },
-
-
     ];
 
     constructor() { }
 
-    ngOnInit() { }
+    ngOnInit() {
+        this.fetchUsername();
+    }
+
+    private fetchUsername(): void {
+        try {
+            const userDataStr = localStorage.getItem('userData');
+            if (userDataStr) {
+                const userData = JSON.parse(userDataStr);
+                const name = userData.nameEn || userData.nameAr || userData.userName || userData.name;
+                if (name) {
+                    this.username.set(name);
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn('Failed to parse userData from localStorage', e);
+        }
+        this.username.set('User');
+    }
 
     onTabChange(tabId: any): void {
         this.currentTab = tabId;

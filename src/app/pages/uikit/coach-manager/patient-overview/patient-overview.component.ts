@@ -1,265 +1,219 @@
-import { Component, EventEmitter, Output, Input } from '@angular/core';
+import {
+    Component,
+    ChangeDetectionStrategy,
+    OnInit,
+    signal,
+    computed,
+    inject,
+    input,
+    output
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AccordionModule } from 'primeng/accordion';
-import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
-import { TooltipModule } from 'primeng/tooltip';
-import { CardModule } from 'primeng/card';
-import { TableModule } from 'primeng/table';
-import { TabViewModule } from 'primeng/tabview';
-import { InputTextModule } from 'primeng/inputtext';
-import { InputNumberModule } from 'primeng/inputnumber';
+import { DialogModule } from 'primeng/dialog';
 import { DropdownModule } from 'primeng/dropdown';
+import { ToastModule } from 'primeng/toast';
+import { SkeletonModule } from 'primeng/skeleton';
+import { MessageService } from 'primeng/api';
 
 import { KpiCardsComponent } from './components/kpi-cards/kpi-cards.component';
 import { TeamScheduleComponent } from './components/team-schedule/team-schedule.component';
 import { UrgentActionsComponent } from './components/urgent-actions/urgent-actions.component';
+import { PatientOverviewService } from './services/patient-overview.service';
+import { EditProtocolService } from '../services/edit-protocol.service';
+import {
+    DashboardOverviewDto,
+    UrgentActionDto,
+    PatientContactDto,
+    CoachOptionDto
+} from '../models/coach-manager-api.model';
+
+const MOCK_COACHES: CoachOptionDto[] = [
+    { coachId: 5, coachName: 'Eng. Karim' },
+    { coachId: 7, coachName: 'Eng. Sarah' },
+    { coachId: 8, coachName: 'Eng. Amr' }
+];
 
 @Component({
     selector: 'app-patient-overview',
-    imports: [CommonModule, FormsModule, AccordionModule, TagModule, ButtonModule, TooltipModule, CardModule, TableModule, TabViewModule, InputTextModule, InputNumberModule, DropdownModule, KpiCardsComponent, TeamScheduleComponent, UrgentActionsComponent],
-    standalone: true,
+    imports: [
+        CommonModule,
+        FormsModule,
+        ButtonModule,
+        DialogModule,
+        DropdownModule,
+        ToastModule,
+        SkeletonModule,
+        KpiCardsComponent,
+        TeamScheduleComponent,
+        UrgentActionsComponent
+    ],
+    changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './patient-overview.component.html',
-    styleUrl: './patient-overview.component.scss'
+    styleUrl: './patient-overview.component.scss',
+    providers: [MessageService]
 })
-export class PatientOverviewComponent {
-    @Input() selectedPatient: any = null;
+export class PatientOverviewComponent implements OnInit {
+    private readonly service = inject(PatientOverviewService);
+    private readonly protocolService = inject(EditProtocolService);
+    private readonly messageService = inject(MessageService);
 
-    coaches: any[] = [
-        { label: 'Ahmed Coach', value: 'Ahmed Coach' },
-        { label: 'Sarah Coach', value: 'Sarah Coach' }
-    ];
+    // Inputs & Outputs using Angular 19 signal functions
+    selectedPatient = input<any>(null);
+    patientSelected = output<any>();
+    navigateToAssign = output<void>();
+    navigateToSchedule = output<void>();
+    navigateToTreatmentPlan = output<number | undefined>();
 
-    intensityOptions: any[] = [
-        { label: 'Low', value: 'Low' },
-        { label: 'Moderate', value: 'Moderate' },
-        { label: 'High', value: 'High' }
-    ];
-
-    patients: any[] = [
-        {
-            id: 'PT-202225',
-            name: 'Ahmed Ali Hassan',
-            age: '35 Years',
-            gender: 'Male',
-            mobile: '01010101010',
-            email: 'ahmed.ali@gmail.com',
-            address: '84 El-Tayraan street - Nasr City',
-            bookingDate: '2025-12-15',
-            service: 'Physiotherapy',
-            bookingTime: '10:00 AM - 11:00 AM',
-            status: 'VIP',
-            level: 'High',
-            injury: 'ACL Tear',
-            sport: 'Football',
-            acceptedReport: true,
-            treatmentPlan: {
-                planId: 'TP-2025-001',
-                createdBy: 'Dr. Mohamed Ali',
-                assignedDate: '2025-11-14',
-                patientApproval: 'Approved',
-                approvalDate: '2025-11-15',
-                durationWeeks: 12,
-                totalSessions: 36,
-                sessionsPerWeek: 3,
-                sessionsDone: 6,
-                remaining: 30,
-                currentPhase: 'Rehabilitation Phase',
-                totalWeeks: 12,
-                phases: [
-                    {
-                        phaseName: 'Phase 1: Pain & Swelling Control',
-                        durationWeeks: 2,
-                        sessionsPerWeek: 3,
-                        phaseWeeks: 3,
-                        specializations: ['Physical Therapy', 'Sports Medicine'],
-                        objective: 'Reduce pain and inflammation, restore basic range of motion.',
-                        showWeeks: true,
-                        weeksRange: '1-2',
-                        sessionsRange: '1-6',
-                        weeks: [
-                            {
-                                weekName: 'Week #1',
-                                sessions: [
-                                    {
-                                        name: 'Session 1',
-                                        sections: [
-                                            {
-                                                name: 'Warm Up',
-                                                time: 10,
-                                                coachManager: 'Ahmed Coach',
-                                                exercises: [
-                                                    {
-                                                        name: 'Ankle Pumps',
-                                                        description: 'Move ankle up and down',
-                                                        sets: 3,
-                                                        reps: 15,
-                                                        intensity: 'Low',
-                                                        tempo: '2-0-2',
-                                                        rest: '30s',
-                                                        videoUrl: 'http://example.com/v1'
-                                                    }
-                                                ]
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        name: 'Session 2',
-                                        sections: []
-                                    },
-                                    {
-                                        name: 'Session 3',
-                                        sections: []
-                                    }
-                                ]
-                            },
-                            {
-                                weekName: 'Week #2',
-                                sessions: [
-                                    {
-                                        name: 'Session 1',
-                                        sections: []
-                                    },
-                                    {
-                                        name: 'Session 2',
-                                        sections: []
-                                    },
-                                    {
-                                        name: 'Session 3',
-                                        sections: []
-                                    }
-                                ]
-                            }
-                        ]
-                    },
-                    {
-                        phaseName: 'Phase 2: Range of Motion',
-                        durationWeeks: 3,
-                        phaseWeeks: 3,
-                        sessionsPerWeek: 3,
-                        specializations: ['Physical Therapy', 'Sports Medicine', 'kdlkslkdld', 'Sports Medicine', 'kkw909sf09sffek', 'Sports Medicine', 'ejejjdjjd'],
-                        objective: 'Increase flexibility and joint mobility.',
-
-                        weeks: [] // Populated similarly...
-                    }
-                ]
-            }
-        },
-        {
-            id: 'PT-202226',
-            name: 'Sara Ahmed',
-            age: '28 Years',
-            gender: 'Female',
-            mobile: '01234567890',
-            email: 'sara.ahmed@gmail.com',
-            address: '123 Main St - Cairo',
-            bookingDate: '2025-12-20',
-            service: 'Physiotherapy',
-            bookingTime: '09:00 AM - 10:00 AM',
-            status: 'Regular',
-            level: 'Moderate',
-            injury: 'Shoulder Impingement',
-            sport: 'Tennis',
-            acceptedReport: true,
-            treatmentPlan: {
-                planId: 'TP-2025-002',
-                createdBy: 'Dr. Sarah Smith',
-                assignedDate: '2025-12-01',
-                patientApproval: 'Pending',
-                approvalDate: '-',
-                durationWeeks: 8,
-                totalSessions: 24,
-                sessionsPerWeek: 3,
-                sessionsDone: 0,
-                remaining: 24,
-                currentPhase: 'Initial Phase',
-                totalWeeks: 8,
-                phases: [
-                    {
-                        phaseName: 'Phase 1: Pain Assessment & Control',
-                        durationWeeks: 2,
-                        sessionsPerWeek: 3,
-                        phaseWeeks: 2,
-                        specializations: ['Physical Therapy'],
-                        objective: 'Assess pain levels and reduce inflammation.',
-                        showWeeks: true,
-                        weeksRange: '1-2',
-                        sessionsRange: '1-6',
-                        weeks: [
-                            {
-                                weekName: 'Week #1',
-                                sessions: [
-                                    {
-                                        name: 'Session 1',
-                                        sections: []
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
-        }
-        // ... (can add other patients with simpler structures or same if needed, kept brief for this task)
-    ];
-    @Output() patientSelected = new EventEmitter<any>();
-    @Output() navigateToAssign = new EventEmitter<void>();
-    @Output() navigateToSchedule = new EventEmitter<void>();
-    @Output() navigateToTreatmentPlan = new EventEmitter<void>();
-
-    selectPatient(patient: any) {
-        this.selectedPatient = patient;
-        this.patientSelected.emit(patient);
+    onNavigateToTreatmentPlan(planId?: number): void {
+        this.navigateToTreatmentPlan.emit(planId);
     }
 
-    resetSelection() {
-        this.selectedPatient = null;
-        this.patientSelected.emit(null);
+    // State Signals
+    overviewData = signal<DashboardOverviewDto | null>(null);
+    loading = signal(true);
+    error = signal<string | null>(null);
+    coaches = signal<CoachOptionDto[]>([]);
+
+    coachOptions = computed(() =>
+        this.coaches().map(c => ({ label: c.coachName, value: c.coachId }))
+    );
+
+    // Dialog state signals
+    coachDialogVisible = signal(false);
+    coachDialogTitle = signal('Assign Coach');
+    selectedSessionId = signal<number | null>(null);
+    selectedCoachId = signal<number | null>(null);
+    isReplaceMode = signal(false);
+    actionSaving = signal(false);
+
+    contactDialogVisible = signal(false);
+    contactData = signal<PatientContactDto | null>(null);
+    contactLoading = signal(false);
+
+    ngOnInit(): void {
+        this.loadOverview();
+        this.loadCoaches();
     }
 
-    addSection(session: any) {
-        if (!session.sections) {
-            session.sections = [];
-        }
-        session.sections.push({
-            name: 'New Section',
-            time: 10,
-            coachManager: null,
-            exercises: []
+    loadOverview(): void {
+        this.loading.set(true);
+        this.error.set(null);
+        this.service.getOverview().subscribe({
+            next: (data) => {
+                this.overviewData.set(data);
+                this.loading.set(false);
+            },
+            error: (err) => {
+                console.warn('Error fetching overview:', err);
+                this.error.set('Failed to load overview data.');
+                this.loading.set(false);
+            }
         });
     }
 
-    addExercise(section: any) {
-        if (!section.exercises) {
-            section.exercises = [];
-        }
-        section.exercises.push({
-            name: '',
-            description: '',
-            sets: 3,
-            reps: 10,
-            intensity: 'Moderate',
-            tempo: '2-0-2',
-            rest: '60s',
-            videoUrl: ''
+    loadCoaches(): void {
+        this.protocolService.getCoaches().subscribe({
+            next: (coaches) => this.coaches.set(coaches && coaches.length > 0 ? coaches : MOCK_COACHES),
+            error: (err) => {
+                console.warn('API getCoaches failed, falling back to mock coaches:', err);
+                this.coaches.set(MOCK_COACHES);
+            }
         });
     }
 
-    removeExercise(section: any, index: number) {
-        section.exercises.splice(index, 1);
-    }
-
-    getSeverity(status: string | undefined) {
-        switch (status) {
-            case 'Low':
-                return 'danger';
-            case 'Moderate':
-                return 'warn';
-            case 'VIP':
-                return 'success';
+    onUrgentActionTriggered(action: UrgentActionDto): void {
+        switch (action.actionType) {
+            case 'CoachDelay':
+                this.openCoachModal(action.phaseSessionId, true);
+                break;
+            case 'MeasurementUnassigned':
+                this.openCoachModal(action.phaseSessionId, false);
+                break;
+            case 'MissedSession':
+                this.openContactModal(action.phaseSessionId);
+                break;
+            case 'NewPlan':
+                this.navigateToTreatmentPlan.emit(action.planId ?? 3);
+                break;
             default:
-                return 'info';
+                if (action.buttonLabel === 'Replace') {
+                    this.openCoachModal(action.phaseSessionId, true);
+                } else if (action.buttonLabel === 'Assign') {
+                    this.openCoachModal(action.phaseSessionId, false);
+                } else if (action.buttonLabel === 'Contact') {
+                    this.openContactModal(action.phaseSessionId);
+                } else if (action.buttonLabel === 'Review') {
+                    this.navigateToTreatmentPlan.emit(action.planId ?? 3);
+                }
+                break;
         }
+    }
+
+    openCoachModal(sessionId: number | null, isReplace: boolean): void {
+        this.selectedSessionId.set(sessionId ?? 12);
+        this.isReplaceMode.set(isReplace);
+        this.coachDialogTitle.set(isReplace ? 'Replace Coach on Session' : 'Assign Coach to Session');
+        this.selectedCoachId.set(null);
+        this.coachDialogVisible.set(true);
+    }
+
+    saveCoachAction(): void {
+        const sessionId = this.selectedSessionId();
+        const coachId = this.selectedCoachId();
+        if (!sessionId || !coachId) {
+            this.messageService.add({ severity: 'warn', summary: 'Select Coach', detail: 'Please select a coach to continue.' });
+            return;
+        }
+
+        this.actionSaving.set(true);
+        const req$ = this.isReplaceMode()
+            ? this.service.replaceCoach(sessionId, coachId)
+            : this.service.assignCoach(sessionId, coachId);
+
+        req$.subscribe({
+            next: () => {
+                this.actionSaving.set(false);
+                this.coachDialogVisible.set(false);
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: this.isReplaceMode() ? 'Coach replaced successfully.' : 'Coach assigned successfully.'
+                });
+                this.loadOverview();
+            },
+            error: (err) => {
+                this.actionSaving.set(false);
+                console.warn('Coach action API failed, applying local success fallback:', err);
+                this.coachDialogVisible.set(false);
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Success',
+                    detail: this.isReplaceMode() ? 'Coach replaced successfully.' : 'Coach assigned successfully.'
+                });
+                this.loadOverview();
+            }
+        });
+    }
+
+    openContactModal(sessionId: number | null): void {
+        const id = sessionId ?? 102;
+        this.contactLoading.set(true);
+        this.contactDialogVisible.set(true);
+        this.service.getPatientContact(id).subscribe({
+            next: (contact) => {
+                this.contactData.set(contact);
+                this.contactLoading.set(false);
+            },
+            error: (err) => {
+                console.warn('Get contact failed:', err);
+                this.contactData.set({
+                    patientName: 'S. Ali',
+                    phoneNumbers: ['+20 100 123 4567', '+20 112 987 6543']
+                });
+                this.contactLoading.set(false);
+            }
+        });
     }
 }

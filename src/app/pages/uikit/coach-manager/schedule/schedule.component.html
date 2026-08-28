@@ -1,61 +1,150 @@
 <div class="schedule-container min-h-screen p-6 overflow-x-auto text-gray-800" dir="rtl">
-    <div class="min-w-[1000px] border border-gray-200 rounded-lg overflow-hidden bg-white shadow-lg">
+
+  @if (loading()) {
+    <!-- ===== LOADING SKELETON ===== -->
+    <div class="min-w-[1000px] border border-gray-200 rounded-lg overflow-hidden bg-white shadow-lg animate-pulse">
+      <!-- Header Row Skeleton -->
+      <div class="flex border-b border-gray-200 bg-gray-50">
+        <div class="w-24 shrink-0 border-l border-gray-200 py-5 flex items-center justify-center">
+          <div class="w-6 h-6 bg-gray-200 rounded-full"></div>
+        </div>
+        <div class="flex-1 grid grid-cols-3">
+          @for (i of [1, 2, 3]; track i) {
+            <div class="flex flex-col items-center justify-center py-5 border-l border-gray-200">
+              <div class="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+              <div class="h-3 bg-gray-200 rounded w-32"></div>
+            </div>
+          }
+        </div>
+      </div>
+      <!-- Body Rows Skeleton -->
+      @for (r of [1, 2, 3, 4]; track r) {
+        <div class="flex border-b border-gray-200">
+          <div class="w-24 shrink-0 border-l border-gray-200 flex items-center justify-center bg-gray-50">
+            <div class="h-5 bg-gray-200 rounded w-12"></div>
+          </div>
+          <div class="flex-1 grid grid-cols-3">
+            @for (c of [1, 2, 3]; track c) {
+              <div class="p-4 border-l border-gray-200">
+                <div class="h-[104px] rounded-lg border border-gray-200 bg-gray-50 p-3.5 flex flex-col justify-between">
+                  <div class="flex justify-between items-start">
+                    <div class="h-4 bg-gray-200 rounded w-16"></div>
+                    <div class="w-4 h-4 bg-gray-200 rounded-full"></div>
+                  </div>
+                  <div class="flex flex-col gap-1.5">
+                    <div class="h-3.5 bg-gray-200 rounded w-28"></div>
+                    <div class="h-3 bg-gray-200 rounded w-20"></div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+  } @else if (error()) {
+    <!-- ===== ERROR STATE ===== -->
+    <div class="bg-red-50 border border-red-200 rounded-2xl p-6 text-center max-w-md mx-auto my-8">
+      <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-3">
+        <i class="pi pi-exclamation-triangle text-xl"></i>
+      </div>
+      <div class="text-sm font-bold text-red-800 mb-1">Unable to Load Team Schedule</div>
+      <p class="text-xs text-red-600 mb-4">{{ error() }}</p>
+      <button 
+        type="button" 
+        (click)="loadSchedule()" 
+        class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none shadow-sm">
+        <i class="pi pi-refresh mr-1 text-xs"></i> Retry
+      </button>
+    </div>
+
+  } @else {
+
+    @if (coaches().length > 0 && timeSlots().length > 0) {
+      <div class="min-w-[1000px] border border-gray-200 rounded-lg overflow-hidden bg-white shadow-lg">
         <!-- Header Row -->
         <div class="flex border-b border-gray-200 bg-gray-50">
-            <!-- Time Header (Far right logically because RTL applies) -->
-            <div class="w-24 shrink-0 border-l border-gray-200 py-5 flex items-center justify-center">
-                <i class="pi pi-clock text-[#475569] text-xl"></i>
-            </div>
-            
-            <!-- Coach Headers -->
-            <div class="flex-1 grid grid-cols-3">
-                <ng-container *ngFor="let coach of coaches; let last = last">
-                    <div class="flex flex-col items-center justify-center py-5" [ngClass]="{'border-l border-gray-200': !last}">
-                        <h3 class="text-[17px] font-bold text-gray-900 m-0">{{ coach.name }}</h3>
-                        <p class="text-[10px] text-gray-500 tracking-[0.2em] uppercase m-0 mt-2">{{ coach.clinic }}</p>
-                    </div>
-                </ng-container>
-            </div>
+          <!-- Time Header -->
+          <div class="w-24 shrink-0 border-l border-gray-200 py-5 flex items-center justify-center">
+            <i class="pi pi-clock text-[#475569] text-xl"></i>
+          </div>
+          
+          <!-- Coach Headers -->
+          <div class="flex-1 grid grid-cols-3">
+            @for (coach of coaches(); track coach.id; let last = $last) {
+              <div class="flex flex-col items-center justify-center py-5" [class.border-l]="!last" [class.border-gray-200]="!last">
+                <h3 class="text-[17px] font-bold text-gray-900 m-0">{{ coach.name }}</h3>
+                <p class="text-[10px] text-gray-500 tracking-[0.2em] uppercase m-0 mt-2">{{ coach.clinic }}</p>
+              </div>
+            }
+          </div>
         </div>
 
         <!-- Body Rows -->
-        <ng-container *ngFor="let slot of timeSlots; let lastRow = last">
-            <div class="flex" [ngClass]="{'border-b border-gray-200': !lastRow}">
-                <!-- Time Column -->
-                <div class="w-24 shrink-0 border-l border-gray-200 flex items-center justify-center bg-gray-50">
-                    <span class="text-lg font-bold text-gray-800">{{ slot.time }}</span>
-                </div>
-
-                <!-- Slots Row -->
-                <div class="flex-1 grid grid-cols-3">
-                    <!-- Coach Columns per Timeslot -->
-                    <ng-container *ngFor="let coach of coaches; let lastCol = last">
-                        <div class="p-4" [ngClass]="{'border-l border-gray-200': !lastCol}">
-                            <!-- The Card -->
-                            <ng-container *ngIf="slot.slots[coach.id] as card">
-                                <div *ngIf="card.status !== 'empty'" class="schedule-card flex flex-col justify-between p-3.5 rounded-lg border transition-all h-[104px]" [ngClass]="getCardClasses(card.status)">
-                                    
-                                    <!-- Top Row: Badge & Icon -->
-                                    <div class="flex justify-between items-start w-full">
-                                        <span class="inline-block px-3 py-0.5 rounded-full text-[11px] font-bold shadow-sm" [ngClass]="getBadgeClasses(card.status)">
-                                            {{ card.badge }}
-                                        </span>
-                                        <div class="mt-0.5">
-                                            <i *ngIf="card.icon" [class]="card.icon + ' ' + getIconClasses(card.status) + ' text-[12px]'"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- Bottom Row: Title and Subtitle -->
-                                    <div class="flex flex-col items-start w-full mt-1.5 leading-[1.2]">
-                                        <span class="font-bold text-[14px] text-gray-900 block">{{ card.title }}</span>
-                                        <span class="text-[11px] text-[#64748B] block mt-1">{{ card.subtitle }}</span>
-                                    </div>
-                                </div>
-                            </ng-container>
-                        </div>
-                    </ng-container>
-                </div>
+        @for (slot of timeSlots(); track slot.time; let lastRow = $last) {
+          <div class="flex" [class.border-b]="!lastRow" [class.border-gray-200]="!lastRow">
+            <!-- Time Column -->
+            <div class="w-24 shrink-0 border-l border-gray-200 flex items-center justify-center bg-gray-50">
+              <span class="text-lg font-bold text-gray-800">{{ slot.time }}</span>
             </div>
-        </ng-container>
-    </div>
+
+            <!-- Slots Row -->
+            <div class="flex-1 grid grid-cols-3">
+              <!-- Coach Columns per Timeslot -->
+              @for (coach of coaches(); track coach.id; let lastCol = $last) {
+                <div class="p-4" [class.border-l]="!lastCol" [class.border-gray-200]="!lastCol">
+                  <!-- The Card -->
+                  @if (slot.slots[coach.id]; as card) {
+                    @if (card.status !== 'empty') {
+                      <div class="schedule-card flex flex-col justify-between p-3.5 rounded-lg border transition-all h-[104px]" [class]="getCardClasses(card.status)">
+                        
+                        <!-- Top Row: Badge & Icon -->
+                        <div class="flex justify-between items-start w-full">
+                          <span class="inline-block px-3 py-0.5 rounded-full text-[11px] font-bold shadow-sm" [class]="getBadgeClasses(card.status)">
+                            {{ card.badge }}
+                          </span>
+                          <div class="mt-0.5">
+                            @if (card.icon) {
+                              <i [class]="card.icon + ' ' + getIconClasses(card.status) + ' text-[12px]'"></i>
+                            }
+                          </div>
+                        </div>
+
+                        <!-- Bottom Row: Title and Subtitle -->
+                        <div class="flex flex-col items-start w-full mt-1.5 leading-[1.2]">
+                          <span class="font-bold text-[14px] text-gray-900 block">{{ card.title }}</span>
+                          <span class="text-[11px] text-[#64748B] block mt-1">{{ card.subtitle }}</span>
+                        </div>
+                      </div>
+                    }
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+    } @else {
+      <!-- ===== EMPTY STATE PLACEHOLDER ===== -->
+      <div class="min-w-[1000px] bg-white rounded-2xl p-12 flex flex-col items-center justify-center text-center shadow-lg border border-gray-200 my-4">
+        <div class="w-16 h-16 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center mb-4">
+          <i class="pi pi-calendar text-2xl"></i>
+        </div>
+        <h3 class="text-sm font-bold text-gray-900 mb-1">No Schedule Available Today</h3>
+        <p class="text-xs text-gray-400 max-w-sm mb-5">
+          There are currently no coach schedule sessions assigned or recorded for today.
+        </p>
+        <button
+          type="button"
+          (click)="loadSchedule()"
+          class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold transition-colors focus:ring-2 focus:ring-gray-300 focus:outline-none">
+          <i class="pi pi-refresh mr-1 text-xs"></i> Refresh Schedule
+        </button>
+      </div>
+    }
+
+  }
+
 </div>

@@ -1,37 +1,30 @@
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TeamScheduleBriefDto } from '../../../models/coach-manager-api.model';
 
 @Component({
   selector: 'app-team-schedule',
-  standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './team-schedule.component.html',
   styleUrl: './team-schedule.component.scss'
 })
 export class TeamScheduleComponent {
-  @Output() navigateToSchedule = new EventEmitter<void>();
+  scheduleData = input<TeamScheduleBriefDto[] | undefined>();
+  navigateToSchedule = output<void>();
 
-  scheduleData = [
-    {
-      name: 'Eng. Karim',
-      initial: 'K',
-      initialBg: '#374151',
-      slot11: { text: 'Late', type: 'late' },
-      slot14: { text: 'Available', type: 'available' }
-    },
-    {
-      name: 'Eng. Sarah',
-      initial: 'S',
-      initialBg: '#1e3a8a',
-      slot11: { text: 'Session', type: 'session' },
-      slot14: { text: 'Session', type: 'session' }
-    },
-    {
-      name: 'Eng. Amr',
-      initial: 'A',
-      initialBg: '#5b21b6',
-      slot11: { text: 'Session', type: 'session' },
-      slot14: { text: 'Training', type: 'training' }
-    }
-  ];
+  getSlotStatusClass(status: string): string {
+    const s = status.toLowerCase();
+    if (s.includes('late')) return 'late';
+    if (s.includes('available')) return 'available';
+    if (s.includes('session')) return 'session';
+    if (s.includes('training')) return 'training';
+    return 'default';
+  }
+
+  getAvatarBg(initial: string): string {
+    const colors = ['#374151', '#1e3a8a', '#5b21b6', '#065f46', '#9a3412'];
+    const charCode = initial ? initial.charCodeAt(0) : 0;
+    return colors[charCode % colors.length];
+  }
 }

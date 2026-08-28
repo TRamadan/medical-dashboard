@@ -9,6 +9,104 @@
     padding: 0.5rem 0;
 }
 
+/* ── Plan Grid ─────────────────────────────────────────────────────────── */
+.plan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.plan-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    background: var(--surface-card);
+    border: 1px solid var(--surface-border);
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    border-left: 4px solid var(--primary-color);
+
+    &:hover {
+        border-color: var(--primary-color);
+        box-shadow: 0 4px 16px color-mix(in srgb, var(--primary-color) 12%, transparent);
+        transform: translateY(-2px);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--primary-color);
+        outline-offset: 2px;
+    }
+
+    .plan-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .plan-card-title-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .plan-card-name {
+        font-weight: 700;
+        font-size: 1rem;
+        color: var(--text-color);
+    }
+
+    .plan-card-patient {
+        font-size: 0.82rem;
+        color: var(--text-color-secondary);
+    }
+
+    .plan-card-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .meta-chip {
+        font-size: 0.75rem;
+        color: var(--text-color-secondary);
+        background: var(--surface-ground);
+        padding: 0.2rem 0.55rem;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .plan-card-footer {
+        border-top: 1px solid var(--surface-border);
+        padding-top: 0.6rem;
+    }
+}
+
+/* ── Phase Objective ────────────────────────────────────────────────────── */
+.phase-objective {
+    display: flex;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--surface-card));
+    border-left: 3px solid var(--primary-color);
+    border-radius: 6px;
+    font-size: 0.875rem;
+}
+
+/* ── Session Title Row ───────────────────────────────────────────────────── */
+.session-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
 /* Info Header */
 .info-header {
     display: flex;

@@ -5,32 +5,36 @@
     <div class="header-row flex flex-wrap justify-between items-center gap-3">
 
       <!-- Tabs -->
-      <div class="tab-group">
+      <div class="tab-group flex items-center gap-2">
         <button
+          type="button"
           id="tab-weekly"
-          [class.active]="activeTab === 'weekly'"
+          [class.active]="activeTab() === 'weekly'"
           (click)="selectTab('weekly')">
           Weekly Evaluation
         </button>
         <button
+          type="button"
           id="tab-cumulative"
-          [class.active]="activeTab === 'cumulative'"
+          [class.active]="activeTab() === 'cumulative'"
           (click)="selectTab('cumulative')">
           Cumulative Perf.
         </button>
         <button
+          type="button"
           id="tab-athlete"
-          [class.active]="activeTab === 'athlete'"
+          [class.active]="activeTab() === 'athlete'"
           (click)="selectTab('athlete')">
           Athlete Voice NPS
         </button>
       </div>
 
       <!-- Week DatePicker (range) — visible only on weekly tab -->
-      @if (activeTab === 'weekly') {
+      @if (activeTab() === 'weekly') {
         <p-datePicker
           id="weekRangePicker"
-          [(ngModel)]="weekDates"
+          [ngModel]="weekDates()"
+          (ngModelChange)="onWeekDatesChange($event)"
           selectionMode="range"
           [readonlyInput]="true"
           [showIcon]="true"
@@ -45,15 +49,15 @@
   </div>
 
   <!-- ===== TAB CONTENT ===== -->
-  @if (activeTab === 'weekly') {
-    <app-weekly-evaluation></app-weekly-evaluation>
+  @if (activeTab() === 'weekly') {
+    <app-weekly-evaluation [weekStart]="weekStartStr()" [weekEnd]="weekEndStr()"></app-weekly-evaluation>
   }
 
-  @if (activeTab === 'cumulative') {
+  @if (activeTab() === 'cumulative') {
     <app-cumulative-preference></app-cumulative-preference>
   }
 
-  @if (activeTab === 'athlete') {
+  @if (activeTab() === 'athlete') {
     <app-athlete-voice></app-athlete-voice>
   }
 

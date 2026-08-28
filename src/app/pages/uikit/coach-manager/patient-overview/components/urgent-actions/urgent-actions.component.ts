@@ -1,82 +1,50 @@
-import { Component, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { UrgentActionDto } from '../../../models/coach-manager-api.model';
 
 @Component({
   selector: 'app-urgent-actions',
-  standalone: true,
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './urgent-actions.component.html',
   styleUrl: './urgent-actions.component.scss'
 })
 export class UrgentActionsComponent {
-  navigateToTreatmentPlan = output<void>();
+  actions = input<UrgentActionDto[] | undefined>();
+  navigateToTreatmentPlan = output<number | undefined>();
+  actionClicked = output<UrgentActionDto>();
 
-  onActionClick(action: any) {
-    if (action.buttonText === 'Review') {
-      this.navigateToTreatmentPlan.emit();
+  onActionClick(action: UrgentActionDto) {
+    if (action.actionType === 'NewPlan' || action.buttonLabel === 'Review') {
+      this.navigateToTreatmentPlan.emit(action.planId ?? 3);
+    }
+    this.actionClicked.emit(action);
+  }
+
+  getActionCardType(action: UrgentActionDto): 'red' | 'yellow' | 'blue' {
+    if (action.badgeColor === 'red' || action.actionType === 'CoachDelay' || action.actionType === 'MissedSession') return 'red';
+    if (action.badgeColor === 'yellow' || action.actionType === 'NewPlan') return 'yellow';
+    return 'blue';
+  }
+
+  getActionIcon(action: UrgentActionDto): string {
+    switch (action.actionType) {
+      case 'CoachDelay': return 'pi-bell-slash';
+      case 'NewPlan': return 'pi-clipboard';
+      case 'MeasurementUnassigned': return 'pi-id-card';
+      case 'MissedSession': return 'pi-exclamation-triangle';
+      default: return 'pi-bolt';
     }
   }
 
-  actions = [
-    {
-      type: 'red',
-      icon: 'pi-bell-slash',
-      title: 'Eng. Karim delayed 20 minutes',
-      subtitle: 'For session: Muscle measurements - 11:00 AM',
-      badgeText: 'Urgent',
-      badgeType: 'red',
-      buttonText: 'Replace',
-      buttonType: 'dark'
-    },
-    {
-      type: 'yellow',
-      icon: 'pi-clipboard',
-      title: 'New Rehab Plan - R. Mostafa',
-      subtitle: 'Pending Medical Protocol Review',
-      badgeText: 'Pending',
-      badgeType: 'yellow',
-      buttonText: 'Review',
-      buttonType: 'blue'
-    },
-    {
-      type: 'blue',
-      icon: 'pi-id-card',
-      title: 'Measurements Session - K. Mahmoud',
-      subtitle: 'Measurement Engineer not assigned yet',
-      badgeText: 'Measur.',
-      badgeType: 'dark-blue',
-      buttonText: 'Assign',
-      buttonType: 'blue'
-    },
-    {
-      type: 'red',
-      icon: 'pi-exclamation-triangle',
-      title: 'Missed Session - S. Ali',
-      subtitle: 'Patient did not attend 10:00 AM session',
-      badgeText: 'Missed',
-      badgeType: 'red',
-      buttonText: 'Contact',
-      buttonType: 'dark'
-    },
-    {
-      type: 'yellow',
-      icon: 'pi-file-edit',
-      title: 'Update Progress - M. Hassan',
-      subtitle: 'Weekly progress report is due today',
-      badgeText: 'Report',
-      badgeType: 'yellow',
-      buttonText: 'Write',
-      buttonType: 'blue'
-    },
-    {
-      type: 'blue',
-      icon: 'pi-calendar-plus',
-      title: 'Reschedule Request - T. Omar',
-      subtitle: 'Patient requested to change tomorrow\'s session',
-      badgeText: 'Schedule',
-      badgeType: 'dark-blue',
-      buttonText: 'Manage',
-      buttonType: 'blue'
-    }
-  ];
+  getBadgeType(action: UrgentActionDto): 'red' | 'yellow' | 'dark-blue' {
+    if (action.badgeColor === 'red' || action.actionType === 'CoachDelay' || action.actionType === 'MissedSession') return 'red';
+    if (action.badgeColor === 'yellow' || action.actionType === 'NewPlan') return 'yellow';
+    return 'dark-blue';
+  }
+
+  getButtonType(action: UrgentActionDto): 'dark' | 'blue' {
+    if (action.buttonLabel === 'Replace' || action.buttonLabel === 'Contact') return 'dark';
+    return 'blue';
+  }
 }

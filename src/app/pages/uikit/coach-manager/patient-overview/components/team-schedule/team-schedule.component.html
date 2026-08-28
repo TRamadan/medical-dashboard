@@ -14,26 +14,40 @@
                 </tr>
             </thead>
             <tbody>
-                @for (row of scheduleData; track row.name) {
-                    <tr>
-                        <td>
-                            <div class="team-schedule__user">
-                                <div class="team-schedule__avatar" [style.background-color]="row.initialBg">
-                                    {{ row.initial }}
+                @if (scheduleData() && scheduleData()!.length > 0) {
+                    @for (row of scheduleData(); track row.coachId) {
+                        <tr>
+                            <td>
+                                <div class="team-schedule__user">
+                                    <div class="team-schedule__avatar" [style.background-color]="getAvatarBg(row.avatarInitial)">
+                                        {{ row.avatarInitial || row.coachName.charAt(0) }}
+                                    </div>
+                                    <span class="team-schedule__name">{{ row.coachName }}</span>
                                 </div>
-                                <span class="team-schedule__name">{{ row.name }}</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="team-schedule__badge team-schedule__badge--{{ row.slot11.type }}">
-                                {{ row.slot11.text }}
-                            </div>
-                        </td>
-                        <td>
-                            <div class="team-schedule__badge team-schedule__badge--{{ row.slot14.type }}">
-                                {{ row.slot14.text }}
-                            </div>
-                        </td>
+                            </td>
+                            <td>
+                                @if (row.slots && row.slots[0]) {
+                                    <div class="team-schedule__badge team-schedule__badge--{{ getSlotStatusClass(row.slots[0].status) }}">
+                                        {{ row.slots[0].status }}
+                                    </div>
+                                } @else {
+                                    <span class="text-xs text-color-secondary">-</span>
+                                }
+                            </td>
+                            <td>
+                                @if (row.slots && row.slots[1]) {
+                                    <div class="team-schedule__badge team-schedule__badge--{{ getSlotStatusClass(row.slots[1].status) }}">
+                                        {{ row.slots[1].status }}
+                                    </div>
+                                } @else {
+                                    <span class="text-xs text-color-secondary">-</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                } @else {
+                    <tr>
+                        <td colspan="3" class="text-center py-4 text-color-secondary">No team schedule available for today.</td>
                     </tr>
                 }
             </tbody>

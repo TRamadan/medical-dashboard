@@ -1,5 +1,5 @@
 <div class="kpi-cards" dir="ltr">
-    <!-- Card 1 -->
+    <!-- Card 1: Open Issues -->
     <div class="kpi-card">
         <div class="kpi-card__header">
             <div class="kpi-card__badge kpi-card__badge--red">Live</div>
@@ -8,15 +8,19 @@
             </div>
         </div>
         <div class="kpi-card__body">
-            <div class="kpi-card__number">1</div>
-            <div class="kpi-card__title">Open Issue</div>
+            <div class="kpi-card__number">{{ data()?.openIssues ?? 0 }}</div>
+            <div class="kpi-card__title">Open Issues</div>
         </div>
         <div class="kpi-card__footer">
-            <span class="kpi-card__text--red">Coach Delay - Eng. Karim</span>
+            @if (data()?.openIssues && data()!.openIssues > 0) {
+                <span class="kpi-card__text--red">Overdue / Delayed Session</span>
+            } @else {
+                <span class="text-xs text-color-secondary">All sessions on schedule</span>
+            }
         </div>
     </div>
 
-    <!-- Card 2 -->
+    <!-- Card 2: Plans Pending Assignment -->
     <div class="kpi-card">
         <div class="kpi-card__header kpi-card__header--right-only">
             <div class="kpi-card__icon kpi-card__icon--yellow">
@@ -24,27 +28,27 @@
             </div>
         </div>
         <div class="kpi-card__body">
-            <div class="kpi-card__number">2</div>
+            <div class="kpi-card__number">{{ data()?.plansPendingAssignment ?? 0 }}</div>
             <div class="kpi-card__title">Plans Pending Assignment</div>
         </div>
     </div>
 
-    <!-- Card 3 -->
+    <!-- Card 3: Team Sessions Today -->
     <div class="kpi-card">
         <div class="kpi-card__header">
-            <div class="kpi-card__update-text">Updated: Now</div>
+            <div class="kpi-card__update-text">Updated: Today</div>
             <div class="kpi-card__icon kpi-card__icon--blue">
                 <i class="pi pi-calendar"></i>
             </div>
         </div>
         <div class="kpi-card__body">
-            <div class="kpi-card__number">12</div>
+            <div class="kpi-card__number">{{ data()?.teamSessionsToday ?? 0 }}</div>
             <div class="kpi-card__title">Team Sessions Today</div>
         </div>
         <div class="kpi-card__footer">
-            <span class="kpi-card__text--green">8 Finished</span>
+            <span class="kpi-card__text--green">{{ data()?.sessionsFinished ?? 0 }} Finished</span>
             <span class="kpi-card__dot">&bull;</span>
-            <span class="kpi-card__text--blue">4 Upcoming</span>
+            <span class="kpi-card__text--blue">{{ data()?.sessionsUpcoming ?? 0 }} Upcoming</span>
         </div>
     </div>
 </div>

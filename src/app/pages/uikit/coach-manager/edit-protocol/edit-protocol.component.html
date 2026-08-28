@@ -1,259 +1,673 @@
+<p-toast />
+
 <div class="edit-protocol-container">
 
-    <!-- Info Header -->
-    <div class="info-header mb-4">
+    <!-- ══════════════════════════════════════════════════════════════════════
+         PLAN LIST VIEW
+    ══════════════════════════════════════════════════════════════════════ -->
+    @if (view() === 'plans') {
+
+    <!-- Header -->
+    <div class="info-header mb-2">
         <div class="info-content">
-            <h5 class="info-title">Treatment Plan Protocol</h5>
-            <p class="info-desc">Team leader only can add new exercise and re-order the exercises not delete any
-                exercise.</p>
-        </div>
-        <div class="patient-stats flex gap-4">
-            <div class="stat-item flex flex-column align-items-center">
-                <span class="text-sm text-color-secondary">Athlete</span>
-                <span class="font-bold text-lg">{{ patientName() }}</span>
-            </div>
-            <div class="stat-item flex flex-column align-items-center">
-                <span class="text-sm text-color-secondary">Total Sessions</span>
-                <span class="font-bold text-lg text-primary">{{ totalSessions() }}</span>
-            </div>
-            <div class="stat-item flex flex-column align-items-center">
-                <span class="text-sm text-color-secondary">Total Weeks</span>
-                <span class="font-bold text-lg text-primary">{{ totalWeeks() }}</span>
-            </div>
+            <h5 class="info-title">Engineering Protocol</h5>
+            <p class="info-desc">Select a patient plan to view and manage its protocol, exercises, and station
+                assignments.</p>
         </div>
     </div>
 
+    <!-- Loading skeleton -->
+    @if (plansLoading()) {
+    <div class="flex flex-column gap-3">
+        @for (_ of [1,2,3]; track $index) {
+        <p-skeleton height="7rem" styleClass="border-round-lg" />
+        }
+    </div>
+    }
 
+    <!-- Error -->
+    @if (plansError()) {
+    <div class="flex flex-column align-items-center gap-3 py-6">
+        <i class="pi pi-exclamation-triangle text-4xl text-orange-400"></i>
+        <p class="text-color-secondary m-0">{{ plansError() }}</p>
+        <p-button label="Retry" icon="pi pi-refresh" [outlined]="true" (click)="loadPlans()" />
+    </div>
+    }
+
+    <!-- Plan Cards -->
+    @if (!plansLoading() && !plansError()) {
+    @if (plans().length === 0) {
+    <div class="flex flex-column align-items-center gap-2 py-8">
+        <i class="pi pi-inbox text-5xl text-color-secondary"></i>
+        <p class="text-color-secondary m-0 font-semibold">No plans pending assignment</p>
+    </div>
+    } @else {
+    <div class="plan-grid">
+        @for (plan of plans(); track trackByPlanId($index, plan)) {
+        <button class="plan-card" (click)="selectPlan(plan)" type="button"
+            [attr.aria-label]="'Open protocol for ' + plan.planName">
+            <div class="plan-card-header">
+                <div class="plan-card-title-group">
+                    <span class="plan-card-name">{{ plan.planName }}</span>
+                    <span class="plan-card-patient">
+                        <i class="pi pi-user mr-1"></i>{{ plan.patientName }}
+                    </span>
+                </div>
+                @if (plan.unassignedSessions > 0) {
+                <p-tag [value]="plan.unassignedSessions + ' unassigned'" severity="warn" />
+                }
+            </div>
+            <div class="plan-card-meta">
+                <span class="meta-chip"><i class="pi pi-box mr-1"></i>{{ plan.injuryCondition }}</span>
+                <span class="meta-chip"><i class="pi pi-calendar mr-1"></i>{{ plan.totalSessions }} sessions</span>
+                <span class="meta-chip"><i class="pi pi-clock mr-1"></i>{{ plan.totalWeeks }} weeks</span>
+            </div>
+            <div class="plan-card-footer">
+                <span class="text-sm text-primary font-semibold">Open Protocol <i
+                        class="pi pi-arrow-right ml-1 text-xs"></i></span>
+            </div>
+        </button>
+        }
+    </div>
+    }
+    }
+
+    }
+
+    <!-- ══════════════════════════════════════════════════════════════════════
+         PROTOCOL DETAIL VIEW
+    ══════════════════════════════════════════════════════════════════════ -->
+    @if (view() === 'protocol') {
+
+    <!-- Back + Header -->
+    <div class="info-header mb-2">
+        <div class="info-content">
+            @if (protocol(); as proto) {
+            <div class="flex align-items-center gap-2 mb-1">
+                <p-button icon="pi pi-arrow-left" [text]="true" size="small" (click)="backToPlans()"
+                    pTooltip="Back to plans" aria-label="Back to plan list" />
+                <h5 class="info-title m-0">{{ proto.planName }}</h5>
+            </div>
+            <p class="info-desc m-0"><i class="pi pi-user mr-1"></i>{{ proto.patientName }}</p>
+            } @else {
+            <p-skeleton width="16rem" height="1.2rem" />
+            }
+        </div>
+        @if (protocol(); as proto) {
+        <div class="patient-stats flex gap-4">
+            <div class="stat-item flex flex-column align-items-center">
+                <span class="text-sm text-color-secondary">Total Sessions</span>
+                <span class="font-bold text-lg text-primary">{{ proto.totalSessions }}</span>
+            </div>
+            <div class="stat-item flex flex-column align-items-center">
+                <span class="text-sm text-color-secondary">Total Weeks</span>
+                <span class="font-bold text-lg text-primary">{{ proto.totalWeeks }}</span>
+            </div>
+            <div class="stat-item flex flex-column align-items-center">
+                <span class="text-sm text-color-secondary">Phases</span>
+                <span class="font-bold text-lg text-primary">{{ proto.phases.length }}</span>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Protocol Loading skeleton -->
+    @if (protocolLoading()) {
+    <div class="flex flex-column gap-3">
+        @for (_ of [1,2]; track $index) {
+        <p-skeleton height="14rem" styleClass="border-round-lg" />
+        }
+    </div>
+    }
+
+    <!-- Protocol Error -->
+    @if (protocolError()) {
+    <div class="flex flex-column align-items-center gap-3 py-6">
+        <i class="pi pi-exclamation-triangle text-4xl text-orange-400"></i>
+        <p class="text-color-secondary m-0">{{ protocolError() }}</p>
+        <p-button label="Retry" icon="pi pi-refresh" [outlined]="true"
+            (click)="retryProtocol()" />
+    </div>
+    }
 
     <!-- Phases Accordion -->
+    @if (!protocolLoading() && !protocolError() && protocol(); as proto) {
     <p-accordion [value]="0">
-        @for (phase of phases; track phase.phaseName; let i = $index) {
-        <p-accordion-panel [value]="i">
+        @for (phase of proto.phases; track trackByPhaseId($index, phase); let phaseIdx = $index) {
+        <p-accordion-panel [value]="phaseIdx">
             <p-accordion-header>
-                <div class="flex align-items-center justify-content-between w-full pr-3">
+                <div class="flex align-items-center justify-content-between w-full pr-3 gap-2">
                     <span class="phase-header-text">{{ phase.phaseName }}</span>
-                    <span class="text-color-secondary text-sm font-semibold py-1 px-2 border-round surface-ground"><i
-                            class="pi pi-calendar mr-1"></i>{{ getPhaseSessionCount(phase) }} sessions</span>
+                    <div class="flex align-items-center gap-2">
+                        <span
+                            class="text-color-secondary text-sm font-semibold py-1 px-2 border-round surface-ground">
+                            <i class="pi pi-calendar mr-1"></i>{{ phase.sessionCount }} sessions
+                        </span>
+                        <span
+                            class="text-color-secondary text-sm font-semibold py-1 px-2 border-round surface-ground">
+                            <i class="pi pi-clock mr-1"></i>{{ phase.weeks }} wks / {{ phase.sessionsPerWeek }}×wk
+                        </span>
+                    </div>
                 </div>
             </p-accordion-header>
             <p-accordion-content>
                 <div class="phase-content">
-                    @for (week of phase.weeks; track week.weekName) {
-                    <div class="week-block">
 
-                        @for (session of week.sessions; track session.name) {
-                        <div class="session-block">
-                            <div class="session-title">{{ session.name }}</div>
+                    <!-- Phase Objective -->
+                    @if (phase.phaseObjective) {
+                    <div class="phase-objective">
+                        <i class="pi pi-target mr-2 text-primary"></i>
+                        <span class="text-sm text-color-secondary">{{ phase.phaseObjective }}</span>
+                    </div>
+                    }
 
-                            @for (section of session.sections; track section; let sectionIdx = $index) {
-                            <div class="section-card">
+                    <!-- Sessions -->
+                    @for (session of phase.sessions; track trackBySessionId($index, session)) {
+                    <div class="session-block">
+                        <div class="session-title-row">
+                            <span class="session-title">Session {{ session.sessionNumber }}
+                                @if (session.isMeasurementSession) {
+                                <p-tag value="Measurement" severity="info" styleClass="ml-2 text-xs" />
+                                }
+                            </span>
+                            <div class="flex align-items-center gap-2">
+                                <span class="text-xs text-color-secondary">{{ session.sessionType }}</span>
+                                @if (session.coachName) {
+                                <span class="text-xs"><i class="pi pi-user mr-1"></i>{{ session.coachName }}</span>
+                                }
+                                <p-tag [value]="session.appointmentStatus"
+                                    [severity]="statusSeverity(session.appointmentStatus)" styleClass="text-xs" />
+                            </div>
+                        </div>
 
-                                <!-- Section Header -->
-                                <div class="section-header">
-                                    <div class="section-header-left">
-                                        <div class="section-badge">{{ sectionIdx + 1 }}</div>
-                                        <span class="section-name">{{ section.name }}</span>
-                                    </div>
+                        <!-- Sections -->
+                        @for (section of session.sections; track trackBySectionId($index, section); let sectionIdx = $index) {
+                        <div class="section-card">
 
+                            <!-- Section Header -->
+                            <div class="section-header">
+                                <div class="section-header-left">
+                                    <div class="section-badge">{{ sectionIdx + 1 }}</div>
+                                    <span class="section-name">{{ section.sectionName }}</span>
                                 </div>
+                                <div class="section-meta">
+                                    <span class="meta-item"><i class="pi pi-clock"></i>{{ section.durationMinutes }}
+                                        min</span>
+                                </div>
+                            </div>
 
-                                <!-- Exercises Cards Layout -->
-                                <div class="flex flex-col gap-4 mt-4">
-                                    @for (ex of section.exercises; track ex; let exIndex = $index) {
-                                    <p class="p-0 m-0 fw-bold">
-                                        Exercise # {{exIndex + 1}}
-                                    </p>
-                                    <div
-                                        class="border border-gray-200 rounded-lg p-4 bg-gray-50 flex flex-col gap-4 relative shadow-sm hover:shadow-md transition-shadow">
+                            <!-- Exercises -->
+                            <div class="flex flex-col gap-4 mt-2">
+                                @for (ex of section.exercises; track trackByExerciseId($index, ex); let exIdx = $index) {
 
+                                 @if (ex.sessionExerciseId <= 0) {
+                                 @let draft = getDraft(ex.sessionExerciseId);
+                                 <!-- ── Inline Draft Card (new exercise being created) ── -->
+                                 <div>
+                                     <p class="p-0 m-0 mb-1 text-sm font-semibold text-primary">New Exercise</p>
+                                     <div class="border-2 border-primary border-dashed rounded-lg p-4 bg-blue-50 flex flex-col gap-4 relative shadow-md transition-shadow">
+
+                                         <!-- Toggle Selection -->
+                                         <div class="flex items-center justify-between pr-2">
+                                             <div class="flex items-center bg-gray-200 p-1.5 rounded-full w-full max-w-[240px] relative font-semibold" dir="ltr">
+                                                 <div class="absolute left-1.5 top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white rounded-full shadow transition-transform duration-300 ease-in-out pointer-events-none"
+                                                     [class.translate-x-full]="draft.sets.length === 0"
+                                                     [class.translate-x-0]="draft.sets.length > 0">
+                                                 </div>
+                                                 <button
+                                                     class="flex-1 relative z-10 py-1.5 text-center text-xs rounded-full transition-colors duration-300 focus:outline-none"
+                                                     (click)="setSetsEmpty(ex.sessionExerciseId, false)"
+                                                     [class.text-gray-900]="draft.sets.length > 0"
+                                                     [class.font-bold]="draft.sets.length > 0"
+                                                     [class.text-gray-500]="draft.sets.length === 0"
+                                                     aria-label="Switch to Exercise mode">Exercise</button>
+                                                 <button
+                                                     class="flex-1 relative z-10 py-1.5 text-center text-xs rounded-full transition-colors duration-300 focus:outline-none"
+                                                     (click)="setSetsEmpty(ex.sessionExerciseId, true)"
+                                                     [class.text-gray-900]="draft.sets.length === 0"
+                                                     [class.font-bold]="draft.sets.length === 0"
+                                                     [class.text-gray-500]="draft.sets.length > 0"
+                                                     aria-label="Switch to Manual mode">Manual</button>
+                                             </div>
+                                         </div>
+
+                                         <!-- Exercise Name + Equipment -->
+                                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                             <div class="flex flex-col gap-1">
+                                                 <label class="text-sm font-semibold text-gray-700" for="draft-ex-name-{{ex.sessionExerciseId}}">Exercise Name <span class="text-red-500">*</span></label>
+                                                 <input id="draft-ex-name-{{ex.sessionExerciseId}}" pInputText [value]="draft.exerciseName"
+                                                     (input)="setExerciseName(ex.sessionExerciseId, $any($event.target).value)"
+                                                     class="w-full" placeholder="e.g. Glute Bridges" aria-required="true" />
+                                             </div>
+                                             <div class="flex flex-col gap-1">
+                                                 <label class="text-sm font-semibold text-gray-700" for="draft-ex-equip-{{ex.sessionExerciseId}}">Equipment</label>
+                                                 <input id="draft-ex-equip-{{ex.sessionExerciseId}}" pInputText [value]="draft.equipment || ''"
+                                                     (input)="setEquipment(ex.sessionExerciseId, $any($event.target).value)"
+                                                     class="w-full" placeholder="e.g. Resistance Band" />
+                                             </div>
+                                         </div>
+
+                                         <!-- Description -->
+                                         <div class="flex flex-col gap-1">
+                                             <label class="text-sm font-semibold text-gray-700" for="draft-ex-desc-{{ex.sessionExerciseId}}">Description</label>
+                                             <textarea id="draft-ex-desc-{{ex.sessionExerciseId}}" pInputTextarea [value]="draft.description"
+                                                 (input)="setExerciseDescription(ex.sessionExerciseId, $any($event.target).value)"
+                                                 rows="3" class="w-full" placeholder="Coaching cues and instructions..."></textarea>
+                                         </div>
+
+                                         <!-- Video URL (Manual mode) -->
+                                         @if (draft.sets.length === 0) {
+                                         <div class="flex flex-col gap-1">
+                                             <label class="text-sm font-semibold text-gray-700" for="draft-ex-video-{{ex.sessionExerciseId}}">Video URL</label>
+                                             <input id="draft-ex-video-{{ex.sessionExerciseId}}" pInputText [value]="draft.videoUrl"
+                                                 (input)="setExerciseVideoUrl(ex.sessionExerciseId, $any($event.target).value)"
+                                                 class="w-full" placeholder="https://..." />
+                                         </div>
+                                         }
+
+                                         <!-- Exercise mode: Contraction + Intensity + Sets -->
+                                         @if (draft.sets.length > 0) {
+
+                                         <!-- Contraction Type -->
+                                         <div class="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                             <div class="flex justify-between items-center">
+                                                 <span class="text-sm font-semibold text-gray-700">Contraction type</span>
+                                                 <span class="bg-[#134e4a] text-[#2dd4a0] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP T</span>
+                                             </div>
+                                             <div class="flex flex-wrap gap-2" role="group" aria-label="Contraction type">
+                                                 @for (type of ['Dynamic', 'Isokinetic', 'Isometric', 'Eccentric', 'Concentric']; track type) {
+                                                 <button
+                                                     class="px-3 py-1.5 text-xs font-semibold rounded-full transition-colors border"
+                                                     (click)="setContractionType(ex.sessionExerciseId, type)"
+                                                     [attr.aria-pressed]="(draft.contractionType === type || (type === 'Dynamic' && !draft.contractionType))"
+                                                     [class]="(draft.contractionType === type || (type === 'Dynamic' && !draft.contractionType)) ? 'bg-[#451a03] text-[#f0a940] border-[#f0a940]' : 'bg-gray-100 text-gray-600 border-gray-100 hover:bg-gray-200'">
+                                                     {{ type }}
+                                                 </button>
+                                                 }
+                                             </div>
+                                         </div>
+
+                                         <!-- Intensity Method -->
+                                         <div class="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                             <div class="flex justify-between items-center">
+                                                 <span class="text-sm font-semibold text-gray-700">Intensity method</span>
+                                                 <span class="bg-[#451a03] text-[#f0a940] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP I</span>
+                                             </div>
+                                             <div class="flex flex-wrap gap-2" role="group" aria-label="Intensity method">
+                                                 @for (method of ['HR Zone', 'RIR', 'RPE 1-10', '1RM %', 'kg/lb', 'Bodyweight']; track method) {
+                                                 <button
+                                                     class="px-3 py-1.5 text-xs font-semibold rounded-full transition-colors border"
+                                                     (click)="setIntensityMethod(ex.sessionExerciseId, method)"
+                                                     [attr.aria-pressed]="(draft.intensityMethod === method || (method === 'RPE 1-10' && !draft.intensityMethod))"
+                                                     [class]="(draft.intensityMethod === method || (method === 'RPE 1-10' && !draft.intensityMethod)) ? 'bg-[#134e4a] text-[#2dd4a0] border-[#2dd4a0]' : 'bg-gray-100 text-gray-600 border-gray-100 hover:bg-gray-200'">
+                                                     {{ method }}
+                                                 </button>
+                                                 }
+                                             </div>
+                                         </div>
+
+                                         <!-- Sets Table -->
+                                         <div class="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                             <div class="flex justify-between items-center mb-1">
+                                                 <div class="flex items-center gap-2">
+                                                     <span class="text-sm font-semibold text-gray-700">Sets:</span>
+                                                     <input pInputText [value]="draft.sets.length" [disabled]="true" type="number"
+                                                         class="w-16 text-center text-sm h-8 p-1" aria-label="Set count" />
+                                                     <p-button label="Add Set" icon="pi pi-plus" [text]="true" size="small" (click)="addSet(ex.sessionExerciseId)" />
+                                                 </div>
+                                                 <span class="bg-[#134e4a] text-[#2dd4a0] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP V</span>
+                                             </div>
+                                             <!-- Header -->
+                                             <div class="grid grid-cols-[2rem_1fr_1fr_1fr_1fr_2rem] gap-2 px-1 text-center">
+                                                 <div class="text-xs font-bold text-gray-400 uppercase">Set #</div>
+                                                 <div class="text-xs font-bold text-gray-400 uppercase">Reps</div>
+                                                 <div class="text-xs font-bold text-gray-400 uppercase">Intensity</div>
+                                                 <div class="text-xs font-bold text-gray-400 uppercase">Tempo</div>
+                                                 <div class="text-xs font-bold text-gray-400 uppercase">Rest (sec)</div>
+                                                 <div></div>
+                                             </div>
+                                             <!-- Rows -->
+                                             <div class="flex flex-col gap-2 overflow-y-auto max-h-[300px]">
+                                                 @for (set of draft.sets; track trackByIndex($index); let si = $index) {
+                                                 <div class="grid grid-cols-[2rem_1fr_1fr_1fr_1fr_2rem] gap-2 items-center px-1">
+                                                     <div class="flex justify-center">
+                                                         <div class="flex items-center justify-center w-7 h-7 rounded bg-gray-100 border border-gray-300">
+                                                             <span class="text-xs text-blue-600 font-bold">{{ set.setNumber }}</span>
+                                                         </div>
+                                                     </div>
+                                                     <p-inputNumber [ngModel]="set.reps"
+                                                         (onInput)="setSetReps(ex.sessionExerciseId, si, $any($event).value ?? 0)"
+                                                         [min]="1" [max]="999" styleClass="w-full h-9"
+                                                         inputStyleClass="text-center text-sm h-9"
+                                                         [attr.aria-label]="'Reps for set ' + set.setNumber" />
+                                                     <input pInputText [value]="set.intensity"
+                                                         (input)="setSetIntensity(ex.sessionExerciseId, si, $any($event.target).value)"
+                                                         class="w-full text-center text-sm h-9" placeholder="Medium"
+                                                         [attr.aria-label]="'Intensity for set ' + set.setNumber" />
+                                                     <input pInputText [value]="set.tempo"
+                                                         (input)="setSetTempo(ex.sessionExerciseId, si, $any($event.target).value)"
+                                                         class="w-full text-center text-sm h-9" placeholder="2-0-2"
+                                                         [attr.aria-label]="'Tempo for set ' + set.setNumber" />
+                                                     <p-inputNumber [ngModel]="set.restSeconds"
+                                                         (onInput)="setSetRest(ex.sessionExerciseId, si, $any($event).value ?? 0)"
+                                                         [min]="0" [max]="600" styleClass="w-full h-9"
+                                                         inputStyleClass="text-center text-sm h-9"
+                                                         [attr.aria-label]="'Rest for set ' + set.setNumber" />
+                                                     <div class="flex justify-center">
+                                                         @if (draft.sets.length > 1) {
+                                                         <button pButton icon="pi pi-times"
+                                                             class="p-button-text p-button-danger p-button-rounded p-button-sm w-7 h-7 p-0"
+                                                             (click)="removeSet(ex.sessionExerciseId, si)"
+                                                             [attr.aria-label]="'Remove set ' + set.setNumber"></button>
+                                                         }
+                                                     </div>
+                                                 </div>
+                                                 }
+                                             </div>
+                                         </div>
+
+                                         } <!-- end exercise mode -->
+
+                                         <!-- Progression Rule -->
+                                         <div class="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                             <div class="flex justify-between items-center">
+                                                 <span class="text-sm font-semibold text-gray-700">Progression Rule</span>
+                                                 <span class="bg-[#451a03] text-[#f0a940] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP P</span>
+                                             </div>
+                                             <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-1">
+                                                 <div class="flex flex-col gap-1">
+                                                     <label class="text-xs font-semibold text-gray-500 uppercase" for="draft-prog-title-{{ex.sessionExerciseId}}">Progression title</label>
+                                                     <input id="draft-prog-title-{{ex.sessionExerciseId}}" pInputText [value]="draft.progressionRule?.title || ''"
+                                                         (input)="setProgressionTitle(ex.sessionExerciseId, $any($event.target).value)"
+                                                         class="w-full text-sm" placeholder="e.g. Volume Progression" />
+                                                 </div>
+                                                 <div class="flex flex-col gap-1">
+                                                     <label class="text-xs font-semibold text-gray-500 uppercase" for="draft-prog-inc-{{ex.sessionExerciseId}}">Increment amount</label>
+                                                     <input id="draft-prog-inc-{{ex.sessionExerciseId}}" pInputText [value]="draft.progressionRule?.incrementAmount || ''"
+                                                         (input)="setProgressionIncrement(ex.sessionExerciseId, $any($event.target).value)"
+                                                         class="w-full text-sm" placeholder="e.g. 2.5" />
+                                                 </div>
+                                                 <div class="flex flex-col gap-1">
+                                                     <label class="text-xs font-semibold text-gray-500 uppercase" for="draft-prog-cond-{{ex.sessionExerciseId}}">Progression condition</label>
+                                                     <input id="draft-prog-cond-{{ex.sessionExerciseId}}" pInputText [value]="draft.progressionRule?.progressionCondition || ''"
+                                                         (input)="setProgressionCondition(ex.sessionExerciseId, $any($event.target).value)"
+                                                         class="w-full text-sm" placeholder="e.g. VAS ≤ 4 + RIR ≥ 3" />
+                                                 </div>
+                                             </div>
+                                         </div>
+
+                                         <!-- Actions -->
+                                         <div class="flex justify-end gap-2 pt-3 border-t border-gray-200">
+                                             <p-button label="Cancel" [outlined]="true" severity="secondary"
+                                                 (click)="cancelAddExercise(phase.phaseId, session.phaseSessionId, section.sectionId, ex.sessionExerciseId)"
+                                                 aria-label="Cancel adding exercise" />
+                                             <p-button label="Add Exercise" icon="pi pi-check" [loading]="isDraftSaving(ex.sessionExerciseId)"
+                                                 (click)="submitAddExercise(ex.sessionExerciseId, phase.phaseId)"
+                                                 aria-label="Save new exercise" />
+                                         </div>
+
+                                     </div>
+                                 </div>
+                                 } @else {
+                                <!-- ── Read-only Exercise Card ── -->
+                                <div>
+                                    <p class="p-0 m-0 mb-1 text-sm font-semibold text-color-secondary">Exercise #{{ exIdx + 1 }}</p>
+                                    <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 flex flex-col gap-4 relative shadow-sm hover:shadow-md transition-shadow">
+
+                                        <!-- Toggle + Actions -->
+                                        <div class="flex items-center justify-between pr-24">
+                                            <div class="flex items-center bg-gray-200 p-1.5 rounded-full w-full max-w-[240px] relative font-semibold" dir="ltr">
+                                                <div class="absolute left-1.5 top-1.5 bottom-1.5 w-[calc(50%-6px)] bg-white rounded-full shadow transition-transform duration-300 ease-in-out pointer-events-none"
+                                                    [class.translate-x-full]="ex.sets.length === 0"
+                                                    [class.translate-x-0]="ex.sets.length > 0">
+                                                </div>
+                                                <button
+                                                    class="flex-1 relative z-10 py-1.5 text-center text-xs rounded-full transition-colors duration-300 focus:outline-none"
+                                                    [disabled]="true"
+                                                    [class.text-gray-900]="ex.sets.length > 0"
+                                                    [class.font-bold]="ex.sets.length > 0"
+                                                    [class.text-gray-500]="ex.sets.length === 0"
+                                                    [class.font-medium]="ex.sets.length === 0"
+                                                    [class.cursor-default]="true">Exercise</button>
+                                                <button
+                                                    class="flex-1 relative z-10 py-1.5 text-center text-xs rounded-full transition-colors duration-300 focus:outline-none"
+                                                    [disabled]="true"
+                                                    [class.text-gray-900]="ex.sets.length === 0"
+                                                    [class.font-bold]="ex.sets.length === 0"
+                                                    [class.text-gray-500]="ex.sets.length > 0"
+                                                    [class.font-medium]="ex.sets.length > 0"
+                                                    [class.cursor-default]="true">Manual</button>
+                                            </div>
+                                        </div>
+
+                                        <!-- Reorder controls -->
                                         <div class="absolute top-2 right-2 flex gap-1">
                                             <button pButton icon="pi pi-angle-up"
                                                 class="p-button-text p-button-secondary p-button-rounded p-button-sm"
-                                                (click)="moveExerciseUp(section, exIndex)" [disabled]="exIndex === 0"
-                                                pTooltip="Move exercise up" aria-label="Move exercise up"></button>
+                                                (click)="moveExerciseUp(phase, session, section, exIdx)"
+                                                [disabled]="exIdx === 0 || reorderSaving()"
+                                                pTooltip="Move exercise up"
+                                                aria-label="Move exercise up"></button>
                                             <button pButton icon="pi pi-angle-down"
                                                 class="p-button-text p-button-secondary p-button-rounded p-button-sm"
-                                                (click)="moveExerciseDown(section, exIndex)"
-                                                [disabled]="exIndex === section.exercises.length - 1"
-                                                pTooltip="Move exercise down" aria-label="Move exercise down"></button>
+                                                (click)="moveExerciseDown(phase, session, section, exIdx)"
+                                                [disabled]="exIdx === section.exercises.length - 1 || reorderSaving()"
+                                                pTooltip="Move exercise down"
+                                                aria-label="Move exercise down"></button>
                                         </div>
-                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6 md:pt-2 pr-12 w-full">
-                                            <!-- Left side: Basic Details -->
-                                            <div class="flex flex-col gap-4 border-r border-gray-100 pr-4">
-                                                <!-- Row 1: Name, Tool, Sets -->
-                                                <div class="flex items-start gap-4">
-                                                    <div class="flex flex-col gap-1 flex-1">
-                                                        <label class="text-sm font-semibold text-gray-700">Name</label>
-                                                        <input pInputText [(ngModel)]="ex.name" class="w-full"
-                                                            placeholder="Exercise name" disabled />
-                                                    </div>
-                                                    <div class="flex flex-col gap-1 w-32">
-                                                        <label class="text-sm font-semibold text-gray-700">Tool</label>
-                                                        <input pInputText [(ngModel)]="ex.tool" class="w-full"
-                                                            placeholder="e.g. Dumbbell" disabled />
-                                                    </div>
-                                                    <div class="flex flex-col gap-1 w-24">
-                                                        <label class="text-sm font-semibold text-gray-700">Sets</label>
-                                                        <input pInputText [(ngModel)]="ex.sets" type="number" min="1"
-                                                            max="10" class="w-full text-center" placeholder="1"
-                                                            disabled />
-                                                    </div>
-                                                </div>
 
-                                                <!-- Row 2: Description -->
-                                                <div class="flex flex-col gap-1">
-                                                    <label class="text-sm font-semibold text-gray-700">Dec</label>
-                                                    <textarea pInputTextarea [(ngModel)]="ex.description" rows="3"
-                                                        class="w-full" placeholder="Enter instructions..."
-                                                        disabled></textarea>
-                                                </div>
+                                        <!-- Exercise Name + Equipment -->
+                                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                            <div class="flex flex-col gap-1">
+                                                <label class="text-sm font-semibold text-gray-700">Exercise Name <span class="text-red-500">*</span></label>
+                                                <input pInputText [value]="ex.exerciseName" [disabled]="true" class="w-full" placeholder="Exercise name" />
+                                            </div>
+                                            <div class="flex flex-col gap-1">
+                                                <label class="text-sm font-semibold text-gray-700">Equipment</label>
+                                                <input pInputText [value]="$any(ex).equipment || '—'" [disabled]="true" class="w-full" placeholder="e.g. Leg Press Machine" />
+                                            </div>
+                                        </div>
 
-                                                <!-- Row 3: Video URL -->
-                                                <div class="flex flex-col gap-1">
-                                                    <label class="text-sm font-semibold text-gray-700">Video URL</label>
-                                                    <input pInputText [(ngModel)]="ex.videoUrl" class="w-full"
-                                                        placeholder="Enter video URL" disabled />
+                                        <!-- Description -->
+                                        <div class="flex flex-col gap-1">
+                                            <label class="text-sm font-semibold text-gray-700">Description</label>
+                                            <textarea pInputTextarea [value]="ex.description || '—'" [disabled]="true" rows="3" class="w-full" placeholder="—"></textarea>
+                                        </div>
+
+                                        <!-- Video URL (Manual mode only) -->
+                                        @if (ex.sets.length === 0) {
+                                        <div class="flex flex-col gap-1">
+                                            <label class="text-sm font-semibold text-gray-700">Video URL</label>
+                                            <div class="flex items-center gap-2">
+                                                <input pInputText [value]="ex.videoUrl || '—'" [disabled]="true" class="w-full" placeholder="—" />
+                                                @if (ex.videoUrl) {
+                                                <button pButton icon="pi pi-play" [disabled]="true" class="p-button-rounded p-button-success p-button-sm flex-shrink-0" aria-label="Play video"></button>
+                                                }
+                                            </div>
+                                        </div>
+                                        }
+
+                                        <!-- For Exercise mode only -->
+                                        @if (ex.sets.length > 0) {
+                                        <!-- Contraction Type -->
+                                        <div class="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm font-semibold text-gray-700">Contraction type</span>
+                                                <span class="bg-[#134e4a] text-[#2dd4a0] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP T</span>
+                                            </div>
+                                            <div class="flex flex-wrap gap-2">
+                                                @for (type of ['Dynamic', 'Isokinetic', 'Isometric', 'Eccentric', 'Concentric']; track type) {
+                                                <button
+                                                    class="px-3 py-1.5 text-xs font-semibold rounded-full transition-colors border"
+                                                    [disabled]="true"
+                                                    [class]="($any(ex).contractionType === type || (type === 'Dynamic' && !$any(ex).contractionType)) ? 'bg-[#451a03] text-[#f0a940] border-[#f0a940] cursor-default' : 'bg-gray-100 text-gray-400 border-gray-100 cursor-default'">
+                                                    {{ type }}
+                                                </button>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <!-- Intensity Method -->
+                                        <div class="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                            <div class="flex justify-between items-center">
+                                                <span class="text-sm font-semibold text-gray-700">Intensity method</span>
+                                                <span class="bg-[#451a03] text-[#f0a940] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP I</span>
+                                            </div>
+                                            <div class="flex flex-wrap gap-2">
+                                                @for (method of ['HR Zone', 'RIR', 'RPE 1-10', '1RM %', 'kg/lb', 'Bodyweight']; track method) {
+                                                <button
+                                                    class="px-3 py-1.5 text-xs font-semibold rounded-full transition-colors border"
+                                                    [disabled]="true"
+                                                    [class]="($any(ex).intensityMethod === method || (method === 'RPE 1-10' && !$any(ex).intensityMethod)) ? 'bg-[#134e4a] text-[#2dd4a0] border-[#2dd4a0] cursor-default' : 'bg-gray-100 text-gray-400 border-gray-100 cursor-default'">
+                                                    {{ method }}
+                                                </button>
+                                                }
+                                            </div>
+                                        </div>
+
+                                        <!-- Sets Table -->
+                                        <div class="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                            <div class="flex justify-between items-center mb-1">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-sm font-semibold text-gray-700">Sets:</span>
+                                                    <input pInputText [value]="ex.sets.length" [disabled]="true" type="number" class="w-16 text-center text-sm h-8 p-1" />
                                                 </div>
+                                                <span class="bg-[#134e4a] text-[#2dd4a0] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP V</span>
                                             </div>
 
-                                            <!-- Right side: Metrics Grid -->
-                                            <div class="flex flex-col gap-2 pl-2 w-full">
-                                                <div class="grid grid-cols-[3rem_1fr_1fr_1fr_1fr] gap-2 items-start">
-                                                    <!-- Table Headers -->
-                                                    <div
-                                                        class="text-xs font-bold text-gray-500 uppercase text-center mb-1">
-                                                        Set #</div>
-                                                    <div
-                                                        class="text-xs font-bold text-gray-500 uppercase text-center mb-1">
-                                                        Reps</div>
-                                                    <div
-                                                        class="text-xs font-bold text-gray-500 uppercase text-center mb-1">
-                                                        Int</div>
-                                                    <div
-                                                        class="text-xs font-bold text-gray-500 uppercase text-center mb-1">
-                                                        Temp</div>
-                                                    <div
-                                                        class="text-xs font-bold text-gray-500 uppercase text-center mb-1">
-                                                        Res</div>
+                                            <!-- Table Header -->
+                                            <div class="grid grid-cols-[2rem_1fr_1fr_1fr_1fr] gap-2 px-1">
+                                                <div class="text-xs font-bold text-gray-400 uppercase text-center">Set #</div>
+                                                <div class="text-xs font-bold text-gray-400 uppercase text-center">Reps</div>
+                                                <div class="text-xs font-bold text-gray-400 uppercase text-center">Intensity</div>
+                                                <div class="text-xs font-bold text-gray-400 uppercase text-center">Tempo</div>
+                                                <div class="text-xs font-bold text-gray-400 uppercase text-center">Rest (sec)</div>
+                                            </div>
 
-                                                    <!-- Reps (Repeated per set) -->
-                                                    <div
-                                                        class="col-span-2 flex flex-col gap-2 overflow-y-auto max-h-[300px] pr-2 pb-2">
-                                                        @for (i of getRepArray(ex); track i) {
-                                                        <div class="grid grid-cols-[3rem_1fr] gap-2 items-center">
-                                                            <div class="flex justify-center">
-                                                                <div
-                                                                    class="flex items-center justify-center w-8 h-8 rounded bg-gray-100 border border-gray-300">
-                                                                    <span
-                                                                        class="text-sm text-blue-600 font-bold">{{i+1}}</span>
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <input pInputText [(ngModel)]="ex.reps[i]"
-                                                                    class="w-full text-center font-medium p-2 text-sm h-10 shadow-sm"
-                                                                    placeholder="reps" disabled />
-                                                            </div>
+                                            <!-- Table Rows -->
+                                            <div class="flex flex-col gap-2 overflow-y-auto max-h-[300px]">
+                                                @for (set of ex.sets; track set.setNumber) {
+                                                <div class="grid grid-cols-[2rem_1fr_1fr_1fr_1fr] gap-2 items-center px-1">
+                                                    <div class="flex justify-center">
+                                                        <div class="flex items-center justify-center w-7 h-7 rounded bg-gray-100 border border-gray-300">
+                                                            <span class="text-xs text-blue-600 font-bold">{{ set.setNumber }}</span>
                                                         </div>
-                                                        }
                                                     </div>
+                                                    <input pInputText [value]="set.reps" [disabled]="true" type="number" class="w-full text-center text-sm h-9 shadow-sm" aria-label="Reps" />
+                                                    <input pInputText [value]="set.intensity" [disabled]="true" class="w-full text-center text-sm h-9 shadow-sm" aria-label="Intensity" />
+                                                    <input pInputText [value]="set.tempo" [disabled]="true" class="w-full text-center text-sm h-9 shadow-sm" aria-label="Tempo" />
+                                                    <input pInputText [value]="set.restSeconds" [disabled]="true" class="w-full text-center text-sm h-9 shadow-sm" aria-label="Rest seconds" />
+                                                </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        }
 
-                                                    <!-- Int (Single Shared) -->
-                                                    <div class="col-span-1">
-                                                        <input pInputText [(ngModel)]="ex.intensity"
-                                                            class="w-full text-center font-medium p-2 text-sm h-10 shadow-sm"
-                                                            placeholder="Mod" disabled />
-                                                    </div>
-
-                                                    <!-- Temp (Single Shared) -->
-                                                    <div class="col-span-1">
-                                                        <input pInputText [(ngModel)]="ex.tempo"
-                                                            class="w-full text-center font-medium p-2 text-sm h-10 shadow-sm"
-                                                            placeholder="2-0-2" disabled />
-                                                    </div>
-
-                                                    <!-- Res (Single Shared) -->
-                                                    <div class="col-span-1">
-                                                        <input pInputText [(ngModel)]="ex.rest"
-                                                            class="w-full text-center font-medium p-2 text-sm h-10 shadow-sm"
-                                                            placeholder="60s" disabled />
-                                                    </div>
+                                        <!-- Progression Rule -->
+                                        <div class="flex flex-col gap-2 bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                                            <div class="flex justify-between items-center">
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-sm font-semibold text-gray-700">Progression Rule</span>
+                                                </div>
+                                                <span class="bg-[#451a03] text-[#f0a940] text-[10px] font-bold px-2 py-0.5 rounded-md">FITT-VP P</span>
+                                            </div>
+                                            <div class="grid grid-cols-1 lg:grid-cols-3 gap-3 mt-1">
+                                                <div class="flex flex-col gap-1">
+                                                    <label class="text-xs font-semibold text-gray-500 uppercase">Progression title</label>
+                                                    <input pInputText [value]="$any(ex).progressionRule?.title || '—'" [disabled]="true" class="w-full text-sm" placeholder="e.g. Volume Progression" />
+                                                </div>
+                                                <div class="flex flex-col gap-1">
+                                                    <label class="text-xs font-semibold text-gray-500 uppercase">Increment amount</label>
+                                                    <input pInputText [value]="$any(ex).progressionRule?.incrementAmount || '—'" [disabled]="true" class="w-full text-sm" placeholder="e.g. 2.5" />
+                                                </div>
+                                                <div class="flex flex-col gap-1">
+                                                    <label class="text-xs font-semibold text-gray-500 uppercase">Progression condition</label>
+                                                    <input pInputText [value]="$any(ex).progressionRule?.progressionCondition || '—'" [disabled]="true" class="w-full text-sm" placeholder="e.g. VAS ≤ 4 + RIR ≥ 3" />
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    }
 
-                                    <div class="flex justify-center mt-2 p-2 border-t border-dashed border-gray-300">
-                                        <p-button label="Add Exercise" icon="pi pi-plus" [outlined]="true" size="small"
-                                            (click)="addExercise(section)"></p-button>
                                     </div>
                                 </div>
+                                } <!-- end read-only card -->
 
-                                <!-- Section Footer Actions -->
-                                <div class="section-footer">
-                                    <button pButton label="Cancel"
-                                        class="p-button-outlined p-button-secondary p-button-sm"></button>
-                                    <button pButton label="Save" class="p-button-success p-button-sm"></button>
+                                } <!-- end @for -->
+
+                                <!-- Add Exercise -->
+                                <div class="flex justify-center mt-2 p-2 border-t border-dashed border-gray-300">
+                                    <p-button label="Add Exercise" icon="pi pi-plus" [outlined]="true" size="small"
+                                        (click)="openAddExercise(phase, session, section)"
+                                        [attr.aria-label]="'Add exercise to ' + section.sectionName" />
                                 </div>
                             </div>
-                            }
-
-                            <!-- Removed add-section logic -->
                         </div>
                         }
                     </div>
                     }
+
+                    <!-- ── Station Assignments for this Phase ── -->
+                    @if (phase.stations && phase.stations.length > 0) {
+                    <div class="stations-container mt-4">
+                        <div class="stations-header mb-3">
+                            <h3 class="stations-title m-0"><i class="pi pi-building mr-2 text-primary"></i>Station
+                                Assignments</h3>
+                            <p class="text-sm text-color-secondary mt-1">Assign performance engineers to stations for
+                                this phase.</p>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            @for (station of phase.stations; track trackByStationId($index, station); let stIdx = $index) {
+                            <div class="w-full">
+                                <div class="station-card h-full flex flex-column justify-content-between p-3 border-round shadow-1 surface-card border-1"
+                                    [class]="getStationColorClass(stIdx)">
+                                    <div
+                                        class="flex align-items-center gap-2 mb-3 pb-2 border-bottom-1 surface-border">
+                                        <div
+                                            class="station-icon-wrapper flex align-items-center justify-content-center border-round w-2rem h-2rem font-bold">
+                                            <i [class]="getStationIcon(stIdx)"></i>
+                                        </div>
+                                        <span class="font-bold text-lg">{{ station.stationName }}</span>
+                                    </div>
+                                    <div
+                                        class="station-card-body flex-grow-1 flex flex-column justify-content-end gap-2">
+                                        <label
+                                            class="text-sm font-semibold text-color-secondary uppercase">Assign
+                                            Performance Engineer</label>
+                                        <p-dropdown appendTo="body" [options]="coachOptions()"
+                                            [ngModel]="getStationCoachDraft(phase.phaseId, station.stationId)"
+                                            (ngModelChange)="setStationCoachDraft(phase.phaseId, station.stationId, $event)"
+                                            placeholder="Select Performance Engineer" styleClass="w-full"
+                                            emptyMessage="No coaches available"
+                                            [attr.aria-label]="'Assign coach to ' + station.stationName" />
+                                        <div class="station-status mt-2 flex align-items-center gap-1 text-xs font-medium"
+                                            [class.text-green-500]="getStationCoachDraft(phase.phaseId, station.stationId) !== null"
+                                            [class.text-orange-500]="getStationCoachDraft(phase.phaseId, station.stationId) === null">
+                                            <i class="pi"
+                                                [class.pi-check-circle]="getStationCoachDraft(phase.phaseId, station.stationId) !== null"
+                                                [class.pi-exclamation-circle]="getStationCoachDraft(phase.phaseId, station.stationId) === null"></i>
+                                            {{ getStationCoachDraft(phase.phaseId, station.stationId) !== null ?
+                                            'Assigned' : 'Pending Assignment' }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            }
+                        </div>
+                        <div class="flex justify-end mt-3">
+                            <p-button label="Save Station Assignments" icon="pi pi-save" severity="success"
+                                [loading]="isStationSaving(phase.phaseId)"
+                                (click)="saveStations(phase)"
+                                [attr.aria-label]="'Save station assignments for ' + phase.phaseName" />
+                        </div>
+                    </div>
+                    }
+
                 </div>
             </p-accordion-content>
         </p-accordion-panel>
         }
     </p-accordion>
+    }
 
-    <!-- Station Assignments -->
-    <div class="stations-container mt-4">
-        <div class="stations-header mb-3">
-            <h3 class="stations-title m-0"><i class="pi pi-building mr-2 text-primary"></i>Station Assignments</h3>
-            <p class="text-sm text-color-secondary mt-1">Assign dedicated performance engineers to oversee specific
-                performance
-                stations</p>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            @for (station of stations; track station.name) {
-            <div class="w-full">
-                <div class="station-card h-full flex flex-column justify-content-between p-3 border-round shadow-1 surface-card border-1"
-                    [class]="'station-card-' + station.type">
-                    <div class="flex align-items-center gap-2 mb-3 pb-2 border-bottom-1 surface-border">
-                        <div
-                            class="station-icon-wrapper flex align-items-center justify-content-center border-round w-2rem h-2rem font-bold">
-                            <i [class]="station.icon"></i>
-                        </div>
-                        <span class="font-bold text-lg">{{ station.name }}</span>
-                    </div>
-                    <div class="station-card-body flex-grow-1 flex flex-column justify-content-end gap-2">
-                        <label class="text-sm font-semibold text-color-secondary uppercase">Assign Performance
-                            Engineer</label>
-                        <p-dropdown appendTo="body" [options]="coaches" [(ngModel)]="station.coach"
-                            placeholder="Select Performance Engineer" styleClass="w-full"
-                            emptyMessage="No coaches available"></p-dropdown>
-
-                        <div class="station-status mt-2 flex align-items-center gap-1 text-xs font-medium"
-                            [class.text-green-500]="station.coach" [class.text-orange-500]="!station.coach">
-                            <i class="pi" [class.pi-check-circle]="station.coach"
-                                [class.pi-exclamation-circle]="!station.coach"></i>
-                            {{ station.coach ? 'Assigned' : 'Pending Assignment' }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            }
-        </div>
-    </div>
-
-    <!-- Action Bar -->
-    <div class="action-bar">
-        <button pButton label="Save Draft" icon="pi pi-save" class="p-button-outlined p-button-secondary"></button>
-        <button pButton label="Confirm Assignment" icon="pi pi-check" class="p-button-success confirm-btn"
-            [disabled]="hasUnassignedStations"></button>
-    </div>
+    }
 
 </div>

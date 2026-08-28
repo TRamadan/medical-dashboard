@@ -1,130 +1,245 @@
+<p-toast></p-toast>
+
 <div class="p-4 flex flex-col gap-5 pb-24">
 
-  @for (ev of evaluations; track ev.id) {
-
-    <div class="eval-card" [style.border-left]="'4px solid ' + ev.cardBorder">
-
-      <!-- ---- Card Header ---- -->
-      <div class="flex flex-wrap justify-between items-start gap-3 mb-5 pb-4 card-divider">
-
+  @if (loading()) {
+  <!-- ===== LOADING SKELETON ===== -->
+  <div class="animate-pulse flex flex-col gap-5">
+    @for (i of [1, 2, 3]; track i) {
+    <div
+      class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 border-l-4 border-l-gray-300 flex flex-col gap-4">
+      <!-- Card Header Skeleton -->
+      <div class="flex justify-between items-start pb-4 border-b border-gray-100">
         <div class="flex items-center gap-3">
-          <div class="avatar"
-               [style.background]="ev.avatarBg"
-               [style.color]="ev.avatarText"
-               [style.border-color]="ev.avatarBorder">
-            {{ ev.initials }}
-          </div>
-          <div>
-            <div class="font-bold text-sm text-gray-900">{{ ev.name }}</div>
-            <div class="text-xs text-gray-500 mt-0.5">{{ ev.role }}</div>
+          <div class="w-10 h-10 rounded-xl bg-gray-200 shrink-0"></div>
+          <div class="flex flex-col gap-1.5">
+            <div class="h-4 bg-gray-200 rounded w-36"></div>
+            <div class="h-3 bg-gray-200 rounded w-48"></div>
           </div>
         </div>
-
         <div class="flex items-center gap-2">
-          <div class="text-2xl font-black" [style.color]="ev.color">{{ ev.score }}</div>
-          <span class="score-badge"
-                [style.background]="ev.statusBg"
-                [style.color]="ev.statusText"
-                [style.border-color]="ev.statusBorder">
-            {{ ev.status }}
-          </span>
+          <div class="h-8 bg-gray-200 rounded w-12"></div>
+          <div class="h-6 bg-gray-200 rounded-full w-32"></div>
         </div>
       </div>
 
-      <!-- ---- Sliders Grid ---- -->
-      <div class="sliders-grid grid gap-x-10 gap-y-6 mb-5 custom-slider" [style.--slider-color]="ev.color">
-
-        <!-- Execution Quality -->
-        <div>
-          <div class="flex justify-between items-center mb-2">
-            <span class="metric-label">Execution Quality</span>
-            <span class="text-xs font-bold" [style.color]="ev.color">{{ ev.metrics.execution }}/5</span>
+      <!-- Sliders Grid Skeleton -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6">
+        @for (s of [1, 2, 3, 4, 5]; track s) {
+        <div class="flex flex-col gap-2">
+          <div class="flex justify-between items-center">
+            <div class="h-3.5 bg-gray-200 rounded w-32"></div>
+            <div class="h-3 bg-gray-200 rounded w-8"></div>
           </div>
-          <p-slider
-            [ngModel]="ev.metrics.execution"
-            (onChange)="updateMetric(ev, 'execution', $event.value)"
-            [min]="0" [max]="5" [step]="1"
-            styleClass="w-full">
-          </p-slider>
-          <div class="range-labels"><span>Weak</span><span>Avg</span><span>Excellent</span></div>
-        </div>
-
-        <!-- Athlete Communication -->
-        <div>
-          <div class="flex justify-between items-center mb-2">
-            <span class="metric-label">Athlete Communication</span>
-            <span class="text-xs font-bold" [style.color]="ev.color">{{ ev.metrics.communication }}/5</span>
+          <div class="h-2 bg-gray-200 rounded-full w-full"></div>
+          <div class="flex justify-between">
+            <div class="h-2 bg-gray-200 rounded w-8"></div>
+            <div class="h-2 bg-gray-200 rounded w-8"></div>
+            <div class="h-2 bg-gray-200 rounded w-12"></div>
           </div>
-          <p-slider
-            [ngModel]="ev.metrics.communication"
-            (onChange)="updateMetric(ev, 'communication', $event.value)"
-            [min]="0" [max]="5" [step]="1"
-            styleClass="w-full">
-          </p-slider>
-          <div class="range-labels"><span>Weak</span><span>Avg</span><span>Excellent</span></div>
         </div>
-
-        <!-- Punctuality -->
-        <div>
-          <div class="flex justify-between items-center mb-2">
-            <span class="metric-label">Punctuality</span>
-            <span class="text-xs font-bold" [style.color]="ev.color">{{ ev.metrics.punctuality }}/5</span>
-          </div>
-          <p-slider
-            [ngModel]="ev.metrics.punctuality"
-            (onChange)="updateMetric(ev, 'punctuality', $event.value)"
-            [min]="0" [max]="5" [step]="1"
-            styleClass="w-full">
-          </p-slider>
-          <div class="range-labels"><span>Weak</span><span>Avg</span><span>Excellent</span></div>
-        </div>
-
-        <!-- Professional Dev. -->
-        <div>
-          <div class="flex justify-between items-center mb-2">
-            <span class="metric-label">Professional Dev.</span>
-            <span class="text-xs font-bold" [style.color]="ev.color">{{ ev.metrics.professionalDev }}/5</span>
-          </div>
-          <p-slider
-            [ngModel]="ev.metrics.professionalDev"
-            (onChange)="updateMetric(ev, 'professionalDev', $event.value)"
-            [min]="0" [max]="5" [step]="1"
-            styleClass="w-full">
-          </p-slider>
-          <div class="range-labels"><span>Weak</span><span>Avg</span><span>Excellent</span></div>
-        </div>
-
+        }
       </div>
 
-      <!-- ---- Text Areas ---- -->
-      <div class="textarea-grid grid gap-4 custom-textarea">
-
-        <div>
-          <label class="block text-xs font-semibold text-gray-500 mb-1">
-            Main point for improvement
-          </label>
-          <textarea pInputTextarea [(ngModel)]="ev.improvements" rows="3" class="w-full"
-            placeholder="Describe the main area that needs improvement...">
-          </textarea>
+      <!-- Textareas Skeleton -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+        <div class="flex flex-col gap-2">
+          <div class="h-3 bg-gray-200 rounded w-36"></div>
+          <div class="h-20 bg-gray-100 rounded-lg w-full"></div>
         </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-gray-500 mb-1">
-            Key strengths to encourage
-          </label>
-          <textarea pInputTextarea [(ngModel)]="ev.strengths" rows="3" class="w-full"
-            placeholder="Highlight what they did well this week...">
-          </textarea>
+        <div class="flex flex-col gap-2">
+          <div class="h-3 bg-gray-200 rounded w-36"></div>
+          <div class="h-20 bg-gray-100 rounded-lg w-full"></div>
         </div>
+      </div>
+    </div>
+    }
+  </div>
 
+  } @else if (error()) {
+  <!-- ===== ERROR STATE ===== -->
+  <div class="bg-red-50 border border-red-200 rounded-2xl p-6 text-center max-w-md mx-auto my-8">
+    <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-3">
+      <i class="pi pi-exclamation-triangle text-xl"></i>
+    </div>
+    <div class="text-sm font-bold text-red-800 mb-1">Unable to Load Evaluations</div>
+    <p class="text-xs text-red-600 mb-4">{{ error() }}</p>
+    <button type="button" (click)="loadEvaluations()"
+      class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-semibold transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none shadow-sm">
+      <i class="pi pi-refresh mr-1 text-xs"></i> Retry
+    </button>
+  </div>
+
+  } @else {
+
+  @if (evaluations().length > 0) {
+
+  @for (ev of evaluations(); track ev.coachId) {
+
+  <div class="eval-card bg-white rounded-2xl p-5 shadow-sm border border-gray-100 transition-shadow hover:shadow-md"
+    [style.border-left]="'4px solid ' + ev.cardBorderLeft">
+
+    <!-- ---- Card Header ---- -->
+    <div class="flex flex-wrap justify-between items-start gap-3 mb-5 pb-4 card-divider border-b border-gray-100">
+
+      <div class="flex items-center gap-3">
+        <div class="avatar w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm border shrink-0"
+          [style.background]="ev.avatarBg" [style.color]="ev.avatarText" [style.border-color]="ev.avatarBorder">
+          {{ ev.initials }}
+        </div>
+        <div>
+          <div class="font-bold text-sm text-gray-900">{{ ev.coachName }}</div>
+          <div class="text-xs text-gray-400 mt-0.5">{{ ev.stationLabel || 'Coach Team Member' }}</div>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex flex-col items-end">
+          <div class="text-2xl font-black" [style.color]="ev.avatarText">{{ ev.overallScore }}</div>
+          <div class="text-[10px] text-gray-400">/ 5 ({{ ev.compositeOutOf100 }}%)</div>
+        </div>
+        <span class="score-badge px-3 py-1 rounded-full text-xs font-semibold border" [style.background]="ev.statusBg"
+          [style.color]="ev.statusText" [style.border-color]="ev.statusBorder">
+          {{ ev.performanceLabel }}
+        </span>
       </div>
     </div>
 
+    <!-- ---- Sliders Grid ---- -->
+    <div class="sliders-grid grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6 mb-5 custom-slider"
+      [style.--slider-color]="ev.avatarText">
+
+      <!-- Execution Quality (Session Quality) -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <span class="metric-label text-xs font-semibold text-gray-700">Session Quality</span>
+          <span class="text-xs font-bold" [style.color]="ev.avatarText">{{ ev.sessionQuality }}/5</span>
+        </div>
+        <p-slider [ngModel]="ev.sessionQuality" (onChange)="updateMetric(ev, 'sessionQuality', $event.value)" [min]="0"
+          [max]="5" [step]="0.1" styleClass="w-full">
+        </p-slider>
+        <div class="range-labels flex justify-between text-[10px] text-gray-400 mt-1">
+          <span>Weak</span><span>Avg</span><span>Excellent</span></div>
+      </div>
+
+      <!-- Protocol Coherence -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <span class="metric-label text-xs font-semibold text-gray-700">Protocol Coherence</span>
+          <span class="text-xs font-bold" [style.color]="ev.avatarText">{{ ev.protocolCoherence }}/5</span>
+        </div>
+        <p-slider [ngModel]="ev.protocolCoherence" (onChange)="updateMetric(ev, 'protocolCoherence', $event.value)"
+          [min]="0" [max]="5" [step]="0.1" styleClass="w-full">
+        </p-slider>
+        <div class="range-labels flex justify-between text-[10px] text-gray-400 mt-1">
+          <span>Weak</span><span>Avg</span><span>Excellent</span></div>
+      </div>
+
+      <!-- Attendance & Punctuality -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <span class="metric-label text-xs font-semibold text-gray-700">Attendance & Punctuality</span>
+          <span class="text-xs font-bold" [style.color]="ev.avatarText">{{ ev.attendancePunctuality }}/5</span>
+        </div>
+        <p-slider [ngModel]="ev.attendancePunctuality"
+          (onChange)="updateMetric(ev, 'attendancePunctuality', $event.value)" [min]="0" [max]="5" [step]="0.1"
+          styleClass="w-full">
+        </p-slider>
+        <div class="range-labels flex justify-between text-[10px] text-gray-400 mt-1">
+          <span>Weak</span><span>Avg</span><span>Excellent</span></div>
+      </div>
+
+      <!-- Client Ratings -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <span class="metric-label text-xs font-semibold text-gray-700">Client Ratings</span>
+          <span class="text-xs font-bold" [style.color]="ev.avatarText">{{ ev.clientRatings }}/5</span>
+        </div>
+        <p-slider [ngModel]="ev.clientRatings" (onChange)="updateMetric(ev, 'clientRatings', $event.value)" [min]="0"
+          [max]="5" [step]="0.1" styleClass="w-full">
+        </p-slider>
+        <div class="range-labels flex justify-between text-[10px] text-gray-400 mt-1">
+          <span>Weak</span><span>Avg</span><span>Excellent</span></div>
+      </div>
+
+      <!-- Professional Dev. -->
+      <div>
+        <div class="flex justify-between items-center mb-2">
+          <span class="metric-label text-xs font-semibold text-gray-700">Professional Dev.</span>
+          <span class="text-xs font-bold" [style.color]="ev.avatarText">{{ ev.professionalDev }}/5</span>
+        </div>
+        <p-slider [ngModel]="ev.professionalDev" (onChange)="updateMetric(ev, 'professionalDev', $event.value)"
+          [min]="0" [max]="5" [step]="0.1" styleClass="w-full">
+        </p-slider>
+        <div class="range-labels flex justify-between text-[10px] text-gray-400 mt-1">
+          <span>Weak</span><span>Avg</span><span>Excellent</span></div>
+      </div>
+
+    </div>
+
+    <!-- ---- Text Areas ---- -->
+    <div class="textarea-grid grid grid-cols-1 md:grid-cols-2 gap-4 custom-textarea">
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1">
+          Main point for improvement
+        </label>
+        <textarea pInputTextarea [(ngModel)]="ev.mainPointForImprovement" rows="3"
+          class="w-full text-xs p-3 border rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+          placeholder="Describe the main area that needs improvement...">
+              </textarea>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-gray-500 mb-1">
+          Key strengths to encourage
+        </label>
+        <textarea pInputTextarea [(ngModel)]="ev.keyStrengths" rows="3"
+          class="w-full text-xs p-3 border rounded-xl focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+          placeholder="Highlight what they did well this week...">
+              </textarea>
+      </div>
+
+    </div>
+
+    <!-- Card Save Action Footer -->
+    <div class="flex justify-end pt-3 mt-4 border-t border-gray-100">
+      <button type="button" (click)="saveSingleEvaluation(ev)" [disabled]="ev.savingCard"
+        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 focus:ring-2 focus:ring-emerald-500 focus:outline-none disabled:opacity-50">
+        @if (ev.savingCard) {
+        <div class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        <span>Saving...</span>
+        } @else {
+        <i class="pi pi-check text-xs"></i>
+        <span>Save Evaluation</span>
+        }
+      </button>
+    </div>
+  </div>
+
   }
 
-  <!-- Save button -->
-  <div class="save-footer">
-    <button>Save Weekly Evaluation ✓</button>
+
+
+  } @else {
+  <!-- ===== EMPTY STATE PLACEHOLDER ===== -->
+  <div
+    class="bg-white rounded-2xl p-12 flex flex-col items-center justify-center text-center shadow-sm border border-gray-100 my-4">
+    <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4">
+      <i class="pi pi-id-card text-2xl"></i>
+    </div>
+    <h3 class="text-sm font-bold text-gray-900 mb-1">No Coach Evaluations Found</h3>
+    <p class="text-xs text-gray-400 max-w-sm mb-5">
+      There are currently no engineer evaluations recorded for this selected week range. Select another date range above
+      or refresh.
+    </p>
+    <button type="button" (click)="loadEvaluations()"
+      class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-semibold transition-colors focus:ring-2 focus:ring-gray-300 focus:outline-none">
+      <i class="pi pi-refresh mr-1 text-xs"></i> Refresh Data
+    </button>
   </div>
+  }
+
+  }
 
 </div>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DatePickerModule } from 'primeng/datepicker';
@@ -10,7 +10,6 @@ type TabId = 'weekly' | 'cumulative' | 'athlete';
 
 @Component({
   selector: 'app-engineer-evaluation',
-  standalone: true,
   imports: [
     CommonModule,
     FormsModule,
@@ -20,17 +19,43 @@ type TabId = 'weekly' | 'cumulative' | 'athlete';
     AthleteVoiceComponent
   ],
   templateUrl: './egineer-evaluation.component.html',
-  styleUrl: './egineer-evaluation.component.scss'
+  styleUrl: './egineer-evaluation.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EngineerEvaluationComponent {
 
-  activeTab: TabId = 'weekly';
+  readonly activeTab = signal<TabId>('weekly');
+  readonly weekDates = signal<Date[]>(this.currentWeekRange());
 
-  /** Current-week date range: [Monday, Sunday] */
-  weekDates: Date[] = this.currentWeekRange();
+  /** Formatted start date as YYYY-MM-DD */
+  readonly weekStartStr = computed<string>(() => {
+    const dates = this.weekDates();
+    if (!dates || dates.length === 0 || !dates[0]) return '';
+    return this.formatDate(dates[0]);
+  });
+
+  /** Formatted end date as YYYY-MM-DD */
+  readonly weekEndStr = computed<string>(() => {
+    const dates = this.weekDates();
+    if (!dates || dates.length < 2 || !dates[1]) {
+      return this.weekStartStr();
+    }
+    return this.formatDate(dates[1]);
+  });
 
   selectTab(tab: TabId): void {
-    this.activeTab = tab;
+    this.activeTab.set(tab);
+  }
+
+  onWeekDatesChange(dates: Date[]): void {
+    this.weekDates.set(dates || []);
+  }
+
+  private formatDate(d: Date): string {
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   private currentWeekRange(): Date[] {
