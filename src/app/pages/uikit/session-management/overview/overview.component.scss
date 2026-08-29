@@ -810,6 +810,30 @@
     padding: 4px 0 0;
 }
 
+.comment-pcard-field-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px 0;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-color-secondary, #64748b);
+}
+
+.comment-pcard-optional-badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.22);
+    border-radius: 999px;
+    padding: 2px 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
 .comment-pcard-textarea {
     width: 100%;
     background: transparent !important;
@@ -817,7 +841,7 @@
     border-radius: 0 !important;
     box-shadow: none !important;
     outline: none !important;
-    padding: 14px 18px;
+    padding: 10px 18px 14px;
     font-size: 13px;
     color: var(--text-color, #1e293b);
     resize: vertical;

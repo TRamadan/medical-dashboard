@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToolbarModule } from 'primeng/toolbar';
 import { TabsModule } from 'primeng/tabs';
@@ -46,14 +46,12 @@ export interface Coach {
     selector: 'app-session-management',
     imports: [DayOverallComponent, SessionsComponent, OverviewComponent, TabsNavigationComponent, TagModule, ToastModule, FormsModule, DialogModule, ButtonModule, LucideAngularModule, CardModule, CommonModule, ToolbarModule, TabsModule],
     templateUrl: './session-management.component.html',
-    styleUrls: ['./session-management.component.css']
+    styleUrls: ['./session-management.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SessionManagementComponent implements OnInit {
-    coachData: Coach = {
-        id: 'C001',
-        name: 'Eng. Sarah Johnson',
-        specialization: 'Orthopedic Rehabilitation'
-    };
+    // Logged-in user name resolved from localStorage userData
+    readonly loggedInName = signal<string>('Coach');
     data = {
         sessionsDone: 12,
         remaining: 36,
@@ -80,5 +78,16 @@ export class SessionManagementComponent implements OnInit {
         this.currentTab = 'sessions';
     }
 
-    ngOnInit(): void { }
+    ngOnInit(): void {
+        try {
+            const raw = localStorage.getItem('userData');
+            if (raw) {
+                const userData = JSON.parse(raw);
+                const name = userData.nameEn || userData.nameAr || userData.userName || userData.name;
+                if (name) this.loggedInName.set(name);
+            }
+        } catch {
+            // localStorage unavailable or JSON parse failed — keep default
+        }
+    }
 }

@@ -1,4 +1,54 @@
+<p-toast></p-toast>
+
 <div class="day-overall-container">
+
+    @if (loading()) {
+    <!-- Loading State -->
+    <div class="d-flex flex-column justify-content-center align-items-center py-5 my-4">
+        <i class="pi pi-spin pi-spinner text-primary mb-3" style="font-size: 2.8rem;" aria-label="Loading day overall data"></i>
+        <span class="text-secondary fw-semibold" style="font-size: 1.1rem;">Loading day summary...</span>
+    </div>
+
+    } @else if (error()) {
+    <!-- Error State -->
+    <div class="card shadow-sm border-0 my-4 text-center py-5">
+        <div class="card-body py-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-danger-subtle text-danger rounded-circle mb-3"
+                style="width: 70px; height: 70px;">
+                <i class="pi pi-exclamation-triangle" style="font-size: 2.2rem;"></i>
+            </div>
+            <h2 class="h4 fw-bold text-dark mb-2">Failed to Load Day Summary</h2>
+            @if (error()?.status) {
+            <div class="mb-3">
+                <span class="badge bg-danger px-3 py-2 fs-6">HTTP Status Error {{ error()?.status }}</span>
+            </div>
+            }
+            <p class="text-secondary mb-4 mx-auto" style="max-width: 550px; font-size: 1rem;">
+                {{ error()?.message }}
+            </p>
+            <button pButton icon="pi pi-refresh" label="Retry" class="p-button-primary px-4 py-2"
+                (click)="loadDayOverall()"></button>
+        </div>
+    </div>
+
+    } @else if (dayOverall() === null) {
+    <!-- Empty State -->
+    <div class="card shadow-sm border-0 my-4 text-center py-5">
+        <div class="card-body py-4">
+            <div class="d-inline-flex align-items-center justify-content-center bg-secondary-subtle text-secondary rounded-circle mb-3"
+                style="width: 70px; height: 70px;">
+                <i class="pi pi-calendar-times" style="font-size: 2.2rem;"></i>
+            </div>
+            <h2 class="h4 fw-bold text-dark mb-2">No Data Available</h2>
+            <p class="text-secondary mb-4 mx-auto" style="max-width: 550px; font-size: 1rem;">
+                No day summary data is available for today.
+            </p>
+            <button pButton icon="pi pi-refresh" label="Refresh" class="p-button-outlined p-button-secondary px-4 py-2"
+                (click)="loadDayOverall()"></button>
+        </div>
+    </div>
+
+    } @else {
     <!-- Stats Grid -->
     <div class="stats-grid">
         @for (stat of stats(); track stat.label) {
@@ -10,7 +60,10 @@
                 </div>
                 <div class="stat-card__count">{{ stat.count }}</div>
                 <div class="stat-card__label">{{ stat.label }}</div>
-                <div class="stat-card__subtitle mt-1" style="font-size: 9px; color: var(--text-color-secondary, #6a718b); text-align: center;">{{ stat.subtitle }}</div>
+                <div class="stat-card__subtitle mt-1"
+                    style="font-size: 9px; color: var(--text-color-secondary, #6a718b); text-align: center;">
+                    {{ stat.subtitle }}
+                </div>
             </div>
         </div>
         }
@@ -23,39 +76,32 @@
 
     <!-- Sessions List -->
     <div class="sessions-list">
-        @for (session of sessions(); track session.engineer) {
+        @if (sessions().length === 0) {
+        <div class="text-center py-4 text-secondary">
+            <i class="pi pi-inbox mb-2" style="font-size: 2rem; display: block;"></i>
+            No sessions recorded for today.
+        </div>
+        } @else {
+        @for (session of sessions(); track session.phaseSessionId) {
         <p-card styleClass="session-pcard"
-                [style.--card-top-border-color]="session.topBorderColor"
-                [style.--card-top-border-width]="session.topBorderColor !== 'transparent' ? '2px' : '0px'">
+            [style.--card-top-border-color]="session.topBorderColor"
+            [style.--card-top-border-width]="session.topBorderColor !== 'transparent' ? '2px' : '0px'">
 
             <div class="session-card-content">
-                <!-- Left Content (Details) -->
+                <!-- Left: patient details -->
                 <div class="session-details">
                     <div class="status-dot" [style.background-color]="session.dotColor"></div>
                     <div class="session-info">
-                        <div class="session-title">
-                            {{ session.engineer }}
-                            @if (session.station) {
-                            <span>- {{ session.station }}</span>
-                            }
-                        </div>
-                        <div class="session-meta">
-                            {{ session.type }} {{ session.time }}
-                            @if (session.duration) {
-                            <span>- {{ session.duration }}</span>
-                            }
-                            @if (session.sessionNum) {
-                            <span>- {{ session.sessionNum }}</span>
-                            }
-                        </div>
+                        <div class="session-title">{{ session.patientName }}</div>
+                        <div class="session-meta">{{ session.sessionInfo }}</div>
                     </div>
                 </div>
 
-                <!-- Right Content (Rating / Badge) -->
+                <!-- Right: rating or status badge -->
                 <div class="session-actions">
                     @if (session.rating !== null) {
                     <div class="rating-display">
-                        <span class="rating-number">{{ session.ratingLabel }}</span>
+                        <span class="rating-number">{{ session.rating }}</span>
                         <div class="stars">
                             @for (star of session.stars; track $index) {
                             <i [class]="star === 1 ? 'pi pi-star-fill star-filled' : 'pi pi-star star-empty'"></i>
@@ -65,8 +111,10 @@
                     }
 
                     @if (session.badge) {
-                    <div class="status-badge" [style.color]="session.badge.color"
-                        [style.border-color]="session.badge.border" [style.background-color]="session.badge.bg">
+                    <div class="status-badge"
+                        [style.color]="session.badge.color"
+                        [style.border-color]="session.badge.border"
+                        [style.background-color]="session.badge.bg">
                         {{ session.badge.label }}
                     </div>
                     }
@@ -74,5 +122,8 @@
             </div>
         </p-card>
         }
+        }
     </div>
+    }
+
 </div>
