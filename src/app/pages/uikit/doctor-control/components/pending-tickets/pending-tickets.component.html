@@ -1,19 +1,34 @@
 <div class="dc-pt" dir="ltr">
 
-  <!-- ── Tab bar ───────────────────────────────────────────── -->
+  <!-- ── Tab bar & Toggle ────────────────────────────────────── -->
   <p-card styleClass="p-0 dc-tabs-card">
-    <div class="dc-pt__tabs" role="tablist" aria-label="Pending tickets tabs">
-      @for (tab of tabs; track tab.id) {
-      <button type="button" role="tab" class="dc-pt-tab" [class.dc-pt-tab--active]="activeTab() === tab.id"
-        (click)="setTab(tab.id)" [attr.aria-selected]="activeTab() === tab.id" [id]="'pt-tab-' + tab.id">
-        <span class="dc-pt-tab__emoji" aria-hidden="true">
-          @if (tab.id === 'decision') { ✋ }
-          @else if (tab.id === 'urgent') { 🚨 }
-          @else { 📋 }
-        </span>
-        <span class="dc-pt-tab__label">{{ tab.label }}</span>
-      </button>
-      }
+    <div class="dc-pt__header-bar">
+      <div class="dc-pt__tabs" role="tablist" aria-label="Pending tickets tabs">
+        @for (tab of tabs; track tab.id) {
+        <button type="button" role="tab" class="dc-pt-tab" [class.dc-pt-tab--active]="activeTab() === tab.id"
+          (click)="setTab(tab.id)" [attr.aria-selected]="activeTab() === tab.id" [id]="'pt-tab-' + tab.id">
+          <span class="dc-pt-tab__emoji" aria-hidden="true">
+            @if (tab.id === 'decision') { ✋ }
+            @else if (tab.id === 'urgent') { 🚨 }
+            @else { 📋 }
+          </span>
+          <span class="dc-pt-tab__label">{{ tab.label }}</span>
+        </button>
+        }
+      </div>
+
+      <!-- Mock Data Toggle Switch -->
+      <div class="dc-pt__toggle-container">
+        <label for="mock-data-toggle" class="dc-pt__toggle-label">
+          Mock Data
+        </label>
+        <p-toggleswitch
+          inputId="mock-data-toggle"
+          [ngModel]="useMockData()"
+          (ngModelChange)="toggleMockData($event)"
+          aria-label="Toggle mock data mode"
+        />
+      </div>
     </div>
   </p-card>
 
@@ -45,8 +60,19 @@
 
       <!-- Sort hint -->
       <div class="dc-pt__sort-line">
-        <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
-        Sorted by urgency (Urgent first), then newest first
+        <span>
+          <i class="pi pi-arrow-up-right" aria-hidden="true"></i>
+          Sorted by urgency (Urgent first), then newest first
+        </span>
+        @if (useMockData()) {
+        <span class="dc-pt__mock-badge">
+          <i class="pi pi-info-circle" aria-hidden="true"></i> Mock Data
+        </span>
+        } @else {
+        <span class="dc-pt__api-badge">
+          <i class="pi pi-server" aria-hidden="true"></i> Live API Data
+        </span>
+        }
       </div>
 
       @if (tickets().length === 0) {

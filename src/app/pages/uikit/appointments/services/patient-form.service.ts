@@ -242,13 +242,17 @@ export class PatientFormService {
 
     readonly form = signal<PatientForm>(structuredClone(defaultForm));
 
-    // ── Submit state signals ──────────────────────────────────────────────────
+    // ── Submit & Fetch state signals ──────────────────────────────────────────
     readonly submitLoading = signal<boolean>(false);
     readonly submitError = signal<string | null>(null);
     readonly submitSuccess = signal<boolean>(false);
+    readonly isLoadingProfile = signal<boolean>(false);
+    readonly hasExistingProfileData = signal<boolean>(false);
 
     reset(): void {
         this.form.set(structuredClone(defaultForm));
+        this.hasExistingProfileData.set(false);
+        this.isLoadingProfile.set(false);
     }
 
     patch(partial: Partial<PatientForm>): void {
@@ -408,24 +412,48 @@ export class PatientFormService {
         );
     }
 
-    // ── Fetch profile by appointmentId ──
+    // ── Fetch profile by appointmentId / consultationId ──
     getConsultationProfile(appointmentId: number): Observable<any> {
-        this.submitLoading.set(true);
+        this.isLoadingProfile.set(true);
         this.submitError.set(null);
-        return this.http.get<{ data: any; isSuccess: boolean; error: any }>(`${this.baseUrl}/${appointmentId}`).pipe(
+        return this.http.get<any>(`${this.baseUrl}/${appointmentId}`).pipe(
             tap(res => {
-                this.submitLoading.set(false);
-                if (res && res.isSuccess && res.data) {
-                    this.applyProfileData(res.data);
+                this.isLoadingProfile.set(false);
+                const rawData = (res && res.data !== undefined) ? res.data : res;
+                if (rawData && this.isProfileDataNotEmpty(rawData)) {
+                    this.hasExistingProfileData.set(true);
+                    this.applyProfileData(rawData);
+                } else {
+                    this.hasExistingProfileData.set(false);
                 }
             }),
             catchError((err: HttpErrorResponse) => {
-                this.submitLoading.set(false);
-                const errorMsg = err?.error?.error || 'فشل تحميل بيانات الملف الشخصي للمريض.';
+                this.isLoadingProfile.set(false);
+                this.hasExistingProfileData.set(false);
+                const errorMsg = err?.error?.error || err?.message || 'فشل تحميل بيانات الملف الشخصي للمريض.';
                 this.submitError.set(errorMsg);
                 return throwError(() => err);
             })
         );
+    }
+
+    private isProfileDataNotEmpty(data: any): boolean {
+        if (!data) return false;
+        const p = data.personalData;
+        const s = data.sportsData;
+        const i = data.injuryData;
+        const h = data.injuryHistory;
+        const m = data.medicalHistory;
+        const soc = data.socialProfile;
+
+        const hasPersonal = !!(p && (p.fullName || p.phoneNumber || p.address || p.dateOfBirth || p.emergencyPhone));
+        const hasSports = !!(s && (s.sport || s.playCenter || s.clubName || s.yearsOfPractice || s.highestAchievement));
+        const hasInjury = !!(i && (i.injuryName || i.injuryDescription || i.painLevel || i.functionalLevel || i.dailyActivityLevel));
+        const hasHistory = !!(h && ((h.previousInjuries && h.previousInjuries.length > 0) || (h.previousSurgeries && h.previousSurgeries.length > 0)));
+        const hasMedical = !!(m && (m.currentConditions || m.otherConditions || (m.medications && m.medications.length > 0) || m.knownAllergies));
+        const hasSocial = !!(soc && (soc.occupation || soc.dailySittingHours || soc.habits));
+
+        return hasPersonal || hasSports || hasInjury || hasHistory || hasMedical || hasSocial;
     }
 
     applyProfileData(data: any): void {

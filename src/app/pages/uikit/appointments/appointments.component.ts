@@ -44,7 +44,6 @@ import { ViewSide, BodyState } from 'body-muscles';
 
 @Component({
     selector: 'app-appointments',
-    standalone: true,
     imports: [
         CardModule,
         ProgressSpinnerModule,
@@ -677,20 +676,49 @@ export class AppointmentsComponent implements OnInit {
 
     openCompletePatientInfo(row: any) {
         this.currentPatientRow = row;
+        this.selectedMockId = null;
         this._patientFormService.reset();
-        this._patientFormService.patch({
-            personalData: {
-                ...this._patientFormService.form().personalData,
-                fullName: row.patientNameEn || ''
-            }
-        });
-        this.refreshFromService();
         this.displayCompletePatientInfoDialog = true;
+
+        if (row?.id) {
+            this._patientFormService.getConsultationProfile(row.id).subscribe({
+                next: () => {
+                    if (!this._patientFormService.hasExistingProfileData()) {
+                        this._patientFormService.patch({
+                            personalData: {
+                                ...this._patientFormService.form().personalData,
+                                fullName: row.patientNameEn || ''
+                            }
+                        });
+                    }
+                    this.refreshFromService();
+                },
+                error: () => {
+                    this._patientFormService.patch({
+                        personalData: {
+                            ...this._patientFormService.form().personalData,
+                            fullName: row.patientNameEn || ''
+                        }
+                    });
+                    this.refreshFromService();
+                }
+            });
+        } else {
+            this._patientFormService.patch({
+                personalData: {
+                    ...this._patientFormService.form().personalData,
+                    fullName: row?.patientNameEn || ''
+                }
+            });
+            this.refreshFromService();
+        }
     }
 
     closePatientInfoDialog() {
         this.displayCompletePatientInfoDialog = false;
         this.currentPatientRow = null;
+        this.selectedMockId = null;
+        this._patientFormService.reset();
     }
 
     savePatientInfo(): void {

@@ -268,28 +268,55 @@
     [style]="{ width: '95vw', maxWidth: '1000px' }" [draggable]="false" [resizable]="false"
     [contentStyle]="{ 'max-height': '78vh', 'overflow-y': 'auto' }" (onHide)="closePatientInfoDialog()" dir="rtl">
 
-    <div *ngIf="currentPatientRow" class="container-fluid p-fluid patient-info-form">
-
-        <!-- ════════════════ Test / Mock Data Banner ════════════════ -->
-        <div class="mock-banner flex items-center gap-3 mb-3 p-3 border-round"
-            style="background: linear-gradient(135deg,#fffbeb,#fef3c7); border:1px dashed #f59e0b;">
-            <i class="pi pi-flask text-amber-500 text-lg flex-shrink-0"></i>
-            <span class="text-sm font-semibold text-amber-800">بيانات تجريبية:</span>
-            <p-select [options]="mockPresets" [(ngModel)]="selectedMockId" optionLabel="label" optionValue="id"
-                placeholder="— اختر سيناريو لملء النموذج تلقائياً —" styleClass="flex-1" appendTo="body"
-                (onChange)="loadMock(selectedMockId)">
-                <ng-template #option let-item>
-                    <div>
-                        <div class="font-semibold text-sm">{{ item.label }}</div>
-                        <div class="text-xs text-gray-500">{{ item.description }}</div>
-                    </div>
-                </ng-template>
-            </p-select>
-            <p-button *ngIf="selectedMockId" icon="pi pi-times" styleClass="p-button-text p-button-sm p-button-warning"
-                pTooltip="مسح البيانات التجريبية" tooltipPosition="top" (click)="selectedMockId = null">
-            </p-button>
+    @if (_patientFormService.isLoadingProfile()) {
+        <div class="flex flex-col items-center justify-center p-8 text-center min-h-[300px] gap-3">
+            <p-progressSpinner strokeWidth="4" animationDuration=".8s" styleClass="w-12 h-12"></p-progressSpinner>
+            <span class="text-gray-600 font-medium">جاري تحميل بيانات المريض...</span>
         </div>
-        <!-- ═══════════════════════════════════════════════════════════ -->
+    } @else if (currentPatientRow) {
+        <div class="container-fluid p-fluid patient-info-form">
+
+            <!-- ════════════════ Profile Data Status Banner / Placeholder ════════════════ -->
+            @if (_patientFormService.hasExistingProfileData()) {
+                <div class="flex items-center gap-3 mb-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-900 shadow-sm">
+                    <i class="pi pi-check-circle text-emerald-600 text-2xl flex-shrink-0"></i>
+                    <div class="flex-1">
+                        <div class="font-bold text-sm">تم العثور على بيانات مسجلة سابقاً للمريض</div>
+                        <div class="text-xs text-emerald-700">تم استرجاع البيانات المسجلة بنجاح. يمكنك مراجعتها والتعديل عليها لحفظها.</div>
+                    </div>
+                </div>
+            } @else {
+                <div class="flex items-center gap-3 mb-3 p-3 rounded-lg bg-blue-50 border border-blue-200 text-blue-900 shadow-sm">
+                    <i class="pi pi-info-circle text-blue-600 text-2xl flex-shrink-0"></i>
+                    <div class="flex-1">
+                        <div class="font-bold text-sm">لا توجد بيانات سابقة للمريض</div>
+                        <div class="text-xs text-blue-700">لم يتم العثور على بيانات سابقة مسجلة، يرجى ملء الاستمارة وتعبئة البيانات المطلوبة.</div>
+                    </div>
+                </div>
+            }
+
+            <!-- ════════════════ Test / Mock Data Banner ════════════════ -->
+            <div class="mock-banner flex items-center gap-3 mb-3 p-3 border-round"
+                style="background: linear-gradient(135deg,#fffbeb,#fef3c7); border:1px dashed #f59e0b;">
+                <i class="pi pi-flask text-amber-500 text-lg flex-shrink-0"></i>
+                <span class="text-sm font-semibold text-amber-800">بيانات تجريبية:</span>
+                <p-select [options]="mockPresets" [(ngModel)]="selectedMockId" optionLabel="label" optionValue="id"
+                    placeholder="— اختر سيناريو لملء النموذج تلقائياً —" styleClass="flex-1" appendTo="body"
+                    (onChange)="loadMock(selectedMockId)">
+                    <ng-template #option let-item>
+                        <div>
+                            <div class="font-semibold text-sm">{{ item.label }}</div>
+                            <div class="text-xs text-gray-500">{{ item.description }}</div>
+                        </div>
+                    </ng-template>
+                </p-select>
+                @if (selectedMockId) {
+                    <p-button icon="pi pi-times" styleClass="p-button-text p-button-sm p-button-warning"
+                        pTooltip="مسح البيانات التجريبية" tooltipPosition="top" (click)="selectedMockId = null">
+                    </p-button>
+                }
+            </div>
+            <!-- ═══════════════════════════════════════════════════════════ -->
 
         <p-tabs value="0" [scrollable]="true">
             <p-tablist>
@@ -875,6 +902,7 @@
             </p-tabpanels>
         </p-tabs>
     </div>
+    }
 
     <ng-template pTemplate="footer">
         <p-button icon="pi pi-times" (click)="closePatientInfoDialog()" label="إلغاء" styleClass="p-button-text"
