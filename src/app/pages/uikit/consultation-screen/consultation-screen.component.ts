@@ -110,24 +110,28 @@ export class ConsultationScreenComponent {
     readonly patientProfileError = signal<string | null>(null);
     readonly rawPatientProfile = signal<any>(null);
 
+    loadPatientProfile(appointmentId: number): void {
+        this.patientProfileLoading.set(true);
+        this.patientProfileError.set(null);
+        this._patientFormService.getConsultationProfile(appointmentId).subscribe({
+            next: (res) => {
+                this.patientProfileLoading.set(false);
+                if (res && res.data) {
+                    this.rawPatientProfile.set(res.data);
+                }
+            },
+            error: () => {
+                this.patientProfileLoading.set(false);
+                this.patientProfileError.set('فشل تحميل بيانات الملف الشخصي للمريض');
+            }
+        });
+    }
+
     openPatientProfileDialog(): void {
         this.displayPatientInfoDialog = true;
         const id = this.appointmentId();
-        if (id) {
-            this.patientProfileLoading.set(true);
-            this.patientProfileError.set(null);
-            this._patientFormService.getConsultationProfile(id).subscribe({
-                next: (res) => {
-                    this.patientProfileLoading.set(false);
-                    if (res && res.data) {
-                        this.rawPatientProfile.set(res.data);
-                    }
-                },
-                error: () => {
-                    this.patientProfileLoading.set(false);
-                    this.patientProfileError.set('فشل تحميل بيانات الملف الشخصي للمريض');
-                }
-            });
+        if (id && !this.rawPatientProfile()) {
+            this.loadPatientProfile(id);
         }
     }
 
@@ -163,8 +167,8 @@ export class ConsultationScreenComponent {
 
         return {
             appointmentId: raw.appointmentId ?? this.appointmentId(),
-            isPaid: raw.isPaid ?? true,
-            isProfileComplete: raw.isProfileComplete ?? true,
+            isPaid: typeof raw.isPaid === 'boolean' ? raw.isPaid : false,
+            isProfileComplete: typeof raw.isProfileComplete === 'boolean' ? raw.isProfileComplete : false,
             personalData: form.personalData,
             sportsData: form.sportsData,
             injuryData: form.injuryData,
@@ -239,6 +243,7 @@ export class ConsultationScreenComponent {
                 this.sessionLoading.set(false);
             }
         });
+        this.loadPatientProfile(appointmentId);
     }
 
     /** Pre-fills every local form field from a GET response. `id: 0` means "not started yet" — leave defaults. */
@@ -467,6 +472,23 @@ export class ConsultationScreenComponent {
 
     // ── Athlete data ────────────────────────────────────────────────────────
     readonly athleteInfo = computed<AthleteInfo | null>(() => {
+        const info = this.patientInfo;
+        const fullName = info.personalData?.fullName;
+        if (fullName) {
+            const initials = info.ui?.initials || '—';
+            const metaParts: string[] = [];
+            if (info.ui?.age) metaParts.push(`${info.ui.age} yrs`);
+            if (info.sportsData?.sport) metaParts.push(info.sportsData.sport);
+            if (info.injuryData?.injuryName) metaParts.push(info.injuryData.injuryName);
+            if (!metaParts.length && info.personalData?.phoneNumber) metaParts.push(info.personalData.phoneNumber);
+
+            return {
+                name: fullName,
+                initials: initials,
+                meta: metaParts.join(' · ') || 'Athlete Details'
+            };
+        }
+
         const t = this.entryType();
         if (!t) return null;
         const map: Record<EntryType, AthleteInfo> = {
@@ -704,71 +726,131 @@ export class ConsultationScreenComponent {
     ];
 
     // ── Derived / helpers ────────────────────────────────────────────────────
-    readonly sidebarData = computed(() => {
+    readonly sidebarData = computed<SidebarData | null>(() => {
         const t = this.entryType();
-        if (!t) return null;
-        const map: Record<EntryType, SidebarData> = {
-            new: {
-                title: 'Athlete Summary',
-                items: [
-                    { color: '#EEEEF8', text: 'Hani Salem · 28 yrs' },
-                    { color: '#3DD9A0', text: 'Football — Active Amateur' },
-                    { color: '#FC6B44', text: 'Right knee pain · 3 months' }
-                ],
-                history: [
-                    { color: '#E24B4A', text: 'Ankle sprain 2023 (healed)' },
-                    { color: '#7A7FA8', text: 'No chronic illness · No medications' }
-                ],
-                ticketStatus: [
-                    { color: '#3DD9A0', text: 'Data Map complete ✓' },
-                    { color: '#3DD9A0', text: 'Payment confirmed ✓ — 4,000 EGP' }
-                ],
-                activeProtocol: null
-            },
-            return: {
-                title: 'Athlete Summary — Returning',
-                items: [
-                    { color: '#C9A84C', text: 'Omar Tarek · 32 yrs · Graduated' },
-                    { color: '#3DD9A0', text: 'Previous Program: ACL RTP — Grad Mar 2026' },
-                    { color: '#FC6B44', text: 'New Complaint: Right Shoulder Pain' }
-                ],
-                history: [
-                    { color: '#3DD9A0', text: 'ACL Reconstruction — 24 weeks' },
-                    { color: '#3DD9A0', text: 'Adherence 94% · NPS 9.2 · Excellent result' },
-                    { color: '#3DD9A0', text: 'LSI at graduation: 92%' }
-                ],
-                ticketStatus: [
-                    { color: '#C9A84C', text: 'Total paid previously: 13,000 EGP' },
-                    { color: '#3DD9A0', text: 'Data Map valid until Jan 2027' }
-                ],
-                activeProtocol: null
-            },
-            reassess: {
-                title: 'Athlete — Active Program',
-                items: [
-                    { color: '#FC6B44', text: 'Karim Mahmoud · 25 yrs' },
-                    { color: '#3DD9A0', text: 'Basketball — Professional' },
-                    { color: '#FC6B44', text: 'New complaint: Right shoulder pain during passing' }
-                ],
-                history: [
-                    { color: '#E24B4A', text: 'ACL Reconstruction — Jan 2026' },
-                    { color: '#7A7FA8', text: 'No chronic illness' }
-                ],
-                ticketStatus: [],
-                activeProtocol: {
-                    title: 'ACL Return to Play — Active',
-                    rows: [
-                        { label: 'Phase', value: '3 of 5 — Strength' },
-                        { label: 'Sessions', value: '18 of 36 completed' },
-                        { label: 'Completion', value: '50%' },
-                        { label: 'Lead', value: 'Ahmed Salem' },
-                        { label: 'Engineers', value: 'R: Sara · S: Karim · A: Mohamed' },
-                        { label: 'Phase Criteria', value: '2 of 4 achieved' }
-                    ]
-                }
+        const raw = this.rawPatientProfile();
+        const info = this.patientInfo;
+        const pData = info.personalData;
+        const sData = info.sportsData;
+        const iData = info.injuryData;
+        const hData = info.injuryHistory;
+
+        // If there's no entryType selected and no raw patient profile loaded, return null
+        if (!t && !raw) return null;
+
+        const fullName = pData?.fullName?.trim() || '';
+        const age = info.ui?.age;
+        const phone = pData?.phoneNumber || '';
+
+        const items: SidebarItem[] = [];
+
+        // 1. Name & Age or Phone
+        if (fullName) {
+            const subtitle = age ? ` · ${age} سنة` : (phone ? ` · ${phone}` : '');
+            items.push({ color: '#EEEEF8', text: `${fullName}${subtitle}` });
+        } else {
+            items.push({ color: '#EEEEF8', text: 'بيانات المريض الأساسية' });
+        }
+
+        // 2. Sport Data
+        if (sData?.sport) {
+            const playCenterStr = sData.playCenter ? ` — ${sData.playCenter}` : '';
+            const clubStr = sData.clubName ? ` (${sData.clubName})` : '';
+            items.push({ color: '#3DD9A0', text: `${sData.sport}${playCenterStr}${clubStr}` });
+        } else {
+            items.push({ color: '#7A7FA8', text: 'بيانات الرياضة: غير مسجلة' });
+        }
+
+        // 3. Injury Data
+        if (iData?.injuryName) {
+            const sideStr = info.ui?.injurySideLabel ? ` (${info.ui.injurySideLabel})` : '';
+            const durStr = iData.inactivityDurationValue
+                ? ` · ${iData.inactivityDurationValue} ${info.ui?.inactivityDurationUnitLabel || ''}`
+                : '';
+            items.push({ color: '#FC6B44', text: `${iData.injuryName}${sideStr}${durStr}` });
+        } else {
+            items.push({ color: '#7A7FA8', text: 'بيانات الإصابة: غير مسجلة' });
+        }
+
+        // History
+        const history: SidebarItem[] = [];
+        const prevInjuries = hData?.previousInjuries || [];
+        const prevSurgeries = hData?.previousSurgeries || [];
+
+        prevInjuries.forEach(inj => {
+            if (inj.bodyPart || inj.description) {
+                const parts = [inj.bodyPart, inj.description].filter(Boolean).join(' — ');
+                const dateStr = inj.injuryDate ? ` (${inj.injuryDate})` : '';
+                history.push({ color: '#E24B4A', text: `${parts}${dateStr}` });
             }
+        });
+
+        prevSurgeries.forEach(surg => {
+            if (surg.surgeryType || surg.description) {
+                const parts = [surg.surgeryType, surg.description].filter(Boolean).join(' — ');
+                const dateStr = surg.surgeryDate ? ` (${surg.surgeryDate})` : '';
+                history.push({ color: '#E24B4A', text: `جراحة: ${parts}${dateStr}` });
+            }
+        });
+
+        if (info.medicalHistory?.knownAllergies) {
+            history.push({ color: '#7A7FA8', text: `حساسية: ${info.medicalHistory.knownAllergies}` });
+        }
+
+        if (history.length === 0) {
+            history.push({ color: '#7A7FA8', text: 'لا يوجد تاريخ إصابي أو مرضي سابق' });
+        }
+
+        // Ticket Status
+        const ticketStatus: SidebarItem[] = [];
+        const isComplete = info.isProfileComplete;
+        const isPaid = info.isPaid;
+
+        ticketStatus.push({
+            color: isComplete ? '#3DD9A0' : '#FC6B44',
+            text: isComplete ? 'الملف الشخصي مكتمل ✓' : 'الملف الشخصي غير مكتمل'
+        });
+
+        ticketStatus.push({
+            color: isPaid ? '#3DD9A0' : '#E24B4A',
+            text: isPaid ? 'الرسوم مدفوعة ✓' : 'الرسوم غير مدفوعة'
+        });
+
+        if (info.appointmentId) {
+            ticketStatus.push({
+                color: '#3DD9A0',
+                text: `رقم الحجز: #${info.appointmentId}`
+            });
+        }
+
+        // Active Protocol (if reassess)
+        let activeProtocol: SidebarData['activeProtocol'] = null;
+        if (t === EntryType.Reassess) {
+            activeProtocol = {
+                title: 'برنامج التأهيل النشط',
+                rows: [
+                    { label: 'المريض', value: fullName || '—' },
+                    { label: 'الرياضة', value: sData?.sport || '—' }
+                ]
+            };
+        }
+
+        let title = 'Athlete Summary';
+        if (fullName) {
+            title = t === EntryType.Return
+                ? `Athlete Summary — Returning (${fullName})`
+                : t === EntryType.Reassess
+                ? `Athlete — Active Program (${fullName})`
+                : `Athlete Summary (${fullName})`;
+        }
+
+        return {
+            title,
+            items,
+            history,
+            ticketStatus,
+            activeProtocol
         };
-        return map[t] ?? null;
     });
 
     // ── Actions ──────────────────────────────────────────────────────────────
@@ -780,11 +862,11 @@ export class ConsultationScreenComponent {
         this.selectedReassessPath.set(null);
         this.actionDone.set(false);
 
-        // Seed PatientFormService with mockup data matching the selected entry type.
-        // Shaped to match PatientForm (personalData/sportsData/injuryData/injuryHistory/
-        // medicalHistory/socialProfile/ui) from patient-form.service.ts — the old flat
-        // shape here (gender/weight/height/decisionInfluencers/consentFullName/etc.)
-        // never matched the real API contract and has been dropped.
+        // Seed PatientFormService with mockup data matching the selected entry type ONLY if no API profile data exists.
+        if (this._patientFormService.hasExistingProfileData() || this.rawPatientProfile()) {
+            return;
+        }
+
         this._patientFormService.reset();
 
         if (type === EntryType.New) {
@@ -939,9 +1021,7 @@ export class ConsultationScreenComponent {
      * Takes `number` (not FlowStep) because the template computes `i + 1` as a
      * plain number — the cast to FlowStep happens here, in one place. */
     onStepClick(step: number): void {
-        if (step <= this.currentStep()) {
-            this.go(step as FlowStep);
-        }
+        this.go(step as FlowStep);
     }
 
     addProcedure(): void {
@@ -1182,19 +1262,8 @@ export class ConsultationScreenComponent {
         this.judgmentChoice.set(choice);
     }
 
-    // Mirrors the old getDecisionConfirmVisible(), but branches on judgmentChoice()
     getJudgmentConfirmVisible(): boolean {
-        if (this.judgmentChoice() === 'writeReport') {
-            return !!this.generalOpinion?.trim()
-                && !!this.diagnosisText?.trim()
-                && !!this.goalText?.trim();
-        }
-        if (this.judgmentChoice() === 'extraAssessment') {
-            return this.entryType() === EntryType.Reassess
-                ? !!this.selectedReassessPath()
-                : !!this.selectedPath();
-        }
-        return false;
+        return true;
     }
 
 

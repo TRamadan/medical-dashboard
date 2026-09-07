@@ -40,7 +40,39 @@
         <!-- Sidebar -->
 
         <aside class="consultation-sidebar">
-            <p-card styleClass="h-full flex flex-col justify-content-center align-items-center">
+            <p-card styleClass="h-full">
+                @if (sidebarData(); as sb) {
+                <div class="sidebar-summary" style="padding: 0.5rem;" dir="rtl">
+                    <div class="font-bold text-base mb-3 pb-2"
+                        style="border-bottom: 1px solid var(--p-content-border-color); color: var(--p-primary-color);">
+                        {{ sb.title }}
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="text-xs font-bold text-muted mb-2">معلومات المريض</div>
+                        @for (item of sb.items; track $index) {
+                        <div class="text-xs font-semibold p-2 mb-1.5 rounded"
+                            [style.background-color]="item.color === '#EEEEF8' ? 'var(--p-surface-100)' : item.color + '22'"
+                            [style.color]="item.color === '#EEEEF8' ? 'var(--p-text-color)' : item.color">
+                            {{ item.text }}
+                        </div>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="text-xs font-bold text-muted mb-2">حالة التذكرة والملف</div>
+                        @for (item of sb.ticketStatus; track $index) {
+                        <div class="text-xs font-semibold p-2 mb-1.5 rounded"
+                            [style.background-color]="item.color + '22'" [style.color]="item.color">
+                            {{ item.text }}
+                        </div>
+                        }
+                    </div>
+
+                    <p-button label="فتح ملف المريض" icon="pi pi-folder-open" severity="primary"
+                        (onClick)="openPatientProfileDialog()" styleClass="w-full mt-2"></p-button>
+                </div>
+                } @else {
                 <div class="empty-sidebar" style="padding: 2rem 1rem; text-align: center;">
                     <i class="pi pi-user"
                         style="font-size:3rem; margin-bottom: 1rem; color: var(--p-primary-color)"></i>
@@ -56,6 +88,7 @@
                     </div>
                     }
                 </div>
+                }
             </p-card>
         </aside>
 
@@ -75,10 +108,10 @@
             <!-- Step Bar (PrimeNG Stepper — steps-only mode; step content stays in the
                  existing @if (currentStep() === N) blocks below, unchanged) -->
             @if (flowStarted()) {
-            <p-stepper [value]="currentStep()" [linear]="true" class="mb-4">
+            <p-stepper [value]="currentStep()" (valueChange)="go($event)" [linear]="false" class="mb-4">
                 <p-step-list>
                     @for (label of stepLabels(); track $index; let i = $index) {
-                    <p-step [value]="i + 1" (click)="onStepClick(i + 1)">{{ label }}</p-step>
+                    <p-step [value]="i + 1" (click)="onStepClick(i + 1)" style="cursor: pointer;">{{ label }}</p-step>
                     }
                 </p-step-list>
             </p-stepper>
@@ -805,11 +838,9 @@
             <div class="btn-row">
                 <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
                     [disabled]="sessionSaving()" (onClick)="go(3)"></p-button>
-                @if (getJudgmentConfirmVisible()) {
                 <p-button [label]="judgmentChoice() === 'writeReport' ? 'Next — Athlete Report' : 'Confirm Judgment'"
                     icon="pi pi-arrow-right" iconPos="right" [loading]="sessionSaving()" [disabled]="sessionSaving()"
                     (onClick)="submitJudgment()"></p-button>
-                }
             </div>
             }
 
@@ -820,7 +851,7 @@
                 <p-card styleClass="mb-3">
                     <ng-template pTemplate="title">
                         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <span>Athlete Report</span>
+                            <span>Athlete jsfkjjf Report</span>
 
                         </div>
                     </ng-template>
@@ -1853,8 +1884,8 @@
     }
 </style>
 
-<p-dialog [(visible)]="displayPatientInfoDialog" [modal]="true" header="ملف المريض الشامل"
-    [draggable]="false" [resizable]="false" [maximizable]="true" styleClass="dossier-dialog" dir="rtl">
+<p-dialog [(visible)]="displayPatientInfoDialog" [modal]="true" header="ملف المريض الشامل" [draggable]="false"
+    [resizable]="false" [maximizable]="true" styleClass="dossier-dialog" dir="rtl">
 
     <div class="dossier" dir="rtl">
 
