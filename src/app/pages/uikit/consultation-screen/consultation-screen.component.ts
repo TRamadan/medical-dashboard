@@ -28,7 +28,7 @@ import { ContactUsComponent } from '../contact-us/contact-us.component';
 import { MuscleSkeletonViewerComponent } from '../appointments/muscle-skeleton-viewer/muscle-skeleton-viewer.component';
 import { PatientFormService } from '../appointments/services/patient-form.service';
 import { ServicesService } from '../add-service/services/services.service';
-import { MeasurementTemplatesService } from "../measurements-config/services/measurement-templates.service";
+import { MeasurementCategoriesService } from "../measurements-config/services/measurement-categories.service";
 import {
     ConsultationSessionService,
     ConsultationSessionDto,
@@ -646,8 +646,8 @@ export class ConsultationScreenComponent {
         { label: 'Recharger', value: '3' }
     ];
 
-    // ── Measurement path detail fields — options loaded from /api/MeasurementTemplates ──
-    measurementType: string[] | null = null;
+    // ── Measurement path detail fields ─────────────────────────────────────────
+    measurementType: number[] | null = null;
     measurementSide: string | null = null;
     measurementDate: Date | null = null;
 
@@ -657,32 +657,80 @@ export class ConsultationScreenComponent {
         { label: 'Bilateral', value: 'bilateral' }
     ];
 
-    readonly measurementTemplatesLoading = signal(true);
-    readonly measurementTemplatesError = signal<string | null>(null);
+    private readonly _measurementCategoriesService = inject(MeasurementCategoriesService);
 
-    readonly measurementsService = inject(MeasurementTemplatesService);
+    // ── Sub-categories dropdown ────────────────────────────────────────────────
+    readonly subCategoriesLoading = signal(false);
+    readonly subCategoriesError = signal<string | null>(null);
+    readonly subCategoriesRaw = signal<any[]>([]);
 
-    private readonly _measurementTemplatesRaw = toSignal(
-        this.measurementsService.getAllTemplates().pipe(
-            map(data => { this.measurementTemplatesLoading.set(false); return data; }),
-            catchError(err => {
-                this.measurementTemplatesLoading.set(false);
-                this.measurementTemplatesError.set(err?.message ?? 'Failed to load measurement templates');
-                return of([]);
-            }),
-            startWith([])
-        ),
-        { initialValue: [] }
-    );
-
-    // ⚠ Template shape assumed to mirror getServices()'s {id, nameEn, nameAr} —
-    // adjust the field names below if MeasurementTemplates returns something else.
-    readonly measurementTypeOptions = computed(() =>
-        (this._measurementTemplatesRaw() ?? []).map((t: any) => ({
-            label: t.nameEn ?? t.nameAr ?? t.name ?? `Template ${t.id}`,
-            value: t.id ?? t.name
+    readonly subCategoryOptions = computed(() =>
+        this.subCategoriesRaw().map((sc: any) => ({
+            label: sc.nameEn ?? sc.nameAr ?? sc.name ?? `SubCategory ${sc.id}`,
+            value: sc.id
         }))
     );
+
+    /** Selected sub-category ID (first dropdown). Loading measurements is triggered on change. */
+    readonly selectedSubCategoryId = signal<number | null>(null);
+
+    onSubCategoryChange(id: number | null): void {
+        this.selectedSubCategoryId.set(id);
+        this.measurementType = null;  // reset multi-select
+        if (id != null) {
+            this.loadMeasurementsBySubCategory(id);
+        } else {
+            this.measurementItemOptions.set([]);
+        }
+    }
+
+    loadSubCategories(): void {
+        if (this.subCategoriesRaw().length > 0) return; // already loaded
+        this.subCategoriesLoading.set(true);
+        this.subCategoriesError.set(null);
+        this._measurementCategoriesService.getAllSubCategories().subscribe({
+            next: (data) => {
+                this.subCategoriesRaw.set(data ?? []);
+                this.subCategoriesLoading.set(false);
+            },
+            error: (err) => {
+                this.subCategoriesError.set(err?.message ?? 'Failed to load sub-categories');
+                this.subCategoriesLoading.set(false);
+            }
+        });
+    }
+
+    // ── Measurement items multi-select (loads by sub-category ID) ─────────────
+    readonly measurementItemsLoading = signal(false);
+    readonly measurementItemsError = signal<string | null>(null);
+    readonly measurementItemOptions = signal<{ label: string; value: number }[]>([]);
+
+    private loadMeasurementsBySubCategory(subCategoryId: number): void {
+        this.measurementItemsLoading.set(true);
+        this.measurementItemsError.set(null);
+        this._measurementCategoriesService.getSubCategoryById(subCategoryId).subscribe({
+            next: (data) => {
+                // getSubCategoryById returns an object with a measurements array
+                const measurements: any[] = data?.measurements ?? (Array.isArray(data) ? data : []);
+                this.measurementItemOptions.set(
+                    measurements.map((m: any) => ({
+                        label: m.nameEn ?? m.nameAr ?? m.name ?? `Measurement ${m.id}`,
+                        value: m.id
+                    }))
+                );
+                this.measurementItemsLoading.set(false);
+            },
+            error: (err) => {
+                this.measurementItemsError.set(err?.message ?? 'Failed to load measurements');
+                this.measurementItemsLoading.set(false);
+            }
+        });
+    }
+
+    // ── (Legacy) measurementTypeOptions kept for any other template reference ─
+    readonly measurementTemplatesLoading = signal(false);
+    readonly measurementTemplatesError = signal<string | null>(null);
+    readonly measurementTypeOptions = computed(() => this.measurementItemOptions());
 
     // ── Referral path detail fields ─────────────────────────────────────────
     referralTest: string = 'MRI';

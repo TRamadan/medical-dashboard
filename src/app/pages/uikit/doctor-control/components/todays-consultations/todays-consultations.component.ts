@@ -10,6 +10,7 @@ import { SlicePipe } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { finalize } from 'rxjs';
+import { Router } from '@angular/router';
 import {
   TodaysConsultationsService,
   CalendarDay,
@@ -39,6 +40,20 @@ function indicatorColor(indicator: string): string {
 })
 export class TodaysConsultationsComponent implements OnInit {
   private readonly service = inject(TodaysConsultationsService);
+  private readonly router = inject(Router);
+
+  // ── Navigation to Consultation ────────────────────────────────────
+
+  navigateToConsultation(appointmentId: number, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (appointmentId != null) {
+      this.router.navigate(['/uikit/consultation-type'], {
+        queryParams: { appointmentId }
+      });
+    }
+  }
 
   // ── State ─────────────────────────────────────────────────────────
 

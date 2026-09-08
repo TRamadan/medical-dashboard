@@ -183,6 +183,7 @@ $muted: #64748b;
 }
 
 .dc-cal-chip {
+  cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -198,7 +199,7 @@ $muted: #64748b;
   width: 100%;
   overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
-  transition: box-shadow 0.15s;
+  transition: box-shadow 0.15s, transform 0.15s;
 
   .pi {
     display: none; // icon hidden; name+time give enough info
@@ -220,6 +221,7 @@ $muted: #64748b;
 
   &:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
   }
 }
 
@@ -266,11 +268,19 @@ $muted: #64748b;
 }
 
 :host ::ng-deep .dc-consult-p-card {
+  cursor: pointer;
+
   .p-card {
     background: $bg-card;
     border: 1px solid $border;
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
   }
 
   .p-card-body,

@@ -66,7 +66,9 @@
         @if (day.slots[idx]) {
         <div class="dc-cal-chip"
           [style.border-left]="'3px solid ' + slotColor(day.slots[idx])"
-          [style.color]="slotColor(day.slots[idx])">
+          [style.color]="slotColor(day.slots[idx])"
+          style="cursor: pointer;"
+          (click)="navigateToConsultation(day.slots[idx].appointmentId, $event)">
           <i class="pi pi-user" aria-hidden="true"></i>
           <span class="dc-cal-chip__name">{{ day.slots[idx].patientName }}</span>
           <span class="dc-cal-chip__time">{{ day.slots[idx].time }}</span>
@@ -95,7 +97,7 @@
   <!-- ── Upcoming consultations ─────────────────────────────── -->
   <div class="dc-tc__list" aria-label="Upcoming consultations">
     @for (item of nextTwoWeeks(); track item.appointmentId) {
-    <p-card styleClass="dc-consult-p-card">
+    <p-card styleClass="dc-consult-p-card" (click)="navigateToConsultation(item.appointmentId, $event)">
       <div class="dc-consult-row">
         <div class="dc-consult-row__indicator">
           <span class="dc-consult-row__dot" style="background:#38bdf8" aria-hidden="true"></span>

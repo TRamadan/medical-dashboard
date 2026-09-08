@@ -718,11 +718,49 @@
                         <ng-template pTemplate="title">Measurement Details</ng-template>
                         <div class="form-grid-3">
                             <div>
-                                <div class="field-label">Type</div>
-                                <p-multiselect [options]="measurementTypeOptions()" [(ngModel)]="measurementType"
-                                    optionLabel="label" optionValue="value" [filter]="true"
-                                    filterPlaceholder="Search types..." display="chip" styleClass="w-full"
-                                    class="w-full" appendTo="body"></p-multiselect>
+                                <div class="field-label">Sub-Category</div>
+                                <p-select
+                                    [options]="subCategoryOptions()"
+                                    [ngModel]="selectedSubCategoryId()"
+                                    (ngModelChange)="onSubCategoryChange($event)"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    [filter]="true"
+                                    filterPlaceholder="Search sub-categories..."
+                                    placeholder="Select sub-category"
+                                    styleClass="w-full"
+                                    class="w-full"
+                                    appendTo="body"
+                                    (onShow)="loadSubCategories()"
+                                    [loading]="subCategoriesLoading()">
+                                </p-select>
+                                @if (subCategoriesError()) {
+                                <small class="p-error">{{ subCategoriesError() }}</small>
+                                }
+                            </div>
+                            <div>
+                                <div class="field-label">Measurement Type</div>
+                                <p-multiselect
+                                    [options]="measurementItemOptions()"
+                                    [(ngModel)]="measurementType"
+                                    optionLabel="label"
+                                    optionValue="value"
+                                    [filter]="true"
+                                    filterPlaceholder="Search measurements..."
+                                    display="chip"
+                                    styleClass="w-full"
+                                    class="w-full"
+                                    appendTo="body"
+                                    [disabled]="!selectedSubCategoryId()"
+                                    [loading]="measurementItemsLoading()"
+                                    placeholder="Select measurements">
+                                </p-multiselect>
+                                @if (!selectedSubCategoryId()) {
+                                <small style="color: var(--p-text-muted-color); font-size: 0.75rem;">Select a sub-category first</small>
+                                }
+                                @if (measurementItemsError()) {
+                                <small class="p-error">{{ measurementItemsError() }}</small>
+                                }
                             </div>
                             <div>
                                 <div class="field-label">Side</div>
