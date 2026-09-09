@@ -36,6 +36,13 @@ export interface ConsultationPlanPhaseDto {
   order: number;
 }
 
+export interface ConsultationMeasurementRequestDto {
+  subCategoryId: number;
+  measurementIds: number[];
+  side: number;    // 0 Left | 1 Right | 2 Bilateral
+  date?: string;   // YYYY-MM-DD — optional; server auto-books appointment if provided
+}
+
 export interface ConsultationExternalReferralDto {
   status: number; // ReferralStatus 0–5, read-only/server-managed
 }
@@ -43,11 +50,28 @@ export interface ConsultationExternalReferralDto {
 export interface ConsultationDecisionDto {
   id?: number;
   decisionType: number; // 0 Direct Blueprint, 1 External Referral, 2 Internal Measurements
-  notes: string;
+  notes?: string;
   externalReferral?: ConsultationExternalReferralDto | null;
+  measurementRequest?: ConsultationMeasurementRequestDto | null;
 }
 
-// ── GET /ConsultationSession/{appointmentId} ────────────────────────────────
+export interface ConsultationCompletePayload {
+  decisionType: number;   // 0 Direct Blueprint | 1 External Referral | 2 Internal Measurements
+  notes?: string;
+
+  // Path 1 — External Referral
+  referralSpecialty?: string;                   // required for decisionType=1
+  referralTestType?: string;                    // MRI / X-Ray / CT …
+  referralRegion?: string;
+  referralPurpose?: string;
+  referralProfessionalNote?: string;
+  referralRecommendedProviderName?: string;
+  referralRecommendedProviderMobile?: string;
+  referralNeedFollowUp?: boolean;
+
+  // Path 2 — Internal Measurements
+  measurementRequest?: ConsultationMeasurementRequestDto;
+}
 export interface ConsultationSessionDto {
   id: number;
   appointmentId: number;
@@ -162,13 +186,6 @@ export interface ConsultationStep4Payload {
   teamNotes: string;
 }
 
-export interface ConsultationCompletePayload {
-  decisionType: number; // 0 Direct Blueprint, 1 External Referral, 2 Internal Measurements
-  notes: string;
-  referralSpecialty?: string;   // required when decisionType = 1
-  referralDescription?: string; // required when decisionType = 1
-  referralNeedFollowUp?: boolean;
-}
 
 export interface ConsultationApiErrorResponse {
   errors: { errorEn: string; errorAr: string }[];

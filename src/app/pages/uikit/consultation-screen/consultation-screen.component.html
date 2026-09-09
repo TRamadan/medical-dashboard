@@ -788,7 +788,7 @@
                         <div class="form-grid-3 mb-3">
                             <div>
                                 <div class="field-label">Test</div>
-                                <p-select [options]="referralTestOptions" [(ngModel)]="referralTest" optionLabel="label"
+                                <p-select [options]="referralTestOptions" [(ngModel)]="referralTestType" optionLabel="label"
                                     optionValue="value" styleClass="w-full" class="w-full" appendTo="body"></p-select>
                             </div>
                             <div>
@@ -1165,7 +1165,7 @@
                 <div class="btn-row" style="justify-content:center">
                     <p-button [label]="actionDone() ? 'Done' : 'Open Protocol Builder'"
                         [severity]="actionDone() ? 'secondary' : 'success'" (onClick)="confirmAction()"
-                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
+                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving() || !canConfirmAction()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-mint mt-3">
@@ -1183,9 +1183,9 @@
                     are
                     ready.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? 'Done' : 'Confirm '"
+                    <p-button [label]="actionDone() ? 'Done' : 'Confirm'"
                         [severity]="actionDone() ? 'secondary' : 'warn'" (onClick)="confirmAction()"
-                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
+                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving() || !canConfirmAction()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-amber mt-3">
@@ -1206,7 +1206,7 @@
                 <div class="btn-row" style="justify-content:center">
                     <p-button [label]="actionDone() ? 'Done' : 'Confirm'"
                         [severity]="actionDone() ? 'secondary' : 'danger'" (onClick)="confirmAction()"
-                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
+                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving() || !canConfirmAction()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-coral mt-3">

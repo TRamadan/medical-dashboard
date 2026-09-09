@@ -32,6 +32,7 @@ import { MeasurementCategoriesService } from "../measurements-config/services/me
 import {
     ConsultationSessionService,
     ConsultationSessionDto,
+    ConsultationCompletePayload,
     ConsultationApiErrorResponse
 } from './consultation-screen-services/consultation-screen.service';
 
@@ -337,6 +338,30 @@ export class ConsultationScreenComponent {
             const pathToSelectMap: Record<number, PathChoice> = { 0: 1, 1: 3, 2: 2 };
             if (session.decision.decisionType != null) {
                 this.selectedPath.set(pathToSelectMap[session.decision.decisionType] ?? 1);
+            }
+            if (session.decision.externalReferral) {
+                const ref = session.decision.externalReferral as any;
+                this.referralSpecialty = ref.specialty ?? '';
+                this.referralTestType = ref.testType ?? 'MRI';
+                this.referralRegion = ref.region ?? '';
+                this.referralPurpose = ref.purpose ?? '';
+                this.referralProfessionalNote = ref.professionalNote ?? '';
+                this.referralRecommendationName = ref.recommendedProviderName ?? '';
+                this.referralRecommendationMobile = ref.recommendedProviderMobile ?? '';
+                this.referralNeedFollowUp = ref.needFollowUp ?? false;
+            }
+            if (session.decision.measurementRequest) {
+                const req = session.decision.measurementRequest;
+                this.selectedSubCategoryId.set(req.subCategoryId);
+                if (req.subCategoryId) {
+                    this.loadSubCategories();
+                    this.loadMeasurementsBySubCategory(req.subCategoryId);
+                }
+                this.measurementType = req.measurementIds ?? [];
+                this.measurementSide = req.side ?? 2;
+                if ((req as any).scheduledDate || req.date) {
+                    this.measurementDate = new Date((req as any).scheduledDate ?? req.date);
+                }
             }
         }
 
@@ -648,14 +673,14 @@ export class ConsultationScreenComponent {
 
     // ── Measurement path detail fields ─────────────────────────────────────────
     measurementType: number[] | null = null;
-    measurementSide: string | null = null;
     measurementDate: Date | null = null;
-
     readonly measurementSideOptions = [
-        { label: 'Left', value: 'left' },
-        { label: 'Right', value: 'right' },
-        { label: 'Bilateral', value: 'bilateral' }
+        { label: 'Left', value: 0 },
+        { label: 'Right', value: 1 },
+        { label: 'Bilateral', value: 2 }
     ];
+
+    measurementSide: number = 2; // Bilateral default
 
     private readonly _measurementCategoriesService = inject(MeasurementCategoriesService);
 
@@ -733,7 +758,7 @@ export class ConsultationScreenComponent {
     readonly measurementTypeOptions = computed(() => this.measurementItemOptions());
 
     // ── Referral path detail fields ─────────────────────────────────────────
-    referralTest: string = 'MRI';
+    referralTestType: string = 'MRI';
     referralRegion: string = '';
     readonly referralTestOptions = [
         { label: 'MRI', value: 'MRI' },
@@ -749,13 +774,22 @@ export class ConsultationScreenComponent {
     referralProfessionalNote: string = '';
     referralRecommendationName: string = '';
     referralRecommendationMobile: string = '';
-    referralNeedFollowUp: boolean = true;
-
-    // ── Decision notes (Step 6) ─────────────────────────────────────────────
-    // ⚠ Gap: POST /complete requires `notes` on every decisionType, but Step 6's
-    // HTML only shows static confirm copy — no bound textarea exists yet. Add one
-    // bound to `decisionNotes` before wiring the confirm button.
+    referralNeedFollowUp: boolean = false;
+    // ── Decision notes (Step 5/6) ───────────────────────────────────────────
     decisionNotes: string = '';
+
+    /** True when the current selected path has all required fields filled. */
+    readonly canConfirmAction = computed<boolean>(() => {
+        const path = this.selectedPath();
+        if (!path) return false;
+        if (path === 3) {
+            return !!this.referralSpecialty?.trim();
+        }
+        if (path === 2) {
+            return !!this.selectedSubCategoryId() && (this.measurementType ?? []).length > 0;
+        }
+        return true;
+    });
 
     // ── Pause reason fields ─────────────────────────────────────────────────
     pauseReason: string = '';
@@ -1248,37 +1282,64 @@ export class ConsultationScreenComponent {
         const path = this.selectedPath();
         if (!id || !path) return;
 
-        // selectedPath 1/2/3 → decisionType 0 (Direct Blueprint) / 2 (Internal Measurements) / 1 (External Referral)
+        // selectedPath 1 -> Direct Blueprint (0), 2 -> Internal Measurements (2), 3 -> External Referral (1)
         const decisionTypeMap: Record<number, number> = { 1: 0, 2: 2, 3: 1 };
         const decisionType = decisionTypeMap[path];
 
-        let payload: Parameters<ConsultationSessionService['complete']>[1] = {
+        let payload: ConsultationCompletePayload = {
             decisionType,
-            notes: this.decisionNotes
+            notes: this.decisionNotes || undefined
         };
 
         if (decisionType === 1) {
-            // ⚠ referralTest/referralRegion don't map 1:1 to referralSpecialty/
-            // referralDescription — combined here until backend confirms the split.
+            if (!this.referralSpecialty?.trim()) {
+                this.sessionError.set('Specialty is required for an external referral.');
+                return;
+            }
             payload = {
                 ...payload,
-                referralSpecialty: this.referralSpecialty,
-                referralDescription: `${this.referralTest} — ${this.referralRegion}`.trim(),
-                referralNeedFollowUp: this.referralNeedFollowUp
+                referralSpecialty: this.referralSpecialty.trim(),
+                referralTestType: this.referralTestType || undefined,
+                referralRegion: this.referralRegion || undefined,
+                referralPurpose: this.referralPurpose || undefined,
+                referralProfessionalNote: this.referralProfessionalNote || undefined,
+                referralRecommendedProviderName: this.referralRecommendationName || undefined,
+                referralRecommendedProviderMobile: this.referralRecommendationMobile || undefined,
+                referralNeedFollowUp: !!this.referralNeedFollowUp
             };
         } else if (decisionType === 2) {
-            // ⚠ measurementType/measurementDate aren't in the documented complete
-            // schema — folded into notes until backend confirms a dedicated field.
+            const subId = this.selectedSubCategoryId();
+            const mIds = this.measurementType ?? [];
+            if (!subId || mIds.length === 0) {
+                this.sessionError.set('A sub-category and at least one measurement are required for an internal measurement.');
+                return;
+            }
+            let dateStr: string | undefined = undefined;
+            if (this.measurementDate) {
+                const d = new Date(this.measurementDate);
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                dateStr = `${year}-${month}-${day}`;
+            }
             payload = {
                 ...payload,
-                notes: `${this.decisionNotes} (Measurement: ${this.measurementType}${this.measurementDate ? ' on ' + this.measurementDate : ''})`.trim()
+                measurementRequest: {
+                    subCategoryId: subId,
+                    measurementIds: mIds,
+                    side: Number(this.measurementSide ?? 2),
+                    ...(dateStr ? { date: dateStr } : {})
+                }
             };
         }
 
         this.sessionSaving.set(true);
         this.sessionError.set(null);
         this.consultationSessionService.complete(id, payload).subscribe({
-            next: () => { this.sessionSaving.set(false); this.actionDone.set(true); },
+            next: () => {
+                this.sessionSaving.set(false);
+                this.actionDone.set(true);
+            },
             error: (err: HttpErrorResponse) => {
                 this.sessionSaving.set(false);
                 this.sessionError.set(this.extractApiError(err) ?? 'Failed to submit decision');
