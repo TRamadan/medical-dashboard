@@ -1,11 +1,13 @@
 export enum TicketType {
-  PHASE_TRANSITION       = "Phase Transition",
-  BLUEPRINT_CONSULTATION = "Blueprint Consultation",
-  PROTOCOL_MODIFICATION  = "Protocol Modification",
-  GRADUATION_READY       = "Graduation Ready",
-  PHASE_TIMEOUT_ALERT    = "Phase Timeout Alert",
-  COMPLIANCE_ALERT       = "Compliance Alert",
-  STALE_DATA_WARNING     = "Stale Data Warning",
+  PHASE_TRANSITION               = "Phase Transition",
+  BLUEPRINT_CONSULTATION         = "Blueprint Consultation",
+  PROTOCOL_MODIFICATION          = "Protocol Modification",
+  GRADUATION_READY               = "Graduation Ready",
+  PHASE_TIMEOUT_ALERT            = "Phase Timeout Alert",
+  COMPLIANCE_ALERT               = "Compliance Alert",
+  STALE_DATA_WARNING             = "Stale Data Warning",
+  DIRECT_BLUEPRINT_AWAITING_PLAN = "Direct Blueprint Awaiting Plan",
+  REPORT_ACCEPTED_AWAITING_PLAN  = "Report Accepted Awaiting Plan",
 }
 
 export enum TicketPriority {

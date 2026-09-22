@@ -7,12 +7,14 @@ import { Observable } from 'rxjs';
 
 /** ticketType numeric values from the API */
 export enum ApiTicketType {
-  BlueprintConsultation = 0,
-  ProtocolModification  = 1,
-  ComplianceAlert       = 2,
-  GraduationReady       = 3,
-  PhaseTimeoutAlert     = 4,
-  StaleDataWarning      = 5,
+  BlueprintConsultation       = 0,
+  ProtocolModification        = 1,
+  ComplianceAlert             = 2,
+  GraduationReady             = 3,
+  PhaseTimeoutAlert           = 4,
+  StaleDataWarning            = 5,
+  DirectBlueprintAwaitingPlan = 6,
+  ReportAcceptedAwaitingPlan  = 7,
 }
 
 /** urgency numeric values from the API */
@@ -49,6 +51,8 @@ export interface ApiTicket {
   appointmentId: number | null;
   treatmentPlanId: number | null;
   modificationRequestId: number | null;
+  consultationDecisionId?: number | null;
+  medicalReportId?: number | null;
 }
 
 export type PendingTicketsTab = 'decision' | 'urgent' | 'all';

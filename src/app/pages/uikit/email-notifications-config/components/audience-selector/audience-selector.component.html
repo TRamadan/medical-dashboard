@@ -1,30 +1,59 @@
 <div class="audience-selector">
   <div class="audience-selector__field">
-    <label class="audience-selector__label" for="userTypes">User types</label>
-    <p-multiSelect inputId="userTypes" [options]="userTypes" [ngModel]="_selectedUserTypeIds()"
-      (ngModelChange)="onUserTypeChange($event)" optionLabel="name" optionValue="id" placeholder="Select user types"
-      [filter]="userTypes.length > 6" filterPlaceHolder="Search user types" display="chip"
-      styleClass="audience-multiselect" />
+    <label class="audience-selector__label" for="audienceRoles">Target staff roles</label>
+    <p-multiSelect inputId="audienceRoles" name="audienceRoles" [options]="audienceOptions()"
+      [ngModel]="selectedRoleIds()" (ngModelChange)="onRoleChange($event)" optionLabel="name" optionValue="id"
+      [placeholder]="audienceOptions().length ? 'Select staff roles (e.g. Doctor, Coach)' : 'No staff roles available'"
+      [filter]="audienceOptions().length > 6" filterPlaceHolder="Search roles" display="chip"
+      styleClass="w-full audience-multiselect" />
+  </div>
+
+  <div class="audience-selector__toggle">
+    <div class="audience-selector__toggle-copy">
+      <label for="includePatients">Include all patients</label>
+      <span>Send to every active patient account</span>
+    </div>
+    <p-inputSwitch inputId="includePatients" name="includePatients" [ngModel]="includePatients()"
+      (ngModelChange)="onPatientsChange($event)" aria-label="Include all patients" />
   </div>
 
   <div class="audience-selector__field">
-    <label class="audience-selector__label" for="users">Users</label>
-    <p-multiSelect inputId="users" [options]="availableUsers()" [ngModel]="_selectedUserIds()"
-      (ngModelChange)="onUserChange($event)" optionLabel="name" optionValue="id"
-      [placeholder]="availableUsers().length ? 'Select users' : 'Select a user type first'"
-      [filter]="availableUsers().length > 6" filterPlaceHolder="Search users" [disabled]="availableUsers().length === 0"
-      display="chip" styleClass="audience-multiselect">
+    <label class="audience-selector__label" for="recipientUsers">Specific individual recipients</label>
+    <p-multiSelect inputId="recipientUsers" name="recipientUsers" [options]="audienceUsers()"
+      [ngModel]="selectedUserIds()" (ngModelChange)="onUserChange($event)" optionLabel="name" optionValue="id"
+      [placeholder]="audienceUsers().length ? 'Select specific individual users' : 'Search or type user name'"
+      [filter]="true" filterPlaceHolder="Search users" display="chip" styleClass="w-full audience-multiselect">
       <ng-template let-user pTemplate="item">
         <div class="user-item">
           <span class="user-item__name">{{ user.name }}</span>
-          <span class="user-item__email" *ngIf="user.email">{{ user.email }}</span>
+          @if (user.email) {
+          <span class="user-item__email">{{ user.email }}</span>
+          }
         </div>
       </ng-template>
     </p-multiSelect>
   </div>
 
   <div class="reach-summary">
-    <span class="reach-summary__label">Selected recipients</span>
-    <p-tag [severity]="selectedUsersCount() > 0 ? 'info' : 'warn'" [value]="selectedUsersCount() + ' users'" />
+    <div class="reach-summary__breakdown">
+      <span class="reach-summary__label">Target audience</span>
+      <span class="reach-summary__chips">
+        @if (selectedRoleIds().length) {
+        <span class="reach-summary__chip">{{ selectedRoleIds().length }} role{{ selectedRoleIds().length === 1 ? '' :
+          's' }}</span>
+        }
+        @if (includePatients()) {
+        <span class="reach-summary__chip">All patients</span>
+        }
+        @if (selectedUserIds().length) {
+        <span class="reach-summary__chip">{{ selectedUserIds().length }} individual{{ selectedUserIds().length === 1 ?
+          '' : 's' }}</span>
+        }
+        @if (!selectedRoleIds().length && !includePatients() && !selectedUserIds().length) {
+        <span class="reach-summary__chip reach-summary__chip--empty">Nobody selected yet</span>
+        }
+      </span>
+    </div>
+    <p-tag [severity]="isAudienceSelected() ? 'info' : 'warn'" [value]="totalAudienceReach()" />
   </div>
 </div>

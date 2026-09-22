@@ -95,7 +95,7 @@ function yellowFlagsMask(...bitIndexes: number[]): number {
 const SESSION_501_NOT_STARTED: ConsultationSessionDto = {
   id: 0,
   appointmentId: 501,
-  isCompleted: false,
+  status: 'InProgress',
   currentStep: 1,
   ...EMPTY_STEP1,
   ...EMPTY_STEP2,
@@ -109,7 +109,7 @@ const SESSION_501_NOT_STARTED: ConsultationSessionDto = {
 const SESSION_502_STEP1_DONE: ConsultationSessionDto = {
   id: 8502,
   appointmentId: 502,
-  isCompleted: false,
+  status: 'InProgress',
   currentStep: 2,
   complaintInAthleteWords: 'Sharp pain in the right knee when pivoting during training.',
   impactOnTraining: 2,
@@ -130,7 +130,7 @@ const SESSION_502_STEP1_DONE: ConsultationSessionDto = {
 const SESSION_503_STEP2_DONE: ConsultationSessionDto = {
   id: 8503,
   appointmentId: 503,
-  isCompleted: false,
+  status: 'InProgress',
   currentStep: 3,
   complaintInAthleteWords: 'Dull ache in the left shoulder after overhead lifts.',
   impactOnTraining: 1,
@@ -158,7 +158,7 @@ const SESSION_503_STEP2_DONE: ConsultationSessionDto = {
 const SESSION_504_EXTRA_ASSESSMENT: ConsultationSessionDto = {
   id: 8504,
   appointmentId: 504,
-  isCompleted: false,
+  status: 'InProgress',
   currentStep: 5,
   complaintInAthleteWords: 'New sharp pain in the shoulder during an ACL rehab session.',
   impactOnTraining: 2,
@@ -206,7 +206,7 @@ const SESSION_504_EXTRA_ASSESSMENT: ConsultationSessionDto = {
 const SESSION_505_WRITE_REPORT: ConsultationSessionDto = {
   id: 8505,
   appointmentId: 505,
-  isCompleted: false,
+  status: 'InProgress',
   currentStep: 4,
   complaintInAthleteWords: 'Aching in the front of the right knee when climbing stairs.',
   impactOnTraining: 2,
@@ -289,7 +289,7 @@ const SESSION_507_COMPLETED_DIRECT: ConsultationSessionDto = {
   ...SESSION_506_ATHLETE_REPORT_DONE,
   id: 8507,
   appointmentId: 507,
-  isCompleted: true,
+  status: 'Completed',
   currentStep: 6,
   decision: {
     id: 1,
@@ -300,11 +300,12 @@ const SESSION_507_COMPLETED_DIRECT: ConsultationSessionDto = {
 };
 
 // ── Scenario 508 — Completed, decisionType 1 (External Referral) ───────────
+// Referral submitted — doctor is waiting for the patient to return with results.
 const SESSION_508_COMPLETED_REFERRAL: ConsultationSessionDto = {
   ...SESSION_504_EXTRA_ASSESSMENT,
   id: 8508,
   appointmentId: 508,
-  isCompleted: true,
+  status: 'AwaitingSubDecision',
   currentStep: 6,
   decision: {
     id: 2,
@@ -315,11 +316,12 @@ const SESSION_508_COMPLETED_REFERRAL: ConsultationSessionDto = {
 };
 
 // ── Scenario 509 — Completed, decisionType 2 (Internal Measurements) ───────
+// Measurement ticket created — awaiting engineer to complete the measurement appointment.
 const SESSION_509_COMPLETED_MEASUREMENTS: ConsultationSessionDto = {
   ...SESSION_505_WRITE_REPORT,
   id: 8509,
   appointmentId: 509,
-  isCompleted: true,
+  status: 'AwaitingSubDecision',
   currentStep: 6,
   recommendedServiceId: 2,
   recommendedServiceName: 'Baseline Strength & Movement Screen',
@@ -354,7 +356,7 @@ const SESSION_509_COMPLETED_MEASUREMENTS: ConsultationSessionDto = {
 const SESSION_510_EDIT_EXISTING: ConsultationSessionDto = {
   id: 8510,
   appointmentId: 510,
-  isCompleted: false,
+  status: 'InProgress',
   currentStep: 4,
   complaintInAthleteWords: 'Recurrent lower back tightness after long training blocks.',
   impactOnTraining: 1,

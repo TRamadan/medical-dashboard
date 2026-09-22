@@ -11,11 +11,15 @@ export function computeNextOccurrences(
   from: Date = new Date()
 ): Date[] {
   const results: Date[] = [];
-  const [hh, mm] = rule.time.split(':').map((v) => parseInt(v, 10) || 0);
+  const timeStr = rule.time || '08:00:00';
+  const [hh, mm] = timeStr.split(':').map((v) => parseInt(v, 10) || 0);
 
-  const start = new Date(rule.startDate + 'T00:00:00');
+  const start = new Date((rule.startDate || new Date().toISOString().slice(0, 10)) + 'T00:00:00');
+  const isEndOnDate = rule.endMode === 2 || (rule.endMode as any) === 'onDate';
+  const isEndAfterCount = rule.endMode === 3 || (rule.endMode as any) === 'afterCount';
+
   const rangeEndDate =
-    rule.endMode === 'onDate' && rule.endDate ? new Date(rule.endDate + 'T23:59:59') : null;
+    isEndOnDate && rule.endDate ? new Date(rule.endDate + 'T23:59:59') : null;
 
   let cursor = new Date(Math.max(start.getTime(), stripTime(from).getTime()));
   let occurrencesSoFar = 0;
@@ -25,7 +29,7 @@ export function computeNextOccurrences(
     guard++;
 
     if (rangeEndDate && cursor.getTime() > rangeEndDate.getTime()) break;
-    if (rule.endMode === 'afterCount' && rule.occurrenceCount != null && occurrencesSoFar >= rule.occurrenceCount) {
+    if (isEndAfterCount && rule.occurrenceCount != null && occurrencesSoFar >= rule.occurrenceCount) {
       break;
     }
 
@@ -34,7 +38,7 @@ export function computeNextOccurrences(
       candidate.setHours(hh, mm, 0, 0);
       occurrencesSoFar++;
 
-      if (rule.endMode === 'afterCount' && rule.occurrenceCount != null && occurrencesSoFar > rule.occurrenceCount) {
+      if (isEndAfterCount && rule.occurrenceCount != null && occurrencesSoFar > rule.occurrenceCount) {
         break;
       }
       if (candidate.getTime() >= from.getTime()) {
@@ -50,22 +54,24 @@ export function computeNextOccurrences(
 
 function matchesRule(date: Date, rule: RecurrenceRule, start: Date): boolean {
   const interval = Math.max(1, rule.interval || 1);
+  const freq = rule.frequency;
 
-  if (rule.frequency === 'daily') {
+  if (freq === 1 || (freq as any) === 'daily') {
     const diffDays = diffInDays(start, date);
     return diffDays >= 0 && diffDays % interval === 0;
   }
 
-  if (rule.frequency === 'weekly') {
-    if (!rule.daysOfWeek.length) return false;
-    if (!rule.daysOfWeek.includes(date.getDay())) return false;
+  if (freq === 2 || (freq as any) === 'weekly') {
+    const days = rule.daysOfWeek || [];
+    if (!days.length) return false;
+    if (!days.includes(date.getDay())) return false;
     const startWeek = startOfWeek(start);
     const thisWeek = startOfWeek(date);
     const diffWeeks = Math.round(diffInDays(startWeek, thisWeek) / 7);
     return diffWeeks >= 0 && diffWeeks % interval === 0;
   }
 
-  if (rule.frequency === 'monthly') {
+  if (freq === 3 || (freq as any) === 'monthly') {
     const day = rule.dayOfMonth ?? start.getDate();
     const lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
     const effectiveDay = Math.min(day, lastDayOfMonth);
@@ -101,13 +107,14 @@ function startOfWeek(d: Date): Date {
 /** Human-readable one-line summary of a recurrence rule, e.g. "Every 2 weeks on Mon, Wed at 09:00". */
 export function describeRecurrence(rule: RecurrenceRule): string {
   const interval = Math.max(1, rule.interval || 1);
-  const time = rule.time;
+  const time = rule.time || '08:00:00';
+  const freq = rule.frequency;
 
   let base: string;
-  if (rule.frequency === 'daily') {
+  if (freq === 1 || (freq as any) === 'daily') {
     base = interval === 1 ? 'Every day' : `Every ${interval} days`;
-  } else if (rule.frequency === 'weekly') {
-    const days = [...rule.daysOfWeek].sort((a, b) => a - b);
+  } else if (freq === 2 || (freq as any) === 'weekly') {
+    const days = [...(rule.daysOfWeek || [])].sort((a, b) => a - b);
     const names = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const dayList = days.length ? days.map((d) => names[d]).join(', ') : 'no days selected';
     base = interval === 1 ? `Every week on ${dayList}` : `Every ${interval} weeks on ${dayList}`;
@@ -117,11 +124,12 @@ export function describeRecurrence(rule: RecurrenceRule): string {
   }
 
   let tail = ` at ${time}`;
-  if (rule.endMode === 'onDate' && rule.endDate) {
+  if ((rule.endMode === 2 || (rule.endMode as any) === 'onDate') && rule.endDate) {
     tail += `, until ${rule.endDate}`;
-  } else if (rule.endMode === 'afterCount' && rule.occurrenceCount) {
+  } else if ((rule.endMode === 3 || (rule.endMode as any) === 'afterCount') && rule.occurrenceCount) {
     tail += `, for ${rule.occurrenceCount} sends`;
   }
 
   return base + tail;
 }
+

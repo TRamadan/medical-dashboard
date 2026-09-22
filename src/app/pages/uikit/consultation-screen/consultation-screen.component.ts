@@ -33,7 +33,8 @@ import {
     ConsultationSessionService,
     ConsultationSessionDto,
     ConsultationCompletePayload,
-    ConsultationApiErrorResponse
+    ConsultationApiErrorResponse,
+    ConsultationSessionStatus
 } from './consultation-screen-services/consultation-screen.service';
 
 // EntryType — consultation entry classification. Values are read-only reference
@@ -369,18 +370,30 @@ export class ConsultationScreenComponent {
         // FlowStep numbering except that API step 3 covers both HTML "Impression &
         // Findings" and "Judgment" — land on Judgment (4) so nothing is skipped.
         const resumeStep = session.currentStep === 3 ? 4 : (session.currentStep as FlowStep);
-        if (session.isCompleted) {
+        const status = session.status;
+
+        if (status === 'Completed') {
+            // Consultation fully done — show read-only step 6.
             this.flowStarted.set(true);
             this.actionDone.set(true);
-            if (!this.selectedPath()) {
-                this.selectedPath.set(1);
-            }
+            this.sessionStatus.set('Completed');
+            if (!this.selectedPath()) this.selectedPath.set(1);
+            this.currentStep.set(6);
+        } else if (status === 'AwaitingPatientReport') {
+            // Doctor submitted report; patient hasn’t responded yet.
+            this.flowStarted.set(true);
+            this.sessionStatus.set('AwaitingPatientReport');
+            this.currentStep.set(6);
+        } else if (status === 'AwaitingSubDecision') {
+            // External referral or internal measurement submitted; awaiting results.
+            this.flowStarted.set(true);
+            this.actionDone.set(true);
+            this.sessionStatus.set('AwaitingSubDecision');
+            if (!this.selectedPath()) this.selectedPath.set(session.decision?.decisionType === 1 ? 3 : 2);
             this.currentStep.set(6);
         } else if (resumeStep >= 1) {
             this.flowStarted.set(true);
-            if (resumeStep === 6 && !this.selectedPath()) {
-                this.selectedPath.set(1);
-            }
+            if (resumeStep === 6 && !this.selectedPath()) this.selectedPath.set(1);
             this.currentStep.set(resumeStep);
         }
     }
@@ -494,6 +507,13 @@ export class ConsultationScreenComponent {
     readonly selectedReassessPath = signal<ReassessChoice>(null);
     readonly flowStarted = signal(false);
     readonly actionDone = signal(false);
+    /**
+     * Tracks the backend session status so the template can show the correct
+     * waiting / locked banner without recalculating from multiple signals.
+     * `InProgress` is the default — any “waiting” state is set by applySession()
+     * or after a successful API call in confirmAction() / submitReport().
+     */
+    readonly sessionStatus = signal<ConsultationSessionStatus>('InProgress');
 
     // ── Athlete data ────────────────────────────────────────────────────────
     readonly athleteInfo = computed<AthleteInfo | null>(() => {
@@ -1267,9 +1287,16 @@ export class ConsultationScreenComponent {
     }
 
     /**
-     * HTML Step 6 (Action / Confirmation) → POST /complete. Only wired for
-     * entryType() !== 'reassess' — the reassessment paths (A–D) have no
-     * documented endpoint yet (see the step-mapping doc's gap notes).
+     * Step 6 confirm handler — branches on `judgmentChoice`:
+     *
+     * • **WriteReport** → `POST /submit-report`  (sends report to patient’s app,
+     *   session becomes `AwaitingPatientReport` — the doctor’s wizard shows a
+     *   "waiting for patient" state until they accept or decline).
+     *
+     * • **ExtraAssessment** → `POST /complete`  (unchanged payload; the three
+     *   decision-type sub-paths are handled inside this branch).
+     *
+     * Reassessment paths (A–D) have no documented endpoint yet — local-only.
      */
     confirmAction(): void {
         if (this.entryType() === EntryType.Reassess) {
@@ -1279,10 +1306,32 @@ export class ConsultationScreenComponent {
         }
 
         const id = this.appointmentId();
-        const path = this.selectedPath();
-        if (!id || !path) return;
+        if (!id) return;
 
-        // selectedPath 1 -> Direct Blueprint (0), 2 -> Internal Measurements (2), 3 -> External Referral (1)
+        // ── Path A: WriteReport → POST /submit-report ────────────────────────────────────────
+        if (this.judgmentChoice() === 'writeReport') {
+            this.sessionSaving.set(true);
+            this.sessionError.set(null);
+            this.consultationSessionService.submitReport(id, this.decisionNotes || undefined).subscribe({
+                next: () => {
+                    this.sessionSaving.set(false);
+                    // Show “waiting for patient” state — NOT actionDone (doctor can’t do
+                    // anything until the patient responds; wizard locks automatically).
+                    this.sessionStatus.set('AwaitingPatientReport');
+                },
+                error: (err: HttpErrorResponse) => {
+                    this.sessionSaving.set(false);
+                    this.sessionError.set(this.extractApiError(err) ?? 'Failed to submit report');
+                }
+            });
+            return;
+        }
+
+        // ── Path B: ExtraAssessment → POST /complete (payload unchanged) ────────────
+        const path = this.selectedPath();
+        if (!path) return;
+
+        // selectedPath 1 → Direct Blueprint (0), 2 → Internal Measurements (2), 3 → External Referral (1)
         const decisionTypeMap: Record<number, number> = { 1: 0, 2: 2, 3: 1 };
         const decisionType = decisionTypeMap[path];
 
@@ -1339,10 +1388,43 @@ export class ConsultationScreenComponent {
             next: () => {
                 this.sessionSaving.set(false);
                 this.actionDone.set(true);
+                // Referral / measurement paths — show waiting state
+                if (decisionType === 1 || decisionType === 2) {
+                    this.sessionStatus.set('AwaitingSubDecision');
+                } else {
+                    this.sessionStatus.set('Completed');
+                }
             },
             error: (err: HttpErrorResponse) => {
                 this.sessionSaving.set(false);
                 this.sessionError.set(this.extractApiError(err) ?? 'Failed to submit decision');
+            }
+        });
+    }
+
+    /**
+     * Closes the loop on a previously submitted ExternalReferral — call this when
+     * the patient returns with imaging results. The server flips the referral to
+     * `Completed` and reopens the consultation at Step 3 so the doctor can make
+     * the final call. `loadSession()` then re-hydrates the wizard.
+     */
+    closeReferralLoop(): void {
+        const id = this.appointmentId();
+        if (!id) return;
+        this.sessionSaving.set(true);
+        this.sessionError.set(null);
+        this.consultationSessionService.completeReferral(id).subscribe({
+            next: () => {
+                this.sessionSaving.set(false);
+                // Session status is now InProgress / currentStep 3 on the server.
+                // Reload to re-hydrate the wizard at the correct step.
+                this.sessionStatus.set('InProgress');
+                this.actionDone.set(false);
+                this.loadSession(id);
+            },
+            error: (err: HttpErrorResponse) => {
+                this.sessionSaving.set(false);
+                this.sessionError.set(this.extractApiError(err) ?? 'Failed to complete referral');
             }
         });
     }

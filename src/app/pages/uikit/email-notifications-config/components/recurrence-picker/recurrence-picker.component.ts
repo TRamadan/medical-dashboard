@@ -1,32 +1,22 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { RadioButtonModule } from 'primeng/radiobutton';
-import { DAY_LABELS, RecurrenceFrequency, RecurrenceRule } from '../../models/notification-trigger.model';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DAY_LABELS, EndType, RecurrenceFrequency, RecurrenceRule } from '../../models/notification-trigger.model';
 
 @Component({
   selector: 'app-recurrence-picker',
-  standalone: true,
   imports: [CommonModule, FormsModule, SelectButtonModule, InputNumberModule, DatePickerModule, RadioButtonModule],
   templateUrl: './recurrence-picker.component.html',
   styleUrl: './recurrence-picker.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RecurrencePickerComponent {
   private _rule!: RecurrenceRule;
 
-  // p-calendar binds to Date objects; the model stores plain strings so it
-  // survives JSON round-trips cleanly. These signals cache the converted
-  // Date values and are only recomputed when the @Input actually changes —
-  // NOT on every template read. A getter that returns `new Date(...)` on
-  // every change-detection pass looks harmless but is a real bug: PrimeNG's
-  // calendar writes back through ngModelChange as it renders, Angular sees
-  // a new object reference on the next check, re-renders, the getter fires
-  // again, produces another new object, forever. That infinite CD loop is
-  // what pegs the CPU and crashes the tab — most visible on the calendar's
-  // open/icon click because that forces an extra render pass for the overlay.
   readonly timeAsDate = signal<Date>(new Date());
   readonly startDateAsDate = signal<Date>(new Date());
   readonly endDateAsDate = signal<Date | null>(null);
@@ -35,7 +25,7 @@ export class RecurrencePickerComponent {
   set rule(value: RecurrenceRule) {
     this._rule = value;
     this.timeAsDate.set(parseTime(value.time));
-    this.startDateAsDate.set(new Date(value.startDate + 'T00:00:00'));
+    this.startDateAsDate.set(new Date((value.startDate || new Date().toISOString().slice(0, 10)) + 'T00:00:00'));
     this.endDateAsDate.set(value.endDate ? new Date(value.endDate + 'T00:00:00') : null);
   }
   get rule(): RecurrenceRule {
@@ -45,9 +35,9 @@ export class RecurrencePickerComponent {
   @Output() ruleChange = new EventEmitter<RecurrenceRule>();
 
   readonly frequencyOptions: { label: string; value: RecurrenceFrequency }[] = [
-    { label: 'Daily', value: 'daily' },
-    { label: 'Weekly', value: 'weekly' },
-    { label: 'Monthly', value: 'monthly' },
+    { label: 'Daily', value: 1 },
+    { label: 'Weekly', value: 2 },
+    { label: 'Monthly', value: 3 },
   ];
 
   readonly dayOptions = DAY_LABELS.map((d) => ({ label: d.short, value: d.value, title: d.full }));
@@ -72,7 +62,7 @@ export class RecurrencePickerComponent {
     this.emit({ dayOfMonth: Math.min(31, Math.max(1, n || 1)) });
   }
 
-  setEndMode(mode: RecurrenceRule['endMode']): void {
+  setEndMode(mode: EndType): void {
     this.emit({ endMode: mode });
   }
 
@@ -84,7 +74,8 @@ export class RecurrencePickerComponent {
     if (!d) return;
     const hh = `${d.getHours()}`.padStart(2, '0');
     const mm = `${d.getMinutes()}`.padStart(2, '0');
-    this.emit({ time: `${hh}:${mm}` });
+    const ss = `${d.getSeconds()}`.padStart(2, '0');
+    this.emit({ time: `${hh}:${mm}:${ss}` });
   }
 
   setStartDateFromDate(d: Date): void {
@@ -98,14 +89,15 @@ export class RecurrencePickerComponent {
   }
 
   get intervalUnitLabel(): string {
-    if (this.rule.frequency === 'daily') return this.rule.interval === 1 ? 'day' : 'days';
-    if (this.rule.frequency === 'weekly') return this.rule.interval === 1 ? 'week' : 'weeks';
-    return this.rule.interval === 1 ? 'month' : 'months';
+    const freq = this.rule?.frequency;
+    if (freq === 1) return this.rule.interval === 1 ? 'day' : 'days';
+    if (freq === 2) return this.rule.interval === 1 ? 'week' : 'weeks';
+    return this.rule?.interval === 1 ? 'month' : 'months';
   }
 }
 
 function parseTime(time: string): Date {
-  const [hh, mm] = (time || '09:00').split(':').map((v) => parseInt(v, 10) || 0);
+  const [hh, mm] = (time || '08:00:00').split(':').map((v) => parseInt(v, 10) || 0);
   const d = new Date();
   d.setHours(hh, mm, 0, 0);
   return d;
@@ -117,3 +109,4 @@ function toIsoDate(d: Date): string {
   const day = `${d.getDate()}`.padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
+

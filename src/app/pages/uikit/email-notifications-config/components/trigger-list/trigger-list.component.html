@@ -1,33 +1,37 @@
-<p-table [value]="triggers" styleClass="trigger-table" [rowHover]="true" dataKey="id">
+<p-table [value]="triggers()" styleClass="trigger-table" [rowHover]="true" dataKey="id" [loading]="loading()">
   <ng-template pTemplate="header">
     <tr>
-      <th style="width: 60px">Active</th>
-      <th>Title</th>
-      <th>Type</th>
-      <th>Schedule</th>
-      <th>Audience</th>
-      <th style="width: 120px"></th>
+      <th style="width: 70px" scope="col">Active</th>
+      <th scope="col">Title</th>
+      <th scope="col">Category type</th>
+      <th scope="col">Schedule</th>
+      <th scope="col">Audience</th>
+      <th style="width: 120px" scope="col" aria-label="Actions"></th>
     </tr>
   </ng-template>
 
   <ng-template pTemplate="body" let-t>
     <tr>
       <td>
-        <p-inputSwitch [ngModel]="t.active" (onChange)="toggleActive.emit(t.id)" />
+        <p-inputSwitch [ngModel]="t.isActive" (onChange)="onToggleActive(t.id)" aria-label="Toggle active status" />
       </td>
-      <td class="clickable" (click)="edit.emit(t)">
+      <td class="clickable" (click)="onEdit(t.id)">
         <span class="trigger-title">{{ t.title }}</span>
       </td>
-      <td class="clickable" (click)="edit.emit(t)">
-        <span class="type-tag">{{ typeLabel(t.notificationType) }}</span>
+      <td class="clickable" (click)="onEdit(t.id)">
+        <span class="type-tag">{{ t.typeLabel || 'Category #' + t.type }}</span>
       </td>
-      <td class="clickable mono" (click)="edit.emit(t)">{{ describe(t) }}</td>
-      <td class="clickable" (click)="edit.emit(t)">{{ audienceNames(t) }}</td>
+      <td class="clickable mono" (click)="onEdit(t.id)">
+        <span>{{ t.scheduleLabel || 'Scheduled' }}</span>
+      </td>
+      <td class="clickable" (click)="onEdit(t.id)">
+        <span>{{ t.audienceLabel || 'All targeted users' }}</span>
+      </td>
       <td class="actions">
-        <button pButton type="button" icon="pi pi-pencil" class="p-button-text p-button-sm"
-          (click)="edit.emit(t)"></button>
+        <button pButton type="button" icon="pi pi-pencil" class="p-button-text p-button-sm" title="Edit trigger"
+          aria-label="Edit trigger" (click)="onEdit(t.id)"></button>
         <button pButton type="button" icon="pi pi-trash" class="p-button-text p-button-sm p-button-danger"
-          (click)="remove.emit(t.id)"></button>
+          title="Delete trigger" aria-label="Delete trigger" (click)="onRemove(t.id)"></button>
       </td>
     </tr>
   </ng-template>
@@ -36,8 +40,10 @@
     <tr>
       <td colspan="6">
         <div class="empty-state">
-          <p class="empty-state__title">No triggers yet</p>
-          <p class="empty-state__body">Create one to start sending on a schedule.</p>
+          <i class="pi pi-bell-slash empty-state__icon" aria-hidden="true"></i>
+          <p class="empty-state__title">No recurring triggers found</p>
+          <p class="empty-state__body">There are no scheduled notification campaigns configured yet. Click "New trigger"
+            to set one up.</p>
         </div>
       </td>
     </tr>

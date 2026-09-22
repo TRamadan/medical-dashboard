@@ -94,7 +94,6 @@ export class PatientOverviewComponent implements OnInit {
 
     ngOnInit(): void {
         this.loadOverview();
-        this.loadCoaches();
     }
 
     loadOverview(): void {
@@ -113,15 +112,6 @@ export class PatientOverviewComponent implements OnInit {
         });
     }
 
-    loadCoaches(): void {
-        this.protocolService.getCoaches().subscribe({
-            next: (coaches) => this.coaches.set(coaches && coaches.length > 0 ? coaches : MOCK_COACHES),
-            error: (err) => {
-                console.warn('API getCoaches failed, falling back to mock coaches:', err);
-                this.coaches.set(MOCK_COACHES);
-            }
-        });
-    }
 
     onUrgentActionTriggered(action: UrgentActionDto): void {
         switch (action.actionType) {

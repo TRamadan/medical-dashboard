@@ -72,10 +72,17 @@ export interface ConsultationCompletePayload {
   // Path 2 — Internal Measurements
   measurementRequest?: ConsultationMeasurementRequestDto;
 }
+export type ConsultationSessionStatus =
+  | 'InProgress'
+  | 'AwaitingPatientReport'
+  | 'AwaitingSubDecision'
+  | 'Completed';
+
 export interface ConsultationSessionDto {
   id: number;
   appointmentId: number;
-  isCompleted: boolean;
+  /** Replaces the old `isCompleted: boolean`. */
+  status: ConsultationSessionStatus;
   currentStep: number; // 1–6
 
   // Step 1 — Examination
@@ -200,7 +207,7 @@ const mockStore = new Map<number, ConsultationSessionDto>(
 
 function mockBlankSession(appointmentId: number): ConsultationSessionDto {
   return {
-    id: 0, appointmentId, isCompleted: false, currentStep: 1,
+    id: 0, appointmentId, status: 'InProgress', currentStep: 1,
     complaintInAthleteWords: null, impactOnTraining: null, impactOnCompetition: null,
     impactOnDailyLife: null, additionalImpactComment: null, complaintStartDate: null,
     daysSinceOnset: null, whatAggravatesPain: null,
@@ -361,14 +368,20 @@ export class ConsultationSessionService {
     return this.http.put<void>(`${API_BASE}ConsultationSession/${appointmentId}/step/4`, payload, { headers: this.getHeaders() });
   }
 
-  /** Final step — creates the decision record, sets isCompleted=true, currentStep=6. */
+  /**
+   * Final step — ExtraAssessment path only.
+   * DirectBlueprint (0) → status becomes `Completed`.
+   * ExternalReferral (1) / InternalMeasurement (2) → status becomes `AwaitingSubDecision`.
+   */
   complete(appointmentId: number, payload: ConsultationCompletePayload): Observable<void> {
     if (USE_MOCK_DATA) {
       if (appointmentId === MOCK_ERROR_APPOINTMENT_ID) return mockErrorResponse$(`mock://ConsultationSession/${appointmentId}/complete`);
       const current = mockStore.get(appointmentId) ?? mockBlankSession(appointmentId);
+      const newStatus: ConsultationSessionStatus =
+        payload.decisionType === 0 ? 'Completed' : 'AwaitingSubDecision';
       mockStore.set(appointmentId, {
         ...current,
-        isCompleted: true,
+        status: newStatus,
         currentStep: 6,
         decision: {
           id: appointmentId,
@@ -380,5 +393,45 @@ export class ConsultationSessionService {
       return of(undefined).pipe(delay(MOCK_LATENCY_MS));
     }
     return this.http.post<void>(`${API_BASE}ConsultationSession/${appointmentId}/complete`, payload, { headers: this.getHeaders() });
+  }
+
+  /**
+   * WriteReport path — sends the medical report to the patient's mobile app.
+   * Body is optional notes (empty `{}` also accepted).
+   * After success the session status becomes `AwaitingPatientReport`.
+   */
+  submitReport(appointmentId: number, notes?: string): Observable<void> {
+    if (USE_MOCK_DATA) {
+      if (appointmentId === MOCK_ERROR_APPOINTMENT_ID) return mockErrorResponse$(`mock://ConsultationSession/${appointmentId}/submit-report`);
+      const current = mockStore.get(appointmentId) ?? mockBlankSession(appointmentId);
+      mockStore.set(appointmentId, { ...current, status: 'AwaitingPatientReport', currentStep: 6 });
+      return of(undefined).pipe(delay(MOCK_LATENCY_MS));
+    }
+    const body = notes ? { notes } : {};
+    return this.http.post<void>(
+      `${API_BASE}ConsultationSession/${appointmentId}/submit-report`,
+      body,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  /**
+   * Closes the loop on an ExternalReferral when the patient returns with results.
+   * Flips the referral to `Completed` and reopens the consultation session
+   * (`status: InProgress`, `currentStep: 3`) so the doctor can make the final call.
+   * No request body needed.
+   */
+  completeReferral(appointmentId: number): Observable<void> {
+    if (USE_MOCK_DATA) {
+      if (appointmentId === MOCK_ERROR_APPOINTMENT_ID) return mockErrorResponse$(`mock://ConsultationSession/${appointmentId}/referral/complete`);
+      const current = mockStore.get(appointmentId) ?? mockBlankSession(appointmentId);
+      mockStore.set(appointmentId, { ...current, status: 'InProgress', currentStep: 3 });
+      return of(undefined).pipe(delay(MOCK_LATENCY_MS));
+    }
+    return this.http.post<void>(
+      `${API_BASE}ConsultationSession/${appointmentId}/referral/complete`,
+      {},
+      { headers: this.getHeaders() }
+    );
   }
 }

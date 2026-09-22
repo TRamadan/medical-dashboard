@@ -104,6 +104,15 @@
             @if (sessionError() && !flowStarted()) {
             <div class="note-banner note-coral mb-3">⚠ {{ sessionError() }}</div>
             }
+            @if (sessionStatus() === 'AwaitingPatientReport' || sessionStatus() === 'AwaitingSubDecision') {
+            <div class="note-banner note-amber mb-3">
+                <i class="pi pi-lock mr-2"></i>
+                <strong>Consultation is locked —</strong>
+                {{ sessionStatus() === 'AwaitingPatientReport'
+                    ? 'Waiting for the patient to review the medical report. Steps are read-only until they respond.'
+                    : 'Waiting for external\/internal results. Steps are read-only until results are received.' }}
+            </div>
+            }
 
             <!-- Step Bar (PrimeNG Stepper — steps-only mode; step content stays in the
                  existing @if (currentStep() === N) blocks below, unchanged) -->
@@ -1055,7 +1064,8 @@
             @if (sessionError()) {
             <div class="note-banner note-coral mb-3">⚠ {{ sessionError() }}</div>
             }
-            <div class="btn-row">
+
+            <div class="btn-row mt-3">
                 <p-button label="Previous" icon="pi pi-arrow-left" [outlined]="true" severity="secondary"
                     [disabled]="sessionSaving()" (onClick)="go(4)"></p-button>
                 <p-button label="Next — Action" icon="pi pi-arrow-right" iconPos="right" [loading]="sessionSaving()"
@@ -1063,23 +1073,94 @@
             </div>
             }
 
-            <!-- -- STEP 6  Action / Confirmation -- -->
+            <!-- ══ STEP 6  Action / Confirmation ══ -->
             @if (currentStep() === 6) {
-
-            @if (!actionDone()) {
-            <p-card styleClass="mb-3">
-                <ng-template pTemplate="title">Decision Notes</ng-template>
-                <div class="field-label">Notes <span class="req">*</span></div>
-                <textarea pTextarea [(ngModel)]="decisionNotes" placeholder="Notes to accompany this decision..." style="width:100%;min-height:60px;padding:.55rem .7rem;border-radius:8px;
-                   border:1px solid var(--p-content-border-color);background:var(--p-content-background);
-                   font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
-            </p-card>
-            }
 
             @if (sessionError()) {
             <div class="note-banner note-coral mb-3">⚠ {{ sessionError() }}</div>
             }
 
+            <!-- ────────────────────────────────────────────────────────
+                 PATH A — WriteReport (judgmentType = 0)
+                 The doctor already filled the Athlete Report (step 5).
+                 Step 6 lets them add optional notes and send the report to the patient.
+                 After sending: session locks into AwaitingPatientReport until patient responds.
+            ──────────────────────────────────────────────────────── -->
+            @if (judgmentChoice() === 'writeReport') {
+
+            @if (sessionStatus() === 'AwaitingPatientReport') {
+            <!-- —— Waiting for patient —— -->
+            <div class="note-banner note-mint mb-3">
+                <i class="pi pi-clock mr-2"></i>
+                <strong>Waiting for Patient:</strong> The medical report has been sent to the patient’s
+                mobile app. This consultation will reopen automatically once they respond.
+                <ul style="margin: 0.5rem 0 0 1rem; font-size: 0.85rem;">
+                    <li><strong>Accept</strong> → A “Build Treatment Plan” ticket will appear in your
+                        dashboard.</li>
+                    <li><strong>Decline</strong> → This consultation reopens at Step 3 for revision.</li>
+                </ul>
+            </div>
+            } @else {
+            <!-- —— Not yet submitted —— -->
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title">Send Medical Report to Patient</ng-template>
+                <p class="field-label mb-3">
+                    The report will be sent to the patient’s mobile app. They will
+                    receive a notification and can accept or decline.
+                </p>
+                <div class="mb-3">
+                    <div class="field-label">Notes <span style="color: var(--p-text-muted-color); font-size: 0.8rem;">(optional)</span></div>
+                    <textarea pTextarea [(ngModel)]="decisionNotes"
+                        placeholder="Any final notes to accompany the report..."
+                        style="width:100%;min-height:60px;padding:.55rem .7rem;border-radius:8px;
+                       border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                       font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+                </div>
+            </p-card>
+            <div class="confirm-box">
+                <div class="confirm-icon" style="color:#1AAD7A">
+                    <i class="pi pi-send"></i>
+                </div>
+                <div class="confirm-title">Send Report to Patient</div>
+                <div class="confirm-desc">The patient will receive a notification on their mobile app and
+                    can accept or request a revision.</div>
+                <div class="btn-row" style="justify-content:center">
+                    <p-button label="Submit Report to Patient" icon="pi pi-send" iconPos="right"
+                        severity="success" (onClick)="confirmAction()"
+                        [loading]="sessionSaving()" [disabled]="sessionSaving()"></p-button>
+                </div>
+            </div>
+            <div class="note-banner note-mint mt-3">
+                <strong>What will happen:</strong> Report sent to patient’s app → status becomes
+                <span class="code-badge">AwaitingPatientReport</span>.
+                If they <strong>accept</strong> → a Build Treatment Plan ticket appears on your
+                dashboard.
+                If they <strong>decline</strong> → consultation reopens at Step 3.
+            </div>
+            }
+            }
+
+            <!-- ────────────────────────────────────────────────────────
+                 PATH B — ExtraAssessment (judgmentType = 1)
+                 Reassessment paths A–D shown when entryType === Reassess.
+                 New/Return paths: Direct Blueprint | Internal Measurement | External Referral.
+                 Post-confirm waiting states are also rendered in this block.
+            ──────────────────────────────────────────────────────── -->
+            @if (judgmentChoice() !== 'writeReport') {
+
+            <!-- Pre-confirm notes card (hidden once a waiting state is active) -->
+            @if (!actionDone()) {
+            <p-card styleClass="mb-3">
+                <ng-template pTemplate="title">Decision Notes</ng-template>
+                <div class="field-label">Notes <span class="req">*</span></div>
+                <textarea pTextarea [(ngModel)]="decisionNotes" placeholder="Notes to accompany this decision..."
+                    style="width:100%;min-height:60px;padding:.55rem .7rem;border-radius:8px;
+                   border:1px solid var(--p-content-border-color);background:var(--p-content-background);
+                   font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
+            </p-card>
+            }
+
+            <!-- ─ Reassessment paths A–D ─ -->
             @if (entryType() === EntryType.Reassess) {
             @if (selectedReassessPath() === 'A') {
             <div class="confirm-box">
@@ -1088,7 +1169,7 @@
                 <div class="confirm-desc">You can add restrictions, change exercises or add a recovery phase. Program
                     continues without stopping. The change is logged in the Audit Trail.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? '? Done' : 'Open Protocol Editor ?'"
+                    <p-button [label]="actionDone() ? '✓ Done' : 'Open Protocol Editor →'"
                         [severity]="actionDone() ? 'secondary' : 'success'" (onClick)="confirmAction()"
                         [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
@@ -1105,56 +1186,98 @@
                 <div class="confirm-desc">Sessions are frozen (not cancelled). You will receive a notification when the
                     investigation is complete to make a final decision.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? '? Done' : 'Confirm Pause ?'"
+                    <p-button [label]="actionDone() ? '✓ Done' : 'Confirm Pause →'"
                         [severity]="actionDone() ? 'secondary' : 'warn'" (onClick)="confirmAction()"
                         [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-amber mt-3">
-                <strong>What will happen:</strong> <span class="code-badge">ACTIVE_PROGRAM ? PROGRAM_PAUSED</span>.
-                Sessions
-                frozen. After investigation: doctor decides (resume / edit / replace).
+                <strong>What will happen:</strong> <span class="code-badge">ACTIVE_PROGRAM → PROGRAM_PAUSED</span>.
+                Sessions frozen. After investigation: doctor decides (resume / edit / replace).
             </div>
             }
             @if (selectedReassessPath() === 'C') {
             <div class="confirm-box">
-                <div class="confirm-icon" style="color:#FC6B44">?</div>
+                <div class="confirm-icon" style="color:#FC6B44">↺</div>
                 <div class="confirm-title">Current Protocol Closed New One Will Be Created</div>
                 <div class="confirm-desc">18 remaining sessions will be transferred. S02 opens to write the new
-                    protocol.
-                </div>
+                    protocol.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? '? Done' : 'Confirm Replacement &amp; Create Protocol ?'"
+                    <p-button [label]="actionDone() ? '✓ Done' : 'Confirm Replacement &amp; Create Protocol →'"
                         [severity]="actionDone() ? 'secondary' : 'danger'" (onClick)="confirmAction()"
                         [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-coral mt-3">
-                <strong>What will happen:</strong> <span class="code-badge">ACTIVE_PROGRAM ?
+                <strong>What will happen:</strong> <span class="code-badge">ACTIVE_PROGRAM →
                     REPLACED_BY_REASSESSMENT</span>. credit_transfer_log: 18 sessions. S02 opens with athlete data.
             </div>
             }
             @if (selectedReassessPath() === 'D') {
             <div class="confirm-box">
-                <div class="confirm-icon" style="color:#6B47FF">?</div>
+                <div class="confirm-icon" style="color:#6B47FF">⇄</div>
                 <div class="confirm-title">A Second Parallel Protocol Will Be Created</div>
                 <div class="confirm-desc">Both protocols will be active simultaneously. Lead assigns engineers for each.
                 </div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? '? Done' : 'Create Parallel Protocol ?'"
+                    <p-button [label]="actionDone() ? '✓ Done' : 'Create Parallel Protocol →'"
                         [severity]="actionDone() ? 'secondary' : 'info'" (onClick)="confirmAction()"
                         [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-purple mt-3">
-                <strong>What will happen:</strong> Protocol 1 stays ACTIVE. Protocol 2 created as DRAFT ? doctor writes
-                it ?
-                activated ? lead assigns engineers.
+                <strong>What will happen:</strong> Protocol 1 stays ACTIVE. Protocol 2 created as DRAFT → doctor writes
+                it → activated → lead assigns engineers.
             </div>
             }
             }
 
+            <!-- ─ New / Return paths ─ -->
             @if (entryType() !== EntryType.Reassess) {
+
+            <!-- ── AwaitingSubDecision: post-confirm waiting states ── -->
+            @if (sessionStatus() === 'AwaitingSubDecision') {
+            @if (selectedPath() === 3) {
+            <div class="note-banner note-coral mb-3">
+                <i class="pi pi-clock mr-2"></i>
+                <strong>Waiting for Referral Results:</strong> The patient has been notified. Auto-reminders on days 2,
+                5, 10, 30.
+                Once they return with results, click <strong>Close Referral Loop</strong> to reopen this consultation
+                for the final decision.
+            </div>
+            <div class="confirm-box">
+                <div class="confirm-icon" style="color:#FC6B44">
+                    <i class="pi pi-arrow-up-right"></i>
+                </div>
+                <div class="confirm-title">External Referral Confirmed</div>
+                <div class="confirm-desc">Mark as resolved when the patient returns with their imaging/lab results. This
+                    will reopen the consultation at Step 3 for the final decision.</div>
+                <div class="btn-row" style="justify-content:center">
+                    <p-button label="Close Referral Loop" icon="pi pi-check-circle"
+                        severity="success" (onClick)="closeReferralLoop()"
+                        [loading]="sessionSaving()" [disabled]="sessionSaving()"></p-button>
+                </div>
+            </div>
+            <div class="note-banner note-coral mt-3">
+                <strong>What will happen:</strong> Referral marked <span class="code-badge">Completed</span>.
+                Consultation reopens at Step 3 (<span class="code-badge">status: InProgress</span>) for final judgment.
+            </div>
+            }
+            @if (selectedPath() === 2) {
+            <div class="note-banner note-amber mb-3">
+                <i class="pi pi-clock mr-2"></i>
+                <strong>Awaiting Measurement Results:</strong> A measurement ticket has been created for the engineer.
+                Once the measurement appointment is marked complete, this consultation will reopen automatically at Step
+                3.
+                <br />
+                <small style="color: var(--p-text-muted-color);">No action needed — the system handles the reopen
+                    automatically.</small>
+            </div>
+            }
+            }
+
+            <!-- ── Normal pre-confirm state: path selection + confirm buttons ── -->
+            @if (sessionStatus() !== 'AwaitingSubDecision') {
             @if (selectedPath() === 1) {
             <div class="confirm-box">
                 <div class="confirm-icon" style="color:#1AAD7A">
@@ -1165,12 +1288,13 @@
                 <div class="btn-row" style="justify-content:center">
                     <p-button [label]="actionDone() ? 'Done' : 'Open Protocol Builder'"
                         [severity]="actionDone() ? 'secondary' : 'success'" (onClick)="confirmAction()"
-                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving() || !canConfirmAction()"></p-button>
+                        [loading]="sessionSaving()"
+                        [disabled]="actionDone() || sessionSaving() || !canConfirmAction()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-mint mt-3">
-                <strong>What will happen:</strong> Ticket status ? <span class="code-badge">CLIENT_APPROVED</span> ? S02
-                opens.
+                <strong>What will happen:</strong> Ticket status → <span class="code-badge">CLIENT_APPROVED</span>
+                → S02 opens.
             </div>
             }
             @if (selectedPath() === 2) {
@@ -1179,19 +1303,17 @@
                     <i class="pi pi-bullseye"></i>
                 </div>
                 <div class="confirm-title">Measurement Ticket Created</div>
-                <div class="confirm-desc">Ticket appears in the engineer's interface. Doctor is notified when results
-                    are
-                    ready.</div>
+                <div class="confirm-desc">Ticket appears in the engineer’s interface. Doctor is notified when results
+                    are ready.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? 'Done' : 'Confirm'"
-                        [severity]="actionDone() ? 'secondary' : 'warn'" (onClick)="confirmAction()"
-                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving() || !canConfirmAction()"></p-button>
+                    <p-button label="Confirm"
+                        severity="warn" (onClick)="confirmAction()"
+                        [loading]="sessionSaving()" [disabled]="sessionSaving() || !canConfirmAction()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-amber mt-3">
-                <strong>What will happen:</strong> <span class="code-badge">PENDING_INTERNAL</span> ? engineer measures
-                ?
-                notification to doctor.
+                <strong>What will happen:</strong> <span class="code-badge">PENDING_INTERNAL</span> → engineer measures
+                → notification to doctor → consultation reopens at Step 3 automatically.
             </div>
             }
             @if (selectedPath() === 3) {
@@ -1204,17 +1326,20 @@
                     sent.
                 </div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button [label]="actionDone() ? 'Done' : 'Confirm'"
-                        [severity]="actionDone() ? 'secondary' : 'danger'" (onClick)="confirmAction()"
-                        [loading]="sessionSaving()" [disabled]="actionDone() || sessionSaving() || !canConfirmAction()"></p-button>
+                    <p-button label="Confirm"
+                        severity="danger" (onClick)="confirmAction()"
+                        [loading]="sessionSaving()" [disabled]="sessionSaving() || !canConfirmAction()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-coral mt-3">
-                <strong>What will happen:</strong> <span class="code-badge">PENDING_EXTERNAL</span> ? Reminder day
-                2/5/10 ?
-                After upload: doctor notification.
+                <strong>What will happen:</strong> <span class="code-badge">PENDING_EXTERNAL</span> → Reminder day
+                2/5/10 →
+                After upload: doctor notification → use <strong>Close Referral Loop</strong> to finalize.
             </div>
             }
+            }
+            }
+
             }
 
             <div class="btn-row mt-4">
@@ -1222,7 +1347,6 @@
                     [disabled]="sessionSaving()" (onClick)="go(5)"></p-button>
             </div>
             }
-
 
         </div>
     </div>

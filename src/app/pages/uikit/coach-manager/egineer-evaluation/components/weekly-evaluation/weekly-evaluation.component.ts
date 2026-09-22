@@ -151,13 +151,11 @@ export class WeeklyEvaluationComponent implements OnInit, OnChanges {
   }
 
   private isCoachUser(user: any): boolean {
-    if (!user) return false;
-    const str = JSON.stringify(user).toLowerCase();
+    debugger
+    if (!user.employeeProfile) return false;
+
     return (
-      str.includes('coach') ||
-      str.includes('مدرب') ||
-      user.employeeTypeId === 1 ||
-      user.userType === 'Coach'
+      user.employeeProfile.employeeTypeId === 3
     );
   }
 

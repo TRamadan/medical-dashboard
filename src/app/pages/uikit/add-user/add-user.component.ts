@@ -205,7 +205,10 @@ export class AddUserComponent implements OnInit {
             employeeProfileDTO: this.fb.group({
                 address: ['', Validators.required],
                 employeeTypeId: [null, Validators.required],
-                attachments: this.fb.array([])
+                attachments: this.fb.array([]),
+                specialty: [''],
+                yearsOfExperience: [null],
+                rating: [null]
             }),
             phones: this.fb.array([
                 this.createPhoneGroup(true)
@@ -361,7 +364,10 @@ export class AddUserComponent implements OnInit {
             },
             employeeProfileDTO: {
                 address: empDTO.address,
-                employeeTypeId: empDTO.employeeTypeId
+                employeeTypeId: empDTO.employeeTypeId,
+                specialty: empDTO.specialty || undefined,
+                yearsOfExperience: empDTO.yearsOfExperience != null ? Number(empDTO.yearsOfExperience) : undefined,
+                rating: empDTO.rating != null ? Number(empDTO.rating) : undefined
             },
             phones: formValue.phones.map((p: any) => {
                 const { id, ...rest } = p;
@@ -440,7 +446,10 @@ export class AddUserComponent implements OnInit {
         const emp = data.employeeProfileDTO ?? data.employeeProfile ?? data.employeeData ?? {};
         this.employeeProfileDTOGroup.patchValue({
             address: emp.address ?? '',
-            employeeTypeId: emp.employeeTypeId ?? data.employeeTypeId ?? emp.userType ?? null
+            employeeTypeId: emp.employeeTypeId ?? data.employeeTypeId ?? emp.userType ?? null,
+            specialty: emp.specialty ?? '',
+            yearsOfExperience: emp.yearsOfExperience ?? null,
+            rating: emp.rating ?? null
         });
 
         const phones = data.phones ?? [];

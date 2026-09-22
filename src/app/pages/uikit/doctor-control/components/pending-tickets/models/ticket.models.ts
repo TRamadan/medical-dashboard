@@ -113,6 +113,8 @@ export interface BaseTicket {
   actions: TicketAction[];
   badge?: string;
   time_ago?: string;
+  consultationDecisionId?: number;
+  medicalReportId?: number;
 }
 
 export interface PhaseTransitionTicket extends BaseTicket {

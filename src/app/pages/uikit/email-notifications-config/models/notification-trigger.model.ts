@@ -1,51 +1,81 @@
-export type RecurrenceFrequency = 'daily' | 'weekly' | 'monthly';
+export type RecurrenceFrequency = 1 | 2 | 3; // 1: Daily, 2: Weekly, 3: Monthly
+export type EndType = 1 | 2 | 3; // 1: Never, 2: OnDate, 3: AfterOccurrences
 
 export interface RecurrenceRule {
   frequency: RecurrenceFrequency;
   /** Interval multiplier: every N days/weeks/months */
   interval: number;
-  /** For weekly: 0 = Sunday .. 6 = Saturday */
+  /** For weekly: 0 = Sunday .. 6 = Saturday (.NET DayOfWeek) */
   daysOfWeek: number[];
   /** For monthly: day of month, 1-31 */
   dayOfMonth: number | null;
-  time: string; // "HH:mm", 24h
+  time: string; // "HH:mm" or "HH:mm:ss", 24h local clinic time
   startDate: string; // ISO date, yyyy-MM-dd
-  endMode: 'never' | 'onDate' | 'afterCount';
-  endDate: string | null;
-  occurrenceCount: number | null;
+  endMode: EndType;
+  endDate: string | null; // ISO date yyyy-MM-dd when endMode = 2
+  occurrenceCount: number | null; // maxOccurrences when endMode = 3
 }
 
-export interface UserType {
-  id: string;
+export interface NotificationTriggerTypeOption {
+  id: number;
+  name: string;
+  label?: string;
+}
+
+export interface AudienceOption {
+  id: number;
   name: string;
 }
 
-export interface AudienceUser {
-  id: string;
+export interface AudienceUserItem {
+  id: number;
   name: string;
   email?: string;
-  userTypeId: string; // links this user to a UserType.id
+  employeeTypeId?: number;
 }
 
-export interface AudienceSegment {
-  id: string;
-  name: string;
-  description: string;
-  estimatedSize: number;
+export interface NotificationTriggerListItem {
+  id: number;
+  isActive: boolean;
+  title: string;
+  typeLabel?: string;
+  scheduleLabel?: string;
+  audienceLabel?: string;
 }
 
-export interface NotificationTrigger {
-  id: string;
+export interface NotificationTriggerListResponse {
+  activeCount: number;
+  totalCount: number;
+  triggers: NotificationTriggerListItem[];
+}
+
+export interface NotificationTriggerPayload {
   title: string;
   message: string;
-  recurrence: RecurrenceRule;
-  userTypeIds?: string[];
-  userIds?: string[];
-  audienceSegmentIds?: string[];
-  active: boolean;
-  createdAt: string;
-  notificationType: string;
-  updatedAt: string;
+  type: number;
+  frequency: number;
+  interval: number;
+  daysOfWeek: number[] | null;
+  dayOfMonth: number | null;
+  timeOfDay: string;
+  startDate: string;
+  endType: number;
+  endDate: string | null;
+  maxOccurrences: number | null;
+  audienceEmployeeTypeIds: number[];
+  includePatients: boolean;
+  recipientUserIds: number[];
+  isActive: boolean;
+}
+
+export interface NotificationTriggerDetail extends NotificationTriggerPayload {
+  id: number;
+  typeLabel?: string;
+  scheduleLabel?: string;
+  audienceLabel?: string;
+  recipients?: { id: number; name: string; email?: string }[];
+  occurrenceCount?: number;
+  lastRunAt?: string | null;
 }
 
 export const DAY_LABELS: { value: number; short: string; full: string }[] = [
@@ -62,14 +92,15 @@ export function defaultRecurrenceRule(): RecurrenceRule {
   const today = new Date();
   const iso = today.toISOString().slice(0, 10);
   return {
-    frequency: 'weekly',
+    frequency: 2, // Weekly
     interval: 1,
-    daysOfWeek: [today.getDay()],
+    daysOfWeek: [today.getDay()], // Sunday = 0
     dayOfMonth: today.getDate(),
-    time: '09:00',
+    time: '08:00:00',
     startDate: iso,
-    endMode: 'never',
+    endMode: 1, // Never
     endDate: null,
     occurrenceCount: null,
   };
 }
+

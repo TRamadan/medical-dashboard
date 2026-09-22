@@ -1,20 +1,39 @@
 <p-card>
   <div class="page">
     <header class="page__header">
-      <div>
-        <h1 class="page__title">Recurring notifications</h1>
-        <p class="page__subtitle">{{ activeCount() }} active of {{ triggers().length }} triggers</p>
+      <div class="page__heading">
+        <span class="page__icon pi pi-bell" aria-hidden="true"></span>
+        <div>
+          <h1 class="page__title">Recurring Notifications</h1>
+          <div class="page__meta">
+            <p class="page__subtitle">{{ activeCount() }} active of {{ totalCount() }}</p>
+            <span class="page__ratio" [style.--nt-ratio]="totalCount() ? activeCount() / totalCount() : 0">
+              <span class="page__ratio-fill"></span>
+            </span>
+          </div>
+        </div>
       </div>
-      <button *ngIf="view() === 'list'" pButton type="button" label="New trigger" icon="pi pi-plus"
-        (click)="openCreate()"></button>
-      <button *ngIf="view() === 'form'" pButton type="button" label="Back to list" class="p-button-outlined"
-        icon="pi pi-arrow-left" (click)="backToList()"></button>
+
+      <div class="page__actions">
+        @if (view() === 'list') {
+        <button pButton type="button" label="New trigger" icon="pi pi-plus" (click)="openCreate()"></button>
+        }
+        @if (view() === 'form') {
+        <button pButton type="button" label="Back to list" class="p-button-outlined" icon="pi pi-arrow-left"
+          (click)="backToList()"></button>
+        }
+      </div>
     </header>
 
-    <app-trigger-list *ngIf="view() === 'list'" [triggers]="triggers()" [userTypes]="userTypes()"
-      [users]="users()" (edit)="openEdit($event)" (toggleActive)="onToggleActive($event)" (remove)="onRemove($event)" />
+    @if (view() === 'list') {
+    <app-trigger-list [triggers]="triggers()" [loading]="loading()" (edit)="openEdit($event)"
+      (toggleActive)="onToggleActive($event)" (remove)="onRemove($event)" />
+    }
 
-    <app-trigger-form *ngIf="view() === 'form'" [trigger]="editingTrigger()" (save)="onSave($event)"
+    @if (view() === 'form') {
+    <app-trigger-form [trigger]="editingTrigger()" [triggerTypes]="triggerTypes()" [audienceOptions]="audienceOptions()"
+      [audienceUsers]="audienceUsers()" [serverError]="errorMessage()" [saving]="saving()" (save)="onSave($event)"
       (cancel)="backToList()" />
+    }
   </div>
 </p-card>

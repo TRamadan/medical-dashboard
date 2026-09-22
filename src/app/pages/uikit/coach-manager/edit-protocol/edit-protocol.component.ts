@@ -259,7 +259,6 @@ export class EditProtocolComponent implements OnInit {
         if (!this.targetPlanId()) {
             this.loadPlans();
         }
-        this.loadCoaches();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -282,15 +281,7 @@ export class EditProtocolComponent implements OnInit {
         });
     }
 
-    loadCoaches(): void {
-        this.service.getCoaches().subscribe({
-            next: (coaches) => this.coaches.set(coaches && coaches.length > 0 ? coaches : MOCK_COACHES),
-            error: (err) => {
-                console.warn('API getCoaches failed, falling back to mock coaches:', err);
-                this.coaches.set(MOCK_COACHES);
-            }
-        });
-    }
+
 
     // ─────────────────────────────────────────────────────────────────────────
     // Protocol

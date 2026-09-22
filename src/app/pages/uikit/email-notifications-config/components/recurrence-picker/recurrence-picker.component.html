@@ -1,69 +1,85 @@
 <div class="recurrence-picker">
-  <div class="field-row">
-    <span class="field-label">Repeats</span>
-    <p-selectButton [options]="frequencyOptions" [ngModel]="rule.frequency" (ngModelChange)="setFrequency($event)"
-      optionLabel="label" optionValue="value" />
-  </div>
+  <section class="recurrence-section">
+    <h3 class="recurrence-section__title">Frequency</h3>
 
-  <div class="field-row">
-    <span class="field-label">Every</span>
-    <div class="inline-fields">
-      <p-inputNumber [ngModel]="rule.interval" (ngModelChange)="setInterval($event)" [min]="1" [max]="365"
-        [showButtons]="true" buttonLayout="horizontal" spinnerMode="horizontal" inputStyleClass="interval-input"
-        decrementButtonClass="p-button-text" incrementButtonClass="p-button-text" />
-      <span class="unit-label">{{ intervalUnitLabel }}</span>
+    <div class="field-row">
+      <span class="field-label">Repeats</span>
+      <p-selectButton [options]="frequencyOptions" [ngModel]="rule.frequency" (ngModelChange)="setFrequency($event)"
+        [ngModelOptions]="{standalone: true}" optionLabel="label" optionValue="value" />
     </div>
-  </div>
 
-  <div class="field-row" *ngIf="rule.frequency === 'weekly'">
-    <span class="field-label">On days</span>
-    <p-selectButton [options]="dayOptions" [ngModel]="rule.daysOfWeek" (ngModelChange)="setDaysOfWeek($event)"
-      optionLabel="label" optionValue="value" [multiple]="true" />
-  </div>
+    <div class="field-row">
+      <span class="field-label">Every</span>
+      <div class="inline-fields">
+        <p-inputNumber [ngModel]="rule.interval" (ngModelChange)="setInterval($event)"
+          [ngModelOptions]="{standalone: true}" [min]="1" [max]="365" [showButtons]="true" buttonLayout="horizontal"
+          spinnerMode="horizontal" inputStyleClass="interval-input" decrementButtonClass="p-button-text"
+          incrementButtonClass="p-button-text" />
+        <span class="unit-label">{{ intervalUnitLabel }}</span>
+      </div>
+    </div>
 
-  <div class="field-row" *ngIf="rule.frequency === 'monthly'">
-    <span class="field-label">On day</span>
-    <p-inputNumber [ngModel]="rule.dayOfMonth" (ngModelChange)="setDayOfMonth($event)" [min]="1" [max]="31" />
-    <span class="field-hint">Clamped to the last day in short months</span>
-  </div>
+    @if (rule.frequency === 2) {
+    <div class="field-row">
+      <span class="field-label">On days</span>
+      <p-selectButton [options]="dayOptions" [ngModel]="rule.daysOfWeek" (ngModelChange)="setDaysOfWeek($event)"
+        [ngModelOptions]="{standalone: true}" optionLabel="label" optionValue="value" [multiple]="true" />
+    </div>
+    }
 
-  <div class="field-row">
-    <span class="field-label">At</span>
-    <p-datepicker [ngModel]="timeAsDate()" (ngModelChange)="setTimeFromDate($event)" [timeOnly]="true" hourFormat="24"
-      appendTo="body" />
-  </div>
+    @if (rule.frequency === 3) {
+    <div class="field-row">
+      <span class="field-label">On day</span>
+      <p-inputNumber [ngModel]="rule.dayOfMonth" (ngModelChange)="setDayOfMonth($event)"
+        [ngModelOptions]="{standalone: true}" [min]="1" [max]="31" />
+      <span class="field-hint">Clamped to the last day in short months</span>
+    </div>
+    }
+  </section>
 
-  <div class="field-row">
-    <span class="field-label">Starting</span>
-    <p-datepicker [ngModel]="startDateAsDate()" (ngModelChange)="setStartDateFromDate($event)" dateFormat="M d, yy"
-      appendTo="body" [showIcon]="true" />
-  </div>
+  <section class="recurrence-section">
+    <h3 class="recurrence-section__title">Timing</h3>
 
-  <div class="field-row field-row--end">
-    <span class="field-label">Ends</span>
+    <div class="field-row">
+      <span class="field-label">At</span>
+      <p-datepicker [ngModel]="timeAsDate()" (ngModelChange)="setTimeFromDate($event)"
+        [ngModelOptions]="{standalone: true}" [timeOnly]="true" hourFormat="24" appendTo="body" />
+    </div>
+
+    <div class="field-row">
+      <span class="field-label">Starting</span>
+      <p-datepicker [ngModel]="startDateAsDate()" (ngModelChange)="setStartDateFromDate($event)"
+        [ngModelOptions]="{standalone: true}" dateFormat="M d, yy" appendTo="body" [showIcon]="true" />
+    </div>
+  </section>
+
+  <section class="recurrence-section">
+    <h3 class="recurrence-section__title">Ends</h3>
+
     <div class="end-options">
       <div class="radio-line">
-        <p-radioButton name="endMode" value="never" [ngModel]="rule.endMode" (ngModelChange)="setEndMode($event)"
+        <p-radioButton name="endMode" [value]="1" [ngModel]="rule.endMode" (ngModelChange)="setEndMode($event)"
           inputId="end-never" />
         <label for="end-never">Never</label>
       </div>
 
       <div class="radio-line">
-        <p-radioButton name="endMode" value="onDate" [ngModel]="rule.endMode" (ngModelChange)="setEndMode($event)"
+        <p-radioButton name="endMode" [value]="2" [ngModel]="rule.endMode" (ngModelChange)="setEndMode($event)"
           inputId="end-onDate" />
         <label for="end-onDate">On date</label>
-        <p-datepicker [ngModel]="endDateAsDate()" (ngModelChange)="setEndDateFromDate($event)" dateFormat="M d, yy"
-          appendTo="body" [showIcon]="true" [disabled]="rule.endMode !== 'onDate'" />
+        <p-datepicker [ngModel]="endDateAsDate()" (ngModelChange)="setEndDateFromDate($event)"
+          [ngModelOptions]="{standalone: true}" dateFormat="M d, yy" appendTo="body" [showIcon]="true"
+          [disabled]="rule.endMode !== 2" />
       </div>
 
       <div class="radio-line">
-        <p-radioButton name="endMode" value="afterCount" [ngModel]="rule.endMode" (ngModelChange)="setEndMode($event)"
+        <p-radioButton name="endMode" [value]="3" [ngModel]="rule.endMode" (ngModelChange)="setEndMode($event)"
           inputId="end-count" />
         <label for="end-count">After</label>
-        <p-inputNumber [ngModel]="rule.occurrenceCount" (ngModelChange)="setOccurrenceCount($event)" [min]="1"
-          [disabled]="rule.endMode !== 'afterCount'" />
-        <span>sends</span>
+        <p-inputNumber [ngModel]="rule.occurrenceCount" (ngModelChange)="setOccurrenceCount($event)"
+          [ngModelOptions]="{standalone: true}" [min]="1" [disabled]="rule.endMode !== 3" />
+        <span class="unit-label">sends</span>
       </div>
     </div>
-  </div>
+  </section>
 </div>

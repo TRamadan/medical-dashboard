@@ -1,7 +1,7 @@
 .audience-selector {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
 }
 
 .audience-selector__field {
@@ -19,6 +19,30 @@
 :host ::ng-deep .audience-multiselect {
   width: 100%;
   border-radius: 10px;
+}
+
+.audience-selector__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--p-surface-border, #e5e7eb);
+  border-radius: 10px;
+
+  label {
+    font-size: 13.5px;
+    font-weight: 600;
+    display: block;
+    cursor: pointer;
+  }
+
+  span:not(label) {
+    display: block;
+    margin-top: 1px;
+    font-size: 12px;
+    color: var(--p-text-muted-color, #6b7280);
+  }
 }
 
 .user-item {
@@ -41,13 +65,48 @@
 .reach-summary {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-radius: 8px;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
   background: var(--p-surface-100, #f1f3f6);
-  font-size: 13px;
+}
+
+.reach-summary__breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
 }
 
 .reach-summary__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--p-text-muted-color, #6b7280);
+}
+
+.reach-summary__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.reach-summary__chip {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--p-surface-0, #fff);
+  border: 1px solid var(--p-surface-border, #e5e7eb);
+  color: var(--p-text-color, #111827);
+
+  &--empty {
+    background: transparent;
+    border-style: dashed;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--p-text-muted-color, #9ca3af);
+  }
 }

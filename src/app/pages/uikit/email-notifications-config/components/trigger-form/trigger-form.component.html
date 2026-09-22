@@ -1,54 +1,65 @@
 <form class="trigger-form" (ngSubmit)="onSubmit()">
+  @if (serverError()) {
+  <p-message severity="error" [text]="serverError()!"></p-message>
+  }
+
   <div class="trigger-form__main">
-    <p-card header="Message">
+    <p-card header="Message & Category">
       <div class="field">
-        <label for="trigger-title">Title</label>
-        <input id="trigger-title" pInputText type="text" placeholder="Weekly digest" [ngModel]="title()"
-          (ngModelChange)="title.set($event)" name="title" maxlength="80" />
+        <label for="trigger-title">Title *</label>
+        <input id="trigger-title" pInputText type="text" placeholder="e.g. Weekly digest, Appointment reminder"
+          [ngModel]="title()" (ngModelChange)="title.set($event)" name="title" maxlength="200" required
+          class="w-full" />
       </div>
 
       <div class="field">
-        <label for="trigger-message">Message</label>
-        <textarea id="trigger-message" pInputTextarea rows="3" placeholder="What the recipient will see"
-          [ngModel]="message()" (ngModelChange)="message.set($event)" name="message" maxlength="240"
-          [autoResize]="true"></textarea>
-        <span class="field__count">{{ message().length }}/240</span>
+        <label for="trigger-message">Message *</label>
+        <textarea id="trigger-message" pInputTextarea rows="3"
+          placeholder="What the recipient will see in their notifications feed" [ngModel]="message()"
+          (ngModelChange)="message.set($event)" name="message" maxlength="1000" [autoResize]="true" required
+          class="w-full"></textarea>
+        <span class="field__count">{{ message().length }}/1000</span>
+      </div>
+
+      <div class="field">
+        <label for="trigger-type">Notification category type *</label>
+        <p-dropdown inputId="trigger-type" [options]="triggerTypes()" [ngModel]="type()"
+          (ngModelChange)="type.set($event)" name="type" optionLabel="name" optionValue="id"
+          [placeholder]="triggerTypes().length ? 'Select category type' : 'No category types available'"
+          [filter]="triggerTypes().length > 6" filterPlaceholder="Search categories" styleClass="w-full" />
       </div>
     </p-card>
 
-    <p-card header="Notification Type">
-      <div class="notif-type-grid">
-        @for (opt of notificationTypes; track opt.value) {
-        <label class="notif-type-option" [class.notif-type-option--selected]="notificationType() === opt.value"
-          [for]="'notif-' + opt.value">
-          <p-radioButton [inputId]="'notif-' + opt.value" name="notificationType" [value]="opt.value"
-            [ngModel]="notificationType()" (ngModelChange)="notificationType.set($event)" />
-          <span class="notif-type-option__label">{{ opt.label }}</span>
-        </label>
-        }
-      </div>
-    </p-card>
-
-    <p-card header="Schedule">
+    <p-card header="Schedule Rule">
       <app-recurrence-picker [rule]="recurrence()" (ruleChange)="recurrence.set($event)" />
     </p-card>
 
-    <p-card header="Audience">
-      <app-audience-selector [userTypes]="userTypes" [users]="users" [selectedUserTypeIds]="selectedUserTypeIds()"
-        [selectedUserIds]="selectedUserIds()" (selectedUserTypeIdsChange)="selectedUserTypeIds.set($event)"
-        (selectedUserIdsChange)="selectedUserIds.set($event)" />
+    <p-card header="Target Audience">
+      <app-audience-selector [audienceOptions]="audienceOptions()" [audienceUsers]="audienceUsers()"
+        [selectedRoleIds]="audienceEmployeeTypeIds()" [includePatients]="includePatients()"
+        [selectedUserIds]="selectedUserIds()" (selectedRoleIdsChange)="audienceEmployeeTypeIds.set($event)"
+        (includePatientsChange)="includePatients.set($event)" (selectedUserIdsChange)="selectedUserIds.set($event)" />
+      @if (!isAudienceValid()) {
+      <small class="p-error block mt-2">* At least one staff role, patients toggle, or individual recipient must be
+        selected.</small>
+      }
     </p-card>
 
     <p-card styleClass="active-card">
       <div class="active-row">
-        <p-inputSwitch [ngModel]="active()" (ngModelChange)="active.set($event)" name="active"
-          inputId="active-switch" />
+        <p-inputSwitch [ngModel]="active()" (ngModelChange)="active.set($event)" name="active" inputId="active-switch"
+          aria-label="Toggle trigger active status" />
         <div>
           <label for="active-switch" class="active-row__label">Trigger is active</label>
-          <p class="active-row__hint">Inactive triggers are saved but never send.</p>
+          <p class="active-row__hint">Inactive triggers are saved but will never fire.</p>
         </div>
       </div>
     </p-card>
   </div>
 
+  <div class="form-actions">
+    <button pButton type="button" label="Cancel" class="p-button-outlined" (click)="onCancel()"></button>
+    <button pButton type="submit" label="Save Trigger" icon="pi pi-check" [loading]="saving()"
+      (click)="onSubmit()"></button>
+  </div>
 </form>
