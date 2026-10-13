@@ -1,103 +1,171 @@
-<div class="panel">
+@if (loading()) {
+<div class="flex items-center gap-3 p-4">
+    <i class="pi pi-spin pi-spinner text-2xl text-primary"></i>
+    <span class="text-gray-500">جارٍ تحميل بيانات الإصابة…</span>
+</div>
+} @else {
+@if (data(); as d) {
+<div class="panel" id="tab-injury">
     <div class="two">
+
+        <!-- ── Current Injury ─────────────────────────────────────────── -->
         <div>
             <div class="sect">الإصابة الحالية</div>
+            @if (d.currentInjury; as inj) {
             <div class="card">
                 <div class="info-row">
                     <div class="ir-label">التشخيص</div>
-                    <div class="ir-val">تمزق رباط أمامي كامل (Grade III)</div>
+                    <div class="ir-val">{{ inj.diagnosis }}</div>
                 </div>
                 <div class="info-row">
                     <div class="ir-label">الموقع</div>
-                    <div class="ir-val">ركبة يمين — ACL</div>
+                    <div class="ir-val">{{ inj.injuryName }} — {{ translateSide(inj.side) }}</div>
+                </div>
+                <div class="info-row">
+                    <div class="ir-label">درجة الإصابة</div>
+                    <div class="ir-val">{{ translateGrade(inj.injuryGrade) }}</div>
                 </div>
                 <div class="info-row">
                     <div class="ir-label">تاريخ الإصابة</div>
-                    <div class="ir-val">فبراير ٢٠٢٦</div>
+                    <div class="ir-val">{{ inj.injuryDate | date:'dd/MM/yyyy' }}</div>
                 </div>
+                @if (inj.mechanism) {
                 <div class="info-row">
                     <div class="ir-label">آلية الإصابة</div>
-                    <div class="ir-val">التواء مفاجئ أثناء التسديد — ملعب دوري خماسي</div>
+                    <div class="ir-val">{{ inj.mechanism }}</div>
                 </div>
+                }
+                @if (d.medicalHistory.previousSurgeries.length > 0) {
                 <div class="info-row">
                     <div class="ir-label">العملية / التدخل</div>
-                    <div class="ir-val">إعادة بناء ACL (Hamstring Graft) — ٥ مارس ٢٠٢٦</div>
+                    <div class="ir-val">
+                        {{ d.medicalHistory.previousSurgeries[0].surgeryType }}
+                        — {{ d.medicalHistory.previousSurgeries[0].surgeryDate | date:'dd/MM/yyyy' }}
+                    </div>
                 </div>
+                }
+                @if (inj.specialists.length > 0) {
                 <div class="info-row">
                     <div class="ir-label">الجراح</div>
-                    <div class="ir-val">د. أحمد منصور — مستشفى الشيخ زايد</div>
+                    <div class="ir-val">{{ inj.specialists[0].doctorName }} — {{ inj.specialists[0].specialty }}</div>
                 </div>
+                }
+                @if (inj.diagnosticTests.length > 0) {
                 <div class="info-row">
-                    <div class="ir-label">التقرير الخارجي</div>
-                    <div class="ir-val"><span style="color:var(--mint2);cursor:pointer;">📎 MRI Report - فبراير
-                            ٢٠٢٦</span></div>
+                    <div class="ir-label">التقارير الخارجية</div>
+                    <div class="ir-val">
+                        @for (test of inj.diagnosticTests; track $index) {
+                        <span class="badge b-teal cursor-pointer">📎 {{ test }}</span>
+                        }
+                    </div>
                 </div>
+                }
             </div>
+            } @else {
+            <div class="card text-center text-gray-400 italic py-6">لا توجد بيانات إصابة حالية</div>
+            }
         </div>
+
+        <!-- ── Medical History ────────────────────────────────────────── -->
         <div>
             <div class="sect">التاريخ الطبي</div>
             <div class="card">
                 <div class="info-row">
                     <div class="ir-label">إصابات سابقة</div>
-                    <div class="ir-val">شد عضلي فخذ أيسر — ٢٠٢٣ (تعافى كاملاً)</div>
+                    <div class="ir-val">
+                        @if (d.medicalHistory.previousInjuries.length > 0) {
+                            @for (inj of d.medicalHistory.previousInjuries; track $index) {
+                            <div>{{ inj.description }} — {{ inj.injuryDate | date:'yyyy' }}</div>
+                            }
+                        } @else {
+                            <span class="muted">لا يوجد</span>
+                        }
+                    </div>
                 </div>
                 <div class="info-row">
                     <div class="ir-label">أمراض مزمنة</div>
-                    <div class="ir-val muted">لا يوجد</div>
+                    <div class="ir-val">
+                        @if (d.medicalHistory.chronicConditions.length > 0) {
+                            {{ d.medicalHistory.chronicConditions.join('، ') }}
+                        } @else {
+                            <span class="muted">لا يوجد</span>
+                        }
+                    </div>
                 </div>
                 <div class="info-row">
                     <div class="ir-label">أدوية حالية</div>
-                    <div class="ir-val">Voltaren Gel — موضعي فقط</div>
+                    <div class="ir-val">
+                        @if (d.medicalHistory.medications.length > 0) {
+                            @for (med of d.medicalHistory.medications; track $index) {
+                            <div>{{ med.name }}@if (med.frequency) { — {{ med.frequency }} }</div>
+                            }
+                        } @else {
+                            <span class="muted">لا يوجد</span>
+                        }
+                    </div>
                 </div>
                 <div class="info-row">
                     <div class="ir-label">الحساسيات</div>
-                    <div class="ir-val muted">لا يوجد</div>
+                    <div class="ir-val">
+                        @if (d.medicalHistory.allergies) {
+                            {{ d.medicalHistory.allergies }}
+                        } @else {
+                            <span class="muted">لا يوجد</span>
+                        }
+                    </div>
                 </div>
                 <div class="info-row">
                     <div class="ir-label">النشاط الرياضي</div>
-                    <div class="ir-val">كرة قدم ترفيهي — ٣ مرات / أسبوع (قبل الإصابة)</div>
+                    <div class="ir-val">
+                        {{ d.medicalHistory.sport }}
+                        @if (d.medicalHistory.yearsOfPractice) { — {{ d.medicalHistory.yearsOfPractice }} سنوات ممارسة }
+                    </div>
                 </div>
+                @if (d.medicalHistory.goal) {
                 <div class="info-row">
                     <div class="ir-label">الهدف</div>
-                    <div class="ir-val">العودة لملاعب الدوري الترفيهي خلال ٦ أشهر</div>
+                    <div class="ir-val">{{ d.medicalHistory.goal }}</div>
                 </div>
+                }
             </div>
+
+            <!-- Clinical Warning -->
+            @if (d.clinicalWarning) {
             <div class="note n-amber" style="margin-top:0;">
-                <strong>تحذير سريري:</strong> الرياضي كان نشطاً قبل الإصابة — خطر ارتفاع التوقعات عن سرعة التعافي. يحتاج
-                إدارة توقعات دورية.
+                <strong>تحذير سريري:</strong> {{ d.clinicalWarning }}
             </div>
+            }
         </div>
     </div>
 
+    <!-- ── Timeline ───────────────────────────────────────────────────── -->
+    @if (d.timeline.length > 0) {
     <div class="divlbl">
         <div class="dl-t">سجل التحويلات والاستشارات الخارجية</div>
     </div>
     <div class="card">
+        @for (item of d.timeline; track $index) {
         <div class="timeline-item">
-            <div class="ti-dot" style="background:var(--mint3);"></div>
+            <div class="ti-dot">
+                <i [class]="getTimelineIcon(item.type)" style="font-size:10px;"></i>
+            </div>
             <div class="ti-content">
-                <div class="ti-title">استشارة Blueprint — TSD</div>
-                <div class="ti-meta">١٥ مارس ٢٠٢٦ · الدكتور حسام زيدان</div>
-                <div class="ti-note">تقييم شامل بعد الجراحة. فتح ملف Return to Play. بدء بروتوكول ACL Reconstruction.
+                <div class="ti-title">{{ item.title }}</div>
+                <div class="ti-meta">
+                    {{ item.date | date:'dd/MM/yyyy' }}
+                    @if (item.subtitle) { · {{ item.subtitle }} }
+                    @if (item.status) { · <span class="badge b-teal text-xs">{{ item.status }}</span> }
                 </div>
+                @if (item.description) {
+                <div class="ti-note">{{ item.description }}</div>
+                }
             </div>
         </div>
-        <div class="timeline-item">
-            <div class="ti-dot" style="background:var(--amber);"></div>
-            <div class="ti-content">
-                <div class="ti-title">تقرير الجراح — د. أحمد منصور</div>
-                <div class="ti-meta">١٠ مارس ٢٠٢٦ · خارجي</div>
-                <div class="ti-note">تقرير ما بعد العملية: Graft سليم، نصيحة بالحمل الجزئي ٤ أسابيع قبل الحمل الكامل.
-                </div>
-            </div>
-        </div>
-        <div class="timeline-item">
-            <div class="ti-dot" style="background:var(--red);"></div>
-            <div class="ti-content">
-                <div class="ti-title">إعادة بناء ACL — الجراحة</div>
-                <div class="ti-meta">٥ مارس ٢٠٢٦ · مستشفى الشيخ زايد</div>
-                <div class="ti-note">Hamstring Graft. مدة العملية ٧٠ دقيقة. لا مضاعفات. خروج نفس اليوم.</div>
-            </div>
-        </div>
+        }
     </div>
+    }
 </div>
+} @else {
+<div class="text-center text-gray-400 italic py-8">لا توجد بيانات</div>
+}
+}

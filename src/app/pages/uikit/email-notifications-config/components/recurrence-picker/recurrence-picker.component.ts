@@ -17,15 +17,16 @@ import { DAY_LABELS, EndType, RecurrenceFrequency, RecurrenceRule } from '../../
 export class RecurrencePickerComponent {
   private _rule!: RecurrenceRule;
 
-  readonly timeAsDate = signal<Date>(new Date());
-  readonly startDateAsDate = signal<Date>(new Date());
+  readonly timeAsDate = signal<Date | null>(null);
+  readonly startDateAsDate = signal<Date | null>(null);
   readonly endDateAsDate = signal<Date | null>(null);
 
   @Input({ required: true })
   set rule(value: RecurrenceRule) {
     this._rule = value;
-    this.timeAsDate.set(parseTime(value.time));
-    this.startDateAsDate.set(new Date((value.startDate || new Date().toISOString().slice(0, 10)) + 'T00:00:00'));
+    // Only reflect values that the user has explicitly set (not defaults)
+    this.timeAsDate.set(value.time ? parseTime(value.time) : null);
+    this.startDateAsDate.set(value.startDate ? new Date(value.startDate + 'T00:00:00') : null);
     this.endDateAsDate.set(value.endDate ? new Date(value.endDate + 'T00:00:00') : null);
   }
   get rule(): RecurrenceRule {
@@ -90,9 +91,11 @@ export class RecurrencePickerComponent {
 
   get intervalUnitLabel(): string {
     const freq = this.rule?.frequency;
-    if (freq === 1) return this.rule.interval === 1 ? 'day' : 'days';
-    if (freq === 2) return this.rule.interval === 1 ? 'week' : 'weeks';
-    return this.rule?.interval === 1 ? 'month' : 'months';
+    const interval = this.rule?.interval;
+    if (!freq || !interval) return '';
+    if (freq === 1) return interval === 1 ? 'day' : 'days';
+    if (freq === 2) return interval === 1 ? 'week' : 'weeks';
+    return interval === 1 ? 'month' : 'months';
   }
 }
 

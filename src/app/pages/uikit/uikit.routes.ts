@@ -205,6 +205,11 @@ export default [
         loadComponent: () => import('./athelete-profile/athelete-profile.component').then(m => m.AtheleteProfileComponent)
     },
     {
+        path: 'athleteprofile/:patientId',
+        data: { breadcrumb: 'Athlete Profile' },
+        loadComponent: () => import('./athelete-profile/athelete-profile.component').then(m => m.AtheleteProfileComponent)
+    },
+    {
         path: 'legacy-launch',
         data: { breadcrumb: 'Legacy Launch' },
         loadComponent: () => import('./legacy-launch/legacy-launch.component').then(m => m.LegacyLaunchComponent)

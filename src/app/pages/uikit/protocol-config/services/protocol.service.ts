@@ -266,13 +266,19 @@ export class ProtocolService {
      *
      * @param saveAsDraft - when true the record is saved as a draft on the server.
      */
-    createTreatmentPlan(saveAsDraft: boolean = true, patientId?: string | null, doctorId?: string | null): Observable<unknown> {
+    createTreatmentPlan(
+        saveAsDraft: boolean = true,
+        patientId?: string | null,
+        doctorId?: string | null,
+        medicalReportId?: number | null,
+        consultationDecisionId?: number | null
+    ): Observable<unknown> {
         const proto = this.activeProtocol();
         if (!proto) {
             throw new Error('No active protocol to save.');
         }
 
-        const body = this.mapProtocolToRequest(proto, saveAsDraft, patientId, doctorId);
+        const body = this.mapProtocolToRequest(proto, saveAsDraft, patientId, doctorId, medicalReportId, consultationDecisionId);
         return this.http.post<unknown>(this.apiUrl + 'TreatmentPlans', body);
     }
 
@@ -283,7 +289,14 @@ export class ProtocolService {
      * @param id - The ID of the treatment plan to update.
      * @param saveAsDraft - when true the record is saved as a draft on the server.
      */
-    updateTreatmentPlan(id: number, saveAsDraft?: boolean, patientId?: string | null, doctorId?: string | null): Observable<unknown> {
+    updateTreatmentPlan(
+        id: number,
+        saveAsDraft?: boolean,
+        patientId?: string | null,
+        doctorId?: string | null,
+        medicalReportId?: number | null,
+        consultationDecisionId?: number | null
+    ): Observable<unknown> {
         const proto = this.activeProtocol();
         if (!proto) {
             throw new Error('No active protocol to update.');
@@ -294,15 +307,25 @@ export class ProtocolService {
             ? saveAsDraft
             : (proto.status !== 'Published');
 
-        const body = this.mapProtocolToRequest(proto, calculatedSaveAsDraft, patientId, doctorId);
+        const body = this.mapProtocolToRequest(proto, calculatedSaveAsDraft, patientId, doctorId, medicalReportId, consultationDecisionId);
         return this.http.put<unknown>(`${this.apiUrl}TreatmentPlans/${id}`, body);
     }
 
-    private mapProtocolToRequest(proto: Protocol, saveAsDraft: boolean, patientId?: string | null, doctorId?: string | null): TreatmentPlanRequest {
+    private mapProtocolToRequest(
+        proto: Protocol,
+        saveAsDraft: boolean,
+        patientId?: string | null,
+        doctorId?: string | null,
+        medicalReportId?: number | null,
+        consultationDecisionId?: number | null
+    ): TreatmentPlanRequest {
         const totalWeeks = proto.phases.reduce((sum, p) => sum + (p.totalWeeks ?? 0), 0);
         const avgSessionsPerWeek = proto.phases.length
             ? Math.round(proto.phases.reduce((sum, p) => sum + (p.sessionsPerWeek ?? 0), 0) / proto.phases.length)
             : 0;
+
+        const finalPatientId = patientId ?? (proto.patientId ? String(proto.patientId) : null);
+        const finalDoctorId = doctorId ?? (proto.doctorId ? String(proto.doctorId) : null);
 
         return {
             name: proto.name,
@@ -313,8 +336,10 @@ export class ProtocolService {
             numberOfPhases: proto.phases.length,
             targetAthleteLevel: proto.targetAthleteLevel || '',
             saveAsDraft,
-            patientId: patientId || null,
-            doctorId: doctorId || null,
+            patientId: finalPatientId,
+            doctorId: finalDoctorId,
+            medicalReportId: medicalReportId ?? null,
+            consultationDecisionId: consultationDecisionId ?? null,
             protocolServiceIds: (proto.services ?? []).map(s => s.id),
             contraindications: (proto.contraindications || []).map(c => c.description),
             phases: proto.phases.map((phase, phaseIdx) => this.mapPhase(phase, phaseIdx)),

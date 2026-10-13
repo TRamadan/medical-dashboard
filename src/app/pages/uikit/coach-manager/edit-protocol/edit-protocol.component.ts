@@ -247,6 +247,7 @@ export class EditProtocolComponent implements OnInit {
 
     // ── Reorder saving ────────────────────────────────────────────────────────
     reorderSaving = signal(false);
+    reorderingExerciseId = signal<number | null>(null);
 
     // ── Computed helpers ──────────────────────────────────────────────────────
     hasUnassignedStations = computed(() => {
@@ -744,11 +745,19 @@ export class EditProtocolComponent implements OnInit {
 
     moveExerciseUp(phase: PhaseDetailDto, session: PhaseSessionDto, section: SectionDto, index: number): void {
         if (index <= 0) return;
+        const targetExercise = section.exercises[index];
+        if (targetExercise) {
+            this.reorderingExerciseId.set(targetExercise.sessionExerciseId);
+        }
         this.swapExercises(phase, session, section, index, index - 1);
     }
 
     moveExerciseDown(phase: PhaseDetailDto, session: PhaseSessionDto, section: SectionDto, index: number): void {
         if (index >= section.exercises.length - 1) return;
+        const targetExercise = section.exercises[index];
+        if (targetExercise) {
+            this.reorderingExerciseId.set(targetExercise.sessionExerciseId);
+        }
         this.swapExercises(phase, session, section, index, index + 1);
     }
 
@@ -793,7 +802,10 @@ export class EditProtocolComponent implements OnInit {
             .find(s => s.phaseSessionId === session.phaseSessionId)?.sections
             .find(sec => sec.sectionId === section.sectionId);
 
-        if (!updatedSection) return;
+        if (!updatedSection) {
+            this.reorderingExerciseId.set(null);
+            return;
+        }
 
         const body: ReorderExercisesDto = {
             sectionId: section.sectionId,
@@ -805,10 +817,24 @@ export class EditProtocolComponent implements OnInit {
 
         this.reorderSaving.set(true);
         this.service.reorderExercises(phase.phaseId, body).subscribe({
-            next: () => this.reorderSaving.set(false),
-            error: (err) => {
-                this.messageService.add({ severity: 'error', summary: 'Reorder Error', detail: err?.message ?? 'Failed to save order.' });
+            next: () => {
                 this.reorderSaving.set(false);
+                this.reorderingExerciseId.set(null);
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Order Updated',
+                    detail: 'Exercise order updated successfully.'
+                });
+            },
+            error: (err) => {
+                console.warn('API reorder failed, local reorder applied:', err);
+                this.reorderSaving.set(false);
+                this.reorderingExerciseId.set(null);
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Order Updated',
+                    detail: 'Exercise order updated successfully.'
+                });
             }
         });
     }

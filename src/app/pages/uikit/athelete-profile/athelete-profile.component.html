@@ -1,47 +1,77 @@
+<p-toast />
+
 <div class="profile-container">
-    <!-- Header Section -->
+    <!-- ── Header ─────────────────────────────────────────────────────── -->
     <header class="profile-header" role="banner">
+        @if (loadingSummary()) {
+        <div class="flex items-center gap-4 p-4">
+            <i class="pi pi-spin pi-spinner text-3xl text-primary"></i>
+            <span class="text-gray-500">جارٍ تحميل الملف الشخصي…</span>
+        </div>
+        } @else {
+        @if (summary(); as s) {
         <div class="athlete-info">
-            <p-avatar [label]="athlete().initials" size="xlarge" shape="circle" aria-label="Athlete Avatar"
+            @if (s.imageUrl) {
+            <p-avatar [image]="s.imageUrl" size="xlarge" shape="circle" aria-label="Athlete Avatar"
+                [style]="{'width': '80px', 'height': '80px'}">
+            </p-avatar>
+            } @else {
+            <p-avatar [label]="headerInitials()" size="xlarge" shape="circle" aria-label="Athlete Avatar"
                 [style]="{'background-color': 'var(--primary-color)', 'color': '#ffffff', 'font-size': '1.5rem', 'width': '80px', 'height': '80px'}">
             </p-avatar>
+            }
             <div class="athlete-details">
-                <h1>{{ athlete().name }}</h1>
+                <h1>{{ s.nameAr || s.nameEn }}</h1>
                 <div class="athlete-meta" aria-label="Athlete Basic Information">
-                    <span>{{ athlete().age }} سنة - {{ athlete().gender }}</span>
+                    <span>{{ s.age }} سنة · {{ genderLabel() }}</span>
                     <span>•</span>
-                    <span>{{ athlete().type }}</span>
+                    <span>{{ s.sport }}</span>
                     <span>•</span>
-                    <span>{{ athlete().branch }}</span>
+                    <span>{{ s.branchNameAr || s.branchNameEn }}</span>
+                    @if (s.memberSince) {
                     <span>•</span>
-                    <span>مشترك منذ {{ athlete().joinedDate }}</span>
+                    <span>مشترك منذ {{ s.memberSince | date:'yyyy/MM/dd' }}</span>
+                    }
                 </div>
                 <div class="athlete-tags">
-                    <p-tag [value]="athlete().status" severity="success" [rounded]="true"></p-tag>
-                    <p-tag [value]="athlete().phase" severity="warn" [rounded]="true"></p-tag>
-                    <p-tag [value]="athlete().session" severity="info" [rounded]="true"></p-tag>
-                    <p-tag [value]="'NPS: ' + athlete().nps" severity="secondary" [rounded]="true"></p-tag>
+                    @if (s.activePlan) {
+                    <p-tag [value]="s.activePlan.planName" severity="success" [rounded]="true"></p-tag>
+                    <p-tag [value]="'المرحلة ' + s.activePlan.currentPhaseOrder + ' - ' + s.activePlan.currentPhaseName"
+                        severity="warn" [rounded]="true"></p-tag>
+                    <p-tag [value]="'جلسة ' + s.activePlan.completedSessions + '/' + s.activePlan.totalSessions"
+                        severity="info" [rounded]="true"></p-tag>
+                    }
+                    @if (s.latestNps != null) {
+                    <p-tag [value]="'NPS: ' + s.latestNps" severity="secondary" [rounded]="true"></p-tag>
+                    }
                 </div>
             </div>
         </div>
+
         <div class="header-actions" aria-label="Page Actions">
-            <p-button label="الدكتور" severity="secondary" [outlined]="true" size="small"
-                ariaLabel="Doctor Contact"></p-button>
-            <p-button label="قائد الفريق" severity="secondary" [outlined]="true" size="small"
-                ariaLabel="Team Leader Contact"></p-button>
-            <p-button label="المدرب" severity="secondary" [outlined]="true" size="small"
-                ariaLabel="Coach Contact"></p-button>
-            <p-button label="إجراء سريع" icon="pi pi-bolt" severity="success" ariaLabel="Quick Action"></p-button>
+            @if (s.careTeam.doctor) {
+            <p-button [label]="'الدكتور · ' + s.careTeam.doctor.nameAr"
+                severity="secondary" [outlined]="true" size="small" ariaLabel="Doctor Contact"></p-button>
+            }
+            @for (coach of s.careTeam.coaches; track coach.id) {
+            <p-button [label]="'المدرب · ' + coach.nameAr"
+                severity="secondary" [outlined]="true" size="small" ariaLabel="Coach Contact"></p-button>
+            }
+            <p-button label="إجراء سريع" icon="pi pi-bolt" severity="success" ariaLabel="Quick Action"
+                [disabled]="true" pTooltip="قريباً"></p-button>
         </div>
+        }
+        }
     </header>
 
-    <!-- Stats Grid (Shared) -->
+    <!-- ── KPI Cards ───────────────────────────────────────────────────── -->
+    @if (!loadingSummary()) {
     <div class="stats-grid mt-4">
-        @for (stat of stats(); track stat.label) {
+        @for (stat of kpiCards(); track stat.label) {
         <div class="stat-card" [style]="{'--stat-color': stat.color}">
             <div class="stat-header">
                 <span class="stat-label">{{ stat.label }}</span>
-                <span class="stat-value" [style]="{color: stat.color}">%{{ stat.value }}</span>
+                <span class="stat-value" [style]="{color: stat.color}">{{ stat.value }}</span>
             </div>
             <p-progressBar [value]="stat.value > 100 ? 100 : stat.value" [showValue]="false"
                 [style]="{height: '8px', borderRadius: '4px'}"></p-progressBar>
@@ -51,80 +81,83 @@
         </div>
         }
     </div>
+    }
 
-    <!-- Navigation Tabs -->
+    <!-- ── Navigation Tabs ────────────────────────────────────────────── -->
     <div class="nav-section mt-4">
-        <p-tabView>
+        <p-tabView (onChange)="onTabChange($event.index)">
+
+            <!-- Tab 0: Overview (نظرة عامة) -->
             <p-tabPanel header="نظرة عامة" leftIcon="pi pi-home">
                 <div class="overview-layout mt-4">
-                    <app-profile-summary-side></app-profile-summary-side>
+                    <app-profile-overview
+                        [overviewData]="overview()"
+                        [loading]="loadingOverview()">
+                    </app-profile-overview>
+                    <app-profile-summary-side
+                        [summary]="summary()"
+                        [loadingSummary]="loadingSummary()">
+                    </app-profile-summary-side>
                     <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
                 </div>
             </p-tabPanel>
 
+            <!-- Tab 1: Injury & History (الإصابة والتاريخ) -->
             <p-tabPanel header="الإصابة والتاريخ" leftIcon="pi pi-history">
                 <div class="overview-layout mt-4">
-                    <app-injury-history></app-injury-history>
+                    <app-injury-history
+                        [data]="injury()"
+                        [loading]="loadingInjury()">
+                    </app-injury-history>
                     <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
                 </div>
-
             </p-tabPanel>
 
+            <!-- Tab 2: Program & Plan (البرنامج والخطة) -->
             <p-tabPanel header="البرنامج والخطة" leftIcon="pi pi-map">
                 <div class="overview-layout mt-4">
-                    <app-program-plan></app-program-plan>
+                    <app-program-plan
+                        [data]="plan()"
+                        [loading]="loadingPlan()">
+                    </app-program-plan>
                     <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
                 </div>
-                <!-- <div class="main-layout mt-4">
-                    <app-profile-summary-side></app-profile-summary-side>
-                    <main class="content-area">
-                        <app-program-plan></app-program-plan>
-                    </main>
-                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
-                </div> -->
             </p-tabPanel>
 
+            <!-- Tab 3: Measurements & Data (القياسات والبيانات) -->
             <p-tabPanel header="القياسات والبيانات" leftIcon="pi pi-chart-bar">
                 <div class="overview-layout mt-4">
-                    <app-measurements-data></app-measurements-data>
+                    <app-measurements-data
+                        [data]="measurements()"
+                        [loading]="loadingMeasure()">
+                    </app-measurements-data>
                     <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
                 </div>
-                <!-- <div class="main-layout mt-4">
-                    <app-profile-summary-side></app-profile-summary-side>
-                    <main class="content-area">
-                        <app-measurements-data></app-measurements-data>
-                    </main>
-                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
-                </div> -->
             </p-tabPanel>
 
+            <!-- Tab 4: Session Log (سجل الجلسات) -->
             <p-tabPanel header="سجل الجلسات" leftIcon="pi pi-list">
                 <div class="overview-layout mt-4">
-                    <app-session-log [sessions]="sessions()"></app-session-log>
+                    <app-session-log
+                        [data]="sessions()"
+                        [loading]="loadingSessions()"
+                        (showAll)="loadAllSessions()">
+                    </app-session-log>
                     <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
                 </div>
-                <!-- <div class="main-layout mt-4">
-                    <app-profile-summary-side></app-profile-summary-side>
-                    <main class="content-area">
-                        <app-session-log [sessions]="sessions()"></app-session-log>
-                    </main>
-                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
-                </div> -->
             </p-tabPanel>
 
+            <!-- Tab 5: Surveys (الاستبيانات) -->
             <p-tabPanel header="الاستبيانات" leftIcon="pi pi-file-edit">
                 <div class="overview-layout mt-4">
-                    <app-surveys></app-surveys>
+                    <app-surveys
+                        [data]="surveys()"
+                        [loading]="loadingSurveys()">
+                    </app-surveys>
                     <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
                 </div>
-                <!-- <div class="main-layout mt-4">
-                    <app-profile-summary-side></app-profile-summary-side>
-                    <main class="content-area">
-                        <app-surveys></app-surveys>
-                    </main>
-                    <app-quick-actions-sidebar [actions]="quickActions()"></app-quick-actions-sidebar>
-                </div> -->
             </p-tabPanel>
+
         </p-tabView>
     </div>
 </div>

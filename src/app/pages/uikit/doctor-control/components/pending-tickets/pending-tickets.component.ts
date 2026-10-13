@@ -39,6 +39,7 @@ type BtnStyle = 'primary' | 'ghost' | 'danger' | 'warning' | 'purple';
 const ACTION_STYLES: Record<string, BtnStyle> = {
   'open-consultation':      'primary',
   'approve-modification':   'primary',
+  'build-treatment-plan':   'primary',
   'open-legacy-launch':     'warning',
   'view-modification':      'ghost',
   'revert-modification':    'danger',
@@ -65,6 +66,8 @@ function actionStyle(action: string): BtnStyle {
 export class PendingTicketsComponent implements OnInit {
   private readonly router  = inject(Router);
   private readonly service = inject(PendingTicketsService);
+
+  readonly ApiTicketType = ApiTicketType;
 
   // ── State ────────────────────────────────────────────────────────────────
 
@@ -123,7 +126,7 @@ export class PendingTicketsComponent implements OnInit {
     const tab = this.activeTab();
 
     if (this.useMockData()) {
-      // ── Mock data — 6 scenarios from the README ───────────────────────────
+      // ── Mock data — 7 scenarios from the README ───────────────────────────
       const ALL_MOCK_TICKETS: ApiTicket[] = [
         // ── Scenario 1: Phase Transition Confirmation ─────────────────────
         {
@@ -263,6 +266,29 @@ export class PendingTicketsComponent implements OnInit {
           treatmentPlanId: 304,
           modificationRequestId: null,
         },
+
+        // ── Scenario 7: Report Accepted Awaiting Plan (ticketType 7) ──────
+        {
+          ticketId: 'TKT-007',
+          ticketType: ApiTicketType.ReportAcceptedAwaitingPlan,
+          typeLabel: 'Report Accepted',
+          patientId: 107,
+          patientName: 'Tarek Mahmoud',
+          description: 'Medical report accepted by athlete. Treatment plan configuration required.',
+          subDescription: 'Medical Report #401 accepted. Ready to build rehabilitation protocol.',
+          urgency: ApiUrgency.NeedsReview,
+          urgencyLabel: 'Needs Review',
+          createdAt: '2026-08-19T09:00:00Z',
+          slaLabel: 'Build plan today',
+          metrics: null,
+          actions: [
+            { label: 'Build Treatment Plan', action: 'build-treatment-plan', style: 'primary' },
+          ],
+          appointmentId: 507,
+          treatmentPlanId: null,
+          modificationRequestId: null,
+          medicalReportId: 401,
+        },
       ];
 
       // Client-side tab filter to simulate the API `tab` param
@@ -335,6 +361,21 @@ export class PendingTicketsComponent implements OnInit {
   handleAction(action: string, ticket: ApiTicket, event: Event): void {
     event.stopPropagation();
 
+    if (
+      ticket.ticketType === ApiTicketType.DirectBlueprintAwaitingPlan ||
+      ticket.ticketType === ApiTicketType.ReportAcceptedAwaitingPlan ||
+      action === 'build-treatment-plan'
+    ) {
+      this.router.navigate(['/uikit/protocol-config'], {
+        queryParams: {
+          patientId: ticket.patientId,
+          ...(ticket.medicalReportId         ? { medicalReportId:         ticket.medicalReportId         } : {}),
+          ...(ticket.consultationDecisionId  ? { consultationDecisionId:  ticket.consultationDecisionId  } : {}),
+        },
+      });
+      return;
+    }
+
     switch (action) {
       case 'open-consultation':
         this.router.navigate(['/uikit/consultation-type'], {
@@ -395,3 +436,4 @@ export class PendingTicketsComponent implements OnInit {
     }
   }
 }
+

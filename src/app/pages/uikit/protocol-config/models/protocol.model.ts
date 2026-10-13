@@ -248,6 +248,8 @@ export interface TreatmentPlanRequest {
     targetAthleteLevel: string;
     patientId?: string | null;
     doctorId?: string | null;
+    medicalReportId?: number | null;
+    consultationDecisionId?: number | null;
     saveAsDraft: boolean;
     protocolServiceIds: number[];
     contraindications?: string[];

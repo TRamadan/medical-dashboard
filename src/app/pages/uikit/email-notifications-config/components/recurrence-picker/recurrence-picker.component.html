@@ -4,20 +4,24 @@
 
     <div class="field-row">
       <span class="field-label">Repeats</span>
-      <p-selectButton [options]="frequencyOptions" [ngModel]="rule.frequency" (ngModelChange)="setFrequency($event)"
+      <p-selectButton [options]="frequencyOptions" [ngModel]="rule.frequency ?? null" (ngModelChange)="setFrequency($event)"
         [ngModelOptions]="{standalone: true}" optionLabel="label" optionValue="value" />
     </div>
 
+    @if (rule.frequency) {
     <div class="field-row">
       <span class="field-label">Every</span>
       <div class="inline-fields">
-        <p-inputNumber [ngModel]="rule.interval" (ngModelChange)="setInterval($event)"
+        <p-inputNumber [ngModel]="rule.interval ?? null" (ngModelChange)="setInterval($event)"
           [ngModelOptions]="{standalone: true}" [min]="1" [max]="365" [showButtons]="true" buttonLayout="horizontal"
           spinnerMode="horizontal" inputStyleClass="interval-input" decrementButtonClass="p-button-text"
-          incrementButtonClass="p-button-text" />
-        <span class="unit-label">{{ intervalUnitLabel }}</span>
+          incrementButtonClass="p-button-text" [placeholder]="'Enter number'" />
+        @if (rule.interval) {
+          <span class="unit-label">{{ intervalUnitLabel }}</span>
+        }
       </div>
     </div>
+    }
 
     @if (rule.frequency === 2) {
     <div class="field-row">
@@ -30,8 +34,8 @@
     @if (rule.frequency === 3) {
     <div class="field-row">
       <span class="field-label">On day</span>
-      <p-inputNumber [ngModel]="rule.dayOfMonth" (ngModelChange)="setDayOfMonth($event)"
-        [ngModelOptions]="{standalone: true}" [min]="1" [max]="31" />
+      <p-inputNumber [ngModel]="rule.dayOfMonth ?? null" (ngModelChange)="setDayOfMonth($event)"
+        [ngModelOptions]="{standalone: true}" [min]="1" [max]="31" placeholder="Enter day" />
       <span class="field-hint">Clamped to the last day in short months</span>
     </div>
     }
@@ -43,13 +47,15 @@
     <div class="field-row">
       <span class="field-label">At</span>
       <p-datepicker [ngModel]="timeAsDate()" (ngModelChange)="setTimeFromDate($event)"
-        [ngModelOptions]="{standalone: true}" [timeOnly]="true" hourFormat="24" appendTo="body" />
+        [ngModelOptions]="{standalone: true}" [timeOnly]="true" hourFormat="24" appendTo="body"
+        placeholder="Select time" />
     </div>
 
     <div class="field-row">
       <span class="field-label">Starting</span>
       <p-datepicker [ngModel]="startDateAsDate()" (ngModelChange)="setStartDateFromDate($event)"
-        [ngModelOptions]="{standalone: true}" dateFormat="M d, yy" appendTo="body" [showIcon]="true" />
+        [ngModelOptions]="{standalone: true}" dateFormat="M d, yy" appendTo="body" [showIcon]="true"
+        placeholder="Select start date" />
     </div>
   </section>
 
@@ -58,26 +64,27 @@
 
     <div class="end-options">
       <div class="radio-line">
-        <p-radioButton name="endMode" [value]="1" [ngModel]="rule.endMode" (ngModelChange)="setEndMode($event)"
+        <p-radioButton name="endMode" [value]="1" [ngModel]="rule.endMode ?? null" (ngModelChange)="setEndMode($event)"
           inputId="end-never" />
         <label for="end-never">Never</label>
       </div>
 
       <div class="radio-line">
-        <p-radioButton name="endMode" [value]="2" [ngModel]="rule.endMode" (ngModelChange)="setEndMode($event)"
+        <p-radioButton name="endMode" [value]="2" [ngModel]="rule.endMode ?? null" (ngModelChange)="setEndMode($event)"
           inputId="end-onDate" />
         <label for="end-onDate">On date</label>
         <p-datepicker [ngModel]="endDateAsDate()" (ngModelChange)="setEndDateFromDate($event)"
           [ngModelOptions]="{standalone: true}" dateFormat="M d, yy" appendTo="body" [showIcon]="true"
-          [disabled]="rule.endMode !== 2" />
+          [disabled]="rule.endMode !== 2" placeholder="Select end date" />
       </div>
 
       <div class="radio-line">
-        <p-radioButton name="endMode" [value]="3" [ngModel]="rule.endMode" (ngModelChange)="setEndMode($event)"
+        <p-radioButton name="endMode" [value]="3" [ngModel]="rule.endMode ?? null" (ngModelChange)="setEndMode($event)"
           inputId="end-count" />
         <label for="end-count">After</label>
-        <p-inputNumber [ngModel]="rule.occurrenceCount" (ngModelChange)="setOccurrenceCount($event)"
-          [ngModelOptions]="{standalone: true}" [min]="1" [disabled]="rule.endMode !== 3" />
+        <p-inputNumber [ngModel]="rule.occurrenceCount ?? null" (ngModelChange)="setOccurrenceCount($event)"
+          [ngModelOptions]="{standalone: true}" [min]="1" [disabled]="rule.endMode !== 3"
+          placeholder="Enter count" />
         <span class="unit-label">sends</span>
       </div>
     </div>

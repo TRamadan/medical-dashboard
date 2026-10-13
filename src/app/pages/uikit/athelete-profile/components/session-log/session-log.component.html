@@ -1,98 +1,65 @@
+@if (loading()) {
+<div class="flex items-center gap-3 p-4">
+    <i class="pi pi-spin pi-spinner text-2xl text-primary"></i>
+    <span class="text-gray-500">جارٍ تحميل سجل الجلسات…</span>
+</div>
+} @else {
+@if (data(); as d) {
 <div class="panel" id="tab-sessions">
-    <div class="sect">سجل الجلسات الكامل — ٧ من ٣٦</div>
+    <div class="sect">سجل الجلسات الكامل — {{ d.completedSessions }} من {{ d.totalSessions }}</div>
 
     <p-card styleClass="p-0">
         <div class="session-container">
-            <!-- Session 7 -->
+            @for (session of d.sessions; track session.phaseSessionId; let last = $last) {
             <div class="session-row">
-                <div class="sr-num">ج٧</div>
+                <div class="sr-num">ج{{ session.globalSessionNumber }}</div>
                 <div class="sr-info">
-                    <div class="sr-title">Swarm — Recharger + Resilience</div>
-                    <div class="sr-meta">٢٦ مارس · م. كريم · م. سارة · تعليق: تعب عضلي خفيف</div>
+                    <div class="sr-title">
+                        {{ session.sessionType }}
+                        @if (session.isMeasurementSession) {<span> + قياسات</span>}
+                    </div>
+                    <div class="sr-meta">
+                        {{ session.date | date:'dd MMM' }}
+                        @if (session.coachNames.length) {
+                        · {{ session.coachNames.join(' · ') }}
+                        }
+                        @if (session.coachNote) {
+                        · {{ session.coachNote }}
+                        }
+                    </div>
+                    @if (session.patientComment) {
+                    <div class="sr-comment text-xs text-gray-500 italic mt-1">
+                        "{{ session.patientComment }}"
+                    </div>
+                    }
                 </div>
                 <div class="sr-metric">
-                    <div class="sr-srpe" style="color:var(--amber);">٦</div>
+                    <div class="sr-srpe" [style]="{color: (session.rpe ?? 0) >= 7 ? 'var(--amber)' : 'var(--mint2)'}">
+                        {{ session.rpe ?? '—' }}
+                    </div>
                     <div class="sr-metric-label">sRPE</div>
                 </div>
                 <div class="sr-rating-box">
-                    <p-rating [ngModel]="4" [readonly]="true"></p-rating>
+                    <p-rating [ngModel]="getStars(session.rating)" [readonly]="true"></p-rating>
                 </div>
             </div>
-            <p-divider></p-divider>
-
-            <!-- Session 6 -->
-            <div class="session-row">
-                <div class="sr-num">ج٦</div>
-                <div class="sr-info">
-                    <div class="sr-title">Swarm + قياسات دورية</div>
-                    <div class="sr-meta">٢٤ مارس · م. كريم · م. سارة · ROM ١١٥° · LSI ٦٨٪</div>
-                </div>
-                <div class="sr-metric">
-                    <div class="sr-srpe" style="color:var(--mint2);">٤</div>
-                    <div class="sr-metric-label">sRPE</div>
-                </div>
-                <div class="sr-rating-box">
-                    <p-rating [ngModel]="5" [readonly]="true"></p-rating>
-                </div>
-            </div>
-            <p-divider></p-divider>
-
-            <!-- Session 5 -->
-            <div class="session-row">
-                <div class="sr-num">ج٥</div>
-                <div class="sr-info">
-                    <div class="sr-title">Swarm — Recharger</div>
-                    <div class="sr-meta">٢٢ مارس · م. كريم · أداء ممتاز · بدأ Eccentric Leg Press</div>
-                </div>
-                <div class="sr-metric">
-                    <div class="sr-srpe" style="color:var(--mint2);">٣</div>
-                    <div class="sr-metric-label">sRPE</div>
-                </div>
-                <div class="sr-rating-box">
-                    <p-rating [ngModel]="5" [readonly]="true"></p-rating>
-                </div>
-            </div>
-            <p-divider></p-divider>
-
-            <!-- Session 4 -->
-            <div class="session-row">
-                <div class="sr-num">ج٤</div>
-                <div class="sr-info">
-                    <div class="sr-title">Swarm — Recharger + Resilience</div>
-                    <div class="sr-meta">١٩ مارس · م. كريم · م. سارة</div>
-                </div>
-                <div class="sr-metric">
-                    <div class="sr-srpe" style="color:var(--amber);">٥</div>
-                    <div class="sr-metric-label">sRPE</div>
-                </div>
-                <div class="sr-rating-box">
-                    <p-rating [ngModel]="3" [readonly]="true"></p-rating>
-                </div>
-            </div>
-            <p-divider></p-divider>
-
-            <!-- Session 3 -->
-            <div class="session-row" style="opacity:.6;">
-                <div class="sr-num">ج٣</div>
-                <div class="sr-info">
-                    <div class="sr-title">Swarm — Recharger</div>
-                    <div class="sr-meta">١٧ مارس · م. كريم</div>
-                </div>
-                <div class="sr-metric">
-                    <div class="sr-srpe" style="color:var(--mint2);">٣</div>
-                    <div class="sr-metric-label">sRPE</div>
-                </div>
-                <div class="sr-rating-box">
-                    <p-rating [ngModel]="4" [readonly]="true"></p-rating>
-                </div>
-            </div>
+            @if (!last) {<p-divider></p-divider>}
+            }
+            @empty {
+            <div class="text-center text-gray-400 italic py-8">لا توجد جلسات مسجّلة</div>
+            }
         </div>
 
         <ng-template pTemplate="footer">
-            <div class="text-center p-2 cursor-pointer load-more">
-                <span style="font-size:12px;color:var(--grey);font-weight:600;">عرض كل الجلسات <i
-                        class="pi pi-chevron-down ml-2"></i></span>
+            <div class="text-center p-2 cursor-pointer load-more" (click)="onShowAll()">
+                <span style="font-size:12px;color:var(--grey);font-weight:600;">
+                    عرض كل الجلسات <i class="pi pi-chevron-down ml-2"></i>
+                </span>
             </div>
         </ng-template>
     </p-card>
 </div>
+} @else {
+<div class="text-center text-gray-400 italic py-8">لا توجد بيانات</div>
+}
+}

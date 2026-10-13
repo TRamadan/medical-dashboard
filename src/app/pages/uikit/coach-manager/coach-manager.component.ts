@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToolbarModule } from 'primeng/toolbar';
 import { TabsModule } from 'primeng/tabs';
@@ -13,6 +13,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { DropdownModule } from 'primeng/dropdown';
 import { TabsNavigationComponent } from '../session-management/tabs-navigation/tabs-navigation.component';
+import { ActivatedRoute } from '@angular/router';
 import { PatientOverviewComponent } from './patient-overview/patient-overview.component';
 import { EditProtocolComponent } from './edit-protocol/edit-protocol.component';
 import { AssignSessionsComponent } from './assign-sessions/assign-sessions.component';
@@ -38,9 +39,6 @@ import { EngineerEvaluationComponent } from './egineer-evaluation/egineer-evalua
         TabsNavigationComponent,
         EditProtocolComponent,
         AssignSessionsComponent,
-        TabsNavigationComponent,
-        EditProtocolComponent,
-        AssignSessionsComponent,
         ScheduleComponent,
         TeamPerformanceComponent,
         EngineerEvaluationComponent
@@ -50,6 +48,7 @@ import { EngineerEvaluationComponent } from './egineer-evaluation/egineer-evalua
     styleUrls: ['./coach-manager.component.css']
 })
 export class CoachManagerComponent implements OnInit {
+    private readonly route = inject(ActivatedRoute);
     currentTab = 'overview';
     selectedPatient: any = null;
     selectedPlanId = signal<number | null>(null);
@@ -86,6 +85,14 @@ export class CoachManagerComponent implements OnInit {
 
     ngOnInit() {
         this.fetchUsername();
+        this.route.queryParams.subscribe(params => {
+            const tab = params['tab'];
+            const planId = params['planId'];
+            if (tab === 'edit' && planId) {
+                this.selectedPlanId.set(Number(planId));
+                this.currentTab = 'edit';
+            }
+        });
     }
 
     private fetchUsername(): void {

@@ -28,6 +28,7 @@ import {
   NotificationTriggerTypeOption,
   RecurrenceRule,
   defaultRecurrenceRule,
+  emptyRecurrenceRule,
 } from '../../models/notification-trigger.model';
 import { computeNextOccurrences, describeRecurrence } from '../../models/recurrence.util';
 
@@ -65,7 +66,7 @@ export class TriggerFormComponent implements OnChanges {
   readonly title = signal('');
   readonly message = signal('');
   readonly type = signal<number | null>(null);
-  readonly recurrence = signal<RecurrenceRule>(defaultRecurrenceRule());
+  readonly recurrence = signal<RecurrenceRule>(emptyRecurrenceRule());
   readonly audienceEmployeeTypeIds = signal<number[]>([]);
   readonly includePatients = signal(false);
   readonly selectedUserIds = signal<number[]>([]);
@@ -85,8 +86,7 @@ export class TriggerFormComponent implements OnChanges {
     () =>
       this.title().trim().length > 0 &&
       this.message().trim().length > 0 &&
-      this.type() != null &&
-      this.isAudienceValid()
+      this.type() != null
   );
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -121,7 +121,7 @@ export class TriggerFormComponent implements OnChanges {
     this.title.set('');
     this.message.set('');
     this.type.set(null);
-    this.recurrence.set(defaultRecurrenceRule());
+    this.recurrence.set(emptyRecurrenceRule());
     this.audienceEmployeeTypeIds.set([]);
     this.includePatients.set(false);
     this.selectedUserIds.set([]);
@@ -129,7 +129,6 @@ export class TriggerFormComponent implements OnChanges {
   }
 
   onSubmit(): void {
-    debugger
     // if (!this.canSave()) return;
 
     const r = this.recurrence();
@@ -142,9 +141,9 @@ export class TriggerFormComponent implements OnChanges {
       daysOfWeek: r.frequency === 2 ? r.daysOfWeek : null,
       dayOfMonth: r.frequency === 3 ? (r.dayOfMonth ?? 1) : null,
       timeOfDay: this.formatTimeOfDay(r.time),
-      startDate: r.startDate,
+      startDate: r.startDate || null,
       endType: Number(r.endMode),
-      endDate: r.endMode === 2 ? r.endDate : null,
+      endDate: r.endMode === 2 && r.endDate ? r.endDate : null,
       maxOccurrences: r.endMode === 3 ? (r.occurrenceCount ?? 1) : null,
       audienceEmployeeTypeIds: this.audienceEmployeeTypeIds(),
       includePatients: this.includePatients(),

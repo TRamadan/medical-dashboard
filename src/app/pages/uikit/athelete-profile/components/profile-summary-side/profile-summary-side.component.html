@@ -1,100 +1,126 @@
-<div class="panel active">
-    <div class="two">
-        <p-card>
-            <ng-template pTemplate="header">
-                <div class="sect">الوضع الحالي</div>
-            </ng-template>
-            <div class="info-row">
-                <div class="ir-label">البرنامج</div>
-                <div class="ir-val">Return to Play — ACL Protocol</div>
-            </div>
-            <div class="info-row">
-                <div class="ir-label">المرحلة</div>
-                <div class="ir-val">٢ — هندسة الحركة <span class="badge b-amber" style="font-size:9px;">جارية</span>
-                </div>
-            </div>
-            <div class="info-row">
-                <div class="ir-label">الجلسة</div>
-                <div class="ir-val">٧ من أصل ٣٦ جلسة</div>
-            </div>
-            <div class="info-row">
-                <div class="ir-label">المدربون</div>
-                <div class="ir-val">م. كريم (Recharger) · م. سارة (Resilience)</div>
-            </div>
-            <div class="info-row">
-                <div class="ir-label">الجلسة القادمة</div>
-                <div class="ir-val" style="color:var(--amber);">غداً ١١:٠٠ص — Recharger</div>
-            </div>
-            <div class="info-row">
-                <div class="ir-label">معيار الانتقال</div>
-                <div class="ir-val muted">LSI ≥ ٧٠٪ + VAS ≤ ٢ + ROM مد كامل</div>
-            </div>
-        </p-card>
-        <p-card>
-            <ng-template pTemplate="header">
-                <div class="sect">تنبيهات سريرية</div>
-            </ng-template>
-            <div class="alert-card">
-                <div class="ac-title">⚠ يحتاج انتباه</div>
-                <div class="ac-item">LSI القوة ٦٨٪ — أقل من هدف المرحلة (٧٠٪)</div>
-                <div class="ac-item">التزام بالمواعيد: غاب مرة في الأسبوع الأول</div>
-            </div>
-            <div class="note n-mint" style="margin-top:0;">
-                <strong>آخر ملاحظة الدكتور (٢٦ مارس):</strong> تقدم جيد في ROM لكن القوة متأخرة. أضف جلسة Apex لتمرين
-                Eccentric إضافي.
-            </div>
-        </p-card>
-    </div>
+@if (loadingSummary()) {
+<div class="flex items-center gap-3 p-4">
+    <i class="pi pi-spin pi-spinner text-2xl text-primary"></i>
+    <span class="text-gray-500">جارٍ التحميل…</span>
+</div>
+} @else {
+@if (summary(); as s) {
+<div class="panel active" id="sidebar-summary">
 
-    <div class="divlbl">
-        <div class="dl-t">آخر ٣ جلسات</div>
-    </div>
-    <p-card styleClass="session-card">
-        <div class="session-row">
-            <div class="sr-num">ج٧</div>
-            <div class="sr-info">
-                <div class="sr-title">Recharger + Resilience — Swarm</div>
-                <div class="sr-meta">٢٦ مارس · م. كريم · تعليق: "تعب عضلي خفيف — خفّف Heel Slides"</div>
-            </div>
-            <div class="sr-srpe" style="color:var(--amber);"
-                title="sRPE = تقييم شدة الجلسة (Borg CR-10) — يملأه الرياضي بعد الجلسة. ٦ = صعبة">sRPE ٦</div>
-            <div class="sr-rating">
-                <div class="star s-on"></div>
-                <div class="star s-on"></div>
-                <div class="star s-on"></div>
-                <div class="star s-on"></div>
-                <div class="star s-off"></div>
+    <!-- ── File Status ───────────────────────────────────────────────── -->
+    <p-card>
+        <ng-template pTemplate="header">
+            <div class="sect">حالة الملف</div>
+        </ng-template>
+        <div class="info-row">
+            <div class="ir-label">حالة البرنامج</div>
+            <div class="ir-val">
+                <p-tag [value]="s.status.programStatus" [severity]="getStatusSeverity(s.status.programStatus)"></p-tag>
             </div>
         </div>
-        <div class="session-row">
-            <div class="sr-num">ج٦</div>
-            <div class="sr-info">
-                <div class="sr-title">Recharger + Resilience — Swarm + قياسات</div>
-                <div class="sr-meta">٢٤ مارس · قياسات دورية — نتائج عند الدكتور</div>
-            </div>
-            <div class="sr-srpe" style="color:var(--mint2);">sRPE ٤</div>
-            <div class="sr-rating">
-                <div class="star s-on"></div>
-                <div class="star s-on"></div>
-                <div class="star s-on"></div>
-                <div class="star s-on"></div>
-                <div class="star s-on"></div>
+        @if (s.status.sessionsUntilPhaseTransition !== null) {
+        <div class="info-row">
+            <div class="ir-label">مرحلة الانتقال</div>
+            <div class="ir-val">{{ s.status.sessionsUntilPhaseTransition }} جلسات</div>
+        </div>
+        }
+        @if (s.status.wellnessToday !== null) {
+        <div class="info-row">
+            <div class="ir-label">الرفاهية اليوم</div>
+            <div class="ir-val">{{ s.status.wellnessToday }} / 5</div>
+        </div>
+        }
+        <div class="info-row">
+            <div class="ir-label">الحضور</div>
+            <div class="ir-val">{{ s.status.attendedAppointments }} / {{ s.status.scheduledPastAppointments }}</div>
+        </div>
+        @if (s.latestNps !== null) {
+        <div class="info-row">
+            <div class="ir-label">NPS</div>
+            <div class="ir-val">
+                {{ s.latestNps }}
+                <p-tag [value]="s.npsCategory ?? ''" [severity]="getNpsSeverity(s.npsCategory)" styleClass="ml-2 text-xs"></p-tag>
             </div>
         </div>
-        <div class="session-row">
-            <div class="sr-num">ج٥</div>
-            <div class="sr-info">
-                <div class="sr-title">Recharger — Swarm</div>
-                <div class="sr-meta">٢٢ مارس · م. كريم · أداء ممتاز</div>
+        }
+    </p-card>
+
+    <!-- ── Interaction Note ──────────────────────────────────────────── -->
+    <p-card>
+        <ng-template pTemplate="header">
+            <div class="sect">ملاحظة التعامل</div>
+        </ng-template>
+        @if (s.interactionNote; as note) {
+        <div class="flex flex-col gap-3 text-sm">
+            <div class="flex flex-col gap-1">
+                <span class="ir-label">الشخصية</span>
+                <span class="text-gray-700">{{ note.personality }}</span>
             </div>
-            <div class="sr-srpe" style="color:var(--mint2);">sRPE ٣</div>
-            <div class="sr-rating">
-                <div class="star s-on"></div>
-                <div class="star s-on"></div>
-                <div class="star s-on"></div>
-                <div class="star s-on"></div>
-                <div class="star s-on"></div>
+            <div class="bg-amber-50 border-r-4 border-amber-400 px-3 py-2 rounded text-amber-800 italic text-sm">
+                "{{ note.communicationTip }}"
             </div>
+            @if (note.updatedBy) {
+            <span class="text-xs text-gray-400">آخر تحديث: {{ note.updatedBy.nameAr }} · {{ note.updatedAt | date:'dd/MM/yyyy' }}</span>
+            }
+        </div>
+        } @else {
+        <div class="text-center text-gray-400 italic py-4 text-sm">
+            <i class="pi pi-plus-circle text-xl mb-2 block"></i>
+            لا توجد ملاحظة تعامل — انقر لإضافة
+        </div>
+        }
+    </p-card>
+
+    <!-- ── Contact ────────────────────────────────────────────────────── -->
+    <p-card>
+        <ng-template pTemplate="header">
+            <div class="sect">التواصل</div>
+        </ng-template>
+        @if (s.contact.phone) {
+        <div class="info-row">
+            <div class="ir-label"><i class="pi pi-phone"></i></div>
+            <div class="ir-val">{{ s.contact.phone }}</div>
+        </div>
+        }
+        @if (s.contact.email) {
+        <div class="info-row">
+            <div class="ir-label"><i class="pi pi-envelope"></i></div>
+            <div class="ir-val">{{ s.contact.email }}</div>
+        </div>
+        }
+        <div class="info-row">
+            <div class="ir-label">الفرع</div>
+            <div class="ir-val">{{ s.branchNameAr || s.branchNameEn }}</div>
+        </div>
+        @if (s.contact.emergencyContacts.length > 0) {
+        <p-divider></p-divider>
+        <div class="text-xs text-gray-500 font-semibold mb-2">جهة الطوارئ</div>
+        @for (ec of s.contact.emergencyContacts; track $index) {
+        <div class="info-row">
+            <div class="ir-label">{{ ec.name }}</div>
+            <div class="ir-val">{{ ec.phoneNumber }}</div>
+        </div>
+        }
+        }
+    </p-card>
+
+    <!-- ── Data Validity ─────────────────────────────────────────────── -->
+    @if (s.activePlan) {
+    <p-card>
+        <ng-template pTemplate="header">
+            <div class="sect">صلاحية البيانات</div>
+        </ng-template>
+        <div class="info-row">
+            <div class="ir-label">بداية الخطة</div>
+            <div class="ir-val">{{ s.activePlan.startDate | date:'dd/MM/yyyy' }}</div>
+        </div>
+        <div class="info-row">
+            <div class="ir-label">نهاية متوقعة</div>
+            <div class="ir-val">{{ s.activePlan.expectedEndDate | date:'dd/MM/yyyy' }}</div>
         </div>
     </p-card>
+    }
+
 </div>
+}
+}

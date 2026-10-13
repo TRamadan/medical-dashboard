@@ -39,10 +39,7 @@
         [selectedRoleIds]="audienceEmployeeTypeIds()" [includePatients]="includePatients()"
         [selectedUserIds]="selectedUserIds()" (selectedRoleIdsChange)="audienceEmployeeTypeIds.set($event)"
         (includePatientsChange)="includePatients.set($event)" (selectedUserIdsChange)="selectedUserIds.set($event)" />
-      @if (!isAudienceValid()) {
-      <small class="p-error block mt-2">* At least one staff role, patients toggle, or individual recipient must be
-        selected.</small>
-      }
+
     </p-card>
 
     <p-card styleClass="active-card">

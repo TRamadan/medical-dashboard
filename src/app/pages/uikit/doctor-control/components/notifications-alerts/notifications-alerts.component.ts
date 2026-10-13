@@ -143,7 +143,9 @@ export class NotificationsAlertsComponent implements OnInit {
     if (n.relatedEntityType === 'Appointment' && n.relatedEntityId) {
       this.router.navigate(['/uikit/appointment-consultation-form', n.relatedEntityId]);
     } else if (n.relatedEntityType === 'TreatmentPlan' && n.relatedEntityId) {
-      this.router.navigate(['/uikit/phases-sessions']);
+      this.router.navigate(['/uikit/coachmanagement'], {
+        queryParams: { tab: 'edit', planId: n.relatedEntityId }
+      });
     } else {
       this.router.navigate(['/uikit/athleteprofile']);
     }

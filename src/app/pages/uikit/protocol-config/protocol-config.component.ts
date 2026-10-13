@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, inject, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { StepperModule } from 'primeng/stepper';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -33,7 +34,8 @@ import { ViewAndReviewComponent } from './components/view-and-review/view-and-re
     changeDetection: ChangeDetectionStrategy.OnPush,
     providers: [MessageService]
 })
-export class ProtocolConfigComponent {
+export class ProtocolConfigComponent implements OnInit {
+    private route = inject(ActivatedRoute);
     private protocolService = inject(ProtocolService);
     private messageService = inject(MessageService);
     readonly showStepper = this.protocolService.showStepper;
@@ -50,6 +52,17 @@ export class ProtocolConfigComponent {
         { value: 5, icon: 'pi pi-eye', label: 'View & Review' }
     ];
 
+    ngOnInit(): void {
+        const queryPatientId = this.route.snapshot.queryParamMap.get('patientId');
+        if (queryPatientId && !this.activeProtocol()) {
+            this.startNewProtocol();
+            const proto = this.activeProtocol();
+            if (proto) {
+                proto.patientId = queryPatientId;
+            }
+        }
+    }
+
     startNewProtocol(): void {
         this.protocolService.startNewProtocol();
     }
@@ -58,7 +71,15 @@ export class ProtocolConfigComponent {
         const proto = this.activeProtocol();
         if (!proto) return;
 
-        this.protocolService.updateTreatmentPlan(proto.id).subscribe({
+        const routePatientId = this.route.snapshot.queryParamMap.get('patientId');
+        const routeMedicalReportId = this.route.snapshot.queryParamMap.get('medicalReportId');
+        const routeConsultationDecisionId = this.route.snapshot.queryParamMap.get('consultationDecisionId');
+
+        const patientId = proto.patientId ? String(proto.patientId) : routePatientId;
+        const medicalReportId = routeMedicalReportId ? Number(routeMedicalReportId) : null;
+        const consultationDecisionId = routeConsultationDecisionId ? Number(routeConsultationDecisionId) : null;
+
+        this.protocolService.updateTreatmentPlan(proto.id, undefined, patientId, undefined, medicalReportId, consultationDecisionId).subscribe({
             next: () => {
                 this.messageService.add({
                     severity: 'success',

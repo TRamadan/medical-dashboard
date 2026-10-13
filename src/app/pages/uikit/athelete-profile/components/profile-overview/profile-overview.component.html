@@ -1,0 +1,123 @@
+@if (loading()) {
+<div class="flex items-center gap-3 p-4">
+    <i class="pi pi-spin pi-spinner text-2xl text-primary"></i>
+    <span class="text-gray-500">جارٍ تحميل النظرة العامة…</span>
+</div>
+} @else {
+@if (overviewData(); as d) {
+<div class="flex flex-col gap-4" id="tab-overview">
+
+    <!-- ── Clinical Alerts ───────────────────────────────────────────── -->
+    @if (d.alerts && d.alerts.length > 0) {
+    <div class="bg-red-50 border border-red-200 rounded-xl p-4 flex flex-col gap-2">
+        <div class="flex items-center gap-2 text-red-700 font-bold">
+            <i class="pi pi-exclamation-triangle"></i>
+            <span>يحتاج انتباه</span>
+        </div>
+        @for (alert of d.alerts; track $index) {
+        <div class="flex items-start gap-2 text-sm text-red-600">
+            <i class="pi pi-circle-fill text-[8px] mt-1.5 flex-shrink-0"></i>
+            <span>{{ alert.messageAr }}</span>
+        </div>
+        }
+    </div>
+    }
+
+    <!-- ── Current Status ─────────────────────────────────────────────── -->
+    @if (d.currentStatus; as cs) {
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
+        <div class="font-bold text-gray-800">الوضع الحالي</div>
+        <div class="grid grid-cols-2 gap-3 text-sm">
+            <div class="flex flex-col gap-1">
+                <span class="text-xs text-gray-500 uppercase font-semibold">الخطة</span>
+                <span class="font-medium text-gray-800">{{ cs.planName }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+                <span class="text-xs text-gray-500 uppercase font-semibold">المرحلة</span>
+                <span class="font-medium text-gray-800">{{ cs.phaseOrder }} — {{ cs.phaseName }}</span>
+            </div>
+            <div class="flex flex-col gap-1">
+                <span class="text-xs text-gray-500 uppercase font-semibold">الجلسة</span>
+                <span class="font-medium text-gray-800">{{ cs.currentSessionNumber }} من أصل {{ cs.totalSessions }} جلسة</span>
+            </div>
+            <div class="flex flex-col gap-1">
+                <span class="text-xs text-gray-500 uppercase font-semibold">المدربون</span>
+                <span class="font-medium text-gray-800">
+                    @for (c of cs.coaches; track c.id) { {{ c.nameAr }}@if (!$last){, } }
+                </span>
+            </div>
+        </div>
+        @if (cs.nextSession) {
+        <div class="bg-blue-50 rounded-lg p-3 flex items-center gap-3 text-sm">
+            <i class="pi pi-calendar text-blue-600"></i>
+            <div class="flex flex-col">
+                <span class="font-semibold text-blue-800">الجلسة القادمة</span>
+                <span class="text-blue-600">
+                    {{ cs.nextSession.startTime | date:'EEE dd/MM h:mm a' }} · {{ cs.nextSession.sessionType }} · {{ cs.nextSession.coachName }}
+                </span>
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- ── Transition Criteria ───────────────────────────────────────── -->
+    @if (cs.transitionCriteria && cs.transitionCriteria.length > 0) {
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
+        <div class="font-bold text-gray-800">معايير الانتقال للمرحلة التالية</div>
+        <div class="flex flex-col gap-2">
+            @for (c of cs.transitionCriteria; track c.criterionType) {
+            <div class="flex items-center gap-3 text-sm">
+                <i [class]="getCriterionIcon(c.isMet)"></i>
+                <span class="flex-1 text-gray-700">
+                    {{ c.criterionType }} {{ c.operator }} {{ c.targetValue }} {{ c.unit ?? '' }}
+                </span>
+                <span class="text-gray-500">
+                    {{ c.currentValue ?? '—' }}
+                </span>
+            </div>
+            }
+        </div>
+    </div>
+    }
+    }
+
+    <!-- ── Latest Doctor Note ─────────────────────────────────────────── -->
+    @if (d.latestDoctorNote) {
+    <div class="bg-amber-50 border border-amber-100 rounded-xl p-4 flex flex-col gap-2">
+        <div class="flex items-center gap-2 text-amber-700 font-bold text-sm">
+            <i class="pi pi-user-edit"></i>
+            <span>ملاحظة الدكتور</span>
+            <span class="text-xs text-gray-400 ml-auto">{{ d.latestDoctorNote.date | date:'dd/MM/yyyy' }}</span>
+        </div>
+        <p class="text-sm text-amber-800 italic">"{{ d.latestDoctorNote.note }}"</p>
+    </div>
+    }
+
+    <!-- ── Recent Sessions ───────────────────────────────────────────── -->
+    @if (d.recentSessions && d.recentSessions.length > 0) {
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex flex-col gap-3">
+        <div class="font-bold text-gray-800">آخر 3 جلسات</div>
+        @for (session of d.recentSessions; track session.phaseSessionId; let last = $last) {
+        <div class="flex items-center gap-3 text-sm">
+            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-600">
+                ج{{ session.globalSessionNumber }}
+            </div>
+            <div class="flex-1 flex flex-col gap-0.5">
+                <span class="font-medium text-gray-800">{{ session.sessionType }}</span>
+                <span class="text-xs text-gray-500">
+                    {{ session.date | date:'dd MMM' }}
+                    @if (session.coachNames.length) { · {{ session.coachNames.join(', ') }} }
+                </span>
+            </div>
+            <div class="text-xs text-gray-400">sRPE {{ session.rpe ?? '—' }}</div>
+        </div>
+        @if (!last) {<p-divider></p-divider>}
+        }
+    </div>
+    }
+
+</div>
+} @else {
+<div class="text-center text-gray-400 italic py-8">لا توجد بيانات — تأكد من تحديد هوية الرياضي</div>
+}
+}

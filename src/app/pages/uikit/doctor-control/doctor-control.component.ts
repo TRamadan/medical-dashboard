@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, signal } from '@angular/core';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { TodaysConsultationsComponent } from './components/todays-consultations/todays-consultations.component';
 import { PendingTicketsComponent } from './components/pending-tickets/pending-tickets.component';
@@ -22,8 +22,9 @@ interface DcNavItem {
   styleUrl: './doctor-control.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DoctorControlComponent {
+export class DoctorControlComponent implements OnInit {
   activeNav = signal<DcNavId>('dashboard');
+  readonly username = signal<string>('');
 
   readonly navItems: DcNavItem[] = [
     { id: 'dashboard', label: 'Dashboard', icon: 'pi-th-large', dot: '#10b981' },
@@ -34,6 +35,23 @@ export class DoctorControlComponent {
       id: 'protocol-builder', label: 'Protocol Builder', icon: ''
     }
   ];
+
+  ngOnInit(): void {
+    try {
+      const raw = localStorage.getItem('userData');
+      if (raw) {
+        const userData = JSON.parse(raw);
+        const name = userData.nameEn || userData.nameAr || userData.userName || userData.name;
+        if (name) {
+          this.username.set(name);
+          return;
+        }
+      }
+    } catch {
+      // silently fall through to default
+    }
+    this.username.set('User');
+  }
 
   setActive(id: DcNavId): void {
     this.activeNav.set(id);

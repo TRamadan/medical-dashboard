@@ -481,8 +481,8 @@
             <button pButton class="px-10 py-3 text-base font-bold" iconPos="left"
                 [icon]="savingDraft() ? 'pi pi-spin pi-spinner' : 'pi pi-check-circle'"
                 [label]="isEditMode() ? 'Save Changes' : 'Create and Sent to athelete'"
-                [disabled]="!proto.name?.trim() || (!isEditMode() && !selectedPatientId) || savingDraft()"
-                pTooltip="{{ proto.name?.trim() ? (isEditMode() ? 'Update this protocol' : (selectedPatientId ? 'Activate and save protocol' : 'Please select an athlete')) : 'Please enter a protocol name first' }}"
+                [disabled]="!proto.name?.trim() || (!selectedPatientId && !proto.patientId) || savingDraft()"
+                pTooltip="{{ proto.name?.trim() ? (isEditMode() ? (selectedPatientId || proto.patientId ? 'Update and activate protocol for athlete' : 'Please select an athlete') : (selectedPatientId ? 'Activate and save protocol' : 'Please select an athlete')) : 'Please enter a protocol name first' }}"
                 tooltipPosition="top"
                 (click)="isEditMode() ? saveEditedProtocol() : activateProtocol()">
             </button>

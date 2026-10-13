@@ -62,7 +62,9 @@ export class NotificationService {
                 if (notification.relatedEntityType === 'Appointment' && notification.relatedEntityId) {
                     this.router.navigate(['/uikit/appointment-consultation-form', notification.relatedEntityId]);
                 } else if (notification.relatedEntityType === 'TreatmentPlan' && notification.relatedEntityId) {
-                    this.router.navigate(['/uikit/phases-sessions']);
+                    this.router.navigate(['/uikit/coachmanagement'], {
+                        queryParams: { tab: 'edit', planId: notification.relatedEntityId }
+                    });
                 } else {
                     this.router.navigate(['/uikit/notifications-alerts']);
                 }

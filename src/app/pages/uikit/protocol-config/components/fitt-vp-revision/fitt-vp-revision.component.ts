@@ -252,9 +252,7 @@ export class FittVpRevisionComponent {
                     if (pr.incrementAmount === null || pr.incrementAmount === undefined || String(pr.incrementAmount).trim() === '') {
                         missing.push(`${label}: increment amount not set`);
                     }
-                    if (!pr.progressionCondition?.trim()) {
-                        missing.push(`${label}: trigger condition is empty`);
-                    }
+
                 }
             }
         }
@@ -262,7 +260,7 @@ export class FittVpRevisionComponent {
         return {
             letter: 'P',
             titleEn: 'Progression',
-            desc: 'Progression rule per exercise: Type + Increment + Trigger Condition',
+            desc: 'Progression rule per exercise: Type + Increment',
             badgeClass: 'badge-p',
             complete: missing.length === 0,
             missingItems: missing,

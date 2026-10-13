@@ -58,7 +58,7 @@ export interface NotificationTriggerPayload {
   daysOfWeek: number[] | null;
   dayOfMonth: number | null;
   timeOfDay: string;
-  startDate: string;
+  startDate: string | null;
   endType: number;
   endDate: string | null;
   maxOccurrences: number | null;
@@ -94,11 +94,26 @@ export function defaultRecurrenceRule(): RecurrenceRule {
   return {
     frequency: 2, // Weekly
     interval: 1,
-    daysOfWeek: [today.getDay()], // Sunday = 0
+    daysOfWeek: [today.getDay()],
     dayOfMonth: today.getDate(),
     time: '08:00:00',
     startDate: iso,
     endMode: 1, // Never
+    endDate: null,
+    occurrenceCount: null,
+  };
+}
+
+/** Returns a blank rule with no pre-filled values — the user must choose everything. */
+export function emptyRecurrenceRule(): RecurrenceRule {
+  return {
+    frequency: null as unknown as RecurrenceFrequency,
+    interval: null as unknown as number,
+    daysOfWeek: [],
+    dayOfMonth: null,
+    time: '',
+    startDate: '',
+    endMode: null as unknown as EndType,
     endDate: null,
     occurrenceCount: null,
   };

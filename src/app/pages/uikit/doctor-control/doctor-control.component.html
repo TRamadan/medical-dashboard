@@ -5,9 +5,9 @@
 
     <!-- Doctor profile -->
     <div class="dc-sidebar__profile">
-      <div class="dc-sidebar__avatar" aria-hidden="true">H</div>
+      <div class="dc-sidebar__avatar" aria-hidden="true">{{ username().charAt(0).toUpperCase() }}</div>
       <div>
-        <div class="dc-sidebar__name">Dr. Hossam Zeidan</div>
+        <div class="dc-sidebar__name">{{ username() }}</div>
         <div class="dc-sidebar__sub">Doctor Command Center</div>
       </div>
     </div>

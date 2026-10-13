@@ -1,55 +1,120 @@
+@if (loading()) {
+<div class="flex items-center gap-3 p-4">
+    <i class="pi pi-spin pi-spinner text-2xl text-primary"></i>
+    <span class="text-gray-500">جارٍ تحميل الاستبيانات…</span>
+</div>
+} @else {
+@if (data(); as d) {
 <div class="panel" id="tab-surveys">
+
+    <!-- ── Daily Wellness — Last 5 days ──────────────────────────────── -->
     <div class="sect">Wellness اليومي — آخر ٥ أيام</div>
     <div class="note n-mint" style="margin-bottom:14px;font-size:10px;">
-        معدل الاستجابة: ١٠٠٪ — الرياضي يملأ Wellness يومياً. <strong>ممتاز.</strong>
+        معدل الاستجابة: <strong>{{ wellnessRate }}٪</strong>
+        — {{ d.wellnessDaysAnswered }} من {{ d.wellnessDaysRequested }} أيام
+        @if (wellnessRate === 100) {<strong> ممتاز.</strong>}
     </div>
 
-    <div class="sect" style="margin-top:20px;">NPS الشهري</div>
+    @if (d.wellness.length > 0) {
+    <div class="card mb-4" style="margin-bottom:14px;">
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            @for (day of d.wellness; track day.date) {
+            <div style="display:flex;align-items:center;gap:10px;font-size:11px;">
+                <span style="color:var(--grey);min-width:75px;">{{ day.date | date:'EEE dd/MM' }}</span>
+                @for (key of getDayWellnessKeys(); track key) {
+                @if (getDayValue(day, key) !== null) {
+                <span style="color:var(--grey);">{{ getWellnessLabel(key) }}:</span>
+                <span style="font-family:var(--mono);font-weight:600;"
+                    [style.color]="getDayValue(day, key)! >= 4 ? 'var(--mint2)' : getDayValue(day, key)! >= 3 ? 'var(--amber)' : 'var(--coral)'">
+                    {{ getDayValue(day, key) }}
+                </span>
+                }
+                }
+            </div>
+            }
+        </div>
+    </div>
+    }
 
+    <!-- ── Monthly NPS ────────────────────────────────────────────────── -->
+    @if (d.nps.length > 0) {
+    <div class="sect" style="margin-top:20px;">NPS الشهري</div>
+    @for (survey of d.nps; track survey.id) {
     <p-card styleClass="mb-3">
         <ng-template pTemplate="header">
             <div class="svi-head px-3 pt-3">
-                <div class="svi-name">NPS — Clarity Score — مارس ٢٠٢٦</div>
-                <div class="svi-date">٢٣ مارس · أسبوع ٢</div>
+                <div class="svi-name">NPS — {{ survey.surveyType }} — {{ survey.submittedAt | date:'MMM yyyy' }}</div>
+                <div class="svi-date">{{ survey.submittedAt | date:'dd MMM · h:mm a' }}</div>
             </div>
         </ng-template>
 
         <div style="display:flex;align-items:center;gap:15px;margin-bottom:12px;">
-            <div class="text-center" style="min-width: 80px;">
-                <div class="nps-score nps-promo">٨.٥</div>
-                <p-tag severity="success" value="Promoter" [rounded]="true" styleClass="text-xs"></p-tag>
+            <div class="text-center" style="min-width:80px;">
+                <div class="nps-score"
+                    [class.nps-promo]="survey.category === 'Promoter'"
+                    [class.nps-passive]="survey.category === 'Passive'"
+                    [class.nps-detractor]="survey.category === 'Detractor'">
+                    {{ survey.score }}
+                </div>
+                @if (survey.category) {
+                <p-tag [severity]="getNpsSeverity(survey.category)" [value]="survey.category"
+                    [rounded]="true" styleClass="text-xs"></p-tag>
+                }
             </div>
+            @if (survey.answers.length > 0) {
             <div style="flex:1;">
-                <div class="svi-q">ما الذي أعجبك في البرنامج؟</div>
-                <div class="svi-a">"الفريق محترف جداً والتقدم واضح في الحركة."</div>
+                <div class="svi-q">{{ survey.answers[0].question }}</div>
+                <div class="svi-a">"{{ survey.answers[0].answer }}"</div>
             </div>
+            }
         </div>
+
+        @for (ans of survey.answers.slice(1); track $index) {
         <p-divider></p-divider>
         <div>
-            <div class="svi-q">ما الذي تتمنى تحسينه؟</div>
-            <div class="svi-a">"أتمنى معرفة جدول المواعيد أسبوع كامل مسبقاً."</div>
+            <div class="svi-q">{{ ans.question }}</div>
+            <div class="svi-a">"{{ ans.answer }}"</div>
         </div>
+        }
     </p-card>
+    }
+    }
 
+    <!-- ── Post-Blueprint Surveys ────────────────────────────────────── -->
+    @if (d.postBlueprint.length > 0) {
     <div class="sect" style="margin-top:20px;">Post-Blueprint Survey</div>
-
+    @for (survey of d.postBlueprint; track survey.id) {
     <p-card styleClass="mb-3">
         <ng-template pTemplate="header">
             <div class="svi-head px-3 pt-3">
                 <div class="svi-name">ما بعد تقرير Blueprint</div>
-                <div class="svi-date">١٦ مارس · ٢٤ ساعة بعد التقرير</div>
+                <div class="svi-date">{{ survey.submittedAt | date:'dd MMM yyyy' }}</div>
             </div>
         </ng-template>
 
-        <div class="svi-q" style="margin-bottom:6px;">كيف وجدت جلسة البلوبرينت؟</div>
-        <div class="svi-a">"تجربة مختلفة تماماً — للأول مرة حد يشرحلي جسمي بالأرقام."</div>
+        @for (ans of survey.answers; track $index) {
+        <div class="svi-q" style="margin-bottom:6px;">{{ ans.question }}</div>
+        <div class="svi-a">"{{ ans.answer }}"</div>
+        @if (!$last) {<p-divider></p-divider>}
+        }
 
         <ng-template pTemplate="footer">
             <div class="flex align-items-center justify-content-between p-2"
-                style="background: rgba(255,255,255,0.02); border-radius: 4px;">
+                style="background:rgba(255,255,255,0.02);border-radius:4px;">
                 <span style="font-size:11px;color:var(--grey);">تقييم الجلسة العام:</span>
-                <span class="badge b-teal">٤.٨ / ٥</span>
+                <span class="badge b-teal">{{ survey.score }} / 5</span>
             </div>
         </ng-template>
     </p-card>
+    }
+    }
+
+    @if (d.nps.length === 0 && d.postBlueprint.length === 0 && d.wellness.length === 0) {
+    <div class="text-center text-gray-400 italic py-6">لا توجد استبيانات مسجّلة</div>
+    }
+
 </div>
+} @else {
+<div class="text-center text-gray-400 italic py-8">لا توجد بيانات</div>
+}
+}

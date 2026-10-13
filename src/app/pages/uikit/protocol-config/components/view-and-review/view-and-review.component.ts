@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, input, signal, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
@@ -24,6 +25,7 @@ import { AssignEmployeeBranchService } from '../../../add-employees-to-branch/se
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ViewAndReviewComponent {
+    private readonly route = inject(ActivatedRoute);
     private protocolService = inject(ProtocolService);
     readonly readonly = input(false);
     private messageService = inject(MessageService);
@@ -38,13 +40,18 @@ export class ViewAndReviewComponent {
     constructor() {
         effect(() => {
             const proto = this.protocol();
+            const routePatientId = this.route.snapshot.queryParamMap.get('patientId');
             if (proto) {
                 if (proto.doctorId) {
                     this.selectedDoctorId = proto.doctorId;
                 }
-                if (proto.patientId) {
-                    this.selectedPatientId = proto.patientId;
+                const effectivePatientId = proto.patientId ? String(proto.patientId) : routePatientId;
+                if (effectivePatientId) {
+                    this.selectedPatientId = effectivePatientId;
+                    proto.patientId = effectivePatientId;
                 }
+            } else if (routePatientId) {
+                this.selectedPatientId = routePatientId;
             }
         });
     }
@@ -121,8 +128,9 @@ export class ViewAndReviewComponent {
         this.selectedAction = this.selectedAction === action ? null : action;
 
         const proto = this.protocol();
-        // Reset selections to the original values from proto when action changes, or null.
-        this.selectedPatientId = proto?.patientId || null;
+        const routePatientId = this.route.snapshot.queryParamMap.get('patientId');
+        // Reset selections to the original values from proto or route parameter when action changes, or null.
+        this.selectedPatientId = proto?.patientId ? String(proto.patientId) : (routePatientId || null);
         this.selectedLocationId = null;
         this.selectedDoctorId = proto?.doctorId || null;
 
@@ -135,7 +143,13 @@ export class ViewAndReviewComponent {
 
     fetchAthletes(): void {
         this.protocolService.getAthletes().subscribe({
-            next: (data) => this.athletes.set(data),
+            next: (data) => {
+                const mapped = (data || []).map((item: any) => ({
+                    ...item,
+                    id: String(item.id)
+                }));
+                this.athletes.set(mapped);
+            },
             error: (err) => console.error('Failed to fetch athletes', err)
         });
     }
@@ -177,17 +191,41 @@ export class ViewAndReviewComponent {
         const proto = this.protocol();
         if (!proto) return;
 
-        const patientId = this.selectedPatientId || proto.patientId || null;
+        const routePatientId = this.route.snapshot.queryParamMap.get('patientId');
+        const routeMedicalReportId = this.route.snapshot.queryParamMap.get('medicalReportId');
+        const routeConsultationDecisionId = this.route.snapshot.queryParamMap.get('consultationDecisionId');
+
+        const patientId = this.selectedPatientId || (proto.patientId ? String(proto.patientId) : null) || routePatientId || null;
         const doctorId = this.selectedDoctorId || proto.doctorId || null;
+        const medicalReportId = routeMedicalReportId ? Number(routeMedicalReportId) : null;
+        const consultationDecisionId = routeConsultationDecisionId ? Number(routeConsultationDecisionId) : null;
+
+        if (patientId && !proto.patientId) {
+            proto.patientId = patientId;
+        }
+
+        let saveAsDraft: boolean | undefined = undefined;
+        const completeness = this.protocolCompleteness();
+
+        if (this.isActionSelected('athlete')) {
+            saveAsDraft = !completeness.isComplete;
+        } else if (this.isActionSelected('template')) {
+            saveAsDraft = !completeness.isComplete;
+        } else if (this.isActionSelected('share')) {
+            saveAsDraft = !completeness.isComplete;
+        }
 
         this.protocolService.savingDraft.set(true);
-        this.protocolService.updateTreatmentPlan(proto.id, undefined, patientId, doctorId).subscribe({
+        this.protocolService.updateTreatmentPlan(proto.id, saveAsDraft, patientId, doctorId, medicalReportId, consultationDecisionId).subscribe({
             next: () => {
                 this.protocolService.savingDraft.set(false);
+                const statusDetail = saveAsDraft === false
+                    ? 'The protocol has been updated and published successfully.'
+                    : 'The protocol has been saved successfully.';
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Protocol Updated',
-                    detail: 'The protocol has been saved successfully.',
+                    detail: statusDetail,
                 });
                 this.protocolService.fetchProtocols();
                 this.protocolService.cancelProtocol();
@@ -240,10 +278,16 @@ export class ViewAndReviewComponent {
         this.protocolService.saveDraftError.set(null);
         this.protocolService.savingDraft.set(true); // Reusing savingDraft for loading state
 
-        const patientId = this.isActionSelected('athlete') ? this.selectedPatientId : null;
-        const doctorId = this.isActionSelected('share') ? this.selectedDoctorId : null;
+        const routePatientId = this.route.snapshot.queryParamMap.get('patientId');
+        const routeMedicalReportId = this.route.snapshot.queryParamMap.get('medicalReportId');
+        const routeConsultationDecisionId = this.route.snapshot.queryParamMap.get('consultationDecisionId');
 
-        this.protocolService.createTreatmentPlan(false, patientId, doctorId).subscribe({
+        const patientId = this.selectedPatientId || (this.protocol()?.patientId ? String(this.protocol()?.patientId) : null) || routePatientId || null;
+        const doctorId = this.isActionSelected('share') ? this.selectedDoctorId : null;
+        const medicalReportId = routeMedicalReportId ? Number(routeMedicalReportId) : null;
+        const consultationDecisionId = routeConsultationDecisionId ? Number(routeConsultationDecisionId) : null;
+
+        this.protocolService.createTreatmentPlan(false, patientId, doctorId, medicalReportId, consultationDecisionId).subscribe({
             next: () => {
                 this.protocolService.savingDraft.set(false);
                 this.messageService.add({
@@ -278,10 +322,16 @@ export class ViewAndReviewComponent {
             ? !completeness.isComplete
             : (this.isActionSelected('athlete') || this.isActionSelected('share') ? false : true);
 
-        const patientId = this.isActionSelected('athlete') ? this.selectedPatientId : null;
-        const doctorId = this.isActionSelected('share') ? this.selectedDoctorId : null;
+        const routePatientId = this.route.snapshot.queryParamMap.get('patientId');
+        const routeMedicalReportId = this.route.snapshot.queryParamMap.get('medicalReportId');
+        const routeConsultationDecisionId = this.route.snapshot.queryParamMap.get('consultationDecisionId');
 
-        this.protocolService.createTreatmentPlan(saveAsDraftFlag, patientId, doctorId).subscribe({
+        const patientId = this.selectedPatientId || (this.protocol()?.patientId ? String(this.protocol()?.patientId) : null) || routePatientId || null;
+        const doctorId = this.isActionSelected('share') ? this.selectedDoctorId : null;
+        const medicalReportId = routeMedicalReportId ? Number(routeMedicalReportId) : null;
+        const consultationDecisionId = routeConsultationDecisionId ? Number(routeConsultationDecisionId) : null;
+
+        this.protocolService.createTreatmentPlan(saveAsDraftFlag, patientId, doctorId, medicalReportId, consultationDecisionId).subscribe({
             next: () => {
                 this.protocolService.savingDraft.set(false);
                 const statusMessage = saveAsDraftFlag ? 'Protocol saved as draft.' : 'Protocol published successfully.';
