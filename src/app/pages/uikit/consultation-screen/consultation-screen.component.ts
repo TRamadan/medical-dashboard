@@ -942,8 +942,8 @@ export class ConsultationScreenComponent {
             title = t === EntryType.Return
                 ? `Athlete Summary — Returning (${fullName})`
                 : t === EntryType.Reassess
-                ? `Athlete — Active Program (${fullName})`
-                : `Athlete Summary (${fullName})`;
+                    ? `Athlete — Active Program (${fullName})`
+                    : `Athlete Summary (${fullName})`;
         }
 
         return {
@@ -1153,7 +1153,7 @@ export class ConsultationScreenComponent {
 
     /** HTML Step 1 (Complaint Registration) → PUT /step/1 */
     submitStep1(): void {
-        debugger
+
         const id = this.appointmentId();
         if (!id) { this.go(2); return; }
         this.sessionSaving.set(true);

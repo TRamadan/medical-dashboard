@@ -410,7 +410,7 @@
             </div>
         </div>
 
-        <div class="mt-2" *ngIf="isActionSelected('athlete')">
+        <!-- <div class="mt-2" *ngIf="isActionSelected('athlete')">
             <div class="bg-blue-50 border border-blue-200 rounded-xl p-5 flex flex-col gap-4">
                 <div class="flex items-start gap-3">
                     <i class="pi pi-info-circle text-blue-600 text-xl mt-0.5"></i>
@@ -429,7 +429,7 @@
                     </p-dropdown>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <div class="mt-2" *ngIf="isActionSelected('share')">
             <div class="bg-purple-50 border border-purple-200 rounded-xl p-5 flex flex-col gap-4">
@@ -471,8 +471,7 @@
                 [label]="isEditMode() ? 'Save Changes' : 'Create protocol'"
                 [disabled]="!proto.name?.trim() || savingDraft()"
                 pTooltip="{{ proto.name?.trim() ? (isEditMode() ? 'Update this protocol' : 'Save protocol as draft') : 'Please enter a protocol name first' }}"
-                tooltipPosition="top"
-                (click)="isEditMode() ? saveEditedProtocol() : saveAsDraft()">
+                tooltipPosition="top" (click)="isEditMode() ? saveEditedProtocol() : saveAsDraft()">
             </button>
             }
 
@@ -483,8 +482,7 @@
                 [label]="isEditMode() ? 'Save Changes' : 'Create and Sent to athelete'"
                 [disabled]="!proto.name?.trim() || (!selectedPatientId && !proto.patientId) || savingDraft()"
                 pTooltip="{{ proto.name?.trim() ? (isEditMode() ? (selectedPatientId || proto.patientId ? 'Update and activate protocol for athlete' : 'Please select an athlete') : (selectedPatientId ? 'Activate and save protocol' : 'Please select an athlete')) : 'Please enter a protocol name first' }}"
-                tooltipPosition="top"
-                (click)="isEditMode() ? saveEditedProtocol() : activateProtocol()">
+                tooltipPosition="top" (click)="isEditMode() ? saveEditedProtocol() : activateProtocol()">
             </button>
             }
 
@@ -495,20 +493,17 @@
                 [label]="isEditMode() ? 'Save Changes' : 'Create and send to the team'"
                 [disabled]="!proto.name?.trim() || (!isEditMode() && !selectedDoctorId) || savingDraft()"
                 pTooltip="{{ proto.name?.trim() ? (isEditMode() ? 'Update this protocol' : (selectedDoctorId ? 'Activate and save protocol' : 'Please select a team member')) : 'Please enter a protocol name first' }}"
-                tooltipPosition="top"
-                (click)="isEditMode() ? saveEditedProtocol() : activateProtocol()">
+                tooltipPosition="top" (click)="isEditMode() ? saveEditedProtocol() : activateProtocol()">
             </button>
             }
 
             <!-- Edit mode: show Save Changes when no card is selected -->
             @if (isEditMode() && !selectedAction) {
             <button pButton class="px-10 py-3 text-base font-bold" iconPos="left"
-                [icon]="savingDraft() ? 'pi pi-spin pi-spinner' : 'pi pi-save'"
-                label="Save Changes"
+                [icon]="savingDraft() ? 'pi pi-spin pi-spinner' : 'pi pi-save'" label="Save Changes"
                 [disabled]="!proto.name?.trim() || savingDraft()"
                 pTooltip="{{ proto.name?.trim() ? 'Update this protocol' : 'Please enter a protocol name first' }}"
-                tooltipPosition="top"
-                (click)="saveEditedProtocol()">
+                tooltipPosition="top" (click)="saveEditedProtocol()">
             </button>
             }
         </div>

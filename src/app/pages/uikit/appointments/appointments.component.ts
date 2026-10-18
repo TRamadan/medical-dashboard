@@ -269,6 +269,7 @@ export class AppointmentsComponent implements OnInit {
     }
 
     loadUrgentAppointments(): void {
+
         this.loading.set(true);
         this._appointmentService.getFilteredAppointments(
             { locationId: this.selectedLocation.id, isUrgent: true },
@@ -385,11 +386,13 @@ export class AppointmentsComponent implements OnInit {
      * Groups appointments by their date field
      */
     private groupAppointmentsByDate(appointments: Appointment[]): { date: string; appointments: Appointment[] }[] {
+
         const grouped: { [key: string]: Appointment[] } = {};
 
         appointments?.forEach((item: any) => {
+
             // Extract only the date part (assuming item.starttime is ISO string or has date info)
-            const dateKey = new Date(item.startTime).toISOString().split('T')[0];
+            const dateKey = item.startTime.split('T')[0];
             if (!grouped[dateKey]) grouped[dateKey] = [];
             grouped[dateKey].push(item);
         });

@@ -151,7 +151,7 @@ export class WeeklyEvaluationComponent implements OnInit, OnChanges {
   }
 
   private isCoachUser(user: any): boolean {
-    debugger
+
     if (!user.employeeProfile) return false;
 
     return (
