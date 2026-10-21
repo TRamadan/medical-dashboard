@@ -18,7 +18,7 @@
       </div>
 
       <!-- Mock Data Toggle Switch -->
-      <div class="dc-pt__toggle-container">
+      <!-- <div class="dc-pt__toggle-container">
         <label for="mock-data-toggle" class="dc-pt__toggle-label">
           Mock Data
         </label>
@@ -28,7 +28,7 @@
           (ngModelChange)="toggleMockData($event)"
           aria-label="Toggle mock data mode"
         />
-      </div>
+      </div> -->
     </div>
   </p-card>
 
@@ -94,10 +94,8 @@
 
                 <!-- Type Tag + SLA -->
                 <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem;">
-                  <span class="dc-ticket__urgency-badge"
-                    [style.color]="urgencyColor(t)"
-                    [style.border-color]="urgencyColor(t) + '40'"
-                    [style.background-color]="urgencyColor(t) + '15'"
+                  <span class="dc-ticket__urgency-badge" [style.color]="urgencyColor(t)"
+                    [style.border-color]="urgencyColor(t) + '40'" [style.background-color]="urgencyColor(t) + '15'"
                     style="font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; border: 1px solid;">
                     {{ t.typeLabel }}
                   </span>
@@ -157,44 +155,40 @@
             <div class="dc-ticket__actions"
               style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid rgba(0,0,0,0.07);">
               @if (t.actions && t.actions.length > 0) {
-                @for (btn of t.actions; track btn.action) {
-                  @if (getActionStyle(btn.action) === 'primary') {
-                  <p-button [label]="btn.label" size="small" severity="success"
-                    [style]="{'font-weight': '700', 'color': '#0f172a', 'flex': '1'}"
-                    (onClick)="handleAction(btn.action, t, $event)">
-                  </p-button>
-                  } @else if (getActionStyle(btn.action) === 'ghost') {
-                  <p-button [label]="btn.label" size="small" severity="secondary"
-                    [style]="{'font-weight': '600', 'flex': '1'}"
-                    (onClick)="handleAction(btn.action, t, $event)">
-                  </p-button>
-                  } @else if (getActionStyle(btn.action) === 'danger') {
-                  <p-button [label]="btn.label" size="small" severity="danger"
-                    [style]="{'font-weight': '600', 'flex': '1'}"
-                    (onClick)="handleAction(btn.action, t, $event)">
-                  </p-button>
-                  } @else if (getActionStyle(btn.action) === 'warning') {
-                  <p-button [label]="btn.label" size="small" severity="warn"
-                    [style]="{'font-weight': '700', 'flex': '1'}"
-                    (onClick)="handleAction(btn.action, t, $event)">
-                  </p-button>
-                  } @else if (getActionStyle(btn.action) === 'purple') {
-                  <p-button [label]="btn.label" size="small" severity="help"
-                    [style]="{'font-weight': '700', 'flex': '1'}"
-                    (onClick)="handleAction(btn.action, t, $event)">
-                  </p-button>
-                  } @else {
-                  <p-button [label]="btn.label" size="small" severity="secondary"
-                    [style]="{'font-weight': '600', 'flex': '1'}"
-                    (onClick)="handleAction(btn.action, t, $event)">
-                  </p-button>
-                  }
-                }
-              } @else if (t.ticketType === ApiTicketType.DirectBlueprintAwaitingPlan || t.ticketType === ApiTicketType.ReportAcceptedAwaitingPlan) {
-                <p-button label="Build Treatment Plan" size="small" severity="success"
-                  [style]="{'font-weight': '700', 'color': '#0f172a', 'flex': '1'}"
-                  (onClick)="handleAction('build-treatment-plan', t, $event)">
-                </p-button>
+              @for (btn of t.actions; track btn.action) {
+              @if (getActionStyle(btn.action) === 'primary') {
+              <p-button [label]="btn.label" size="small" severity="success"
+                [style]="{'font-weight': '700', 'color': '#0f172a', 'flex': '1'}"
+                (onClick)="handleAction(btn.action, t, $event)">
+              </p-button>
+              } @else if (getActionStyle(btn.action) === 'ghost') {
+              <p-button [label]="btn.label" size="small" severity="secondary"
+                [style]="{'font-weight': '600', 'flex': '1'}" (onClick)="handleAction(btn.action, t, $event)">
+              </p-button>
+              } @else if (getActionStyle(btn.action) === 'danger') {
+              <p-button [label]="btn.label" size="small" severity="danger" [style]="{'font-weight': '600', 'flex': '1'}"
+                (onClick)="handleAction(btn.action, t, $event)">
+              </p-button>
+              } @else if (getActionStyle(btn.action) === 'warning') {
+              <p-button [label]="btn.label" size="small" severity="warn" [style]="{'font-weight': '700', 'flex': '1'}"
+                (onClick)="handleAction(btn.action, t, $event)">
+              </p-button>
+              } @else if (getActionStyle(btn.action) === 'purple') {
+              <p-button [label]="btn.label" size="small" severity="help" [style]="{'font-weight': '700', 'flex': '1'}"
+                (onClick)="handleAction(btn.action, t, $event)">
+              </p-button>
+              } @else {
+              <p-button [label]="btn.label" size="small" severity="secondary"
+                [style]="{'font-weight': '600', 'flex': '1'}" (onClick)="handleAction(btn.action, t, $event)">
+              </p-button>
+              }
+              }
+              } @else if (t.ticketType === ApiTicketType.DirectBlueprintAwaitingPlan || t.ticketType ===
+              ApiTicketType.ReportAcceptedAwaitingPlan) {
+              <p-button label="Build Treatment Plan" size="small" severity="success"
+                [style]="{'font-weight': '700', 'color': '#0f172a', 'flex': '1'}"
+                (onClick)="handleAction('build-treatment-plan', t, $event)">
+              </p-button>
               }
             </div>
 

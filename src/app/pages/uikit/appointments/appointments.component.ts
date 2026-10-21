@@ -620,7 +620,7 @@ export class AppointmentsComponent implements OnInit {
     patientForm = this._patientFormService.form();
 
     // ── Test / Mock data presets ─────────────────────────────────────────────
-    readonly mockPresets: MockPatientPreset[] = PATIENT_FORM_MOCKS;
+    // readonly mockPresets: MockPatientPreset[] = PATIENT_FORM_MOCKS;
     selectedMockId: string | null = null;
     dateOfBirthValue: Date | null = null;
     injuryDateValue: Date | null = null;
@@ -629,18 +629,18 @@ export class AppointmentsComponent implements OnInit {
      *  Uses JSON deep-clone to avoid shared object references, and
      *  defers the local patientForm refresh to the next tick so the
      *  signal settles before Angular re-renders the bound templates. */
-    loadMock(id: string | null): void {
+    // loadMock(id: string | null): void {
 
-        if (!id) return;
-        const preset = this.mockPresets.find(p => p.id === id);
-        if (!preset) return;
-        // Deep-clone to prevent shared references between the mock constant and live form
-        const clone = JSON.parse(JSON.stringify(preset.data));
-        this._patientFormService.form.set(clone);
-        // Defer patientForm re-assignment so the current CD cycle finishes first.
-        // Without this the ngModel two-way bindings on nested objects crash Angular.
-        setTimeout(() => this.refreshFromService(), 0);
-    }
+    //     if (!id) return;
+    //     const preset = this.mockPresets.find(p => p.id === id);
+    //     if (!preset) return;
+    //     // Deep-clone to prevent shared references between the mock constant and live form
+    //     const clone = JSON.parse(JSON.stringify(preset.data));
+    //     this._patientFormService.form.set(clone);
+    //     // Defer patientForm re-assignment so the current CD cycle finishes first.
+    //     // Without this the ngModel two-way bindings on nested objects crash Angular.
+    //     setTimeout(() => this.refreshFromService(), 0);
+    // }
 
     /** Call this from (ngModelChange) or any change event to keep the service in sync. */
     syncForm(): void {
