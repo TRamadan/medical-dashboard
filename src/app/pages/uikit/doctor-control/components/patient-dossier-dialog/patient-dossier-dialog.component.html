@@ -1,0 +1,711 @@
+<p-dialog [(visible)]="visible" [modal]="true" header="ملف المريض الشامل" [draggable]="false"
+    [resizable]="false" [maximizable]="true" styleClass="dossier-dialog" dir="rtl">
+
+    <div class="dossier" dir="rtl">
+
+        @if (patientProfileLoading()) {
+        <div class="dossier-state">
+            <i class="pi pi-spin pi-spinner spin"></i>
+            <div class="msg">جاري تحميل ملف المريض الشامل...</div>
+        </div>
+        } @else if (patientProfileError()) {
+        <div class="dossier-state is-error">
+            <i class="pi pi-exclamation-triangle"></i>
+            <div class="msg">{{ patientProfileError() }}</div>
+        </div>
+        } @else {
+
+        <!-- Hero / ID card -->
+        <div class="dossier-hero">
+            <div class="dossier-hero-row">
+                <div class="dossier-avatar">{{ patientInfo.ui?.initials || '—' }}</div>
+                <div class="dossier-id">
+                    <div class="dossier-name">{{ patientInfo.personalData?.fullName || 'اسم غير مسجل' }}</div>
+                    <div class="dossier-sub">
+                        <span><i class="pi pi-calendar"></i>
+                            {{ (patientInfo.personalData?.dateOfBirth | date: 'dd/MM/yyyy') || 'تاريخ الميلاد غير مسجل'
+                            }}
+                            @if (patientInfo.ui?.age) { <span>· {{ patientInfo.ui.age }} سنة</span> }
+                        </span>
+                        <span dir="ltr"><i class="pi pi-phone"></i> {{ patientInfo.personalData?.phoneNumber || '—'
+                            }}</span>
+                        <span><i class="pi pi-hashtag"></i> حجز رقم {{ patientInfo.appointmentId || '—' }}</span>
+                    </div>
+                </div>
+                <div class="dossier-badges">
+                    <div class="dossier-jersey">{{ patientInfo.sportsData?.sport || patientInfo.preAppointmentQuestionnaire?.sport || 'رياضة غير محددة' }}@if
+                        (patientInfo.sportsData?.playCenter) { <span> · {{ patientInfo.sportsData.playCenter }}</span> }
+                    </div>
+                    <div class="status-pill" [class.ok]="patientInfo.isPaid" [class.warn]="!patientInfo.isPaid">
+                        <i class="pi" [class.pi-check-circle]="patientInfo.isPaid"
+                            [class.pi-clock]="!patientInfo.isPaid"></i>
+                        {{ patientInfo.isPaid ? 'الرسوم مدفوعة' : 'الرسوم غير مدفوعة' }}
+                    </div>
+                    <div class="status-pill" [class.ok]="patientInfo.isProfileComplete"
+                        [class.warn]="!patientInfo.isProfileComplete">
+                        <i class="pi" [class.pi-verified]="patientInfo.isProfileComplete"
+                            [class.pi-exclamation-circle]="!patientInfo.isProfileComplete"></i>
+                        {{ patientInfo.isProfileComplete ? 'الملف مكتمل' : 'الملف غير مكتمل' }}
+                    </div>
+                    @if (patientInfo.preAppointmentQuestionnaire) {
+                    <div class="status-pill ok">
+                        <i class="pi pi-clipboard"></i>
+                        استمارة ما قبل الموعد
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- System record / active protocol strip -->
+        @if (sidebarData(); as sb) {
+        <div class="dossier-strip">
+            <div class="dossier-strip-col">
+                <div class="dossier-strip-label">{{ sb.title || 'حالة الملف' }}</div>
+                @for (item of sb.items; track $index) {
+                <div class="dossier-strip-item">{{ item.text }}</div>
+                } @empty {
+                <div class="d-empty"><i class="pi pi-info-circle"></i> لا توجد بيانات</div>
+                }
+            </div>
+            @if (sb.activeProtocol; as ap) {
+            <div class="dossier-strip-col">
+                <div class="protocol-title">{{ ap.title }}</div>
+                @for (row of ap.rows; track $index) {
+                <div class="protocol-row"><span>{{ row.label }}</span><span>{{ row.value }}</span></div>
+                }
+            </div>
+            }
+            <div class="dossier-strip-col">
+                <div class="dossier-strip-label">حالة التذكرة</div>
+                @for (item of sb.history; track $index) {
+                <div class="dossier-strip-item">{{ item.text }}</div>
+                }
+                @for (item of sb.ticketStatus; track $index) {
+                <div class="dossier-strip-item">{{ item.text }}</div>
+                }
+                @if (!sb.history?.length && !sb.ticketStatus?.length) {
+                <div class="d-empty"><i class="pi pi-info-circle"></i> لا توجد بيانات</div>
+                }
+            </div>
+        </div>
+        }
+
+        <!-- Section nav — mirrors the intake form's tabs -->
+        <div class="dossier-nav">
+            <a (click)="scrollToSection('sec-questionnaire', $event)" data-tone="questionnaire" style="cursor: pointer;"><i
+                    class="pi pi-clipboard"></i> استمارة ما قبل الموعد</a>
+            <a (click)="scrollToSection('sec-personal', $event)" style="cursor: pointer;"><i class="pi pi-id-card"></i>
+                ١. البيانات الشخصية</a>
+            <a (click)="scrollToSection('sec-sport', $event)" data-tone="sport" style="cursor: pointer;"><i
+                    class="pi pi-bolt"></i> ٢. بيانات الرياضة</a>
+            <a (click)="scrollToSection('sec-injury', $event)" data-tone="injury" style="cursor: pointer;"><i
+                    class="pi pi-heart"></i> ٣. بيانات الاصابة</a>
+            <a (click)="scrollToSection('sec-treatment', $event)" data-tone="treatment" style="cursor: pointer;"><i
+                    class="pi pi-user-edit"></i> ٤. التاريخ الطبي</a>
+            <a (click)="scrollToSection('sec-injury-history', $event)" data-tone="history" style="cursor: pointer;"><i
+                    class="pi pi-history"></i> ٥. التاريخ الإصابي</a>
+            <a (click)="scrollToSection('sec-medical-history', $event)" data-tone="medical" style="cursor: pointer;"><i
+                    class="pi pi-file-plus"></i> ٦. التاريخ المرضي</a>
+            <a (click)="scrollToSection('sec-social', $event)" data-tone="social" style="cursor: pointer;"><i
+                    class="pi pi-sparkles"></i> ٧. الحالة الاجتماعية</a>
+        </div>
+
+        <div class="dossier-body">
+
+            <!-- استمارة ما قبل الموعد -->
+            <section id="sec-questionnaire" class="d-section" data-tone="questionnaire">
+                <div class="d-section-head">
+                    <div class="d-section-icon"><i class="pi pi-clipboard"></i></div>
+                    <div>
+                        <div class="d-section-eyebrow">إجابات استمارة الاستقبال المبدئية</div>
+                        <div class="d-section-title">استمارة ما قبل الموعد (Pre-Appointment Questionnaire)</div>
+                    </div>
+                </div>
+
+                @if (patientInfo.preAppointmentQuestionnaire; as q) {
+                <div class="d-grid wide">
+                    <div class="d-field span-2">
+                        <span class="d-label">هدف الزيارة الرئيسي</span>
+                        <div class="d-value" [class.placeholder]="!q.objectiveLabel">
+                            <span class="d-val-icon"><i class="pi pi-bullseye"></i></span>
+                            <span>{{ q.objectiveLabel || 'غير محدد' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="d-field">
+                        <span class="d-label">الرياضة التي يمارسها</span>
+                        <div class="d-value" [class.placeholder]="!q.sport">
+                            <span class="d-val-icon"><i class="pi pi-bolt"></i></span>
+                            <span>{{ q.sport || 'غير محدد' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="d-field">
+                        <span class="d-label">منذ متى والمشكلة موجودة؟</span>
+                        <div class="d-value" [class.placeholder]="!q.durationLabel">
+                            <span class="d-val-icon"><i class="pi pi-clock"></i></span>
+                            <span>{{ q.durationLabel || 'غير محدد' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="d-field">
+                        <span class="d-label">هل خضع لعلاج سابق لهذه المشكلة؟</span>
+                        <div class="d-value">
+                            <span class="d-pill" [class.yes]="q.hasPreviousTreatment"
+                                [class.no]="!q.hasPreviousTreatment">
+                                <i class="pi" [class.pi-check]="q.hasPreviousTreatment"
+                                    [class.pi-times]="!q.hasPreviousTreatment"></i>
+                                {{ q.hasPreviousTreatment ? 'نعم (خضع لعلاج سابق)' : 'لا (لم يخضع لعلاج سابق)' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="d-field span-2">
+                        <span class="d-label">كيف عرفت عن مختبر الأداء؟ (مصدر المعرفة)</span>
+                        <div class="d-value" [class.placeholder]="!q.referralSourceLabel">
+                            <span class="d-val-icon"><i class="pi pi-compass"></i></span>
+                            <span>{{ q.referralSourceLabel || 'غير محدد' }}</span>
+                        </div>
+                    </div>
+                </div>
+                } @else {
+                <div class="d-empty">
+                    <i class="pi pi-info-circle"></i>
+                    لم يتم تسجيل إجابات استمارة ما قبل الموعد لهذا الحجز حتى الآن
+                </div>
+                }
+            </section>
+
+            <!-- 1. البيانات الشخصية -->
+            <section id="sec-personal" class="d-section">
+                <div class="d-section-head">
+                    <div class="d-section-icon"><i class="pi pi-id-card"></i></div>
+                    <div>
+                        <div class="d-section-eyebrow">١</div>
+                        <div class="d-section-title">البيانات الشخصية</div>
+                    </div>
+                </div>
+
+                <div class="d-field mb-3" style="max-width:280px">
+                    <span class="d-label">هل هذا الحجز شخصي؟</span>
+                    <div class="d-value">
+                        <span class="d-pill" [class.yes]="patientInfo.personalData?.bookingForSelf"
+                            [class.no]="!patientInfo.personalData?.bookingForSelf">
+                            <i class="pi" [class.pi-check]="patientInfo.personalData?.bookingForSelf"
+                                [class.pi-times]="!patientInfo.personalData?.bookingForSelf"></i>
+                            {{ patientInfo.personalData?.bookingForSelf ? 'نعم' : 'لا' }}
+                        </span>
+                    </div>
+                </div>
+
+                @if (!patientInfo.personalData?.bookingForSelf) {
+                <div class="d-grid mb-3">
+                    <div class="d-field">
+                        <span class="d-label">صفة القائم بالحجز</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.personalData?.fillerRelation">{{
+                            patientInfo.personalData?.fillerRelation || 'غير محدد' }}</div>
+                    </div>
+                    <div class="d-field">
+                        <span class="d-label">اسم القائم بملء الاستمارة</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.personalData?.fillerName">{{
+                            patientInfo.personalData?.fillerName || 'غير محدد' }}</div>
+                    </div>
+                    <div class="d-field">
+                        <span class="d-label">رقم موبايل القائم بملء الاستمارة</span>
+                        <div class="d-value ltr" [class.placeholder]="!patientInfo.personalData?.fillerMobile">{{
+                            patientInfo.personalData?.fillerMobile || 'غير محدد' }}</div>
+                    </div>
+                </div>
+                }
+
+                <div class="d-grid">
+                    <div class="d-field">
+                        <span class="d-label">الاسم الكامل</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.personalData?.fullName">{{
+                            patientInfo.personalData?.fullName || 'غير مسجل' }}</div>
+                    </div>
+                    <div class="d-field">
+                        <span class="d-label">تاريخ الميلاد</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.personalData?.dateOfBirth">{{
+                            (patientInfo.personalData?.dateOfBirth | date: 'dd/MM/yyyy') || 'غير محدد' }}</div>
+                    </div>
+                    <div class="d-field span-2">
+                        <span class="d-label">محل السكن</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.personalData?.address">{{
+                            patientInfo.personalData?.address || 'غير محدد' }}</div>
+                    </div>
+                    <div class="d-field">
+                        <span class="d-label">رقم الموبايل</span>
+                        <div class="d-value ltr" [class.placeholder]="!patientInfo.personalData?.phoneNumber">{{
+                            patientInfo.personalData?.phoneNumber || 'غير محدد' }}</div>
+                    </div>
+                    <div class="d-field span-2">
+                        <span class="d-label">رقم موبايل الطوارئ / صلة القرابة</span>
+                        <div class="d-value ltr" [class.placeholder]="!patientInfo.personalData?.emergencyPhone">
+                            @if (patientInfo.personalData?.emergencyPhone) {
+                            {{ patientInfo.personalData.emergencyPhone }} — {{
+                            patientInfo.personalData.emergencyRelation || 'صلة غير محددة' }}
+                            } @else { غير محدد }
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. بيانات الرياضة -->
+            <section id="sec-sport" class="d-section" data-tone="sport">
+                <div class="d-section-head">
+                    <div class="d-section-icon"><i class="pi pi-bolt"></i></div>
+                    <div>
+                        <div class="d-section-eyebrow">٢</div>
+                        <div class="d-section-title">بيانات الرياضة</div>
+                    </div>
+                </div>
+
+                <div class="stat-row mb-3">
+                    <div class="stat-bar" style="--tone:var(--turf)">
+                        <div class="stat-bar-head"><span class="stat-bar-label">عدد سنوات الممارسة</span><span
+                                class="stat-bar-value">{{ patientInfo.sportsData?.yearsOfPractice ?? '—' }}/30</span>
+                        </div>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill"
+                                [style.width.%]="((patientInfo.sportsData?.yearsOfPractice || 0) / 30) * 100"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <div class="d-field">
+                        <span class="d-label">اللعبة</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.sportsData?.sport">{{
+                            patientInfo.sportsData?.sport || 'غير محدد' }}</div>
+                    </div>
+                    <div class="d-field">
+                        <span class="d-label">مركز اللعب / التخصص</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.sportsData?.playCenter">{{
+                            patientInfo.sportsData?.playCenter || 'غير محدد' }}</div>
+                    </div>
+                    <div class="d-field">
+                        <span class="d-label">النادي</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.sportsData?.clubName">{{
+                            patientInfo.sportsData?.clubName || 'غير محدد' }}</div>
+                    </div>
+                    <div class="d-field full">
+                        <span class="d-label">أعلى إنجاز تم تحقيقه</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.sportsData?.highestAchievement">{{
+                            patientInfo.sportsData?.highestAchievement || 'لا يوجد' }}</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. بيانات الاصابة -->
+            <section id="sec-injury" class="d-section" data-tone="injury">
+                <div class="d-section-head">
+                    <div class="d-section-icon"><i class="pi pi-heart"></i></div>
+                    <div>
+                        <div class="d-section-eyebrow">٣</div>
+                        <div class="d-section-title">بيانات الاصابة</div>
+                    </div>
+                </div>
+
+                <div class="d-field full mb-3">
+                    <span class="d-label">خريطة موقع الإصابة</span>
+                    <div class="d-musclemap">
+                        @if (patientInfo.selectedMuscles?.length || patientInfo.injuryData?.painLocations?.length) {
+                        <app-muscle-skeleton-viewer [readOnly]="true"
+                            [selectedMuscles]="patientInfo.selectedMuscles"></app-muscle-skeleton-viewer>
+                        } @else {
+                        <div class="d-empty"><i class="pi pi-map"></i> لم يتم تحديد مواقع الألم</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <div class="d-field">
+                        <span class="d-label">اسم الإصابة</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.injuryData?.injuryName">{{
+                            patientInfo.injuryData?.injuryName || 'غير محدد' }}</div>
+                    </div>
+                    <div class="d-field">
+                        <span class="d-label">الجانب المصاب</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.ui?.injurySideLabel">{{
+                            patientInfo.ui?.injurySideLabel || 'غير محدد' }}</div>
+                    </div>
+                    <div class="d-field">
+                        <span class="d-label">تاريخ الإصابة</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.injuryData?.injuryDate">{{
+                            (patientInfo.injuryData?.injuryDate | date: 'dd/MM/yyyy') || 'غير محدد' }}</div>
+                    </div>
+                    <div class="d-field">
+                        <span class="d-label">فترة الانقطاع عن اللعب</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.injuryData?.inactivityDurationValue">
+                            {{ patientInfo.injuryData?.inactivityDurationValue ?
+                            (patientInfo.injuryData.inactivityDurationValue + ' ' +
+                            (patientInfo.ui?.inactivityDurationUnitLabel || '')) : 'غير محدد' }}
+                        </div>
+                    </div>
+                    <div class="d-field span-2">
+                        <span class="d-label">هل الإصابة مرتبطة بالنشاط الرياضي؟</span>
+                        <div class="d-value">
+                            <span class="d-pill" [class.yes]="patientInfo.injuryData?.isSportRelated"
+                                [class.no]="!patientInfo.injuryData?.isSportRelated">
+                                <i class="pi" [class.pi-check]="patientInfo.injuryData?.isSportRelated"
+                                    [class.pi-times]="!patientInfo.injuryData?.isSportRelated"></i>
+                                {{ patientInfo.injuryData?.isSportRelated ? 'نعم' : 'لا' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-row mb-3">
+                    <div class="stat-bar" style="--tone:var(--clay)">
+                        <div class="stat-bar-head"><span class="stat-bar-label">مستوى الألم الحالي</span><span
+                                class="stat-bar-value">{{ patientInfo.injuryData?.painLevel ?? '—' }}/10</span></div>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill" [style.width.%]="(patientInfo.injuryData?.painLevel || 0) * 10">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="stat-bar" style="--tone:var(--clay-ink)">
+                        <div class="stat-bar-head"><span class="stat-bar-label">أقصى ألم</span><span
+                                class="stat-bar-value">{{ patientInfo.injuryData?.functionalLevel ?? '—' }}/10</span>
+                        </div>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill"
+                                [style.width.%]="(patientInfo.injuryData?.functionalLevel || 0) * 10"></div>
+                        </div>
+                    </div>
+                    <div class="stat-bar" style="--tone:var(--teal)">
+                        <div class="stat-bar-head"><span class="stat-bar-label">تأثير الألم على الأداء</span><span
+                                class="stat-bar-value">{{ patientInfo.injuryData?.dailyActivityLevel ?? '—' }}/10</span>
+                        </div>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill"
+                                [style.width.%]="(patientInfo.injuryData?.dailyActivityLevel || 0) * 10"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-field full">
+                    <span class="d-label">وصف تفصيلي مكتوب للإصابة</span>
+                    <div class="d-value" style="min-height:2.6rem;align-items:flex-start;padding-top:.6rem"
+                        [class.placeholder]="!patientInfo.injuryData?.injuryDescription">{{
+                        patientInfo.injuryData?.injuryDescription || 'لا يوجد وصف مسجل' }}</div>
+                </div>
+            </section>
+
+            <!-- 4. التاريخ الطبي (specialists / treatment / diagnostics) -->
+            <section id="sec-treatment" class="d-section" data-tone="treatment">
+                <div class="d-section-head">
+                    <div class="d-section-icon"><i class="pi pi-user-edit"></i></div>
+                    <div>
+                        <div class="d-section-eyebrow">٤</div>
+                        <div class="d-section-title">التاريخ الطبي</div>
+                    </div>
+                </div>
+
+                <div class="d-field mb-3" style="max-width:280px">
+                    <span class="d-label">هل عرض نفسه على طبيب متخصص؟</span>
+                    <div class="d-value">
+                        <span class="d-pill" [class.yes]="patientInfo.injuryData?.seenSpecialist"
+                            [class.no]="!patientInfo.injuryData?.seenSpecialist">
+                            <i class="pi" [class.pi-check]="patientInfo.injuryData?.seenSpecialist"
+                                [class.pi-times]="!patientInfo.injuryData?.seenSpecialist"></i>
+                            {{ patientInfo.injuryData?.seenSpecialist ? 'نعم' : 'لا' }}
+                        </span>
+                    </div>
+                </div>
+
+                @if (patientInfo.injuryData?.seenSpecialist) {
+                <div class="d-field full mb-3">
+                    <span class="d-label">الأطباء الذين تم عرض الحالة عليهم</span>
+                    <div class="d-recordlist">
+                        @for (doc of patientInfo.injuryData?.specialistsConsulted; track $index) {
+                        <div class="d-record" style="--tone:var(--teal)">
+                            <div class="d-record-cell"><span class="k">اسم الدكتور</span><span class="v"
+                                    [class.placeholder]="!doc.doctorName">{{ doc.doctorName || 'غير محدد' }}</span>
+                            </div>
+                            <div class="d-record-cell"><span class="k">التخصص</span><span class="v"
+                                    [class.placeholder]="!doc.specialty">{{ doc.specialty || 'غير محدد' }}</span></div>
+                            <div class="d-record-cell"><span class="k">التشخيص</span><span class="v"
+                                    [class.placeholder]="!doc.diagnosis">{{ doc.diagnosis || 'غير محدد' }}</span></div>
+                            <div class="d-record-cell"><span class="k">طريقة التواصل</span><span class="v"
+                                    [class.placeholder]="!doc.communicationMethod">{{ doc.communicationMethod || 'غير
+                                    محدد' }}</span></div>
+                        </div>
+                        } @empty {
+                        <div class="d-empty"><i class="pi pi-info-circle"></i> لم تتم إضافة أي طبيب بعد</div>
+                        }
+                    </div>
+                </div>
+                }
+
+                <div class="d-field full mb-3">
+                    <span class="d-label">العلاج الموصوف</span>
+                    <div class="d-value" [class.placeholder]="!patientInfo.ui?.prescribedTreatmentsSelected?.length">
+                        {{ patientInfo.ui?.prescribedTreatmentsSelected?.length ?
+                        patientInfo.ui.prescribedTreatmentsSelected.join('، ') : 'لا يوجد' }}
+                        @if (patientInfo.injuryData?.otherPrescribedTreatment) { — {{
+                        patientInfo.injuryData.otherPrescribedTreatment }} }
+                    </div>
+                </div>
+
+                <div class="d-field mb-2" style="max-width:280px">
+                    <span class="d-label">هل أجريت فحوصات تشخيصية؟</span>
+                    <div class="d-value">
+                        <span class="d-pill" [class.yes]="patientInfo.injuryData?.hadDiagnosticTests"
+                            [class.no]="!patientInfo.injuryData?.hadDiagnosticTests">
+                            <i class="pi" [class.pi-check]="patientInfo.injuryData?.hadDiagnosticTests"
+                                [class.pi-times]="!patientInfo.injuryData?.hadDiagnosticTests"></i>
+                            {{ patientInfo.injuryData?.hadDiagnosticTests ? 'نعم' : 'لا' }}
+                        </span>
+                    </div>
+                </div>
+
+                @if (patientInfo.injuryData?.hadDiagnosticTests) {
+                <div class="d-field full">
+                    <span class="d-label">الفحوصات المُجراة</span>
+                    <div class="d-value" [class.placeholder]="!patientInfo.ui?.diagnosticTestsSelected?.length">
+                        {{ patientInfo.ui?.diagnosticTestsSelected?.length ?
+                        patientInfo.ui.diagnosticTestsSelected.join('، ') : 'غير محدد' }}
+                        @if (patientInfo.injuryData?.otherDiagnosticTest) { — {{
+                        patientInfo.injuryData.otherDiagnosticTest }} }
+                    </div>
+                </div>
+                }
+            </section>
+
+            <!-- 5. التاريخ الإصابي -->
+            <section id="sec-injury-history" class="d-section" data-tone="history">
+                <div class="d-section-head">
+                    <div class="d-section-icon"><i class="pi pi-history"></i></div>
+                    <div>
+                        <div class="d-section-eyebrow">٥</div>
+                        <div class="d-section-title">التاريخ الإصابي</div>
+                    </div>
+                </div>
+
+                <div class="d-field full mb-3">
+                    <span class="d-label">الإصابات القديمة</span>
+                    <div class="d-recordlist">
+                        @for (inj of patientInfo.injuryHistory?.previousInjuries; track $index) {
+                        <div class="d-record" style="--tone:var(--clay)">
+                            <div class="d-record-cell"><span class="k">الجزء المصاب</span><span class="v"
+                                    [class.placeholder]="!inj.bodyPart">{{ inj.bodyPart || 'غير محدد' }}</span></div>
+                            <div class="d-record-cell"><span class="k">التاريخ</span><span class="v"
+                                    [class.placeholder]="!inj.injuryDate">{{ (inj.injuryDate | date: 'dd/MM/yyyy') ||
+                                    'غير محدد' }}</span></div>
+                            <div class="d-record-cell"><span class="k">الوصف</span><span class="v"
+                                    [class.placeholder]="!inj.description">{{ inj.description || 'غير محدد' }}</span>
+                            </div>
+                            <div class="d-record-cell"><span class="k">العلاج المتلقى</span><span class="v"
+                                    [class.placeholder]="!inj.treatmentReceived">{{ inj.treatmentReceived || 'غير محدد'
+                                    }}</span></div>
+                        </div>
+                        } @empty {
+                        <div class="d-empty"><i class="pi pi-info-circle"></i> لا توجد إصابات مسجلة</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="d-field full">
+                    <span class="d-label">الجراحات السابقة</span>
+                    <div class="d-recordlist">
+                        @for (s of patientInfo.injuryHistory?.previousSurgeries; track $index) {
+                        <div class="d-record" style="--tone:var(--steel)">
+                            <div class="d-record-cell"><span class="k">نوع الجراحة</span><span class="v"
+                                    [class.placeholder]="!s.surgeryType">{{ s.surgeryType || 'غير محدد' }}</span></div>
+                            <div class="d-record-cell"><span class="k">التاريخ</span><span class="v"
+                                    [class.placeholder]="!s.surgeryDate">{{ (s.surgeryDate | date: 'dd/MM/yyyy') || 'غير
+                                    محدد' }}</span></div>
+                            <div class="d-record-cell"><span class="k">وصف / ملاحظات</span><span class="v"
+                                    [class.placeholder]="!s.description">{{ s.description || '—' }}</span></div>
+                        </div>
+                        } @empty {
+                        <div class="d-empty"><i class="pi pi-info-circle"></i> لا توجد جراحات مسجلة</div>
+                        }
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6. التاريخ المرضي -->
+            <section id="sec-medical-history" class="d-section" data-tone="medical">
+                <div class="d-section-head">
+                    <div class="d-section-icon"><i class="pi pi-file-plus"></i></div>
+                    <div>
+                        <div class="d-section-eyebrow">٦</div>
+                        <div class="d-section-title">التاريخ المرضي</div>
+                    </div>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <div class="d-field span-2">
+                        <span class="d-label">الحالات المرضية</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.ui?.chronicConditionsSelected?.length">
+                            {{ patientInfo.ui?.chronicConditionsSelected?.length ?
+                            patientInfo.ui.chronicConditionsSelected.join('، ') : 'لا يوجد' }}
+                            @if (patientInfo.medicalHistory?.otherConditions) { — {{
+                            patientInfo.medicalHistory.otherConditions }} }
+                        </div>
+                    </div>
+                    <div class="d-field span-2">
+                        <span class="d-label">هل يوجد أي مسببات حساسية معروفة؟</span>
+                        <div class="d-value" style="color:var(--clay-ink)"
+                            [class.placeholder]="!patientInfo.medicalHistory?.knownAllergies">{{
+                            patientInfo.medicalHistory?.knownAllergies || 'لا يوجد' }}</div>
+                    </div>
+                </div>
+
+                <div class="d-field full mb-3">
+                    <span class="d-label">الأدوية / المكملات المستخدمة حالياً</span>
+                    <div class="d-taglist">
+                        @for (m of patientInfo.medicalHistory?.medications; track $index) {
+                        <div class="d-tag tone-med"><i class="pi pi-heart-fill"></i> {{ m.name }} ({{ m.dose }} - {{
+                            m.frequency }})</div>
+                        } @empty {
+                        <div class="d-empty"><i class="pi pi-info-circle"></i> لا توجد أدوية مسجلة</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <div class="d-field">
+                        <span class="d-label">هل سبق إصابته بفيروس كورونا؟</span>
+                        <div class="d-value">
+                            <span class="d-pill" [class.yes]="patientInfo.medicalHistory?.hadCovid"
+                                [class.no]="!patientInfo.medicalHistory?.hadCovid">
+                                <i class="pi" [class.pi-check]="patientInfo.medicalHistory?.hadCovid"
+                                    [class.pi-times]="!patientInfo.medicalHistory?.hadCovid"></i>
+                                {{ patientInfo.medicalHistory?.hadCovid ? 'نعم' : 'لا' }}
+                            </span>
+                        </div>
+                    </div>
+                    @if (patientInfo.medicalHistory?.hadCovid) {
+                    <div class="d-field">
+                        <span class="d-label">كم مرة أصيب بفيروس كورونا؟</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.medicalHistory?.covidTimesCount">{{
+                            patientInfo.medicalHistory?.covidTimesCount || 'غير محدد' }}</div>
+                    </div>
+                    }
+                    <div class="d-field">
+                        <span class="d-label">هل تلقى لقاح كورونا؟</span>
+                        <div class="d-value">
+                            <span class="d-pill" [class.yes]="patientInfo.medicalHistory?.covidVaccinated"
+                                [class.no]="!patientInfo.medicalHistory?.covidVaccinated">
+                                <i class="pi" [class.pi-check]="patientInfo.medicalHistory?.covidVaccinated"
+                                    [class.pi-times]="!patientInfo.medicalHistory?.covidVaccinated"></i>
+                                {{ patientInfo.medicalHistory?.covidVaccinated ? 'نعم' : 'لا' }}
+                            </span>
+                        </div>
+                    </div>
+                    @if (patientInfo.medicalHistory?.covidVaccinated) {
+                    <div class="d-field span-2">
+                        <span class="d-label">نوع اللقاح وعدد الجرعات</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.medicalHistory?.vaccineType">
+                            {{ patientInfo.medicalHistory?.vaccineType || 'غير محدد' }}@if
+                            (patientInfo.medicalHistory?.vaccineDoses) { — {{ patientInfo.medicalHistory.vaccineDoses }}
+                            جرعات }
+                        </div>
+                    </div>
+                    }
+                </div>
+
+                <div class="d-grid">
+                    <div class="d-field span-2">
+                        <span class="d-label">التاريخ المرضي — الأب</span>
+                        <div class="d-value"
+                            [class.placeholder]="!(patientInfo.ui?.fatherConditionsSelected?.length || patientInfo.medicalHistory?.fatherOtherConditions)">
+                            {{ patientInfo.ui?.fatherConditionsSelected?.length ?
+                            patientInfo.ui.fatherConditionsSelected.join('، ') : 'لا يوجد' }}
+                            @if (patientInfo.medicalHistory?.fatherOtherConditions) { — {{
+                            patientInfo.medicalHistory.fatherOtherConditions }} }
+                        </div>
+                    </div>
+                    <div class="d-field span-2">
+                        <span class="d-label">التاريخ المرضي — الأم</span>
+                        <div class="d-value"
+                            [class.placeholder]="!(patientInfo.ui?.motherConditionsSelected?.length || patientInfo.medicalHistory?.motherOtherConditions)">
+                            {{ patientInfo.ui?.motherConditionsSelected?.length ?
+                            patientInfo.ui.motherConditionsSelected.join('، ') : 'لا يوجد' }}
+                            @if (patientInfo.medicalHistory?.motherOtherConditions) { — {{
+                            patientInfo.medicalHistory.motherOtherConditions }} }
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 7. الحالة الاجتماعية -->
+            <section id="sec-social" class="d-section" data-tone="social">
+                <div class="d-section-head">
+                    <div class="d-section-icon"><i class="pi pi-sparkles"></i></div>
+                    <div>
+                        <div class="d-section-eyebrow">٧</div>
+                        <div class="d-section-title">الحالة الاجتماعية</div>
+                    </div>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <div class="d-field span-2">
+                        <span class="d-label">الوظيفة / طبيعة العمل</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.socialProfile?.occupation">
+                            {{ patientInfo.socialProfile?.occupation || 'غير محدد' }} @if
+                            (patientInfo.ui?.workNatureLabel) { / {{ patientInfo.ui.workNatureLabel }} }
+                        </div>
+                    </div>
+                    <div class="d-field">
+                        <span class="d-label">الحالة الاجتماعية</span>
+                        <div class="d-value" [class.placeholder]="!patientInfo.ui?.maritalStatusLabel">{{
+                            patientInfo.ui?.maritalStatusLabel || 'غير محدد' }}</div>
+                    </div>
+                </div>
+
+                <div class="stat-row mb-3">
+                    <div class="stat-bar" style="--tone:var(--gold)">
+                        <div class="stat-bar-head"><span class="stat-bar-label">عدد ساعات الجلوس اليومية</span><span
+                                class="stat-bar-value">{{ patientInfo.socialProfile?.dailySittingHours ?? '—'
+                                }}/16</span></div>
+                        <div class="stat-bar-track">
+                            <div class="stat-bar-fill"
+                                [style.width.%]="((patientInfo.socialProfile?.dailySittingHours || 0) / 16) * 100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-field full mb-3">
+                    <span class="d-label">العادات</span>
+                    <div class="d-value" [class.placeholder]="!patientInfo.ui?.habitsSelected?.length">{{
+                        patientInfo.ui?.habitsSelected?.length ? patientInfo.ui.habitsSelected.join('، ') : 'لا يوجد' }}
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <div class="d-field">
+                        <span class="d-label">هل الشغل مسبب لضغط عصبي؟</span>
+                        <div class="d-value">
+                            <span class="d-pill" [class.yes]="patientInfo.socialProfile?.isWorkStressful"
+                                [class.no]="!patientInfo.socialProfile?.isWorkStressful">
+                                <i class="pi" [class.pi-check]="patientInfo.socialProfile?.isWorkStressful"
+                                    [class.pi-times]="!patientInfo.socialProfile?.isWorkStressful"></i>
+                                {{ patientInfo.socialProfile?.isWorkStressful ? 'نعم' : 'لا' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="d-field">
+                        <span class="d-label">هل لديه أطفال؟</span>
+                        <div class="d-value">
+                            <span class="d-pill" [class.yes]="patientInfo.socialProfile?.hasChildren"
+                                [class.no]="!patientInfo.socialProfile?.hasChildren">
+                                <i class="pi" [class.pi-check]="patientInfo.socialProfile?.hasChildren"
+                                    [class.pi-times]="!patientInfo.socialProfile?.hasChildren"></i>
+                                {{ patientInfo.socialProfile?.hasChildren ? 'نعم' : 'لا' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+        }
+    </div>
+</p-dialog>

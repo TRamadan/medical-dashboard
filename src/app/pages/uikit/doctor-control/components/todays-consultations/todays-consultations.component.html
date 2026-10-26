@@ -68,7 +68,7 @@
           [style.border-left]="'3px solid ' + slotColor(day.slots[idx])"
           [style.color]="slotColor(day.slots[idx])"
           style="cursor: pointer;"
-          (click)="navigateToConsultation(day.slots[idx].appointmentId, $event)">
+          (click)="onSlotClick(day.slots[idx], day, $event, slotPopover)">
           <i class="pi pi-user" aria-hidden="true"></i>
           <span class="dc-cal-chip__name">{{ day.slots[idx].patientName }}</span>
           <span class="dc-cal-chip__time">{{ day.slots[idx].time }}</span>
@@ -117,5 +117,62 @@
   </div>
 
   } <!-- end !loading && !error -->
+
+  <!-- ── Slot Popover with 2 options ──────────────────────────── -->
+  <p-popover #slotPopover [dismissable]="true">
+    @if (selectedSlot(); as slot) {
+    <div class="dc-slot-popover">
+      <div class="dc-slot-popover__header">
+        <div class="dc-slot-popover__avatar" [style.color]="slotColor(slot)">
+          <i class="pi pi-user" aria-hidden="true"></i>
+        </div>
+        <div class="dc-slot-popover__meta">
+          <div class="dc-slot-popover__name">{{ slot.patientName }}</div>
+          <div class="dc-slot-popover__sub">
+            <i class="pi pi-clock" aria-hidden="true"></i> {{ slot.time }} &bull; Appt #{{ slot.appointmentId }}
+          </div>
+        </div>
+      </div>
+
+      <div class="dc-slot-popover__actions">
+        <!-- Option 1: Navigate to Consultation -->
+        <button
+          type="button"
+          class="dc-slot-popover__action-btn"
+          (click)="navigateToConsultation(slot.appointmentId, $event); slotPopover.hide()">
+          <span class="dc-slot-popover__action-icon dc-slot-popover__action-icon--consult">
+            <i class="pi pi-stethoscope" aria-hidden="true"></i>
+          </span>
+          <div class="dc-slot-popover__action-text">
+            <span class="dc-slot-popover__action-title">Navigate to Consultation</span>
+            <span class="dc-slot-popover__action-desc">Open clinical consultation form</span>
+          </div>
+          <i class="pi pi-arrow-right dc-slot-popover__chevron" aria-hidden="true"></i>
+        </button>
+
+        <!-- Option 2: Show Athlete Info -->
+        <button
+          type="button"
+          class="dc-slot-popover__action-btn"
+          (click)="openAthleteInfoModal(slot, $event); slotPopover.hide()">
+          <span class="dc-slot-popover__action-icon dc-slot-popover__action-icon--athlete">
+            <i class="pi pi-id-card" aria-hidden="true"></i>
+          </span>
+          <div class="dc-slot-popover__action-text">
+            <span class="dc-slot-popover__action-title">Show Athlete Info</span>
+            <span class="dc-slot-popover__action-desc">View athlete quick dossier</span>
+          </div>
+          <i class="pi pi-arrow-right dc-slot-popover__chevron" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+    }
+  </p-popover>
+
+  <!-- ── Comprehensive Patient Dossier Dialog (Mirroring consultation-screen) ── -->
+  <app-patient-dossier-dialog
+    [(visible)]="athleteDialogVisible"
+    [appointmentId]="selectedSlot()?.appointmentId ?? null">
+  </app-patient-dossier-dialog>
 
 </div>

@@ -9,8 +9,11 @@ import {
 import { SlicePipe } from '@angular/common';
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
+import { PopoverModule, Popover } from 'primeng/popover';
+import { DialogModule } from 'primeng/dialog';
 import { finalize } from 'rxjs';
 import { Router } from '@angular/router';
+import { PatientDossierDialogComponent } from '../patient-dossier-dialog/patient-dossier-dialog.component';
 import {
   TodaysConsultationsService,
   CalendarDay,
@@ -33,7 +36,14 @@ function indicatorColor(indicator: string): string {
 
 @Component({
   selector: 'app-dc-todays-consultations',
-  imports: [SlicePipe, CardModule, ButtonModule],
+  imports: [
+    SlicePipe,
+    CardModule,
+    ButtonModule,
+    PopoverModule,
+    DialogModule,
+    PatientDossierDialogComponent
+  ],
   templateUrl: './todays-consultations.component.html',
   styleUrl: './todays-consultations.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -41,6 +51,38 @@ function indicatorColor(indicator: string): string {
 export class TodaysConsultationsComponent implements OnInit {
   private readonly service = inject(TodaysConsultationsService);
   private readonly router = inject(Router);
+
+  // ── Popover & Athlete Modal State ─────────────────────────────────
+
+  selectedSlot = signal<CalendarSlot | null>(null);
+  selectedSlotDay = signal<CalendarDay | null>(null);
+  athleteDialogVisible = signal<boolean>(false);
+
+  onSlotClick(slot: CalendarSlot, day: CalendarDay, event: MouseEvent, popover: Popover): void {
+    event.stopPropagation();
+    this.selectedSlot.set(slot);
+    this.selectedSlotDay.set(day);
+    popover.toggle(event);
+  }
+
+  openAthleteInfoModal(slot: CalendarSlot, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.selectedSlot.set(slot);
+    this.athleteDialogVisible.set(true);
+  }
+
+  getIndicatorLabel(indicator?: string): string {
+    switch (indicator?.toLowerCase()) {
+      case 'green': return 'Confirmed & Ready';
+      case 'yellow': return 'Pending / Waiting';
+      case 'red': return 'Urgent Attention';
+      case 'blue': return 'Treatment Plan';
+      case 'gray': return 'Completed / Archived';
+      default: return 'Scheduled';
+    }
+  }
 
   // ── Navigation to Consultation ────────────────────────────────────
 
@@ -118,7 +160,8 @@ export class TodaysConsultationsComponent implements OnInit {
 
   // ── Data helpers ──────────────────────────────────────────────────
 
-  slotColor(slot: CalendarSlot): string {
+  slotColor(slot?: CalendarSlot | null): string {
+    if (!slot) return '#94a3b8';
     return indicatorColor(slot.indicator);
   }
 

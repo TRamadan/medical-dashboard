@@ -157,9 +157,16 @@
                 style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; margin-left: 0.5rem; flex-shrink: 0;">
 
                 @if (t.appointmentId) {
-                <button type="button" style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.68rem; font-weight: 600;
+                <button
+                  type="button"
+                  title="عرض ملف المريض الشامل"
+                  (click)="openDossier(t.appointmentId, $event)"
+                  style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.68rem; font-weight: 600;
                          padding: 3px 8px; border-radius: 5px; border: 1px solid rgba(168,85,247,0.35);
-                         background: rgba(168,85,247,0.08); color: #9333ea; cursor: pointer;"></button>
+                         background: rgba(168,85,247,0.08); color: #9333ea; cursor: pointer;">
+                  <i class="pi pi-folder-open" style="font-size: 0.72rem;"></i>
+                  Patient File
+                </button>
                 }
               </div>
             </div>
@@ -214,3 +221,9 @@
   }
 
 </div>
+
+<!-- Patient Dossier Dialog -->
+<app-patient-dossier-dialog
+  [(visible)]="dossierVisible"
+  [appointmentId]="dossierAppointmentId()">
+</app-patient-dossier-dialog>

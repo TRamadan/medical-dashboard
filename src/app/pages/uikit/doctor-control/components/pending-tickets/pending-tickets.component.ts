@@ -12,6 +12,7 @@ import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { BadgeModule } from 'primeng/badge';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { PatientDossierDialogComponent } from '../patient-dossier-dialog/patient-dossier-dialog.component';
 import { finalize, of } from 'rxjs';
 import {
   PendingTicketsService,
@@ -58,7 +59,7 @@ function actionStyle(action: string): BtnStyle {
 
 @Component({
   selector: 'app-dc-pending-tickets',
-  imports: [ButtonModule, CardModule, BadgeModule, ToggleSwitchModule, FormsModule],
+  imports: [ButtonModule, CardModule, BadgeModule, ToggleSwitchModule, FormsModule, PatientDossierDialogComponent],
   templateUrl: './pending-tickets.component.html',
   styleUrl: './pending-tickets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -76,6 +77,10 @@ export class PendingTicketsComponent implements OnInit {
 
   loading = signal(false);
   error = signal<string | null>(null);
+
+  // ── Patient Dossier Dialog ──────────────────────────────────────────────
+  dossierVisible = signal(false);
+  dossierAppointmentId = signal<number | null>(null);
 
   /** Raw API tickets for the current tab */
   private rawTickets = signal<ApiTicket[]>([]);
@@ -141,6 +146,15 @@ export class PendingTicketsComponent implements OnInit {
 
   }
 
+  // ── Patient Dossier Dialog ───────────────────────────────────────────────
+
+  openDossier(appointmentId: number | null | undefined, event: Event): void {
+    event.stopPropagation();
+    if (!appointmentId) return;
+    this.dossierAppointmentId.set(appointmentId);
+    this.dossierVisible.set(true);
+  }
+
   // ── Template helpers ─────────────────────────────────────────────────────
 
   urgencyColor(t: ApiTicket): string {
@@ -186,6 +200,7 @@ export class PendingTicketsComponent implements OnInit {
           tab: 'Published',
           startNew: 'false',
           patientId: ticket.patientId,
+          appointmentId: ticket.appointmentId
         },
       });
       return;

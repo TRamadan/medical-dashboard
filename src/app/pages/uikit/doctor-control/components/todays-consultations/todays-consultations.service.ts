@@ -9,6 +9,8 @@ export interface CalendarSlot {
   patientName: string;
   time: string;
   indicator: string; // 'yellow' | 'green' | 'gray'
+  patientId?: number;
+  service?: string;
 }
 
 export interface CalendarDay {

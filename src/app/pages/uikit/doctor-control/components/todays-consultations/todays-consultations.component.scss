@@ -414,3 +414,144 @@ $muted: #64748b;
     padding: 0.875rem;
   }
 }
+
+// ── Slot Popover ─────────────────────────────────────────────
+::ng-deep .p-popover {
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+
+  .p-popover-content {
+    padding: 0.35rem;
+  }
+}
+
+.dc-slot-popover {
+  min-width: 260px;
+  max-width: 310px;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.6rem 0.65rem;
+  }
+
+  &__avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  &__meta {
+    overflow: hidden;
+  }
+
+  &__name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__sub {
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  &__action-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.55rem 0.65rem;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+
+    &:hover {
+      background: rgba(99, 102, 241, 0.08);
+
+      .dc-slot-popover__chevron {
+        transform: translateX(2px);
+        color: #4f46e5;
+      }
+    }
+
+    &:focus-visible {
+      outline: 2px solid #6366f1;
+      outline-offset: 1px;
+    }
+  }
+
+  &__action-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+
+    &--consult {
+      background: rgba(16, 185, 129, 0.12);
+      color: #059669;
+    }
+
+    &--athlete {
+      background: rgba(14, 165, 233, 0.12);
+      color: #0284c7;
+    }
+  }
+
+  &__action-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__action-title {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.2;
+  }
+
+  &__action-desc {
+    font-size: 10.5px;
+    color: #64748b;
+    margin-top: 2px;
+  }
+
+  &__chevron {
+    font-size: 10px;
+    color: #94a3b8;
+    transition: transform 0.15s ease, color 0.15s ease;
+  }
+}
