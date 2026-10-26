@@ -54,7 +54,8 @@ export class ProtocolConfigComponent implements OnInit {
 
     ngOnInit(): void {
         const queryPatientId = this.route.snapshot.queryParamMap.get('patientId');
-        if (queryPatientId && !this.activeProtocol()) {
+        const startNew = this.route.snapshot.queryParamMap.get('startNew') === 'true';
+        if (startNew && queryPatientId && !this.activeProtocol()) {
             this.startNewProtocol();
             const proto = this.activeProtocol();
             if (proto) {

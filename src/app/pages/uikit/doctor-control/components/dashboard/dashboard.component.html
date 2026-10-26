@@ -56,7 +56,16 @@
               </span>
             </div>
             <div class="dc-action-row__summary">{{ p.type }}</div>
-            <div class="dc-action-row__details">{{ p.time }}</div>
+            <div class="dc-action-row__meta-row">
+              <span class="dc-action-row__meta-time">
+                <i class="pi pi-clock" aria-hidden="true"></i>
+                {{ p.time }}
+              </span>
+              <span class="dc-action-row__meta-sep" aria-hidden="true">·</span>
+              <span class="dc-appt-id" [attr.title]="'Appointment ID: ' + p.appointmentId">
+                <i class="pi pi-hashtag" aria-hidden="true"></i>{{ p.appointmentId }}
+              </span>
+            </div>
           </div>
         </div>
         <div class="dc-action-row__actions">

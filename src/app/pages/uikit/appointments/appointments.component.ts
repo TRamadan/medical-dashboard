@@ -795,6 +795,15 @@ export class AppointmentsComponent implements OnInit {
         this.syncForm();
     }
 
+    getPreviousInjuryDateValue(inj: { injuryDate: string }): Date | null {
+        return inj.injuryDate ? new Date(inj.injuryDate) : null;
+    }
+
+    onPreviousInjuryDateChange(inj: { injuryDate: string }, date: Date | null): void {
+        inj.injuryDate = date ? this.formatLocalDate(date) : '';
+        this.syncForm();
+    }
+
     // ── Previous surgeries (Tab 5) — now matches injuryHistory.previousSurgeries shape ──
     addSurgery(): void {
         if (!this.patientForm.injuryHistory.previousSurgeries) {
@@ -808,6 +817,15 @@ export class AppointmentsComponent implements OnInit {
 
     removeSurgery(index: number): void {
         this.patientForm.injuryHistory.previousSurgeries?.splice(index, 1);
+        this.syncForm();
+    }
+
+    getPreviousSurgeryDateValue(s: { surgeryDate: string }): Date | null {
+        return s.surgeryDate ? new Date(s.surgeryDate) : null;
+    }
+
+    onPreviousSurgeryDateChange(s: { surgeryDate: string }, date: Date | null): void {
+        s.surgeryDate = date ? this.formatLocalDate(date) : '';
         this.syncForm();
     }
 

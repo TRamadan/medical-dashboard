@@ -5,7 +5,7 @@
 <br />
 <section>
   <div class="container">
-    @if(selectedPatient){
+    @if(selectedPatient()){
     <div class="treatment-plan-container">
       <h2 class="title p-2">Treatment Plan</h2>
 
@@ -35,36 +35,33 @@
     }
 
     <div class="my-2">
-      <app-tabs-navigation [tabs]="tabs" [activeTab]="currentTab"
+      <app-tabs-navigation [tabs]="tabs" [activeTab]="currentTab()"
         (tabChange)="onTabChange($event)"></app-tabs-navigation>
     </div>
 
-    <ng-container [ngSwitch]="currentTab">
-      <ng-container *ngSwitchCase="'overview'">
-        <app-patient-overview [selectedPatient]="selectedPatient" (patientSelected)="onPatientSelected($event)"
+    @switch (currentTab()) {
+      @case ('overview') {
+        <app-patient-overview [selectedPatient]="selectedPatient()" (patientSelected)="onPatientSelected($event)"
           (navigateToAssign)="onTabChange('assign')" (navigateToSchedule)="onTabChange('schedule')"
           (navigateToTreatmentPlan)="onOpenPlanDetails($event)"></app-patient-overview>
-      </ng-container>
+      }
 
-      <ng-container *ngSwitchCase="'schedule'">
+      @case ('schedule') {
         <app-schedule></app-schedule>
-      </ng-container>
+      }
 
-
-      <ng-container *ngSwitchCase="'edit'">
+      @case ('edit') {
         <app-edit-protocol [targetPlanId]="selectedPlanId()"></app-edit-protocol>
-      </ng-container>
+      }
 
-      <ng-container *ngSwitchCase="'teamPerformance'">
+      @case ('teamPerformance') {
         <app-team-performance></app-team-performance>
-      </ng-container>
+      }
 
-      <ng-container *ngSwitchCase="'engineerEvaluation'">
+      @case ('engineerEvaluation') {
         <app-engineer-evaluation></app-engineer-evaluation>
-      </ng-container>
-
-
-    </ng-container>
+      }
+    }
 
 
   </div>

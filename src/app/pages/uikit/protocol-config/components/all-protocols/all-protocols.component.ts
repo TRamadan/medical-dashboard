@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, effect, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute } from '@angular/router';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
@@ -15,13 +16,19 @@ import { Protocol } from '../../models/protocol.model';
     styleUrl: './all-protocols.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AllProtocolsComponent {
+export class AllProtocolsComponent implements OnInit {
     public protocolService = inject(ProtocolService);
+    private readonly route = inject(ActivatedRoute);
     readonly protocols = this.protocolService.protocols;
 
-
-    constructor() {
+    ngOnInit(): void {
         this.logProtocols();
+        // Pre-select tab from query param (e.g. tab=Published or tab=Draft)
+        const tabParam = this.route.snapshot.queryParamMap.get('tab') as 'Published' | 'Draft' | null;
+        if (tabParam === 'Published' || tabParam === 'Draft') {
+            this.activeTab.set(tabParam);
+        }
+
     }
     readonly activeTab = signal<'Published' | 'Draft'>('Published');
 

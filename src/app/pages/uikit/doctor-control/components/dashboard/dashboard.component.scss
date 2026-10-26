@@ -265,6 +265,28 @@ $muted: #64748b;
   white-space: nowrap;
 }
 
+// ── Appointment ID chip ────────────────────────────────────────
+.dc-appt-id {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  color: #818cf8;
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+  border-radius: 5px;
+  padding: 1px 6px;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+
+  .pi {
+    font-size: 8.5px;
+    opacity: 0.8;
+  }
+}
+
 // ── Priority divider ──────────────────────────────────────────
 .dc-priority-divider {
   display: flex;
@@ -356,6 +378,34 @@ $muted: #64748b;
     font-size: 10.5px;
     color: $muted;
     margin-top: 1px;
+  }
+
+  // ── Inline meta row: time + appointment ID ──────────────────
+  &__meta-row {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 3px;
+    flex-wrap: wrap;
+  }
+
+  &__meta-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10.5px;
+    color: $muted;
+
+    .pi {
+      font-size: 9.5px;
+      opacity: 0.75;
+    }
+  }
+
+  &__meta-sep {
+    font-size: 10px;
+    color: rgba(100, 116, 139, 0.45);
+    line-height: 1;
   }
 
   &__actions {

@@ -150,7 +150,8 @@ export class AppTopbar implements OnInit, OnDestroy {
         const nextState = !this.showOverlay();
         this.showOverlay.set(nextState);
         if (nextState) {
-            this.notificationService.loadUnreadNotifications().subscribe();
+            this.notificationService.loadNotificationsHistory(1, 20).subscribe();
+            this.notificationService.loadUnreadCount().subscribe();
         }
     }
 
@@ -165,10 +166,28 @@ export class AppTopbar implements OnInit, OnDestroy {
         this.showOverlay.set(false);
 
         if (notification.relatedEntityType === 'Appointment' && notification.relatedEntityId) {
-            this.router.navigate(['/uikit/appointment-consultation-form', notification.relatedEntityId]);
-        } else if (notification.relatedEntityType === 'TreatmentPlan' && notification.relatedEntityId) {
-            this.router.navigate(['/uikit/phases-sessions']);
-        } else {
+            this.router.navigate(['/uikit/consultation-type', notification.relatedEntityId]);
+        } else if (notification.relatedEntityType === 'TreatmentPlan') {
+            this.router.navigate(['/uikit/coachmanagement'], {
+                queryParams: {
+                    tab: 'edit',
+                    ...(notification.relatedEntityId ? { planId: notification.relatedEntityId } : {})
+                }
+            });
+        }
+
+        else if (notification.relatedEntityType === 'MedicalReport' && notification.relatedEntityId) {
+            this.router.navigate(['/uikit/protocol-config'], {
+                queryParams: {
+                    tab: 'Published',
+                    startNew: 'false',
+                    patientId: notification.relatedEntityId,
+
+                },
+            });
+        }
+
+        else {
             this.router.navigate(['/uikit/notifications-alerts']);
         }
     }

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, ChangeDetectionStrategy, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToolbarModule } from 'primeng/toolbar';
 import { TabsModule } from 'primeng/tabs';
@@ -14,6 +14,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { DropdownModule } from 'primeng/dropdown';
 import { TabsNavigationComponent } from '../session-management/tabs-navigation/tabs-navigation.component';
 import { ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { PatientOverviewComponent } from './patient-overview/patient-overview.component';
 import { EditProtocolComponent } from './edit-protocol/edit-protocol.component';
 import { AssignSessionsComponent } from './assign-sessions/assign-sessions.component';
@@ -23,7 +24,7 @@ import { EngineerEvaluationComponent } from './egineer-evaluation/egineer-evalua
 
 @Component({
     selector: 'app-coach-manager',
-    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [
         PatientOverviewComponent,
         DropdownModule,
@@ -49,13 +50,15 @@ import { EngineerEvaluationComponent } from './egineer-evaluation/egineer-evalua
 })
 export class CoachManagerComponent implements OnInit {
     private readonly route = inject(ActivatedRoute);
-    currentTab = 'overview';
-    selectedPatient: any = null;
+    private readonly destroyRef = inject(DestroyRef);
+
+    currentTab = signal<string>('overview');
+    selectedPatient = signal<any>(null);
     selectedPlanId = signal<number | null>(null);
     username = signal<string>('');
 
     onPatientSelected(patient: any) {
-        this.selectedPatient = patient;
+        this.selectedPatient.set(patient);
     }
 
     onOpenPlanDetails(planId?: number): void {
@@ -64,7 +67,7 @@ export class CoachManagerComponent implements OnInit {
         } else {
             this.selectedPlanId.set(3); // Default fallback plan ID
         }
-        this.currentTab = 'edit';
+        this.currentTab.set('edit');
     }
     data = {
         sessionsDone: 12,
@@ -85,12 +88,16 @@ export class CoachManagerComponent implements OnInit {
 
     ngOnInit() {
         this.fetchUsername();
-        this.route.queryParams.subscribe(params => {
+        this.route.queryParams.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
             const tab = params['tab'];
             const planId = params['planId'];
-            if (tab === 'edit' && planId) {
+            if (planId) {
                 this.selectedPlanId.set(Number(planId));
-                this.currentTab = 'edit';
+            }
+            if (tab) {
+                this.currentTab.set(tab);
+            } else if (planId) {
+                this.currentTab.set('edit');
             }
         });
     }
@@ -113,6 +120,6 @@ export class CoachManagerComponent implements OnInit {
     }
 
     onTabChange(tabId: any): void {
-        this.currentTab = tabId;
+        this.currentTab.set(tabId);
     }
 }

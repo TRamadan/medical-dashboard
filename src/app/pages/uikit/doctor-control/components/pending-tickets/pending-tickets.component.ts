@@ -183,9 +183,9 @@ export class PendingTicketsComponent implements OnInit {
     ) {
       this.router.navigate(['/uikit/protocol-config'], {
         queryParams: {
+          tab: 'Published',
+          startNew: 'false',
           patientId: ticket.patientId,
-          ...(ticket.medicalReportId ? { medicalReportId: ticket.medicalReportId } : {}),
-          ...(ticket.consultationDecisionId ? { consultationDecisionId: ticket.consultationDecisionId } : {}),
         },
       });
       return;

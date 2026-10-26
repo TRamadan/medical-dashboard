@@ -231,25 +231,16 @@ export class AppMenu {
             ]
         });
 
-        this.model.push({
-            label: 'Consultation',
-            items: [
-                {
-                    label: 'Consultation Form Config',
-                    icon: 'pi pi-fw pi-file-edit',
-                    routerLink: ['/uikit/consultation-form-configuration']
-                }
-            ]
-        });
-        this.model.push({
-            label: 'Athlete Management',
-            items: [
-                {
-                    label: 'Athlete Profile',
-                    icon: 'pi pi-fw pi-user',
-                    routerLink: ['/uikit/athleteprofile']
-                }
-            ]
-        });
+
+        // this.model.push({
+        //     label: 'Athlete Management',
+        //     items: [
+        //         {
+        //             label: 'Athlete Profile',
+        //             icon: 'pi pi-fw pi-user',
+        //             routerLink: ['/uikit/athleteprofile']
+        //         }
+        //     ]
+        // });
     }
 }

@@ -106,10 +106,24 @@
                   }
                 </div>
 
-                <!-- Patient Name -->
-                <div class="dc-ticket__name"
-                  style="font-size: 0.85rem; font-weight: 600; color: #000000; margin-bottom: 0.2rem;">
-                  {{ t.patientName }}
+                <!-- Patient Name + Appointment ID -->
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.2rem;">
+                  <div class="dc-ticket__name" style="font-size: 0.85rem; font-weight: 600; color: #000000;">
+                    {{ t.patientName }}
+                  </div>
+                  @if (t.appointmentId) {
+                  <span style="font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 4px;
+                               background: rgba(56,189,248,0.12); color: #0284c7; border: 1px solid rgba(56,189,248,0.3);
+                               letter-spacing: 0.02em;">
+                    Appt #{{ t.appointmentId }}
+                  </span>
+                  } @else {
+                  <span
+                    style="font-size: 0.65rem; font-weight: 600; padding: 2px 7px; border-radius: 4px;
+                               background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.25);">
+                    — No Appt.
+                  </span>
+                  }
                 </div>
 
                 <!-- Description -->
@@ -138,16 +152,15 @@
 
               </div>
 
-              <!-- Urgency badge -->
-              <div style="margin-left: 0.5rem; flex-shrink: 0;">
-                <p-badge [value]="t.urgencyLabel" [style]="{
-                  'background-color': urgencyColor(t),
-                  'color': '#ffffff',
-                  'font-size': '0.65rem',
-                  'font-weight': '600',
-                  'border-radius': '4px'
-                }">
-                </p-badge>
+              <!-- Right: urgency badge + profile button -->
+              <div
+                style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; margin-left: 0.5rem; flex-shrink: 0;">
+
+                @if (t.appointmentId) {
+                <button type="button" style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.68rem; font-weight: 600;
+                         padding: 3px 8px; border-radius: 5px; border: 1px solid rgba(168,85,247,0.35);
+                         background: rgba(168,85,247,0.08); color: #9333ea; cursor: pointer;"></button>
+                }
               </div>
             </div>
 

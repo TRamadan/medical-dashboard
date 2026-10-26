@@ -8,52 +8,52 @@ import { CardModule } from "primeng/card";
 export type DcNavId = 'dashboard' | 'todays-consultations' | 'pending-tickets' | 'notifications-alerts' | 'protocol-builder';
 
 interface DcNavItem {
-  id: DcNavId;
-  label: string;
-  icon: string;
-  badge?: number;
-  dot?: string;
+    id: DcNavId;
+    label: string;
+    icon: string;
+    badge?: number;
+    dot?: string;
 }
 
 @Component({
-  selector: 'app-doctor-control',
-  imports: [CardModule, ProtocolConfigComponent, DashboardComponent, TodaysConsultationsComponent, PendingTicketsComponent, NotificationsAlertsComponent],
-  templateUrl: './doctor-control.component.html',
-  styleUrl: './doctor-control.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-doctor-control',
+    imports: [CardModule, ProtocolConfigComponent, DashboardComponent, TodaysConsultationsComponent, PendingTicketsComponent, NotificationsAlertsComponent],
+    templateUrl: './doctor-control.component.html',
+    styleUrl: './doctor-control.component.scss',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DoctorControlComponent implements OnInit {
-  activeNav = signal<DcNavId>('dashboard');
-  readonly username = signal<string>('');
+    activeNav = signal<DcNavId>('dashboard');
+    readonly username = signal<string>('');
 
-  readonly navItems: DcNavItem[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'pi-th-large', dot: '#10b981' },
-    { id: 'todays-consultations', label: 'Today\'s Consultations', icon: 'pi-calendar-plus', badge: 2 },
-    { id: 'pending-tickets', label: 'Pending Tickets', icon: 'pi-ticket', badge: 4 },
-    { id: 'notifications-alerts', label: 'Notifications & Alerts', icon: 'pi-bell', badge: 3 },
-    {
-      id: 'protocol-builder', label: 'Protocol Builder', icon: ''
-    }
-  ];
-
-  ngOnInit(): void {
-    try {
-      const raw = localStorage.getItem('userData');
-      if (raw) {
-        const userData = JSON.parse(raw);
-        const name = userData.nameEn || userData.nameAr || userData.userName || userData.name;
-        if (name) {
-          this.username.set(name);
-          return;
+    readonly navItems: DcNavItem[] = [
+        { id: 'dashboard', label: 'Dashboard', icon: 'pi-th-large', dot: '#10b981' },
+        { id: 'todays-consultations', label: 'Today\'s Consultations', icon: 'pi-calendar-plus', badge: 2 },
+        { id: 'pending-tickets', label: 'Pending Tickets', icon: 'pi-ticket', badge: 4 },
+        { id: 'notifications-alerts', label: 'Notifications & Alerts', icon: 'pi-bell', badge: 3 },
+        {
+            id: 'protocol-builder', label: 'Protocol Builder', icon: ''
         }
-      }
-    } catch {
-      // silently fall through to default
-    }
-    this.username.set('User');
-  }
+    ];
 
-  setActive(id: DcNavId): void {
-    this.activeNav.set(id);
-  }
+    ngOnInit(): void {
+        try {
+            const raw = localStorage.getItem('userData');
+            if (raw) {
+                const userData = JSON.parse(raw);
+                const name = userData.nameEn || userData.nameAr || userData.userName || userData.name;
+                if (name) {
+                    this.username.set(name);
+                    return;
+                }
+            }
+        } catch {
+            // silently fall through to default
+        }
+        this.username.set('User');
+    }
+
+    setActive(id: DcNavId): void {
+        this.activeNav.set(id);
+    }
 }

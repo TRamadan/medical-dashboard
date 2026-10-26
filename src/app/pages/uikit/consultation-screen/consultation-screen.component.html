@@ -109,8 +109,8 @@
                 <i class="pi pi-lock mr-2"></i>
                 <strong>Consultation is locked —</strong>
                 {{ sessionStatus() === 'AwaitingPatientReport'
-                    ? 'Waiting for the patient to review the medical report. Steps are read-only until they respond.'
-                    : 'Waiting for external\/internal results. Steps are read-only until results are received.' }}
+                ? 'Waiting for the patient to review the medical report. Steps are read-only until they respond.'
+                : 'Waiting for external\/internal results. Steps are read-only until results are received.' }}
             </div>
             }
 
@@ -728,20 +728,11 @@
                         <div class="form-grid-3">
                             <div>
                                 <div class="field-label">Sub-Category</div>
-                                <p-select
-                                    [options]="subCategoryOptions()"
-                                    [ngModel]="selectedSubCategoryId()"
-                                    (ngModelChange)="onSubCategoryChange($event)"
-                                    optionLabel="label"
-                                    optionValue="value"
-                                    [filter]="true"
-                                    filterPlaceholder="Search sub-categories..."
-                                    placeholder="Select sub-category"
-                                    styleClass="w-full"
-                                    class="w-full"
-                                    appendTo="body"
-                                    (onShow)="loadSubCategories()"
-                                    [loading]="subCategoriesLoading()">
+                                <p-select [options]="subCategoryOptions()" [ngModel]="selectedSubCategoryId()"
+                                    (ngModelChange)="onSubCategoryChange($event)" optionLabel="label"
+                                    optionValue="value" [filter]="true" filterPlaceholder="Search sub-categories..."
+                                    placeholder="Select sub-category" styleClass="w-full" class="w-full" appendTo="body"
+                                    (onShow)="loadSubCategories()" [loading]="subCategoriesLoading()">
                                 </p-select>
                                 @if (subCategoriesError()) {
                                 <small class="p-error">{{ subCategoriesError() }}</small>
@@ -749,23 +740,15 @@
                             </div>
                             <div>
                                 <div class="field-label">Measurement Type</div>
-                                <p-multiselect
-                                    [options]="measurementItemOptions()"
-                                    [(ngModel)]="measurementType"
-                                    optionLabel="label"
-                                    optionValue="value"
-                                    [filter]="true"
-                                    filterPlaceholder="Search measurements..."
-                                    display="chip"
-                                    styleClass="w-full"
-                                    class="w-full"
-                                    appendTo="body"
-                                    [disabled]="!selectedSubCategoryId()"
-                                    [loading]="measurementItemsLoading()"
-                                    placeholder="Select measurements">
+                                <p-multiselect [options]="measurementItemOptions()" [(ngModel)]="measurementType"
+                                    optionLabel="label" optionValue="value" [filter]="true"
+                                    filterPlaceholder="Search measurements..." display="chip" styleClass="w-full"
+                                    class="w-full" appendTo="body" [disabled]="!selectedSubCategoryId()"
+                                    [loading]="measurementItemsLoading()" placeholder="Select measurements">
                                 </p-multiselect>
                                 @if (!selectedSubCategoryId()) {
-                                <small style="color: var(--p-text-muted-color); font-size: 0.75rem;">Select a sub-category first</small>
+                                <small style="color: var(--p-text-muted-color); font-size: 0.75rem;">Select a
+                                    sub-category first</small>
                                 }
                                 @if (measurementItemsError()) {
                                 <small class="p-error">{{ measurementItemsError() }}</small>
@@ -797,8 +780,9 @@
                         <div class="form-grid-3 mb-3">
                             <div>
                                 <div class="field-label">Test</div>
-                                <p-select [options]="referralTestOptions" [(ngModel)]="referralTestType" optionLabel="label"
-                                    optionValue="value" styleClass="w-full" class="w-full" appendTo="body"></p-select>
+                                <p-select [options]="referralTestOptions" [(ngModel)]="referralTestType"
+                                    optionLabel="label" optionValue="value" styleClass="w-full" class="w-full"
+                                    appendTo="body"></p-select>
                             </div>
                             <div>
                                 <div class="field-label">Region</div>
@@ -1109,10 +1093,10 @@
                     receive a notification and can accept or decline.
                 </p>
                 <div class="mb-3">
-                    <div class="field-label">Notes <span style="color: var(--p-text-muted-color); font-size: 0.8rem;">(optional)</span></div>
+                    <div class="field-label">Notes <span
+                            style="color: var(--p-text-muted-color); font-size: 0.8rem;">(optional)</span></div>
                     <textarea pTextarea [(ngModel)]="decisionNotes"
-                        placeholder="Any final notes to accompany the report..."
-                        style="width:100%;min-height:60px;padding:.55rem .7rem;border-radius:8px;
+                        placeholder="Any final notes to accompany the report..." style="width:100%;min-height:60px;padding:.55rem .7rem;border-radius:8px;
                        border:1px solid var(--p-content-border-color);background:var(--p-content-background);
                        font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
                 </div>
@@ -1125,9 +1109,8 @@
                 <div class="confirm-desc">The patient will receive a notification on their mobile app and
                     can accept or request a revision.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button label="Submit Report to Patient" icon="pi pi-send" iconPos="right"
-                        severity="success" (onClick)="confirmAction()"
-                        [loading]="sessionSaving()" [disabled]="sessionSaving()"></p-button>
+                    <p-button label="Submit Report to Patient" icon="pi pi-send" iconPos="right" severity="success"
+                        (onClick)="confirmAction()" [loading]="sessionSaving()" [disabled]="sessionSaving()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-mint mt-3">
@@ -1153,8 +1136,7 @@
             <p-card styleClass="mb-3">
                 <ng-template pTemplate="title">Decision Notes</ng-template>
                 <div class="field-label">Notes <span class="req">*</span></div>
-                <textarea pTextarea [(ngModel)]="decisionNotes" placeholder="Notes to accompany this decision..."
-                    style="width:100%;min-height:60px;padding:.55rem .7rem;border-radius:8px;
+                <textarea pTextarea [(ngModel)]="decisionNotes" placeholder="Notes to accompany this decision..." style="width:100%;min-height:60px;padding:.55rem .7rem;border-radius:8px;
                    border:1px solid var(--p-content-border-color);background:var(--p-content-background);
                    font-family:inherit;font-size:.85rem;color:inherit;resize:vertical;outline:none;"></textarea>
             </p-card>
@@ -1253,9 +1235,9 @@
                 <div class="confirm-desc">Mark as resolved when the patient returns with their imaging/lab results. This
                     will reopen the consultation at Step 3 for the final decision.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button label="Close Referral Loop" icon="pi pi-check-circle"
-                        severity="success" (onClick)="closeReferralLoop()"
-                        [loading]="sessionSaving()" [disabled]="sessionSaving()"></p-button>
+                    <p-button label="Close Referral Loop" icon="pi pi-check-circle" severity="success"
+                        (onClick)="closeReferralLoop()" [loading]="sessionSaving()"
+                        [disabled]="sessionSaving()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-coral mt-3">
@@ -1306,9 +1288,8 @@
                 <div class="confirm-desc">Ticket appears in the engineer’s interface. Doctor is notified when results
                     are ready.</div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button label="Confirm"
-                        severity="warn" (onClick)="confirmAction()"
-                        [loading]="sessionSaving()" [disabled]="sessionSaving() || !canConfirmAction()"></p-button>
+                    <p-button label="Confirm" severity="warn" (onClick)="confirmAction()" [loading]="sessionSaving()"
+                        [disabled]="sessionSaving() || !canConfirmAction()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-amber mt-3">
@@ -1326,9 +1307,8 @@
                     sent.
                 </div>
                 <div class="btn-row" style="justify-content:center">
-                    <p-button label="Confirm"
-                        severity="danger" (onClick)="confirmAction()"
-                        [loading]="sessionSaving()" [disabled]="sessionSaving() || !canConfirmAction()"></p-button>
+                    <p-button label="Confirm" severity="danger" (onClick)="confirmAction()" [loading]="sessionSaving()"
+                        [disabled]="sessionSaving() || !canConfirmAction()"></p-button>
                 </div>
             </div>
             <div class="note-banner note-coral mt-3">

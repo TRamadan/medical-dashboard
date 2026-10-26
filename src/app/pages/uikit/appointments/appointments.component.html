@@ -651,8 +651,9 @@
                                         placeholder="الجزء المصاب" class="w-100" />
                                 </div>
                                 <div class="col-6 col-md-2">
-                                    <input pInputText [(ngModel)]="inj.injuryDate" (ngModelChange)="syncForm()"
-                                        placeholder="التاريخ (YYYY-MM-DD)" class="w-100" />
+                                    <p-datepicker [ngModel]="getPreviousInjuryDateValue(inj)"
+                                        (ngModelChange)="onPreviousInjuryDateChange(inj, $event)"
+                                        styleClass="w-100" [showIcon]="true" appendTo="body" />
                                 </div>
                                 <div class="col-6 col-md-4">
                                     <input pInputText [(ngModel)]="inj.description" (ngModelChange)="syncForm()"
@@ -687,8 +688,9 @@
                                         placeholder="نوع الجراحة" class="w-100" />
                                 </div>
                                 <div class="col-6 col-md-3">
-                                    <input pInputText [(ngModel)]="s.surgeryDate" (ngModelChange)="syncForm()"
-                                        placeholder="تاريخ الجراحة (YYYY-MM-DD)" class="w-100" />
+                                    <p-datepicker [ngModel]="getPreviousSurgeryDateValue(s)"
+                                        (ngModelChange)="onPreviousSurgeryDateChange(s, $event)"
+                                        styleClass="w-100" [showIcon]="true" appendTo="body" />
                                 </div>
                                 <div class="col-12 col-md-5">
                                     <input pInputText [(ngModel)]="s.description" (ngModelChange)="syncForm()"
