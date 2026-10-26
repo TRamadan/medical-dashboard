@@ -176,7 +176,7 @@ export class AppTopbar implements OnInit, OnDestroy {
             });
         }
         else if (notification.relatedEntityType === 'MedicalReport' && notification.relatedEntityId) {
-            debugger
+
             this.router.navigate(['/uikit/protocol-config'], {
                 queryParams: {
                     tab: 'Published',
