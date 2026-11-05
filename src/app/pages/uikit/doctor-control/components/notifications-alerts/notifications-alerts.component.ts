@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from "primeng/card";
 import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 import { NotificationService } from '../../../../../core/services/notification.service';
 import { NotificationDTO, NotificationType } from '../../../../../core/services/notification.model';
 
@@ -23,7 +24,7 @@ interface UiNotification {
 
 @Component({
   selector: 'app-dc-notifications-alerts',
-  imports: [ButtonModule, CardModule, TagModule],
+  imports: [ButtonModule, CardModule, TagModule, TooltipModule],
   templateUrl: './notifications-alerts.component.html',
   styleUrl: './notifications-alerts.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -149,6 +150,37 @@ export class NotificationsAlertsComponent implements OnInit {
     } else {
       this.router.navigate(['/uikit/athleteprofile']);
     }
+  }
+
+  getNotificationTooltip(n: UiNotification): string {
+    const title = this.escapeHtml(n.title);
+    const body = this.escapeHtml(n.body);
+    const tag = n.tag
+      ? `<div class="mt-1"><span class="font-semibold text-gray-300">Category:</span> ${this.escapeHtml(n.tag)}${n.relatedEntityId ? ' #' + n.relatedEntityId : ''}</div>`
+      : '';
+    const status = n.isRead ? 'Read' : 'Unread';
+
+    return `
+      <div class="text-left text-xs leading-relaxed max-w-sm p-1">
+        <div class="font-bold text-white text-sm mb-1">${title}</div>
+        <div class="text-gray-200 mb-2 whitespace-normal">${body}</div>
+        <div class="border-t border-gray-600/60 pt-1.5 text-[11px] text-gray-300 space-y-0.5">
+          ${tag}
+          <div><span class="font-semibold text-gray-300">Time:</span> ${this.escapeHtml(n.time)}</div>
+          <div><span class="font-semibold text-gray-300">Status:</span> ${status}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  private escapeHtml(text: string | null | undefined): string {
+    if (!text) return '';
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   private getMockNotifications(): UiNotification[] {

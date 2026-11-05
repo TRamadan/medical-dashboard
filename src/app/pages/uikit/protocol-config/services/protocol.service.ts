@@ -1,8 +1,26 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
-import { Protocol, Phase, Week, Session, Exercise, Section, SetData, PhaseCriteria, TransitionCriterion, ExerciseType, ManualType, TreatmentPlanRequest, TreatmentPlanPhase, TreatmentPlanSession, TreatmentPlanSection, TreatmentPlanExercise, TreatmentPlanSet, TreatmentPlanCriterion } from '../models/protocol.model';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, map, forkJoin } from 'rxjs';
+import { Protocol, ProtocolKind, TreatmentPlanFilter, Phase, Week, Session, Exercise, Section, SetData, PhaseCriteria, TransitionCriterion, ExerciseType, ManualType, TreatmentPlanRequest, TreatmentPlanPhase, TreatmentPlanSession, TreatmentPlanSection, TreatmentPlanExercise, TreatmentPlanSet, TreatmentPlanCriterion, CoachManagerOption } from '../models/protocol.model';
 import { environment } from '../../../../../environments/environment';
+import { firstValueFrom } from 'rxjs';
+import * as XLSX from 'xlsx';
+
+/** Result of one plan during an Excel import. */
+export interface PlanImportResult {
+    planKey: string;
+    name: string;
+    status: 'pending' | 'success' | 'failed' | 'skipped';
+    /** Fields that were empty in the sheet (the plan is then forced to saveAsDraft = true). */
+    missing: string[];
+    error?: string;
+}
+
+interface ParsedPlan {
+    key: string;
+    body: TreatmentPlanRequest;
+    missing: string[];
+}
 
 @Injectable({ providedIn: 'root' })
 export class ProtocolService {
@@ -15,6 +33,11 @@ export class ProtocolService {
     readonly saveDraftError = signal<string | null>(null);
     readonly loadingProtocols = signal(false);
 
+    // ── Excel import state ────────────────────────────────────────────────────
+    readonly importing = signal(false);
+    readonly importError = signal<string | null>(null);
+    readonly importResults = signal<PlanImportResult[]>([]);
+
     // ── State ────────────────────────────────────────────────────────────────
     readonly protocols = signal<Protocol[]>([]);
 
@@ -23,13 +46,37 @@ export class ProtocolService {
     }
 
     /**
-     * Fetches all treatment plans from the API and maps them to the local Protocol model.
+     * Fetches treatment plans from the API using filter parameters
+     * (defaults to TreatmentPlans?kind=Drafted&status=Draft&isTemplate=false)
+     * and maps them to the local Protocol model.
      */
-    fetchProtocols(): void {
+    fetchProtocols(filter?: TreatmentPlanFilter): void {
         this.loadingProtocols.set(true);
-        this.http.get<any>(this.apiUrl + 'TreatmentPlans').subscribe({
+        let params = new HttpParams();
+
+        const activeFilter: TreatmentPlanFilter = filter ?? {
+            kind: 'Drafted',
+            status: 'Draft',
+            isTemplate: false,
+        };
+
+        if (activeFilter.kind !== undefined && activeFilter.kind !== null) {
+            params = params.set('kind', activeFilter.kind);
+        }
+        if (activeFilter.status !== undefined && activeFilter.status !== null) {
+            params = params.set('status', activeFilter.status);
+        }
+        if (activeFilter.isTemplate !== undefined && activeFilter.isTemplate !== null) {
+            params = params.set('isTemplate', String(activeFilter.isTemplate));
+        }
+        if (activeFilter.patientId !== undefined && activeFilter.patientId !== null) {
+            params = params.set('patientId', String(activeFilter.patientId));
+        }
+
+        this.http.get<any>(this.apiUrl + 'TreatmentPlans', { params }).subscribe({
             next: (data: any) => {
-                const mappedProtocols = data.data.map((item: any) => this.mapToProtocol(item));
+                const rawList = data?.data ?? (Array.isArray(data) ? data : []);
+                const mappedProtocols = rawList.map((item: any) => this.mapToProtocol(item));
                 this.protocols.set(mappedProtocols);
                 this.loadingProtocols.set(false);
             },
@@ -38,6 +85,39 @@ export class ProtocolService {
                 this.loadingProtocols.set(false);
             }
         });
+    }
+
+    /**
+     * Returns an Observable of treatment plans using filter parameters
+     * (defaults to TreatmentPlans?kind=Drafted&status=Draft&isTemplate=false).
+     */
+    getTreatmentPlans(filter?: TreatmentPlanFilter): Observable<Protocol[]> {
+        let params = new HttpParams();
+        const activeFilter: TreatmentPlanFilter = filter ?? {
+            kind: 'Drafted',
+            status: 'Draft',
+            isTemplate: false,
+        };
+
+        if (activeFilter.kind !== undefined && activeFilter.kind !== null) {
+            params = params.set('kind', activeFilter.kind);
+        }
+        if (activeFilter.status !== undefined && activeFilter.status !== null) {
+            params = params.set('status', activeFilter.status);
+        }
+        if (activeFilter.isTemplate !== undefined && activeFilter.isTemplate !== null) {
+            params = params.set('isTemplate', String(activeFilter.isTemplate));
+        }
+        if (activeFilter.patientId !== undefined && activeFilter.patientId !== null) {
+            params = params.set('patientId', String(activeFilter.patientId));
+        }
+
+        return this.http.get<any>(this.apiUrl + 'TreatmentPlans', { params }).pipe(
+            map((data: any) => {
+                const rawList = data?.data ?? (Array.isArray(data) ? data : []);
+                return rawList.map((item: any) => this.mapToProtocol(item));
+            })
+        );
     }
 
     /**
@@ -50,10 +130,17 @@ export class ProtocolService {
     }
 
     private mapToProtocol(apiData: any): Protocol {
+        const detectedKind: ProtocolKind = apiData.kind ?? (
+            apiData.status === 'Draft'
+                ? 'Drafted'
+                : (apiData.patientId != null && !apiData.isTemplate ? 'Published' : 'Template')
+        );
+
         return {
             id: apiData.id || 0,
             name: apiData.name || '',
             status: apiData.status,
+            kind: detectedKind,
             injuryCondition: apiData.injuryCondition,
             primaryGoal: apiData.primaryGoal,
             targetAthleteLevel: apiData.targetAthleteLevel,
@@ -66,13 +153,23 @@ export class ProtocolService {
             weeks: apiData.totalWeeks,
             totalSessions: apiData.totalSessions,
             template: apiData.template,
+            isTemplate: apiData.isTemplate ?? (detectedKind === 'Template'),
             numberOfPhases: apiData.numberOfPhases,
             phases: (apiData.phases || []).map((p: any) => this.mapToPhase(p)),
-            contraindications: apiData.contraindications || [],
+            contraindications: (apiData.contraindications || []).map((c: any, idx: number) => ({
+                id: typeof c === 'object' && c?.id ? c.id : 0,
+                description: typeof c === 'string' ? c : (c?.description ?? c?.contraindication ?? c?.name ?? c?.text ?? ''),
+                order: typeof c === 'object' && c?.order ? c.order : idx + 1,
+            })),
             doctorNameAr: apiData.doctorNameAr || null,
             doctorNameEn: apiData.doctorNameEn || null,
             doctorId: apiData.doctorId || null,
             patientId: apiData.patientId || null,
+            patientNameEn: apiData.patientNameEn || null,
+            patientNameAr: apiData.patientNameAr || null,
+            coachManagerId: apiData.coachManagerId ?? null,
+            coachManagerNameEn: apiData.coachManagerNameEn || null,
+            coachManagerNameAr: apiData.coachManagerNameAr || null,
         };
     }
 
@@ -184,7 +281,8 @@ export class ProtocolService {
     readonly showStepper = signal(false);
     readonly activeProtocol = signal<Protocol | null>(null);
     readonly currentStep = signal(1);
-    readonly stepperMode = signal<'create' | 'view' | 'edit'>('create');
+    readonly stepperMode = signal<'create' | 'view' | 'edit' | 'assignment'>('create');
+    readonly isAssigningToPatient = signal(false);
 
     /** Bump this whenever nested object properties are mutated via ngModel
      *  so any computed() that reads it will re-run. */
@@ -218,10 +316,24 @@ export class ProtocolService {
             next: (fullProtocol) => {
                 this.activeProtocol.set(fullProtocol);
                 this.stepperMode.set('view');
+                this.isAssigningToPatient.set(false);
                 this.currentStep.set(1);
                 this.showStepper.set(true);
             },
             error: (err) => console.error('Failed to fetch protocol details:', err)
+        });
+    }
+
+    assignProtocol(protocol: Protocol): void {
+        this.getTreatmentPlanById(protocol.id).subscribe({
+            next: (fullProtocol) => {
+                this.activeProtocol.set(fullProtocol);
+                this.stepperMode.set('assignment');
+                this.isAssigningToPatient.set(true);
+                this.currentStep.set(1);
+                this.showStepper.set(true);
+            },
+            error: (err) => console.error('Failed to fetch protocol for assignment:', err)
         });
     }
 
@@ -268,18 +380,31 @@ export class ProtocolService {
      */
     createTreatmentPlan(
         saveAsDraft: boolean = true,
-        patientId?: string | null,
+        patientId?: number | string | null,
         doctorId?: string | null,
         medicalReportId?: number | null,
-        consultationDecisionId?: number | null
-    ): Observable<unknown> {
+        consultationDecisionId?: number | null,
+        notifyPatient?: boolean,
+        saveAsNewTemplate?: boolean,
+        newTemplateName?: string
+    ): Observable<any> {
         const proto = this.activeProtocol();
         if (!proto) {
             throw new Error('No active protocol to save.');
         }
 
-        const body = this.mapProtocolToRequest(proto, saveAsDraft, patientId, doctorId, medicalReportId, consultationDecisionId);
-        return this.http.post<unknown>(this.apiUrl + 'TreatmentPlans', body);
+        const body = this.mapProtocolToRequest(
+            proto,
+            saveAsDraft,
+            patientId,
+            doctorId,
+            medicalReportId,
+            consultationDecisionId,
+            notifyPatient,
+            saveAsNewTemplate,
+            newTemplateName
+        );
+        return this.http.post<any>(this.apiUrl + 'TreatmentPlans', body);
     }
 
     /**
@@ -292,42 +417,63 @@ export class ProtocolService {
     updateTreatmentPlan(
         id: number,
         saveAsDraft?: boolean,
-        patientId?: string | null,
+        patientId?: number | string | null,
         doctorId?: string | null,
         medicalReportId?: number | null,
-        consultationDecisionId?: number | null
+        consultationDecisionId?: number | null,
+        notifyPatient?: boolean,
+        saveAsNewTemplate?: boolean,
+        newTemplateName?: string
     ): Observable<unknown> {
         const proto = this.activeProtocol();
         if (!proto) {
             throw new Error('No active protocol to update.');
         }
 
-        // If status is 'Published', we don't want to revert it to 'Draft'
+        // Selected protocol update must be published (saveAsDraft: false)
         const calculatedSaveAsDraft = saveAsDraft !== undefined
             ? saveAsDraft
-            : (proto.status !== 'Published');
+            : false;
 
-        const body = this.mapProtocolToRequest(proto, calculatedSaveAsDraft, patientId, doctorId, medicalReportId, consultationDecisionId);
+        const body = this.mapProtocolToRequest(
+            proto,
+            calculatedSaveAsDraft,
+            patientId,
+            doctorId,
+            medicalReportId,
+            consultationDecisionId,
+            notifyPatient,
+            saveAsNewTemplate,
+            newTemplateName
+        );
         return this.http.put<unknown>(`${this.apiUrl}TreatmentPlans/${id}`, body);
     }
 
     private mapProtocolToRequest(
         proto: Protocol,
         saveAsDraft: boolean,
-        patientId?: string | null,
+        patientId?: number | string | null,
         doctorId?: string | null,
         medicalReportId?: number | null,
-        consultationDecisionId?: number | null
+        consultationDecisionId?: number | null,
+        notifyPatient?: boolean,
+        saveAsNewTemplate?: boolean,
+        newTemplateName?: string
     ): TreatmentPlanRequest {
         const totalWeeks = proto.phases.reduce((sum, p) => sum + (p.totalWeeks ?? 0), 0);
         const avgSessionsPerWeek = proto.phases.length
             ? Math.round(proto.phases.reduce((sum, p) => sum + (p.sessionsPerWeek ?? 0), 0) / proto.phases.length)
             : 0;
 
-        const finalPatientId = patientId ?? (proto.patientId ? String(proto.patientId) : null);
+        let finalPatientId: number | null = null;
+        const candidatePatientId = patientId !== undefined ? patientId : proto.patientId;
+        if (candidatePatientId !== undefined && candidatePatientId !== null && candidatePatientId !== '') {
+            const num = Number(candidatePatientId);
+            finalPatientId = !isNaN(num) ? num : null;
+        }
         const finalDoctorId = doctorId ?? (proto.doctorId ? String(proto.doctorId) : null);
 
-        return {
+        const request: TreatmentPlanRequest = {
             name: proto.name,
             injuryCondition: proto.injuryCondition || '',
             primaryGoal: proto.primaryGoal || '',
@@ -336,18 +482,335 @@ export class ProtocolService {
             numberOfPhases: proto.phases.length,
             targetAthleteLevel: proto.targetAthleteLevel || '',
             saveAsDraft,
+            notifyPatient: notifyPatient ?? false,
             patientId: finalPatientId,
             doctorId: finalDoctorId,
             medicalReportId: medicalReportId ?? null,
             consultationDecisionId: consultationDecisionId ?? null,
             protocolServiceIds: (proto.services ?? []).map(s => s.id),
-            contraindications: (proto.contraindications || []).map(c => c.description),
+            contraindications: (proto.contraindications || [])
+                .map((c: any) => {
+                    if (typeof c === 'string') return c.trim();
+                    return (c?.description ?? c?.contraindication ?? c?.name ?? c?.text ?? '').trim();
+                })
+                .filter((desc: string) => desc.length > 0),
             phases: proto.phases.map((phase, phaseIdx) => this.mapPhase(phase, phaseIdx)),
         };
+
+        if (saveAsNewTemplate !== undefined) {
+            request.saveAsNewTemplate = saveAsNewTemplate;
+        }
+        if (newTemplateName !== undefined && newTemplateName !== null && newTemplateName.trim() !== '') {
+            request.newTemplateName = newTemplateName.trim();
+        }
+
+        return request;
     }
 
-    getAthletes(): Observable<any[]> {
-        return this.http.get<any>(this.apiUrl + 'Athletes').pipe(map(res => res.data));
+
+
+    getCoachManagers(): Observable<CoachManagerOption[]> {
+        return this.http.get<any>(this.apiUrl + 'TreatmentPlans/coach-managers').pipe(
+            map(res => res.data ?? [])
+        );
+    }
+
+    assignCoachManager(planId: number, coachManagerId: number): Observable<Protocol> {
+        return this.http.put<any>(`${this.apiUrl}TreatmentPlans/${planId}/coach-manager`, { coachManagerId }).pipe(
+            map(res => this.mapToProtocol(res.data))
+        );
+    }
+
+    // ── Excel import ──────────────────────────────────────────────────────────
+    /**
+     * Reads the uploaded workbook and saves every plan as its OWN request
+     * (one POST to TreatmentPlans per row of the 'Plans' sheet), in ExecutionOrder.
+     *
+     *  - The file is fully parsed first: a bad workbook sends nothing at all.
+     *  - Plans are sent one after another. The first failed request stops the import;
+     *    every later plan is marked 'skipped' and is never sent.
+     *  - patientId, consultationDecisionId and medicalReportId are always null.
+     *  - A plan with any empty field (except name) is sent with saveAsDraft = true.
+     */
+    async importTreatmentPlansFromExcel(
+        file: File,
+        doctorId?: string | null
+    ): Promise<PlanImportResult[]> {
+        this.importing.set(true);
+        this.importError.set(null);
+        this.importResults.set([]);
+
+        try {
+            let plans: ParsedPlan[];
+            try {
+                plans = await this.parseTreatmentPlansExcel(file, doctorId);
+            } catch (e: any) {
+                this.importError.set(e?.message ?? 'Failed to read the Excel file.');
+                return [];
+            }
+
+            const results: PlanImportResult[] = plans.map(p => ({
+                planKey: p.key,
+                name: p.body.name,
+                status: 'pending',
+                missing: p.missing,
+            }));
+            this.importResults.set([...results]);
+
+            for (let i = 0; i < plans.length; i++) {
+                try {
+                    await this.saveImportedPlan(plans[i].body);
+                    results[i] = { ...results[i], status: 'success' };
+                    this.importResults.set([...results]);
+                } catch (err: any) {
+                    results[i] = {
+                        ...results[i],
+                        status: 'failed',
+                        error: err?.error?.message ?? err?.error?.title ?? err?.message ?? 'Request failed',
+                    };
+                    // never send the remaining plans
+                    for (let j = i + 1; j < results.length; j++) {
+                        results[j] = { ...results[j], status: 'skipped' };
+                    }
+                    this.importResults.set([...results]);
+                    break;
+                }
+            }
+
+            if (results.some(r => r.status === 'success')) {
+                this.fetchProtocols(); // refresh the list
+            }
+            return results;
+        } finally {
+            this.importing.set(false);
+        }
+    }
+
+    /** Saves ONE imported plan (a single POST). Throws if the request fails. */
+    private async saveImportedPlan(body: TreatmentPlanRequest): Promise<unknown> {
+        const res: any = await firstValueFrom(this.http.post<any>(this.apiUrl + 'TreatmentPlans', body));
+        if (res && res.success === false) {
+            throw new Error(res.message ?? 'The server rejected the plan.');
+        }
+        return res;
+    }
+
+    /** Rebuilds one TreatmentPlanRequest per row of the 'Plans' sheet. */
+    private async parseTreatmentPlansExcel(file: File, doctorId?: string | null): Promise<ParsedPlan[]> {
+        const wb = XLSX.read(await file.arrayBuffer(), { type: 'array' });
+
+        const required = ['Plans', 'Phases', 'Criteria', 'Sessions', 'Sections', 'Exercises', 'Sets', 'Contraindications'];
+        const absent = required.filter(n => !wb.Sheets[n]);
+        if (absent.length) throw new Error(`Missing sheet(s): ${absent.join(', ')}`);
+
+        const rows = (n: string) => XLSX.utils.sheet_to_json<any>(wb.Sheets[n], { defval: null });
+        const plans = rows('Plans');
+        const phases = rows('Phases');
+        const criteria = rows('Criteria');
+        const sessions = rows('Sessions');
+        const sections = rows('Sections');
+        const exercises = rows('Exercises');
+        const sets = rows('Sets');
+        const contra = rows('Contraindications');
+
+        const blank = (v: any) => v === null || v === undefined || String(v).trim() === '';
+        const num = (v: any, d = 0) => (blank(v) || isNaN(Number(v)) ? d : Number(v));
+        const str = (v: any) => (blank(v) ? '' : String(v).trim());
+        const bool = (v: any) => v === true || v === 1 || ['true', '1'].includes(String(v).toLowerCase());
+        // the app's own UI uses the symbols ≥ / ≤, so accept >= / <= from Excel too
+        const op = (v: any) => {
+            const s = str(v);
+            return s === '>=' ? '≥' : s === '<=' ? '≤' : s;
+        };
+        const at = (r: any, pk: string, ph?: number, ses?: number, sec?: number, ex?: number) =>
+            r.PlanKey === pk &&
+            (ph === undefined || r.PhaseOrder === ph) &&
+            (ses === undefined || r.SessionNumber === ses) &&
+            (sec === undefined || r.SectionOrder === sec) &&
+            (ex === undefined || r.ExerciseOrder === ex);
+
+        // the workbook has pre-filled formula rows: ignore rows without a PlanKey
+        const planRows = plans.filter(r => !blank(r.PlanKey));
+        if (!planRows.length) throw new Error("The 'Plans' sheet has no rows.");
+
+        return [...planRows]
+            .sort((a, b) => num(a.ExecutionOrder) - num(b.ExecutionOrder))
+            .map(p => {
+                const pk = p.PlanKey;
+
+                // 'name' is the only mandatory field: a draft still needs a name
+                if (blank(p.name)) throw new Error(`${pk}: 'name' is required.`);
+
+                // Every other empty field is collected here and forces saveAsDraft = true
+                const missing: string[] = [];
+                const need = (ok: boolean, label: string) => { if (!ok) missing.push(label); };
+
+                need(!blank(p.injuryCondition), 'injuryCondition');
+                need(!blank(p.primaryGoal), 'primaryGoal');
+                need(!blank(p.targetAthleteLevel), 'targetAthleteLevel');
+
+                const serviceIds = str(p.protocolServiceIds)
+                    .split(',').map(s => s.trim()).filter(Boolean).map(Number).filter(n => !isNaN(n));
+                need(serviceIds.length > 0, 'protocolServiceIds');
+
+                const planPhases = phases
+                    .filter(x => x.PlanKey === pk)
+                    .sort((a, b) => num(a.PhaseOrder) - num(b.PhaseOrder));
+                need(planPhases.length > 0, 'phases');
+
+                const phaseDtos: TreatmentPlanPhase[] = planPhases.map(ph => {
+                    const pl = `Phase ${num(ph.PhaseOrder)}`;
+                    need(!blank(ph.phaseName), `${pl}: phaseName`);
+                    need(num(ph.weeks) > 0, `${pl}: weeks`);
+                    need(num(ph.sessionsPerWeek) > 0, `${pl}: sessionsPerWeek`);
+                    need(!blank(ph.phaseObjective), `${pl}: phaseObjective`);
+
+                    const crit: TreatmentPlanCriterion[] = criteria
+                        .filter(c => at(c, pk, ph.PhaseOrder))
+                        .map((c, ci) => {
+                            need(!blank(c.criterionType) && !blank(c.operator) && !blank(c.value) && !blank(c.unit),
+                                `${pl} > Criterion ${ci + 1}`);
+                            return {
+                                criterionType: str(c.criterionType),
+                                operator: op(c.operator),
+                                value: num(c.value),
+                                unit: str(c.unit),
+                            } as TreatmentPlanCriterion;
+                        });
+                    need(crit.length > 0, `${pl}: criteria`);
+
+                    const sess: TreatmentPlanSession[] = sessions
+                        .filter(s => at(s, pk, ph.PhaseOrder))
+                        .sort((a, b) => num(a.SessionNumber) - num(b.SessionNumber))
+                        .map(s => {
+                            const sl = `${pl} > Session ${num(s.SessionNumber)}`;
+                            const isMeasurement = bool(s.isMeasurementSession);
+                            if (isMeasurement) need(!blank(s.measurementTemplateId), `${sl}: measurementTemplateId`);
+
+                            // like mapSession: measurement sessions carry no sections
+                            const secDtos: TreatmentPlanSection[] = isMeasurement ? [] : sections
+                                .filter(x => at(x, pk, ph.PhaseOrder, s.SessionNumber))
+                                .sort((a, b) => num(a.SectionOrder) - num(b.SectionOrder))
+                                .map(sec => {
+                                    const cl = `${sl} > Section ${num(sec.SectionOrder)}`;
+                                    need(!blank(sec.sectionName), `${cl}: sectionName`);
+                                    need(num(sec.durationMinutes) > 0, `${cl}: durationMinutes`);
+
+                                    const exDtos: TreatmentPlanExercise[] = exercises
+                                        .filter(e => at(e, pk, ph.PhaseOrder, s.SessionNumber, sec.SectionOrder))
+                                        .sort((a, b) => num(a.ExerciseOrder) - num(b.ExerciseOrder))
+                                        .map(e => {
+                                            const el = `${cl} > Exercise ${num(e.ExerciseOrder)}`;
+                                            const type = str(e.exerciseType).toLowerCase();
+                                            const isManual = type === 'manual';
+                                            need(type === 'exercise' || isManual, `${el}: exerciseType`);
+                                            need(!blank(e.exerciseName), `${el}: exerciseName`);
+                                            need(!blank(e.exerciseId), `${el}: exerciseId`);
+
+                                            let setDtos: TreatmentPlanSet[] = [];
+                                            if (isManual) {
+                                                need(!blank(e.videoUrl), `${el}: videoUrl`);
+                                            } else {
+                                                need(!blank(e.equipment), `${el}: equipment`);
+                                                need(!blank(e.contractionType), `${el}: contractionType`);
+                                                need(!blank(e.intensityMethod), `${el}: intensityMethod`);
+                                                setDtos = sets
+                                                    .filter(t => at(t, pk, ph.PhaseOrder, s.SessionNumber, sec.SectionOrder, e.ExerciseOrder))
+                                                    .sort((a, b) => num(a.setNumber) - num(b.setNumber))
+                                                    .map(t => {
+                                                        const tl = `${el} > Set ${num(t.setNumber)}`;
+                                                        need(num(t.reps) > 0, `${tl}: reps`);
+                                                        need(!blank(t.intensity), `${tl}: intensity`);
+                                                        need(!blank(t.tempo), `${tl}: tempo`);
+                                                        need(!blank(t.restSeconds), `${tl}: restSeconds`);
+                                                        return {
+                                                            setNumber: num(t.setNumber),
+                                                            reps: num(t.reps),
+                                                            intensity: str(t.intensity),
+                                                            tempo: str(t.tempo),
+                                                            restSeconds: num(t.restSeconds),
+                                                        };
+                                                    });
+                                                need(setDtos.length > 0, `${el}: sets`);
+                                            }
+
+                                            // mirrors mapExercise: manual = video only, exercise = equipment + sets
+                                            return {
+                                                exerciseType: type as TreatmentPlanExercise['exerciseType'],
+                                                order: num(e.ExerciseOrder),
+                                                exerciseId: num(e.exerciseId),
+                                                equipment: isManual ? '' : str(e.equipment),
+                                                contractionType: isManual ? '' : str(e.contractionType),
+                                                intensityMethod: isManual ? '' : str(e.intensityMethod),
+                                                sets: setDtos,
+                                                exerciseName: str(e.exerciseName),
+                                                description: str(e.description),
+                                                videoUrl: isManual ? str(e.videoUrl) : '',
+                                                progressionTitle: str(e.progressionTitle),
+                                                incrementAmount: num(e.incrementAmount),
+                                                progressionCondition: str(e.progressionCondition),
+                                            };
+                                        });
+                                    need(exDtos.length > 0, `${cl}: exercises`);
+
+                                    return {
+                                        sectionName: str(sec.sectionName),
+                                        durationMinutes: num(sec.durationMinutes),
+                                        order: num(sec.SectionOrder),
+                                        exercises: exDtos,
+                                    };
+                                });
+                            if (!isMeasurement) need(secDtos.length > 0, `${sl}: sections`);
+
+                            return {
+                                sessionNumber: num(s.SessionNumber),
+                                isMeasurementSession: isMeasurement,
+                                measurementTemplateId: num(s.measurementTemplateId), // blank -> 0, like mapSession
+                                sections: secDtos,
+                            };
+                        });
+                    need(sess.length > 0, `${pl}: sessions`);
+
+                    return {
+                        phaseName: str(ph.phaseName),
+                        phaseOrder: num(ph.PhaseOrder),
+                        weeks: num(ph.weeks),
+                        sessionsPerWeek: num(ph.sessionsPerWeek),
+                        phaseObjective: str(ph.phaseObjective),
+                        criteria: crit,
+                        sessions: sess,
+                    };
+                });
+
+                const body: TreatmentPlanRequest = {
+                    name: str(p.name),
+                    injuryCondition: str(p.injuryCondition),
+                    primaryGoal: str(p.primaryGoal),
+                    // same calculation as mapProtocolToRequest
+                    totalWeeks: phaseDtos.reduce((sum, ph) => sum + ph.weeks, 0),
+                    sessionsPerWeek: phaseDtos.length
+                        ? Math.round(phaseDtos.reduce((sum, ph) => sum + ph.sessionsPerWeek, 0) / phaseDtos.length)
+                        : 0,
+                    numberOfPhases: phaseDtos.length,
+                    targetAthleteLevel: str(p.targetAthleteLevel),
+                    // The sheet's saveAsDraft column is a formula (TRUE when anything is missing).
+                    // This is a second safeguard: anything missing -> always a draft.
+                    saveAsDraft: missing.length > 0 ? true : (blank(p.saveAsDraft) ? true : bool(p.saveAsDraft)),
+                    notifyPatient: false,
+                    patientId: null,
+                    doctorId: doctorId ?? null,
+                    medicalReportId: null,
+                    consultationDecisionId: null,
+                    protocolServiceIds: serviceIds,
+                    contraindications: contra.filter(c => c.PlanKey === pk && !blank(c.contraindication)).map(c => str(c.contraindication)),
+                    phases: phaseDtos,
+                };
+
+                if (!blank(p.saveAsNewTemplate)) body.saveAsNewTemplate = bool(p.saveAsNewTemplate);
+                if (!blank(p.newTemplateName)) body.newTemplateName = str(p.newTemplateName);
+
+                return { key: pk, body, missing };
+            });
     }
 
     private mapPhase(phase: Phase, phaseIdx: number): TreatmentPlanPhase {
@@ -581,4 +1044,6 @@ export class ProtocolService {
             };
         }
     }
+
+
 }

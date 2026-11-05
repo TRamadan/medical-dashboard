@@ -167,6 +167,13 @@ export class AppTopbar implements OnInit, OnDestroy {
 
         if (notification.relatedEntityType === 'Appointment' && notification.relatedEntityId) {
             this.router.navigate(['/uikit/consultation-type', notification.relatedEntityId]);
+        } else if (notification.relatedEntityType === 'ProtocolModificationRequest') {
+            this.router.navigate(['/uikit/doctor-control'], {
+                queryParams: {
+                    tab: 'pending-tickets',
+                    ...(notification.relatedEntityId ? { requestId: notification.relatedEntityId } : {})
+                }
+            });
         } else if (notification.relatedEntityType === 'TreatmentPlan') {
             this.router.navigate(['/uikit/coachmanagement'], {
                 queryParams: {
@@ -181,7 +188,9 @@ export class AppTopbar implements OnInit, OnDestroy {
                 queryParams: {
                     tab: 'Published',
                     startNew: 'false',
-                    patientId: notification.relatedEntityId,
+                    // patientId: notification.relatedEntityId,
+                    medicalReportId: notification.relatedEntityId,
+                    //    consultationDecisionId: notification.relatedEntityId,     
 
 
                 },
@@ -197,6 +206,8 @@ export class AppTopbar implements OnInit, OnDestroy {
         switch (entityType) {
             case 'Appointment':
                 return 'pi pi-calendar';
+            case 'ProtocolModificationRequest':
+                return 'pi pi-ticket';
             case 'TreatmentPlan':
                 return 'pi pi-file-edit';
             default:

@@ -1,3 +1,4 @@
+<p-toast></p-toast>
 <div class="dc-pt" dir="ltr">
 
   <!-- ── Tab bar & Toggle ────────────────────────────────────── -->
@@ -86,7 +87,9 @@
         @for (t of tickets(); track t.ticketId) {
         <p-card styleClass="dc-ticket-p-card"
           [style]="{'border-top': '3px solid ' + urgencyColor(t), 'border-radius': '10px'}">
-          <div class="dc-ticket" [style]="{'--urgency-color': urgencyColor(t)}">
+          <div class="dc-ticket" [style]="{'--urgency-color': urgencyColor(t)}"
+            [style.cursor]="t.ticketType === ApiTicketType.AssignCoachManager ? 'pointer' : 'default'"
+            (click)="onTicketCardClick(t, $event)">
 
             <div class="dc-ticket__content"
               style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -157,10 +160,7 @@
                 style="display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem; margin-left: 0.5rem; flex-shrink: 0;">
 
                 @if (t.appointmentId) {
-                <button
-                  type="button"
-                  title="عرض ملف المريض الشامل"
-                  (click)="openDossier(t.appointmentId, $event)"
+                <button type="button" title="عرض ملف المريض الشامل" (click)="openDossier(t.appointmentId, $event)"
                   style="display: flex; align-items: center; gap: 0.3rem; font-size: 0.68rem; font-weight: 600;
                          padding: 3px 8px; border-radius: 5px; border: 1px solid rgba(168,85,247,0.35);
                          background: rgba(168,85,247,0.08); color: #9333ea; cursor: pointer;">
@@ -209,6 +209,11 @@
                 [style]="{'font-weight': '700', 'color': '#0f172a', 'flex': '1'}"
                 (onClick)="handleAction('build-treatment-plan', t, $event)">
               </p-button>
+              } @else if (t.ticketType === ApiTicketType.AssignCoachManager) {
+              <p-button label="Assign Coach Manager" size="small" severity="success"
+                [style]="{'font-weight': '700', 'color': '#0f172a', 'flex': '1'}"
+                (onClick)="handleAction('assign-coach-manager', t, $event)">
+              </p-button>
               }
             </div>
 
@@ -223,7 +228,123 @@
 </div>
 
 <!-- Patient Dossier Dialog -->
-<app-patient-dossier-dialog
-  [(visible)]="dossierVisible"
-  [appointmentId]="dossierAppointmentId()">
+<app-patient-dossier-dialog [(visible)]="dossierVisible" [appointmentId]="dossierAppointmentId()">
 </app-patient-dossier-dialog>
+
+<!-- Protocol Modification Details Dialog -->
+<p-dialog header="Protocol Modification Details" [modal]="true" [(visible)]="modDialogVisible"
+  [style]="{width: '650px'}">
+  @if (modDetails(); as det) {
+  <div class="flex flex-col gap-4">
+    <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+      <div class="flex justify-between items-center mb-2">
+        <span class="text-xs font-semibold uppercase text-gray-500">Plan: {{ det.planName }}</span>
+        <span class="text-xs font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-800">{{ det.changeType }}</span>
+      </div>
+      <div class="text-sm font-bold text-gray-800 dark:text-gray-100 mb-1">Phase: {{ det.phaseName }}</div>
+      <div class="text-sm text-gray-600 dark:text-gray-300 mb-3">{{ det.description }}</div>
+      <div class="text-xs text-gray-400">Proposed by: <span class="font-semibold text-gray-600 dark:text-gray-300">{{
+          det.requestedByName }}</span> on {{ formatDate(det.createdAt) }}</div>
+    </div>
+
+    <!-- Change-specific details comparison -->
+    @if (det.changeType === 'UpdateExercise' && det.proposedChange) {
+    <div class="grid grid-cols-2 gap-4">
+      <!-- Before -->
+      <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+        <span class="text-xs font-bold text-red-700 uppercase mb-2 block">Previous state</span>
+        <div class="text-xs text-gray-700 space-y-1">
+          <div><strong>Intensity Method:</strong> {{ det.proposedChange['previousIntensityMethod'] || 'N/A' }}</div>
+          <div><strong>Sets:</strong></div>
+          <ul class="list-disc pl-4">
+            @for (s of det.proposedChange['previousSets']; track s.setNumber) {
+            <li>Set {{ s.setNumber }}: Reps: {{ s.reps }}, Intensity: {{ s.intensity }}, Tempo: {{ s.tempo }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+      <!-- After -->
+      <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+        <span class="text-xs font-bold text-emerald-700 uppercase mb-2 block">Proposed changes</span>
+        <div class="text-xs text-gray-700 space-y-1">
+          <div><strong>Intensity Method:</strong> {{ det.proposedChange['intensityMethod'] || 'N/A' }}</div>
+          <div><strong>Sets:</strong></div>
+          <ul class="list-disc pl-4">
+            @for (s of det.proposedChange['sets']; track s.setNumber) {
+            <li>Set {{ s.setNumber }}: Reps: {{ s.reps }}, Intensity: {{ s.intensity }}, Tempo: {{ s.tempo }}</li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+    } @else if (det.changeType === 'AddExercise' && det.proposedChange) {
+    <div class="p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+      <span class="text-xs font-bold text-emerald-700 uppercase mb-2 block">New Exercise Added</span>
+      <div class="text-xs text-gray-700 space-y-1">
+        <div><strong>Exercise Name:</strong> {{ det.proposedChange['exerciseName'] || 'N/A' }}</div>
+        <div><strong>Description:</strong> {{ det.proposedChange['description'] || 'N/A' }}</div>
+        @if (det.proposedChange['videoUrl']) {
+        <div><strong>Video URL:</strong> <a [href]="det.proposedChange['videoUrl']" target="_blank"
+            class="text-blue-600 hover:underline">Link</a></div>
+        }
+        @if (det.proposedChange['sets'] && det.proposedChange['sets'].length > 0) {
+        <div><strong>Sets:</strong></div>
+        <ul class="list-disc pl-4">
+          @for (s of det.proposedChange['sets']; track s.setNumber) {
+          <li>Set {{ s.setNumber }}: Reps: {{ s.reps }}, Intensity: {{ s.intensity }}, Tempo: {{ s.tempo }}</li>
+          }
+        </ul>
+        }
+      </div>
+    </div>
+    }
+    <!-- @else {
+    <div class="p-3 bg-gray-50 rounded-lg text-xs font-mono overflow-x-auto">
+      <pre>{{ det.proposedChange | json }}</pre>
+    </div>
+    } -->
+
+    <!-- Options / Note -->
+    <div class="flex flex-col gap-3 mt-2">
+      <div
+        class="flex items-center justify-between p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl">
+        <div class="flex flex-col">
+          <label for="notifyPatientMod"
+            class="text-sm font-semibold text-gray-800 dark:text-gray-100 cursor-pointer">Notify Patient</label>
+          <span class="text-xs text-gray-500">Send an update notification to the patient about this change</span>
+        </div>
+        <p-toggleswitch inputId="notifyPatientMod" [(ngModel)]="modNotifyPatient" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label for="modNote" class="text-sm font-semibold text-gray-700 dark:text-gray-300">Note for Coach Manager
+          (optional)</label>
+        <textarea pTextarea id="modNote" [(ngModel)]="modNote" rows="2" placeholder="Add a note or reason..."
+          class="w-full"></textarea>
+      </div>
+    </div>
+  </div>
+  }
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-between items-center w-full">
+      <button pButton label="Refuse / Revert" icon="pi pi-times" class="p-button-danger p-button-text"
+        [disabled]="modActionProcessing()" (click)="revertMod()"></button>
+      <div class="flex gap-2">
+        <button pButton label="Cancel" class="p-button-secondary p-button-text"
+          (click)="modDialogVisible.set(false)"></button>
+        <button pButton label="Approve Changes" icon="pi pi-check" class="p-button-success"
+          [disabled]="modActionProcessing()" (click)="approveMod()"></button>
+      </div>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Loading Overlay inside Dialog -->
+<p-dialog [visible]="modDetailsLoading()" [modal]="true" [closable]="false" [showHeader]="false"
+  [style]="{width: '200px'}">
+  <div class="flex flex-col items-center gap-3">
+    <i class="pi pi-spin pi-spinner text-3xl text-primary"></i>
+    <span class="text-sm font-semibold">Loading details...</span>
+  </div>
+</p-dialog>

@@ -1,4 +1,5 @@
 <div class="flex flex-col gap-6">
+    <p-toast></p-toast>
     <!-- Header -->
     <div class="flex items-center gap-3">
         <div class="flex items-center justify-center w-10 h-10 rounded-xl bg-[#131337]">
@@ -6,7 +7,7 @@
         </div>
         <div class="flex flex-col">
             <span class="text-xl font-bold text-gray-800">All Protocols</span>
-            <span class="text-sm text-gray-500">{{ protocols().length }} protocols defined</span>
+            <span class="text-sm text-gray-500">{{ filteredProtocols().length }} protocols shown</span>
         </div>
     </div>
 
@@ -20,64 +21,140 @@
     </div>
     }
 
-    <!-- Status Filter Tabs -->
-    <div *ngIf="!protocolService.loadingProtocols()" class="flex items-center gap-1 p-1 bg-gray-100 rounded-xl w-full"
-        role="tablist" aria-label="Protocol status filter">
-        <!-- Active Tab -->
-        <button id="tab-active" role="tab" [attr.aria-selected]="activeTab() === 'Published'"
-            [attr.aria-controls]="'tabpanel-protocols'" (click)="setTab('Published')"
-            class="flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#131337]"
-            [class]="activeTab() === 'Published'
-                ? 'bg-white text-emerald-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-white/60'">
-            <i class="pi pi-check-circle text-xs"></i>
-            Published
-            <span
-                class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold transition-all"
-                [class]="activeTab() === 'Published' ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'">
-                {{ tabCounts().active }}
-            </span>
-        </button>
+    <!-- Tabs (Published | Drafts) and Template Filter -->
+    @if (!protocolService.loadingProtocols()) {
+    <div class="flex flex-col gap-3">
+        <!-- Main Tabs Bar (Published vs Drafts) -->
+        <div class="flex items-center gap-1 p-1 bg-gray-100 rounded-xl w-full"
+            role="tablist" aria-label="Protocol status filter">
+            <!-- Published Tab -->
+            <button id="tab-published" role="tab" [attr.aria-selected]="activeTab() === 'Published'"
+                [attr.aria-controls]="'tabpanel-protocols'" (click)="setTab('Published')"
+                class="flex flex-1 items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#131337]"
+                [class]="activeTab() === 'Published'
+                    ? 'bg-white text-emerald-600 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-white/60'">
+                <i class="pi pi-check-circle text-xs"></i>
+                Published
+                @if (activeTab() === 'Published') {
+                <span
+                    class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-700">
+                    {{ filteredProtocols().length }}
+                </span>
+                }
+            </button>
 
-        <!-- Draft Tab -->
-        <button id="tab-draft" role="tab" [attr.aria-selected]="activeTab() === 'Draft'"
-            [attr.aria-controls]="'tabpanel-protocols'" (click)="setTab('Draft')"
-            class="flex flex-1 items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#131337]"
-            [class]="activeTab() === 'Draft'
-                ? 'bg-white text-amber-600 shadow-sm'
-                : 'text-gray-500 hover:text-gray-700 hover:bg-white/60'">
-            <i class="pi pi-pencil text-xs"></i>
-            Draft
-            <span
-                class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold transition-all"
-                [class]="activeTab() === 'Draft' ? 'bg-amber-100 text-amber-700' : 'bg-gray-200 text-gray-500'">
-                {{ tabCounts().draft }}
-            </span>
-        </button>
+            <!-- Drafts Tab -->
+            <button id="tab-drafted" role="tab" [attr.aria-selected]="activeTab() === 'Drafted'"
+                [attr.aria-controls]="'tabpanel-protocols'" (click)="setTab('Drafted')"
+                class="flex flex-1 items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#131337]"
+                [class]="activeTab() === 'Drafted'
+                    ? 'bg-white text-amber-600 shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 hover:bg-white/60'">
+                <i class="pi pi-pencil text-xs"></i>
+                Drafts
+                @if (activeTab() === 'Drafted') {
+                <span
+                    class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-700">
+                    {{ filteredProtocols().length }}
+                </span>
+                }
+            </button>
+        </div>
+
+        <!-- Template Filter inside both tabs -->
+        <div class="flex items-center justify-between flex-wrap gap-2 px-1">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="pi pi-filter text-[11px] text-gray-400"></i>
+                    Show:
+                </span>
+                <div class="inline-flex items-center p-0.5 bg-gray-100 rounded-lg text-xs font-medium border border-gray-200/60">
+                    <button type="button" (click)="setTemplateFilter('all')"
+                        class="px-3 py-1.5 rounded-md transition-all duration-150"
+                        [class]="templateFilter() === 'all'
+                            ? 'bg-white text-gray-900 font-semibold shadow-xs'
+                            : 'text-gray-500 hover:text-gray-800'">
+                        All
+                    </button>
+                    <button type="button" (click)="setTemplateFilter('patient')"
+                        class="px-3 py-1.5 rounded-md transition-all duration-150 flex items-center gap-1.5"
+                        [class]="templateFilter() === 'patient'
+                            ? 'bg-white text-gray-900 font-semibold shadow-xs'
+                            : 'text-gray-500 hover:text-gray-800'">
+                        <i class="pi pi-user text-[11px]"></i>
+                        Patient Plans
+                    </button>
+                    <button type="button" (click)="setTemplateFilter('template')"
+                        class="px-3 py-1.5 rounded-md transition-all duration-150 flex items-center gap-1.5"
+                        [class]="templateFilter() === 'template'
+                            ? 'bg-white text-indigo-600 font-semibold shadow-xs'
+                            : 'text-gray-500 hover:text-gray-800'">
+                        <i class="pi pi-folder text-[11px]"></i>
+                        Templates
+                    </button>
+                </div>
+            </div>
+
+            @if (templateFilter() !== 'all') {
+            <button type="button" (click)="setTemplateFilter('all')"
+                class="text-xs text-gray-500 hover:text-gray-700 underline flex items-center gap-1">
+                <i class="pi pi-times text-[10px]"></i>
+                Clear filter
+            </button>
+            }
+        </div>
     </div>
+    }
 
     <!-- Protocol Cards Grid -->
-    <div *ngIf="!protocolService.loadingProtocols()" id="tabpanel-protocols" role="tabpanel"
+    @if (!protocolService.loadingProtocols()) {
+    <div id="tabpanel-protocols" role="tabpanel"
         [attr.aria-labelledby]="'tab-' + activeTab()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 
-        @for (protocol of filteredProtocols(); track protocol.name) {
+        @for (protocol of filteredProtocols(); track protocol.id) {
         <div
-            class="border rounded-xl p-0 overflow-hidden bg-white shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group">
+            [id]="'protocol-card-' + protocol.id"
+            [class]="'border rounded-xl p-0 overflow-hidden bg-white shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer group relative ' +
+            (highlightedPlanId() === protocol.id
+                ? 'ring-4 ring-amber-400/90 border-amber-500 shadow-xl bg-amber-50/15'
+                : '')">
 
-            <!-- Top accent bar -->
+            <!-- Top banner when highlighted -->
+            @if (highlightedPlanId() === protocol.id) {
+            <div class="bg-amber-100 border-b border-amber-200 px-4 py-2 flex items-center justify-between text-amber-900 text-xs font-bold">
+                <span class="flex items-center gap-1.5">
+                    <i class="pi pi-bell text-amber-600"></i>
+                    <span>Assign Coach Manager Required</span>
+                </span>
+                <span class="text-[10px] uppercase tracking-wider bg-amber-500 text-white font-bold px-2 py-0.5 rounded-full shadow-sm">
+                    Plan #{{ highlightedPlanId() }}
+                </span>
+            </div>
+            }
+
+            <!-- Top accent bar based on kind -->
             <div class="h-1.5"
-                [style.background-color]="protocol.status === 'Published' ? '#10b981' : protocol.status === 'Draft' ? '#fbbf24' : '#d1d5db'">
+                [style.background-color]="highlightedPlanId() === protocol.id ? '#f59e0b' : (detectKind(protocol) === 'Published' ? '#10b981' : detectKind(protocol) === 'Template' ? '#6366f1' : '#fbbf24')">
             </div>
 
             <div class="p-5 flex flex-col gap-4">
-                <!-- Title Row -->
-                <div class="flex justify-between items-start">
+                <!-- Title Row & Kind Tag -->
+                <div class="flex justify-between items-start gap-2">
                     <div class="flex flex-col gap-1 flex-1 pr-2">
-                        <span class="font-bold text-base text-gray-800 group-hover:text-[#131337] transition-colors">{{
-                            protocol.name }}</span>
+                        <span class="font-bold text-base text-gray-800 group-hover:text-[#131337] transition-colors leading-snug">
+                            {{ protocol.name }}
+                        </span>
+                        @if (protocol.patientNameEn || protocol.patientNameAr) {
+                        <div class="flex items-center gap-1.5 text-xs text-gray-600 mt-0.5">
+                            <i class="pi pi-user text-gray-400 text-[11px]"></i>
+                            <span class="font-medium text-gray-700">{{ protocol.patientNameEn || protocol.patientNameAr }}</span>
+                        </div>
+                        }
                     </div>
-                    <p-tag [value]="protocol.status | titlecase" [severity]="getSeverity(protocol.status)"
-                        [icon]="getStatusIcon(protocol.status)"></p-tag>
+                    <p-tag [value]="getKindLabel(protocol)" [severity]="getKindSeverity(detectKind(protocol))"
+                        [icon]="getKindIcon(detectKind(protocol))">
+                    </p-tag>
                 </div>
 
                 <!-- Stats -->
@@ -99,6 +176,33 @@
                     </div>
                 </div>
 
+                <!-- Coach Manager Row (Running Published plans only) -->
+                @if (canAssignCoachManager(protocol)) {
+                <div
+                    [class]="'flex items-center justify-between py-2 px-3 rounded-lg border border-dashed transition-all ' +
+                    (highlightedPlanId() === protocol.id && !protocol.coachManagerId
+                        ? 'bg-amber-100/70 border-amber-400 ring-2 ring-amber-300'
+                        : 'bg-gray-50 border-gray-200')">
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-user-edit text-[#131337] text-xs"></i>
+                        @if (protocol.coachManagerId) {
+                        <span class="text-gray-700 font-medium text-xs">
+                            {{ protocol.coachManagerNameEn || protocol.coachManagerNameAr }}
+                        </span>
+                        } @else {
+                        <span class="text-amber-600 font-medium text-xs italic">No coach manager assigned</span>
+                        }
+                    </div>
+                    <button pButton [icon]="protocol.coachManagerId ? 'pi pi-refresh' : 'pi pi-user-plus'"
+                        class="p-button-text p-button-sm"
+                        [pTooltip]="protocol.coachManagerId ? 'Change coach manager' : 'Assign coach manager'"
+                        tooltipPosition="top"
+                        [attr.aria-label]="protocol.coachManagerId ? 'Change coach manager' : 'Assign coach manager'"
+                        (click)="openAssignDialog(protocol, $event)">
+                    </button>
+                </div>
+                }
+
                 <!-- Actions -->
                 <div class="flex items-center justify-between pt-1 border-t border-gray-100">
                     <div class="flex flex-wrap gap-1">
@@ -111,30 +215,72 @@
                             pTooltip="View Protocol" tooltipPosition="top" (click)="viewProtocol(protocol)"></button>
                         <button pButton icon="pi pi-pencil" class="p-button-text p-button-sm" pTooltip="Edit Protocol"
                             tooltipPosition="top" (click)="editProtocol(protocol)"></button>
+
+                        <!-- Assign to Patient -->
+                        @if (canAssignToPatient(protocol)) {
+                            <button pButton icon="pi pi-user-plus" class="p-button-text p-button-sm p-button-success"
+                                pTooltip="Assign to Patient" tooltipPosition="top" aria-label="Assign to Patient"
+                                (click)="assignToPatient(protocol, $event)"></button>
+                        }
                     </div>
                 </div>
             </div>
         </div>
         }
     </div>
+    }
 
-    <!-- Per-tab Empty State -->
-    @if (filteredProtocols().length === 0) {
+    <!-- Empty State -->
+    @if (!protocolService.loadingProtocols() && filteredProtocols().length === 0) {
     <div class="flex flex-col items-center justify-center py-16 text-gray-400" role="status">
-        @switch (activeTab()) {
-        @case ('Published') {
-        <i class="pi pi-check-circle text-5xl mb-4 text-emerald-300"></i>
-        <span class="text-lg font-semibold">No active protocols</span>
-        <span class="text-sm">Activate a draft protocol or define a new one.</span>
-        }
-        @case ('Draft') {
-        <i class="pi pi-pencil text-5xl mb-4 text-amber-300"></i>
-        <span class="text-lg font-semibold">No draft protocols</span>
-        <span class="text-sm">Click "Define New Protocol" to start building one.</span>
-        }
-
+        @if (templateFilter() === 'template') {
+        <i class="pi pi-folder text-5xl mb-4 text-indigo-300"></i>
+        <span class="text-lg font-semibold text-gray-700">No {{ activeTab() === 'Published' ? 'published' : 'draft' }} templates found</span>
+        <span class="text-sm mt-1">Templates {{ activeTab() === 'Published' ? 'ready for reuse' : 'in progress' }} will appear here.</span>
+        } @else if (templateFilter() === 'patient') {
+        <i class="pi pi-user text-5xl mb-4 text-emerald-300"></i>
+        <span class="text-lg font-semibold text-gray-700">No {{ activeTab() === 'Published' ? 'published' : 'draft' }} patient plans found</span>
+        <span class="text-sm mt-1">Patient treatment plans {{ activeTab() === 'Published' ? 'assigned to athletes' : 'in progress' }} will appear here.</span>
+        } @else {
+        <i class="pi pi-inbox text-5xl mb-4 text-gray-300"></i>
+        <span class="text-lg font-semibold text-gray-700">No {{ activeTab() === 'Published' ? 'published' : 'draft' }} protocols found</span>
+        <span class="text-sm mt-1">{{ activeTab() === 'Published' ? 'Finished protocols will appear here.' : 'In-progress drafts will appear here.' }}</span>
         }
     </div>
     }
 
 </div>
+
+<!-- ── Assign Coach Manager Dialog ──────────────────────────────────────────── -->
+<p-dialog header="Assign Coach Manager" [modal]="true" [visible]="showAssignDialog()"
+    (visibleChange)="showAssignDialog.set($event)" [style]="{width: '560px'}" [draggable]="false" [resizable]="false">
+
+    <div class="border border-purple-200 rounded-xl p-5 flex flex-col gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-semibold text-gray-700">Location</label>
+                <p-dropdown [options]="locations()" [(ngModel)]="selectedLocationId" optionLabel="label" appendTo="body"
+                    [filter]="true" optionValue="id" placeholder="Select Location" styleClass="w-full"
+                    (onChange)="onLocationChange($event.value)" [showClear]="true">
+                </p-dropdown>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <label class="text-sm font-semibold text-gray-700">Coach manager assigned to location</label>
+                <p-dropdown [options]="coachManagers()" [(ngModel)]="selectedDoctorId" optionLabel="nameEn"
+                    appendTo="body" optionValue="userId" placeholder="Select Member" styleClass="w-full" [filter]="true"
+                    [disabled]="!selectedLocationId" [showClear]="true">
+                </p-dropdown>
+            </div>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <button pButton label="Cancel" class="p-button-text p-button-secondary" (click)="showAssignDialog.set(false)">
+        </button>
+        <button pButton [label]="selectedPlanForAssign()?.coachManagerId ? 'Reassign' : 'Assign'"
+            [disabled]="isAssignDisabled()" [icon]="assigningCoachManager() ? 'pi pi-spin pi-spinner' : 'pi pi-check'"
+            (click)="confirmAssign()">
+        </button>
+    </ng-template>
+</p-dialog>

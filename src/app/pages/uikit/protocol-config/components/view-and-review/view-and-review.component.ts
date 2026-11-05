@@ -15,11 +15,14 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 import { DropdownModule } from 'primeng/dropdown';
 import { FloatLabelModule } from 'primeng/floatlabel';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { InputTextModule } from 'primeng/inputtext';
+import { DialogModule } from 'primeng/dialog';
 import { AssignEmployeeBranchService } from '../../../add-employees-to-branch/services/assign-employee-branch.service';
 
 @Component({
     selector: 'app-view-and-review',
-    imports: [CommonModule, FormsModule, CardModule, TagModule, ButtonModule, AccordionModule, TooltipModule, InputTextarea, ToastModule, DropdownModule, FloatLabelModule],
+    imports: [CommonModule, FormsModule, CardModule, TagModule, ButtonModule, AccordionModule, TooltipModule, InputTextarea, ToastModule, DropdownModule, FloatLabelModule, ToggleSwitchModule, InputTextModule, DialogModule],
     templateUrl: './view-and-review.component.html',
     styleUrl: './view-and-review.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
@@ -28,12 +31,14 @@ export class ViewAndReviewComponent {
     private readonly route = inject(ActivatedRoute);
     private protocolService = inject(ProtocolService);
     readonly readonly = input(false);
+    readonly assignMode = input(false);
     private messageService = inject(MessageService);
     private pdfExportService = inject(PdfExportService);
     private assignEmployeeBranchService = inject(AssignEmployeeBranchService);
     readonly protocol = this.protocolService.activeProtocol;
+    readonly isAssigning = this.protocolService.isAssigningToPatient;
+    readonly stepperMode = this.protocolService.stepperMode;
     readonly savingDraft = this.protocolService.savingDraft;
-    readonly saveDraftError = this.protocolService.saveDraftError;
 
     readonly getPhaseSessionCount = getPhaseSessionCount;
 
@@ -52,6 +57,16 @@ export class ViewAndReviewComponent {
                 }
             } else if (routePatientId) {
                 this.selectedPatientId = routePatientId;
+            }
+        });
+
+        // In assign mode: pre-select 'athlete' and load athletes list
+        effect(() => {
+            if (this.assignMode()) {
+                if (this.selectedAction !== 'athlete') {
+                    this.selectedAction = 'athlete';
+                }
+                // this.fetchAthletes();
             }
         });
     }
@@ -84,28 +99,37 @@ export class ViewAndReviewComponent {
                 if (!p.criteria?.transitionCriteria?.length) missing.push(`${label}: Transition Criteria`);
 
                 // 3. Sessions and Exercises
-                let hasExercises = false;
                 p.weeks.forEach(w => {
                     w.sessions.forEach(s => {
-                        if (p.measurementSessionNums.includes(s.sessionNumber)) return;
-                        s.sections.forEach(sec => {
-                            if (!sec.time?.trim()) missing.push(`${label} › Session ${s.sessionNumber} › ${sec.sectionName || 'Section'}: Duration`);
-                            if (sec.exercises.length > 0) hasExercises = true;
-                            sec.exercises.forEach(ex => {
-                                if (!ex.name?.trim()) missing.push(`${label} › Session ${s.sessionNumber} › Exercise Name`);
-                                if (ex.type === 'exercise') {
-                                    const exE = ex as ExerciseType;
-                                    if (!exE.equipment?.trim()) missing.push(`${label} › ${ex.name}: Equipment`);
-                                    if (!exE.contractionType?.trim()) missing.push(`${label} › ${ex.name}: Contraction Type`);
-                                    if (exE.sets.some(st => !st.intensity?.trim() || !st.repetitions || !st.tempo?.trim())) {
-                                        missing.push(`${label} › ${ex.name}: Set Details (Reps/Intensity/Tempo)`);
+                        const isMeasurement = p.measurementSessionNums.includes(s.sessionNumber);
+
+                        if (isMeasurement) {
+                            if (!s.measurementTemplateId) {
+                                missing.push(`${label} › Session ${s.sessionNumber}: Measurement Template missing`);
+                            }
+                        } else {
+                            let sessionHasExercises = false;
+                            s.sections.forEach(sec => {
+                                if (sec.exercises.length > 0) sessionHasExercises = true;
+                                if (!sec.time?.trim()) missing.push(`${label} › Session ${s.sessionNumber} › ${sec.sectionName || 'Section'}: Duration`);
+                                sec.exercises.forEach(ex => {
+                                    if (!ex.name?.trim()) missing.push(`${label} › Session ${s.sessionNumber} › Exercise Name`);
+                                    if (ex.type === 'exercise') {
+                                        const exE = ex as ExerciseType;
+                                        if (!exE.equipment?.trim()) missing.push(`${label} › ${ex.name}: Equipment`);
+                                        if (!exE.contractionType?.trim()) missing.push(`${label} › ${ex.name}: Contraction Type`);
+                                        if (exE.sets.some(st => !st.intensity?.trim() || !st.repetitions || !st.tempo?.trim())) {
+                                            missing.push(`${label} › ${ex.name}: Set Details (Reps/Intensity/Tempo)`);
+                                        }
                                     }
-                                }
+                                });
                             });
-                        });
+                            if (!sessionHasExercises) {
+                                missing.push(`${label} › Session ${s.sessionNumber}: No exercises added`);
+                            }
+                        }
                     });
                 });
-                if (!hasExercises && p.totalWeeks > 0) missing.push(`${label}: Exercises`);
             });
         }
 
@@ -116,15 +140,25 @@ export class ViewAndReviewComponent {
     });
 
     // Selection properties
-    athletes = signal<any[]>([]);
-    locations = signal<any[]>([]);
-    coachManagers = signal<any[]>([]);
+    readonly athletes = signal<any[]>([]);
+    readonly locations = signal<any[]>([]);
+    readonly coachManagers = signal<any[]>([]);
+    readonly isEditMode = computed(() => this.protocolService.stepperMode() === 'edit');
+    readonly notifyPatient = signal(false);
+    readonly saveAsNewTemplate = signal(false);
+    readonly newTemplateName = signal('');
+    readonly showAssignCoachModal = signal(false);
+    readonly createdPlanId = signal<number | null>(null);
+    readonly assigningCoachManager = signal(false);
 
     selectedPatientId: string | null = null;
     selectedLocationId: number | null = null;
     selectedDoctorId: string | null = null;
 
     toggleAction(action: string): void {
+        if (this.assignMode()) {
+            return; // In assign mode, the action is locked to 'athlete' and cannot be unchecked or changed
+        }
         this.selectedAction = this.selectedAction === action ? null : action;
 
         const proto = this.protocol();
@@ -134,25 +168,17 @@ export class ViewAndReviewComponent {
         this.selectedLocationId = null;
         this.selectedDoctorId = proto?.doctorId || null;
 
-        if (this.selectedAction === 'athlete') {
-            this.fetchAthletes();
+        if (this.selectedAction === 'template') {
+            this.saveAsNewTemplate.set(true);
+            if (!this.newTemplateName() && proto?.name) {
+                this.newTemplateName.set(proto.name);
+            }
         } else if (this.selectedAction === 'share') {
             this.fetchLocations();
         }
     }
 
-    fetchAthletes(): void {
-        this.protocolService.getAthletes().subscribe({
-            next: (data) => {
-                const mapped = (data || []).map((item: any) => ({
-                    ...item,
-                    id: String(item.id)
-                }));
-                this.athletes.set(mapped);
-            },
-            error: (err) => console.error('Failed to fetch athletes', err)
-        });
-    }
+
 
     fetchLocations(): void {
         this.assignEmployeeBranchService.getBranches().subscribe({
@@ -185,7 +211,56 @@ export class ViewAndReviewComponent {
         return this.selectedAction === action;
     }
 
-    readonly isEditMode = computed(() => this.protocolService.stepperMode() === 'edit');
+    onToggleSaveAsTemplate(checked: boolean): void {
+        this.saveAsNewTemplate.set(checked);
+        if (checked && !this.newTemplateName()) {
+            this.newTemplateName.set(this.protocol()?.name || '');
+        }
+    }
+
+    isAssignCoachDisabled(): boolean {
+        return !this.selectedDoctorId || this.assigningCoachManager();
+    }
+
+    assignCoachManager(): void {
+        const planId = this.createdPlanId();
+        const coachManagerId = this.selectedDoctorId ? Number(this.selectedDoctorId) : null;
+        if (!planId || !coachManagerId) return;
+
+        this.assigningCoachManager.set(true);
+        this.protocolService.assignCoachManager(planId, coachManagerId).subscribe({
+            next: (updatedPlan) => {
+                const assignedName =
+                    updatedPlan.coachManagerNameEn ||
+                    updatedPlan.coachManagerNameAr ||
+                    'Coach manager';
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Coach Manager Assigned',
+                    detail: `${assignedName} will run this plan.`,
+                });
+                this.assigningCoachManager.set(false);
+                this.showAssignCoachModal.set(false);
+                this.protocolService.finaliseProtocol();
+            },
+            error: (err: any) => {
+                this.assigningCoachManager.set(false);
+                const msg =
+                    err?.error?.error?.errors?.[0]?.errorEn ||
+                    'Failed to assign coach manager.';
+                this.messageService.add({
+                    severity: 'error',
+                    summary: 'Assignment Failed',
+                    detail: msg,
+                });
+            },
+        });
+    }
+
+    skipAssignCoachManager(): void {
+        this.showAssignCoachModal.set(false);
+        this.protocolService.finaliseProtocol();
+    }
 
     saveEditedProtocol(): void {
         const proto = this.protocol();
@@ -195,7 +270,8 @@ export class ViewAndReviewComponent {
         const routeMedicalReportId = this.route.snapshot.queryParamMap.get('medicalReportId');
         const routeConsultationDecisionId = this.route.snapshot.queryParamMap.get('consultationDecisionId');
 
-        const patientId = this.selectedPatientId || (proto.patientId ? String(proto.patientId) : null) || routePatientId || null;
+        const rawPatientId = this.selectedPatientId || (proto.patientId ? String(proto.patientId) : null) || routePatientId || null;
+        const patientId = rawPatientId != null && rawPatientId !== '' ? Number(rawPatientId) : null;
         const doctorId = this.selectedDoctorId || proto.doctorId || null;
         const medicalReportId = routeMedicalReportId ? Number(routeMedicalReportId) : null;
         const consultationDecisionId = routeConsultationDecisionId ? Number(routeConsultationDecisionId) : null;
@@ -204,22 +280,28 @@ export class ViewAndReviewComponent {
             proto.patientId = patientId;
         }
 
-        let saveAsDraft: boolean | undefined = undefined;
         const completeness = this.protocolCompleteness();
+        let saveAsDraftFlag = false;
+        let saveAsNewTemplateFlag = false;
+        let templateName: string | undefined = undefined;
 
-        if (this.isActionSelected('athlete')) {
-            saveAsDraft = !completeness.isComplete;
-        } else if (this.isActionSelected('template')) {
-            saveAsDraft = !completeness.isComplete;
-        } else if (this.isActionSelected('share')) {
-            saveAsDraft = !completeness.isComplete;
+        if (!completeness.isComplete) {
+            saveAsDraftFlag = true;
+            saveAsNewTemplateFlag = false; // Cannot save incomplete protocol as a new template
+        } else if (this.isActionSelected('template') || this.saveAsNewTemplate()) {
+            saveAsDraftFlag = false;
+            saveAsNewTemplateFlag = true;
+            templateName = this.newTemplateName().trim() || proto?.name || 'Protocol Template';
+        } else {
+            // Default for updates, or if complete and not explicitly saving as new template.
+            saveAsDraftFlag = false;
         }
 
         this.protocolService.savingDraft.set(true);
-        this.protocolService.updateTreatmentPlan(proto.id, saveAsDraft, patientId, doctorId, medicalReportId, consultationDecisionId).subscribe({
+        this.protocolService.updateTreatmentPlan(proto.id, saveAsDraftFlag, patientId, doctorId, medicalReportId, consultationDecisionId, this.notifyPatient(), saveAsNewTemplateFlag, templateName).subscribe({
             next: () => {
                 this.protocolService.savingDraft.set(false);
-                const statusDetail = saveAsDraft === false
+                const statusDetail = saveAsDraftFlag === false
                     ? 'The protocol has been updated and published successfully.'
                     : 'The protocol has been saved successfully.';
                 this.messageService.add({
@@ -282,20 +364,31 @@ export class ViewAndReviewComponent {
         const routeMedicalReportId = this.route.snapshot.queryParamMap.get('medicalReportId');
         const routeConsultationDecisionId = this.route.snapshot.queryParamMap.get('consultationDecisionId');
 
-        const patientId = this.selectedPatientId || (this.protocol()?.patientId ? String(this.protocol()?.patientId) : null) || routePatientId || null;
+        const rawPatientId = this.selectedPatientId || (this.protocol()?.patientId ? String(this.protocol()?.patientId) : null) || routePatientId || null;
+        const patientId = rawPatientId != null && rawPatientId !== '' ? Number(rawPatientId) : null;
         const doctorId = this.isActionSelected('share') ? this.selectedDoctorId : null;
         const medicalReportId = routeMedicalReportId ? Number(routeMedicalReportId) : null;
         const consultationDecisionId = routeConsultationDecisionId ? Number(routeConsultationDecisionId) : null;
 
         this.protocolService.createTreatmentPlan(false, patientId, doctorId, medicalReportId, consultationDecisionId).subscribe({
-            next: () => {
+            next: (res: any) => {
                 this.protocolService.savingDraft.set(false);
+                const createdPlan = res?.data;
+                const planId = createdPlan?.id;
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Protocol Activated',
                     detail: 'Protocol has been published and activated successfully.',
                 });
-                this.protocolService.finaliseProtocol();
+                if (planId && patientId) {
+                    this.createdPlanId.set(planId);
+                    this.selectedLocationId = null;
+                    this.selectedDoctorId = null;
+                    this.fetchLocations();
+                    this.showAssignCoachModal.set(true);
+                } else {
+                    this.protocolService.finaliseProtocol();
+                }
             },
             error: (err: any) => {
                 this.protocolService.savingDraft.set(false);
@@ -308,42 +401,144 @@ export class ViewAndReviewComponent {
         });
     }
 
+    /** Called when user clicks 'Assign to Patient' in assign mode. */
+    assignToPatient(): void {
+        if (!this.selectedPatientId) {
+            this.messageService.add({ severity: 'warn', summary: 'Patient Required', detail: 'Please select a patient before assigning.' });
+            return;
+        }
+
+        const routeMedicalReportId = this.route.snapshot.queryParamMap.get('medicalReportId');
+        const routeConsultationDecisionId = this.route.snapshot.queryParamMap.get('consultationDecisionId');
+        const patientId = Number(this.selectedPatientId);
+        const medicalReportId = routeMedicalReportId ? Number(routeMedicalReportId) : null;
+        const consultationDecisionId = routeConsultationDecisionId ? Number(routeConsultationDecisionId) : null;
+
+        this.protocolService.savingDraft.set(true);
+        this.protocolService.createTreatmentPlan(
+            false,              // saveAsDraft: false — publish
+            patientId,
+            null,               // doctorId — taken from token by the API
+            medicalReportId,
+            consultationDecisionId,
+            false,              // notifyPatient
+            false,              // saveAsNewTemplate
+            undefined
+        ).subscribe({
+            next: (res: any) => {
+                this.protocolService.savingDraft.set(false);
+                const planId = res?.data?.id;
+                this.messageService.add({
+                    severity: 'success',
+                    summary: 'Protocol Assigned',
+                    detail: 'Protocol published and assigned to patient successfully.',
+                });
+                if (planId && patientId) {
+                    this.createdPlanId.set(planId);
+                    this.selectedLocationId = null;
+                    this.selectedDoctorId = null;
+                    this.fetchLocations();
+                    this.showAssignCoachModal.set(true);
+                } else {
+                    this.protocolService.finaliseProtocol();
+                }
+            },
+            error: (err: any) => {
+                this.protocolService.savingDraft.set(false);
+                let message = 'Failed to assign protocol. Please try again.';
+                if (err.error?.error?.errors && Array.isArray(err.error.error.errors)) {
+                    message = err.error.error.errors.map((e: any) => e.errorEn).filter((m: string) => !!m).join(' ');
+                }
+                this.messageService.add({ severity: 'error', summary: 'Assignment Failed', detail: message });
+            }
+        });
+    }
+
     saveAsDraft(): void {
         this.protocolService.saveDraftError.set(null);
         this.protocolService.savingDraft.set(true);
 
         const isTemplate = this.isActionSelected('template');
         const completeness = this.protocolCompleteness();
+        const proto = this.protocol();
 
-        // If it's a template and it's complete, saveAsDraft should be false (Published)
-        // If it's athlete or share, it should be false (Published) as requested
-        // Otherwise (incomplete template OR no action selected), saveAsDraft is true
-        const saveAsDraftFlag = isTemplate
-            ? !completeness.isComplete
-            : (this.isActionSelected('athlete') || this.isActionSelected('share') ? false : true);
+        // 1- If protocol is missing anything, save as draft (saveAsDraft: true)
+        // 2- If complete and user chooses save as template: saveAsDraft: true, saveAsNewTemplate: true, newTemplateName: string
+        // 3- If complete and user does not choose template: saveAsDraft: false (published for patient)
+        let saveAsDraftFlag = false;
+        let saveAsNewTemplateFlag = false;
+        let templateName: string | undefined = undefined;
+
+        if (!completeness.isComplete) {
+            // Requirement 1: If protocol is incomplete, save as draft.
+            saveAsDraftFlag = true;
+            saveAsNewTemplateFlag = false; // Cannot save incomplete protocol as a new template
+        } else {
+            // Protocol is complete. This method is only called when isActionSelected('template') is true.
+            if (this.saveAsNewTemplate()) {
+                // Requirement 2: Complete, user chose to save as new template
+                saveAsDraftFlag = false;
+                saveAsNewTemplateFlag = true;
+                templateName = this.newTemplateName().trim() || proto?.name || 'Protocol Template';
+            } else {
+                // Complete, user selected 'Save as Template' but didn't toggle 'Save as a new Template'
+                // Requirement 3: Complete and not saved as template -> publish for patient
+                saveAsDraftFlag = false;
+                saveAsNewTemplateFlag = false;
+            }
+        }
 
         const routePatientId = this.route.snapshot.queryParamMap.get('patientId');
         const routeMedicalReportId = this.route.snapshot.queryParamMap.get('medicalReportId');
         const routeConsultationDecisionId = this.route.snapshot.queryParamMap.get('consultationDecisionId');
 
-        const patientId = this.selectedPatientId || (this.protocol()?.patientId ? String(this.protocol()?.patientId) : null) || routePatientId || null;
+        const rawPatientId = this.selectedPatientId || (proto?.patientId ? String(proto.patientId) : null) || routePatientId || null;
+        const patientId = rawPatientId != null && rawPatientId !== '' ? Number(rawPatientId) : null;
         const doctorId = this.isActionSelected('share') ? this.selectedDoctorId : null;
         const medicalReportId = routeMedicalReportId ? Number(routeMedicalReportId) : null;
         const consultationDecisionId = routeConsultationDecisionId ? Number(routeConsultationDecisionId) : null;
 
-        this.protocolService.createTreatmentPlan(saveAsDraftFlag, patientId, doctorId, medicalReportId, consultationDecisionId).subscribe({
-            next: () => {
+        this.protocolService.createTreatmentPlan(
+            saveAsDraftFlag,
+            patientId,
+            doctorId,
+            medicalReportId,
+            consultationDecisionId,
+            false,
+            saveAsNewTemplateFlag,
+            templateName
+        ).subscribe({
+            next: (res: any) => {
                 this.protocolService.savingDraft.set(false);
-                const statusMessage = saveAsDraftFlag ? 'Protocol saved as draft.' : 'Protocol published successfully.';
-                this.messageService.add({
-                    severity: 'success',
-                    summary: saveAsDraftFlag ? 'Draft Saved' : 'Protocol Published',
-                    detail: statusMessage,
-                });
+                const createdPlan = res?.data;
+                const planId = createdPlan?.id;
+
                 if (saveAsDraftFlag) {
+                    const statusMessage = saveAsNewTemplateFlag
+                        ? 'Protocol saved to template library successfully.'
+                        : 'Protocol saved as draft.';
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: saveAsNewTemplateFlag ? 'Template Saved' : 'Draft Saved',
+                        detail: statusMessage,
+                    });
                     this.protocolService.saveProtocolAsDraft();
                 } else {
-                    this.protocolService.finaliseProtocol();
+                    this.messageService.add({
+                        severity: 'success',
+                        summary: 'Protocol Published',
+                        detail: 'Protocol published and assigned to patient successfully.',
+                    });
+                    // Ready for next step: assign coach manager via specific endpoint
+                    if (planId && patientId) {
+                        this.createdPlanId.set(planId);
+                        this.selectedLocationId = null;
+                        this.selectedDoctorId = null;
+                        this.fetchLocations();
+                        this.showAssignCoachModal.set(true);
+                    } else {
+                        this.protocolService.finaliseProtocol();
+                    }
                 }
             },
             error: (err: any) => {
@@ -351,7 +546,6 @@ export class ViewAndReviewComponent {
 
                 let message = 'Failed to save draft. Please try again.';
 
-                // Parse the specific error structure provided
                 if (err.error?.error?.errors && Array.isArray(err.error.error.errors)) {
                     message = err.error.error.errors
                         .map((e: any) => e.errorEn)

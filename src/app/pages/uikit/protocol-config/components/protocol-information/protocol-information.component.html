@@ -192,6 +192,20 @@
                 </div>
             </div>
         </div>
+
+
+        @if (!readonly() && protocolService.stepperMode() === 'edit') {
+        <p-card>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="pi pi-send text-blue-600 text-xl"></i>
+                    <span class="text-xl font-bold">Notify Patient</span>
+                </div>
+                <p-inputSwitch [(ngModel)]="notifyPatient" (ngModelChange)="onNotifyPatientChange()"
+                    [disabled]="readonly()"></p-inputSwitch>
+            </div>
+        </p-card>
+        }
     </p-card>
     }
 
@@ -344,7 +358,8 @@
                         <input pInputText formControlName="newContraindication" class="proto-input contra-input"
                             placeholder="Type a contraindication and press Enter or click Add…"
                             aria-label="New contraindication"
-                            (keyup.enter)="addContraindication()" />
+                            (keyup.enter)="addContraindication()"
+                            (blur)="addContraindication()" />
 
                         <button type="button" class="contra-add-btn"
                             aria-label="Add contraindication"

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit, effect, input, signal, DestroyRef, computed } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit, OnDestroy, effect, input, signal, DestroyRef, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { finalize, takeUntil } from 'rxjs';
 import { FormArray, FormBuilder, FormGroup, FormsModule, Validators } from '@angular/forms';
@@ -9,6 +9,7 @@ import { InputTextarea } from 'primeng/inputtextarea';
 import { CheckboxModule } from 'primeng/checkbox';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputNumberModule } from 'primeng/inputnumber';
+import { InputSwitchModule } from 'primeng/inputswitch';
 import { ProtocolService } from '../../services/protocol.service';
 import { ServicecategoryService } from '../../../add-service/services/servicecategory.service';
 import { ProtocolTemplate, ServiceItem } from '../../models/protocol.model';
@@ -16,12 +17,12 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { ServicesService } from '../../../add-service/services/services.service';
 @Component({
     selector: 'app-protocol-information',
-    imports: [ReactiveFormsModule, CommonModule, FormsModule, CardModule, ButtonModule, InputTextModule, InputTextarea, CheckboxModule, DropdownModule, InputNumberModule],
+    imports: [ReactiveFormsModule, CommonModule, FormsModule, CardModule, ButtonModule, InputTextModule, InputTextarea, CheckboxModule, DropdownModule, InputNumberModule, InputSwitchModule],
     templateUrl: './protocol-information.component.html',
     styleUrl: './protocol-information.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProtocolInformationComponent implements OnInit {
+export class ProtocolInformationComponent implements OnInit, OnDestroy {
     public protocolService = inject(ProtocolService);
     form!: FormGroup;
     private services = inject(ServicesService);
@@ -50,6 +51,7 @@ export class ProtocolInformationComponent implements OnInit {
     useTemplate = false;
     selectedTemplate: ProtocolTemplate | null = null;
     loadingTemplateDetails = signal(false);
+    notifyPatient = signal(false);
 
     athleteLevelOptions = [
         { label: 'Recreational', value: 'recreational' },
@@ -63,20 +65,24 @@ export class ProtocolInformationComponent implements OnInit {
     ];
 
     templates = computed<ProtocolTemplate[]>(() => {
-        return this.protocolService.protocols().map((p: any) => {
-            const weeks = p.weeks || (p.phases?.reduce((sum: number, ph: any) => sum + (ph.totalWeeks || 0), 0)) || 0;
-            const sessions = p.totalSessions || (p.phases?.reduce((sum: number, ph: any) => sum + ((ph.totalWeeks || 0) * (ph.sessionsPerWeek || 0)), 0)) || 0;
+        debugger
+        return this.protocolService
+            .protocols()
+            .filter((p: any) => p.isTemplate && p.status === 'Published' && !p.patientId && !p.coachManagerId)
+            .map((p: any) => {
+                const weeks = p.weeks || (p.phases?.reduce((sum: number, ph: any) => sum + (ph.totalWeeks || 0), 0)) || 0;
+                const sessions = p.totalSessions || (p.phases?.reduce((sum: number, ph: any) => sum + ((ph.totalWeeks || 0) * (ph.sessionsPerWeek || 0)), 0)) || 0;
 
-            return {
-                id: p.id,
-                title: p.name,
-                subtitle: p.injuryCondition || 'General Protocol',
-                description: p.primaryGoal || 'Professional treatment plan template.',
-                duration: `${weeks} weeks`,
-                frequency: `${weeks > 0 ? (sessions / weeks).toFixed(1) : 0}x/week`,
-                phases: `${p.numberOfPhases || p.phases?.length || 0} phases`
-            };
-        });
+                return {
+                    id: p.id,
+                    title: p.name,
+                    subtitle: p.injuryCondition || 'General Protocol',
+                    description: p.primaryGoal || 'Professional treatment plan template.',
+                    duration: `${weeks} weeks`,
+                    frequency: `${weeks > 0 ? (sessions / weeks).toFixed(1) : 0}x/week`,
+                    phases: `${p.numberOfPhases || p.phases?.length || 0} phases`
+                };
+            });
     });
 
     ngOnInit(): void {
@@ -121,7 +127,7 @@ export class ProtocolInformationComponent implements OnInit {
             contra.forEach((c: any) => {
                 arr.push(this.fb.group({
                     id: [c.id || null],
-                    description: [typeof c === 'string' ? c : c.description, Validators.required],
+                    description: [typeof c === 'string' ? c : (c?.description ?? c?.contraindication ?? c?.name ?? c?.text ?? ''), Validators.required],
                     order: [c.order || arr.length + 1]
                 }), { emitEvent: false });
             });
@@ -188,11 +194,21 @@ export class ProtocolInformationComponent implements OnInit {
         }
     }
 
+    onNotifyPatientChange(): void {
+        this.onConfigChange();
+    }
+
     onConfigChange(): void {
         // triggers change detection via protocol signal
+        const proto = this.protocol();
+        if (proto) {
+            proto.notifyPatient = this.notifyPatient();
+            this.protocolService.notifyChange();
+        }
     }
 
     onToggleTemplate(): void {
+        debugger
         if (!this.useTemplate) {
             this.selectedTemplate = null;
             const proto = this.protocol();
@@ -200,6 +216,11 @@ export class ProtocolInformationComponent implements OnInit {
                 proto.template = null;
                 proto.weeks = null;
                 proto.totalSessions = null;
+            }
+        } else {
+            const hasUnassigned = this.protocolService.protocols().some((p: any) => !p.patientId && !p.patientNameEn && !p.patientNameAr);
+            if (!hasUnassigned) {
+                this.protocolService.fetchProtocols({ isTemplate: true });
             }
         }
     }
@@ -247,7 +268,7 @@ export class ProtocolInformationComponent implements OnInit {
                 (active.contraindications || []).forEach((c: any) => {
                     arr.push(this.fb.group({
                         id: [c.id || null],
-                        description: [typeof c === 'string' ? c : c.description, Validators.required],
+                        description: [typeof c === 'string' ? c : (c?.description ?? c?.contraindication ?? c?.name ?? c?.text ?? ''), Validators.required],
                         order: [c.order || arr.length + 1]
                     }));
                 });
@@ -256,6 +277,10 @@ export class ProtocolInformationComponent implements OnInit {
             },
             error: (err) => console.error('Failed to load template details:', err)
         });
+    }
+
+    ngOnDestroy(): void {
+        this.addContraindication();
     }
 
     get contraindications(): FormArray {
@@ -267,23 +292,27 @@ export class ProtocolInformationComponent implements OnInit {
         if (!proto) return;
         const rawItems: { id: number | null; description: string; order: number }[] =
             this.contraindications.getRawValue();
-        proto.contraindications = rawItems.map((c, idx) => ({
-            id: c.id ?? 0,
-            description: c.description ?? '',
-            order: c.order ?? idx + 1,
-        }));
+        const updated = rawItems
+            .filter(c => c && c.description && String(c.description).trim() !== '')
+            .map((c, idx) => ({
+                id: c.id ?? 0,
+                description: String(c.description).trim(),
+                order: c.order ?? idx + 1,
+            }));
+        proto.contraindications = updated;
+        this.protocolService.activeProtocol.update(p => p ? { ...p, contraindications: [...updated] } : null);
     }
 
     addContraindication(): void {
-        const val = this.form.get('newContraindication')?.value?.trim();
+        const ctrl = this.form?.get('newContraindication');
+        const val = ctrl?.value?.trim();
         if (val) {
             this.contraindications.push(this.fb.group({
                 id: [null],
                 description: [val, Validators.required],
                 order: [this.contraindications.length + 1]
             }));
-            this.form.get('newContraindication')?.reset();
-            // Explicitly sync so the new item is immediately in proto.contraindications
+            ctrl?.reset('', { emitEvent: false });
             const proto = this.protocol();
             this.syncContraindications(proto);
             this.protocolService.notifyChange();

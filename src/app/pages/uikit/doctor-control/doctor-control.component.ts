@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy, OnInit, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, signal, inject } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { TodaysConsultationsComponent } from './components/todays-consultations/todays-consultations.component';
 import { PendingTicketsComponent } from './components/pending-tickets/pending-tickets.component';
@@ -23,6 +24,7 @@ interface DcNavItem {
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DoctorControlComponent implements OnInit {
+    private readonly route = inject(ActivatedRoute);
     activeNav = signal<DcNavId>('dashboard');
     readonly username = signal<string>('');
 
@@ -37,6 +39,13 @@ export class DoctorControlComponent implements OnInit {
     ];
 
     ngOnInit(): void {
+        this.route.queryParamMap.subscribe(params => {
+            const tab = params.get('tab') as DcNavId;
+            if (tab && this.navItems.some(item => item.id === tab)) {
+                this.activeNav.set(tab);
+            }
+        });
+
         try {
             const raw = localStorage.getItem('userData');
             if (raw) {

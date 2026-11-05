@@ -501,12 +501,10 @@
                                                 <button pButton icon="pi pi-angle-up"
                                                     class="p-button-text p-button-secondary p-button-rounded p-button-sm"
                                                     (click)="moveExerciseUp(phase, session, section, exIdx)"
-                                                    [disabled]="exIdx === 0 || reorderSaving()"
                                                     pTooltip="Move exercise up" aria-label="Move exercise up"></button>
                                                 <button pButton icon="pi pi-angle-down"
                                                     class="p-button-text p-button-secondary p-button-rounded p-button-sm"
                                                     (click)="moveExerciseDown(phase, session, section, exIdx)"
-                                                    [disabled]="exIdx === section.exercises.length - 1 || reorderSaving()"
                                                     pTooltip="Move exercise down"
                                                     aria-label="Move exercise down"></button>
                                                 }

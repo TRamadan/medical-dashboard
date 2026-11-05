@@ -13,17 +13,51 @@
                 <button pButton icon="pi pi-arrow-left" label="Back to All Protocols"
                     class="p-button-text p-button-secondary p-button-sm" (click)="cancelProtocol()"></button>
 
-                <!-- Mode badge -->
+                <!-- Mode & Kind badge -->
                 @if (stepperMode() === 'view') {
                 <span
                     class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">
-                    <i class="pi pi-lock text-[10px]"></i> Read-only view
+                    <i class="pi pi-lock text-[10px]"></i> Read-only ({{ activePlanKind() || 'Protocol' }})
+                </span>
+                }
+                @if (stepperMode() === 'assignment') {
+                <span
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+                    <i class="pi pi-user-plus text-[10px]"></i> Assigning to Patient: {{ activeProtocol()?.name || 'Protocol' }}
                 </span>
                 }
                 @if (stepperMode() === 'edit') {
+                    @switch (activePlanKind()) {
+                        @case ('Template') {
+                        <span
+                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200">
+                            <i class="pi pi-folder text-[10px]"></i> Editing Template: {{ activeProtocol()?.name || 'Template' }}
+                        </span>
+                        }
+                        @case ('Published') {
+                        <span
+                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+                            <i class="pi pi-check-circle text-[10px]"></i> Editing Running Plan: {{ activeProtocol()?.name || 'Plan' }}
+                        </span>
+                        }
+                        @case ('Drafted') {
+                        <span
+                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">
+                            <i class="pi pi-pencil text-[10px]"></i> Editing Draft: {{ activeProtocol()?.name || 'Draft' }}
+                        </span>
+                        }
+                        @default {
+                        <span
+                            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">
+                            <i class="pi pi-pencil text-[10px]"></i> Editing: {{ activeProtocol()?.name || 'Protocol' }}
+                        </span>
+                        }
+                    }
+                }
+                @if (stepperMode() === 'create') {
                 <span
-                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">
-                    <i class="pi pi-pencil text-[10px]"></i> Editing: {{ activeProtocol()?.name || 'Protocol' }}
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
+                    <i class="pi pi-plus text-[10px]"></i> New Protocol
                 </span>
                 }
             </div>
@@ -32,7 +66,14 @@
             <!-- Right: context actions -->
             <div class="flex items-center gap-2">
                 @if (!showStepper()) {
-                <p-button label="Define New Protocol" icon="pi pi-plus" (onClick)="startNewProtocol()"></p-button>
+                <p-menu #defineMenu [model]="defineOptions" [popup]="true" appendTo="body"></p-menu>
+                <p-button (onClick)="defineMenu.toggle($event)">
+                    <span class="flex items-center gap-2">
+                        <i class="pi pi-plus"></i>
+                        <span>Define New Protocol</span>
+                        <i class="pi pi-chevron-down text-xs ml-1"></i>
+                    </span>
+                </p-button>
                 }
 
                 @if (showStepper() && stepperMode() === 'view') {
@@ -127,7 +168,7 @@
 
                 <!-- Step 5 -->
                 <div *ngIf="currentStep() === 5">
-                    <app-view-and-review [readonly]="isReadonly()"></app-view-and-review>
+                    <app-view-and-review [readonly]="isReadonly()" [assignMode]="isAssignMode()"></app-view-and-review>
                     <div class="flex p-4 justify-start">
                         <p-button label="Back" severity="secondary" icon="pi pi-arrow-left" (onClick)="prevStep()" />
                     </div>
@@ -136,3 +177,56 @@
         </div>
     </div>
 </section>
+
+<!-- ── Upload Protocol Excel Dialog ────────────────────────────────────── -->
+<p-dialog header="Upload Protocol Excel" [modal]="true" [visible]="showExcelUploadModal()"
+    (visibleChange)="showExcelUploadModal.set($event)" [style]="{ width: '520px' }" [draggable]="false"
+    [resizable]="false">
+
+    <div class="flex flex-col gap-5 py-2">
+        <div class="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
+            <i class="pi pi-file-excel text-emerald-600 text-2xl mt-0.5"></i>
+            <div class="flex flex-col gap-1">
+                <span class="font-bold text-emerald-900 text-sm">Upload Protocol Spreadsheet</span>
+                <span class="text-xs text-emerald-700">Upload an Excel file (.xlsx, .xls) containing protocol details, phases, sessions, and exercises.</span>
+            </div>
+        </div>
+
+        <!-- Drag & Drop Zone -->
+        <div class="border-2 border-dashed rounded-xl p-8 text-center flex flex-col items-center justify-center gap-3 cursor-pointer transition-all"
+            [class]="isDragging() ? 'border-emerald-500 bg-emerald-50/50' : 'border-gray-300 bg-gray-50/50 hover:border-emerald-400 hover:bg-emerald-50/20'"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave($event)"
+            (drop)="onFileDrop($event)"
+            (click)="fileInput.click()">
+            <input #fileInput type="file" accept=".xlsx, .xls" class="hidden" (change)="onFileSelected($event)" />
+
+            @if (!selectedExcelFile()) {
+            <div class="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-2xl">
+                <i class="pi pi-upload"></i>
+            </div>
+            <div class="flex flex-col gap-1">
+                <span class="font-semibold text-gray-800 text-sm">Click to choose a file or drag &amp; drop</span>
+                <span class="text-xs text-gray-500">Supports .xlsx and .xls (max 10MB)</span>
+            </div>
+            } @else {
+            <div class="flex items-center gap-3 w-full bg-white p-3 rounded-lg border border-gray-200">
+                <i class="pi pi-file-excel text-emerald-600 text-2xl"></i>
+                <div class="flex flex-col items-start flex-1 min-w-0">
+                    <span class="font-semibold text-gray-800 text-sm truncate max-w-full">{{ selectedExcelFile()?.name }}</span>
+                    <span class="text-xs text-gray-500">{{ formatFileSize(selectedExcelFile()?.size) }}</span>
+                </div>
+                <button pButton icon="pi pi-times" class="p-button-text p-button-sm p-button-danger"
+                    aria-label="Remove selected file"
+                    (click)="$event.stopPropagation(); removeSelectedFile()"></button>
+            </div>
+            }
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <button pButton label="Cancel" class="p-button-text p-button-secondary" (click)="closeExcelUploadModal()" [disabled]="isUploadingExcel()"></button>
+        <button pButton label="Upload Protocol" icon="pi pi-upload" [loading]="isUploadingExcel()"
+            [disabled]="!selectedExcelFile() || isUploadingExcel()" (click)="uploadExcelProtocol()"></button>
+    </ng-template>
+</p-dialog>

@@ -89,7 +89,17 @@ export interface Phase {
 }
 
 
+export type ProtocolKind = 'Published' | 'Template' | 'Drafted';
+
+export interface TreatmentPlanFilter {
+    kind?: ProtocolKind | string;
+    status?: 'Draft' | 'Published' | 'Archived' | string;
+    isTemplate?: boolean;
+    patientId?: number | string;
+}
+
 export interface Protocol {
+    kind?: ProtocolKind;
     id: number;
     name: string;
     status: 'Draft' | 'Published' | 'Archived';
@@ -100,15 +110,22 @@ export interface Protocol {
     weeks: number | null;
     totalSessions: number | null;
     template: ProtocolTemplate | null;
+    isTemplate?: boolean;
     phases: Phase[];
     numberOfPhases?: number;
+    notifyPatient?: boolean;
     contraindications?: { id: number; description: string; order: number; }[];
     createdAt?: string;
     createdBy?: CreatedBy;
     doctorNameAr?: string | null;
     doctorNameEn?: string | null;
     doctorId?: string | null;
-    patientId?: string | null;
+    patientId?: number | string | null;
+    patientNameEn?: string | null;
+    patientNameAr?: string | null;
+    coachManagerId?: number | null;
+    coachManagerNameEn?: string | null;
+    coachManagerNameAr?: string | null;
 }
 
 
@@ -149,6 +166,14 @@ export interface CertItem {
     nameAr: string;
     tag: string;
     checked: boolean;
+}
+
+
+export interface CoachManagerOption {
+    id: number;
+    nameEn: string | null;
+    nameAr: string | null;
+    activePlans: number;
 }
 
 
@@ -246,11 +271,16 @@ export interface TreatmentPlanRequest {
     sessionsPerWeek: number;
     numberOfPhases: number;
     targetAthleteLevel: string;
-    patientId?: string | null;
+    patientId?: number | null;
+    patientNameEn?: string | null;
+    patientNameAr?: string | null;
     doctorId?: string | null;
     medicalReportId?: number | null;
     consultationDecisionId?: number | null;
     saveAsDraft: boolean;
+    notifyPatient?: boolean;
+    saveAsNewTemplate?: boolean;
+    newTemplateName?: string;
     protocolServiceIds: number[];
     contraindications?: string[];
     phases: TreatmentPlanPhase[];

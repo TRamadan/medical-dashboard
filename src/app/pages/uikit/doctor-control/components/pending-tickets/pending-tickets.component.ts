@@ -6,12 +6,17 @@ import {
   inject,
   OnInit,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
 import { BadgeModule } from 'primeng/badge';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { DialogModule } from 'primeng/dialog';
+import { ToastModule } from 'primeng/toast';
+import { TextareaModule } from 'primeng/textarea';
+import { MessageService } from 'primeng/api';
 import { PatientDossierDialogComponent } from '../patient-dossier-dialog/patient-dossier-dialog.component';
 import { finalize, of } from 'rxjs';
 import {
@@ -20,6 +25,7 @@ import {
   ApiTicketType,
   ApiUrgency,
   PendingTicketsTab,
+  ProtocolModificationDetails,
 } from './pending-tickets.service';
 
 // ── UI-level tab ids (mapped to API tab param) ──────────────────────────────
@@ -41,6 +47,7 @@ const ACTION_STYLES: Record<string, BtnStyle> = {
   'open-consultation': 'primary',
   'approve-modification': 'primary',
   'build-treatment-plan': 'primary',
+  'assign-coach-manager': 'primary',
   'open-legacy-launch': 'warning',
   'view-modification': 'ghost',
   'revert-modification': 'danger',
@@ -59,14 +66,27 @@ function actionStyle(action: string): BtnStyle {
 
 @Component({
   selector: 'app-dc-pending-tickets',
-  imports: [ButtonModule, CardModule, BadgeModule, ToggleSwitchModule, FormsModule, PatientDossierDialogComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    CardModule,
+    BadgeModule,
+    ToggleSwitchModule,
+    DialogModule,
+    ToastModule,
+    TextareaModule,
+    PatientDossierDialogComponent,
+  ],
   templateUrl: './pending-tickets.component.html',
   styleUrl: './pending-tickets.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [MessageService],
 })
 export class PendingTicketsComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly service = inject(PendingTicketsService);
+  private readonly messageService = inject(MessageService);
 
   readonly ApiTicketType = ApiTicketType;
 
@@ -81,6 +101,14 @@ export class PendingTicketsComponent implements OnInit {
   // ── Patient Dossier Dialog ──────────────────────────────────────────────
   dossierVisible = signal(false);
   dossierAppointmentId = signal<number | null>(null);
+
+  // ── Protocol Modification Dialog ──────────────────────────────────────────
+  readonly modDialogVisible = signal(false);
+  readonly modDetailsLoading = signal(false);
+  readonly modActionProcessing = signal(false);
+  readonly modDetails = signal<ProtocolModificationDetails | null>(null);
+  modNotifyPatient = true;
+  modNote = '';
 
   /** Raw API tickets for the current tab */
   private rawTickets = signal<ApiTicket[]>([]);
@@ -102,7 +130,7 @@ export class PendingTicketsComponent implements OnInit {
     { id: 'all', label: 'All tickets' },
   ];
 
-  // ── Lifecycle ────────────────────────────────────────────────────────────
+  // ── Lifecycle ────────────────────────────────────────────────────
 
   ngOnInit(): void {
     this.loadTickets();
@@ -130,8 +158,6 @@ export class PendingTicketsComponent implements OnInit {
 
     const tab = this.activeTab();
 
-
-
     // ── Live API data ────────────────────────────────────────────────────
     this.service
       .getTickets(tab)
@@ -143,7 +169,6 @@ export class PendingTicketsComponent implements OnInit {
           this.error.set('Failed to load pending tickets. Please try again.');
         },
       });
-
   }
 
   // ── Patient Dossier Dialog ───────────────────────────────────────────────
@@ -153,6 +178,88 @@ export class PendingTicketsComponent implements OnInit {
     if (!appointmentId) return;
     this.dossierAppointmentId.set(appointmentId);
     this.dossierVisible.set(true);
+  }
+
+  // ── Protocol Modification Dialog Actions ─────────────────────────────────
+
+  openModificationDialog(ticket: ApiTicket): void {
+    if (!ticket.modificationRequestId) return;
+    this.modNote = '';
+    this.modNotifyPatient = true;
+    this.modDetailsLoading.set(true);
+    this.service
+      .getModificationDetails(ticket.modificationRequestId)
+      .pipe(finalize(() => this.modDetailsLoading.set(false)))
+      .subscribe({
+        next: (details) => {
+          this.modDetails.set(details);
+          this.modDialogVisible.set(true);
+        },
+        error: (err) => {
+          console.error('Failed to load modification details', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Could not load modification details.',
+          });
+        },
+      });
+  }
+
+  approveMod(): void {
+    const det = this.modDetails();
+    if (!det) return;
+    this.modActionProcessing.set(true);
+    this.service
+      .approveModification(det.id, this.modNotifyPatient, this.modNote || null)
+      .pipe(finalize(() => this.modActionProcessing.set(false)))
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Approved',
+            detail: 'Protocol modification has been approved.',
+          });
+          this.modDialogVisible.set(false);
+          this.loadTickets();
+        },
+        error: (err) => {
+          console.error('Approve failed', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to approve modification.',
+          });
+        },
+      });
+  }
+
+  revertMod(): void {
+    const det = this.modDetails();
+    if (!det) return;
+    this.modActionProcessing.set(true);
+    this.service
+      .revertModification(det.id, this.modNote || null)
+      .pipe(finalize(() => this.modActionProcessing.set(false)))
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Refused',
+            detail: 'Protocol modification has been refused/reverted.',
+          });
+          this.modDialogVisible.set(false);
+          this.loadTickets();
+        },
+        error: (err) => {
+          console.error('Revert failed', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to revert modification.',
+          });
+        },
+      });
   }
 
   // ── Template helpers ─────────────────────────────────────────────────────
@@ -187,8 +294,31 @@ export class PendingTicketsComponent implements OnInit {
 
   // ── Action handler ───────────────────────────────────────────────────────
 
+  onTicketCardClick(ticket: ApiTicket, event: Event): void {
+    if (ticket.ticketType === ApiTicketType.AssignCoachManager) {
+      this.handleAction('assign-coach-manager', ticket, event);
+    }
+  }
+
   handleAction(action: string, ticket: ApiTicket, event: Event): void {
     event.stopPropagation();
+
+    if (
+      ticket.ticketType === ApiTicketType.AssignCoachManager ||
+      action === 'assign-coach-manager'
+    ) {
+      this.router.navigate(['/uikit/protocol-config'], {
+        queryParams: {
+          tab: 'Published',
+          template: 'false',
+          highlightPlanId: ticket.treatmentPlanId ?? undefined,
+          treatmentPlanId: ticket.treatmentPlanId ?? undefined,
+          patientId: ticket.patientId ?? undefined,
+          autoAssign: 'true',
+        },
+      });
+      return;
+    }
 
     if (
       ticket.ticketType === ApiTicketType.DirectBlueprintAwaitingPlan ||
@@ -200,7 +330,9 @@ export class PendingTicketsComponent implements OnInit {
           tab: 'Published',
           startNew: 'false',
           patientId: ticket.patientId,
-          appointmentId: ticket.appointmentId
+          appointmentId: ticket.appointmentId,
+          consultationDecisionId: ticket.consultationDecisionId,
+          medicalReportId: ticket.medicalReportId,
         },
       });
       return;
@@ -218,7 +350,7 @@ export class PendingTicketsComponent implements OnInit {
 
       case 'approve-modification':
         if (ticket.modificationRequestId != null) {
-          this.service.approveModification(ticket.modificationRequestId).subscribe({
+          this.service.approveModification(ticket.modificationRequestId, false).subscribe({
             next: () => this.loadTickets(),
             error: (err) => console.error('Approve failed', err),
           });
@@ -235,8 +367,9 @@ export class PendingTicketsComponent implements OnInit {
         break;
 
       case 'view-modification':
-        // Show detail via ticket description / subDescription (handled in template)
-        console.log('View modification:', ticket.ticketId, ticket.subDescription);
+        if (ticket.modificationRequestId != null) {
+          this.openModificationDialog(ticket);
+        }
         break;
 
       case 'open-legacy-launch':
@@ -266,4 +399,3 @@ export class PendingTicketsComponent implements OnInit {
     }
   }
 }
-
