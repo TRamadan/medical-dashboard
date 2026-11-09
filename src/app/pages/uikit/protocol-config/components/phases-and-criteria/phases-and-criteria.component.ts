@@ -101,7 +101,7 @@ export class PhasesAndCriteriaComponent implements OnInit {
                 const targetPhase = proto.phases.find(p => p.id === phase.id);
                 if (targetPhase) {
                     targetPhase.criteria.transitionCriteria = values.map((c: any, index: number) => ({
-                        id: c.id || (Date.now() + index),
+                        id: c.id != null ? c.id : null,
                         metric: c.metric,
                         operator: c.operator,
                         value: c.value,
@@ -250,7 +250,7 @@ export class PhasesAndCriteriaComponent implements OnInit {
     private buildRow(metricValue: string, value: number): FormGroup {
         const meta = this.metricsMap.get(metricValue);
         return this.fb.group({
-            id: [Date.now()],
+            id: [null],
             metric: [metricValue, Validators.required],
             operator: [''], // Default operator
             unit: [meta?.unit || ''],

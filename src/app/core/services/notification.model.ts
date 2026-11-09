@@ -28,6 +28,8 @@ export interface NotificationDTO {
     relatedEntityType: string | null;
     relatedEntityId: number | null;
     createdAt: string;
+    patientId: number
+    consultationDecisionId: number
 }
 
 export interface PaginatedNotificationsResponse {

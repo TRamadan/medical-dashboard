@@ -178,6 +178,7 @@ export class ProtocolService {
         const totalWeeks = apiPhase.weeks || 0;
         const phase: Phase = {
             id: String(apiPhase.id || apiPhase.phaseOrder),
+            dbId: apiPhase.id != null ? Number(apiPhase.id) : undefined,
             name: apiPhase.phaseName || '',
             totalWeeks: totalWeeks,
             sessionsPerWeek: sessionsPerWeek,
@@ -187,7 +188,7 @@ export class ProtocolService {
                 regressionCriteria: '',
                 precautions: '',
                 transitionCriteria: (apiPhase.criteria || []).map((c: any, idx: number) => ({
-                    id: idx,
+                    id: c.id != null ? Number(c.id) : idx,
                     metric: c.criterionType,
                     operator: c.operator as any,
                     value: c.value,
@@ -213,9 +214,11 @@ export class ProtocolService {
 
                 if (apiSession) {
                     week.sessions.push({
+                        id: apiSession.id != null ? apiSession.id : undefined,
                         sessionNumber: sessionNum,
                         measurementTemplateId: apiSession.measurementTemplateId,
                         sections: (apiSession.sections || []).map((sec: any) => ({
+                            id: sec.id != null ? sec.id : undefined,
                             sectionName: sec.sectionName,
                             time: String(sec.durationMinutes) + ' min',
                             exercises: (sec.exercises || []).map((ex: any) => this.mapToExercise(ex))
@@ -247,6 +250,7 @@ export class ProtocolService {
         const type = String(apiEx.exerciseType || '').toLowerCase() as 'exercise' | 'manual';
         const base: any = {
             id: apiEx.id,
+            exerciseId: apiEx.exerciseId,
             type: type,
             name: apiEx.exerciseName,
             description: apiEx.description,
@@ -264,6 +268,7 @@ export class ProtocolService {
                 contractionType: apiEx.contractionType,
                 intensityMethod: apiEx.intensityMethod,
                 sets: (apiEx.sets || []).map((s: any) => ({
+                    id: s.id != null ? s.id : undefined,
                     repetitions: s.reps,
                     intensity: s.intensity,
                     tempo: s.tempo,
@@ -489,9 +494,9 @@ export class ProtocolService {
             consultationDecisionId: consultationDecisionId ?? null,
             protocolServiceIds: (proto.services ?? []).map(s => s.id),
             contraindications: (proto.contraindications || [])
-                .map((c: any) => {
+                .map((c: any): string => {
                     if (typeof c === 'string') return c.trim();
-                    return (c?.description ?? c?.contraindication ?? c?.name ?? c?.text ?? '').trim();
+                    return String(c?.description ?? c?.contraindication ?? c?.name ?? c?.text ?? '').trim();
                 })
                 .filter((desc: string) => desc.length > 0),
             phases: proto.phases.map((phase, phaseIdx) => this.mapPhase(phase, phaseIdx)),
@@ -815,58 +820,72 @@ export class ProtocolService {
 
     private mapPhase(phase: Phase, phaseIdx: number): TreatmentPlanPhase {
         const allSessions = phase.weeks.flatMap(w => w.sessions);
-        return {
+        const result: TreatmentPlanPhase = {
             phaseName: phase.name,
             phaseOrder: phaseIdx + 1,
             weeks: phase.totalWeeks,
             sessionsPerWeek: phase.sessionsPerWeek,
             phaseObjective: phase.objective ?? '',
-            criteria: (phase.criteria.transitionCriteria ?? []).map(tc => ({
-                criterionType: tc.metric,
-                operator: tc.operator,
-                value: tc.value ?? 0,
-                unit: tc.unit,
-            } satisfies TreatmentPlanCriterion)),
+            criteria: (phase.criteria.transitionCriteria ?? []).map(tc => {
+                const criterion: TreatmentPlanCriterion = {
+                    criterionType: tc.metric,
+                    operator: tc.operator,
+                    value: tc.value ?? 0,
+                    unit: tc.unit,
+                };
+                if (tc.id != null) criterion.id = tc.id;
+                return criterion;
+            }),
             sessions: allSessions.map(session => this.mapSession(session, phase)),
         };
+        if (phase.dbId != null) result.id = phase.dbId;
+        return result;
     }
 
     private mapSession(session: Session, phase: Phase): TreatmentPlanSession {
         const isMeasurement = phase.measurementSessionNums.includes(session.sessionNumber);
-        return {
+        const result: TreatmentPlanSession = {
             sessionNumber: session.sessionNumber,
             isMeasurementSession: isMeasurement,
             measurementTemplateId: session.measurementTemplateId ?? 0,
             sections: isMeasurement ? [] : session.sections.map((sec, secIdx) => this.mapSection(sec, secIdx)),
         };
+        if (session.id != null) result.id = Number(session.id);
+        return result;
     }
 
     private mapSection(section: Section, sectionIdx: number): TreatmentPlanSection {
-        return {
+        const result: TreatmentPlanSection = {
             sectionName: section.sectionName,
             durationMinutes: this.parseDurationMinutes(section.time),
             order: sectionIdx + 1,
             exercises: section.exercises.map((ex, exIdx) => this.mapExercise(ex, exIdx)),
         };
+        if (section.id != null) result.id = Number(section.id);
+        return result;
     }
 
     private mapExercise(ex: Exercise, exIdx: number): TreatmentPlanExercise {
         const isExercise = ex.type === 'exercise';
         const exerciseEx = isExercise ? (ex as ExerciseType) : null;
-        return {
+        const result: TreatmentPlanExercise = {
             exerciseType: ex.type,
             order: exIdx + 1,
-            exerciseId: ex.id ?? 0,
+            exerciseId: (ex as any).exerciseId ?? ex.id ?? 0,
             equipment: exerciseEx?.equipment ?? '',
             contractionType: exerciseEx?.contractionType ?? '',
             intensityMethod: exerciseEx?.intensityMethod ?? '',
-            sets: (exerciseEx?.sets ?? []).map((set, setIdx) => ({
-                setNumber: setIdx + 1,
-                reps: set.repetitions,
-                intensity: set.intensity,
-                tempo: set.tempo,
-                restSeconds: this.parseRestSeconds(set.rest),
-            } satisfies TreatmentPlanSet)),
+            sets: (exerciseEx?.sets ?? []).map((set, setIdx) => {
+                const mappedSet: TreatmentPlanSet = {
+                    setNumber: setIdx + 1,
+                    reps: set.repetitions,
+                    intensity: set.intensity,
+                    tempo: set.tempo,
+                    restSeconds: this.parseRestSeconds(set.rest),
+                };
+                if (set.id != null) mappedSet.id = set.id;
+                return mappedSet;
+            }),
             exerciseName: ex.name,
             description: ex.description ?? '',
             videoUrl: ex.type === 'manual' ? (ex as import('../models/protocol.model').ManualType).videoUrl ?? '' : '',
@@ -874,6 +893,8 @@ export class ProtocolService {
             incrementAmount: ex.progressionRule?.incrementAmount ?? 0,
             progressionCondition: ex.progressionRule?.progressionCondition ?? '',
         };
+        if (ex.id != null) result.id = ex.id;
+        return result;
     }
 
     /** Converts rest strings like '60s', '1m', '90' to seconds. */

@@ -188,9 +188,9 @@ export class AppTopbar implements OnInit, OnDestroy {
                 queryParams: {
                     tab: 'Published',
                     startNew: 'false',
-                    // patientId: notification.relatedEntityId,
+                    patientId: notification.patientId,
                     medicalReportId: notification.relatedEntityId,
-                    //    consultationDecisionId: notification.relatedEntityId,     
+                    consultationDecisionId: notification.consultationDecisionId,
 
 
                 },

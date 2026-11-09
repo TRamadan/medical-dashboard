@@ -1,5 +1,6 @@
 
 export interface SetData {
+    id?: number | null;
     repetitions: number;
     intensity: string;
     tempo: string;
@@ -15,6 +16,7 @@ export interface ProgressionRule {
 
 export interface BaseExercise {
     id?: number;
+    exerciseId?: number;
     type: 'exercise' | 'manual';
     name: string;
     description: string;
@@ -38,6 +40,7 @@ export type Exercise = ExerciseType | ManualType;
 
 
 export interface Section {
+    id?: number | string | null;
     sectionName: string;
     time?: string;
     exercises: Exercise[];
@@ -45,7 +48,7 @@ export interface Section {
 
 
 export interface Session {
-    id?: string;
+    id?: number | string | null;
     sessionNumber: number;
     sections: Section[];
     measurementTemplateId?: number | null;
@@ -61,7 +64,7 @@ export interface Week {
 
 
 export interface TransitionCriterion {
-    id: number;
+    id?: number | null;
     metric: string;
     operator: '≤' | '≥' | '=' | '>' | '<';
     value: number | null;
@@ -77,7 +80,8 @@ export interface PhaseCriteria {
 
 
 export interface Phase {
-    id: string;
+    id: any;
+    dbId?: number;
     name: string;
     totalWeeks: number;
     sessionsPerWeek: number;
@@ -209,6 +213,7 @@ export const toAbsoluteWeek = (
 // ── API Request Body Types (TreatmentPlans endpoint) ─────────────────────────
 
 export interface TreatmentPlanSet {
+    id?: number | null;
     setNumber: number;
     reps: number;
     intensity: string;
@@ -217,6 +222,7 @@ export interface TreatmentPlanSet {
 }
 
 export interface TreatmentPlanExercise {
+    id?: number | null;
     exerciseType: string;
     order: number;
     exerciseId: number;
@@ -233,6 +239,7 @@ export interface TreatmentPlanExercise {
 }
 
 export interface TreatmentPlanSection {
+    id?: number | null;
     sectionName: string;
     durationMinutes: number;
     order: number;
@@ -240,6 +247,7 @@ export interface TreatmentPlanSection {
 }
 
 export interface TreatmentPlanSession {
+    id?: number | null;
     sessionNumber: number;
     isMeasurementSession: boolean;
     measurementTemplateId: number;
@@ -247,6 +255,7 @@ export interface TreatmentPlanSession {
 }
 
 export interface TreatmentPlanCriterion {
+    id?: number | null;
     criterionType: string;
     operator: string;
     value: number;
@@ -254,6 +263,7 @@ export interface TreatmentPlanCriterion {
 }
 
 export interface TreatmentPlanPhase {
+    id?: number | null;
     phaseName: string;
     phaseOrder: number;
     weeks: number;
