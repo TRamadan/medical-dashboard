@@ -1,165 +1,341 @@
 <p-toast />
 <form [formGroup]="workingHoursForm">
+    <!-- Apply to all days option (When adding new) -->
     @if (!isEdit) {
-    <div class="mb-3 d-flex align-items-center gap-2 p-3 surface-50 border-round">
-        <p-checkbox binary="true" [ngModelOptions]="{ standalone: true }" [(ngModel)]="applyToAllDays"
-            inputId="applyToAllDays" (onChange)="onApplyToAllChange()"> </p-checkbox>
-        <label for="applyToAllDays" class="ml-2 font-medium cursor-pointer">Apply selected times to all days</label>
+    <div class="apply-all-banner mb-3 p-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+            <p-checkbox binary="true" [ngModelOptions]="{ standalone: true }" [(ngModel)]="applyToAllDays"
+                inputId="applyToAllDays" (onChange)="onApplyToAllChange()"> </p-checkbox>
+            <label for="applyToAllDays" class="font-medium cursor-pointer text-sm text-gray-800 m-0">
+                Apply selected times to all days
+            </label>
+        </div>
+        <span class="text-xs text-gray-500 hidden sm:inline">Copy first day's schedule to all week days</span>
     </div>
     }
 
-    <p-accordion value="0">
-        <div formArrayName="days">
+    <!-- DAYS OF WEEK TABS (Like S08 Design) -->
+    <div class="day-tabs-scroll-wrapper mb-3">
+        <div class="day-tabs-container" id="day-tabs">
             @for (day of weekDays; track day; let dayIndex = $index) {
             @if (!isEdit || (isEdit && day.value == selectedDayOfWeek)) {
-            <p-accordion-panel [value]="dayIndex.toString()" [formGroupName]="dayIndex">
-                <p-accordion-header>{{ day.label }}</p-accordion-header>
-                <p-accordion-content>
-                    @if (hasDoctorSelected && !isEdit) {
-                        <div class="mb-4">
-                            <h6 class="text-md font-bold text-gray-700 mb-2 border-b pb-1">Currently Assigned Hours</h6>
-                            @if (isLoadingHours) {
-                                <div class="flex justify-center flex-col items-center py-4">
-                                    <p-progressSpinner styleClass="w-3rem h-3rem" strokeWidth="4"></p-progressSpinner>
-                                    <span class="text-gray-500 mt-2 text-sm">Loading working hours...</span>
-                                </div>
-                            } @else {
-                                @if (getGroupedAssignedHoursForDay(day.value).length > 0) {
-                                    <div class="flex flex-col gap-3 md:w-8/12 lg:w-6/12 xl:w-5/12">
-                                        @for (slot of getGroupedAssignedHoursForDay(day.value); track slot.id) {
-                                            <div class="bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition-shadow">
-                                                <div class="flex flex-col mb-3">
-                                                    <span class="text-lg font-bold text-gray-800">{{ slot.startTime.substring(0, 5) }} - {{ slot.endTime.substring(0, 5) }}</span>
-                                                </div>
-                                                <div class="text-sm text-gray-600">
-                                                    <div class="flex flex-col gap-2 mb-3">
-                                                        @if (isLoadingServices) {
-                                                            <div class="flex items-center gap-2 p-1">
-                                                                <p-progressSpinner styleClass="w-2rem h-2rem" strokeWidth="3"></p-progressSpinner>
-                                                                <span class="text-gray-500 text-sm">Loading services...</span>
-                                                            </div>
-                                                        } @else {
-                                                            @for (service of slot.services; track service) {
-                                                                <p class="flex items-center gap-2 m-0" [title]="service">
-                                                                    <i class="pi pi-briefcase text-gray-400"></i> 
-                                                                    <span class="truncate font-medium">{{ service }}</span>
-                                                                </p>
-                                                            }
-                                                        }
-                                                    </div>
-                                                    <div class="flex flex-col gap-2 pt-2 border-t border-gray-100">
-                                                        @for (location of slot.locations; track location) {
-                                                            <p class="flex items-center gap-2 m-0" [title]="location">
-                                                                <i class="pi pi-map-marker text-gray-400"></i> 
-                                                                <span class="truncate">{{ location }}</span>
-                                                            </p>
-                                                        }
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        }
-                                    </div>
-                                } @else {
-                                    <div class="text-sm text-orange-600 bg-orange-50 p-2 rounded border border-orange-200">
-                                        No working hours currently assigned for {{ day.label }}.
-                                    </div>
-                                }
-                            }
-                        </div>
-                    }
-
-                    <div formArrayName="workingHours">
-                        @for (workingHour of getDayWorkingHoursArray(dayIndex).controls; track workingHour; let
-                        workingHourIndex = $index) {
-                        <div class="card p-3 mb-3 border-0 shadow-sm surface-card border-round relative"
-                            [formGroupName]="workingHourIndex">
-                            <!-- Remove Button at top corner -->
-                            @if (getDayWorkingHoursArray(dayIndex).length > 0) {
-                                <div class="absolute top-0 right-0 mt-2 mr-2 z-1">
-                                    <p-button icon="pi pi-trash" [text]="true" [rounded]="true" severity="danger" (onClick)="removeWorkingHour(dayIndex, workingHourIndex)" pTooltip="Remove slot" />
-                                </div>
-                            }
-
-                            <div class="row g-3 align-items-end mb-3 mt-1">
-                                <!-- Start Time -->
-                                <div class="col-12 col-md-6">
-                                    <label [for]="'start-' + dayIndex + '-' + workingHourIndex" class="block font-medium mb-1"> Start time </label>
-                                    <p-select appendTo="body" formControlName="startTime" [inputId]="'start-' + dayIndex + '-' + workingHourIndex" [options]="durationOptions" optionLabel="label" optionValue="value" placeholder="Start" styleClass="w-full" (onChange)="onTimeChanged(dayIndex, workingHourIndex, true)">
-                                    </p-select>
-                                    @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.invalid && getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.touched) {
-                                        <small class="text-red-500 mt-1 block">Required</small>
-                                    }
-                                </div>
-
-                                <!-- End Time -->
-                                <div class="col-12 col-md-6">
-                                    <label [for]="'end-' + dayIndex + '-' + workingHourIndex" class="block font-medium mb-1"> End time </label>
-                                    <p-select appendTo="body" formControlName="endTime" [inputId]="'end-' + dayIndex + '-' + workingHourIndex" [options]="getEndTimeOptions(getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.value)" optionLabel="label" optionValue="value" placeholder="End" styleClass="w-full" (onChange)="onTimeChanged(dayIndex, workingHourIndex)">
-                                    </p-select>
-                                    @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.invalid && getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.touched) {
-                                        <small class="text-red-500 mt-1 block">Required</small>
-                                    }
-                                </div>
-                            </div>
-                            
-                            <div class="row g-3">
-                                <!-- Location -->
-                                <div class="col-12 col-md-6">
-                                    <label [for]="'loc-' + dayIndex + '-' + workingHourIndex" class="block font-medium mb-1"> Location </label>
-                                    <p-select appendTo="body" formControlName="locationId" [inputId]="'loc-' + dayIndex + '-' + workingHourIndex" [options]="locations" optionLabel="name" optionValue="id" placeholder="Location" styleClass="w-full" [filter]="true" filterBy="name" (onChange)="onFieldChanged(dayIndex, workingHourIndex)">
-                                    </p-select>
-                                    @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('locationId')?.invalid && getWorkingHourFormGroup(dayIndex, workingHourIndex).get('locationId')?.touched) {
-                                        <small class="text-red-500 mt-1 block">Required</small>
-                                    }
-                                </div>
-
-                                <!-- Service -->
-                                <div class="col-12 col-md-6">
-                                    <label [for]="'srv-' + dayIndex + '-' + workingHourIndex" class="block font-medium mb-1"> Service </label>
-                                    <p-treeSelect appendTo="body" formControlName="serviceId" [inputId]="'srv-' + dayIndex + '-' + workingHourIndex" [options]="serviceCategories" selectionMode="checkbox" display="chip" placeholder="Service" styleClass="w-full" containerStyleClass="w-full" [filter]="true" (onNodeSelect)="onFieldChanged(dayIndex, workingHourIndex)" (onNodeUnselect)="onFieldChanged(dayIndex, workingHourIndex)">
-                                    </p-treeSelect>
-                                    @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('serviceId')?.invalid && getWorkingHourFormGroup(dayIndex, workingHourIndex).get('serviceId')?.touched) {
-                                        <small class="text-red-500 mt-1 block">Required</small>
-                                    }
-                                </div>
-
-                                <!-- Group-level error -->
-                                @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).errors?.['startAfterEnd'] &&
-                                getWorkingHourFormGroup(dayIndex, workingHourIndex).touched) {
-                                <div class="col-12 mt-1">
-                                    <small class="text-red-500">Start time must be earlier than end time</small>
-                                </div>
-                                }
-                            </div>
-                        </div>
-                        }
-
-                        <!-- Show message when no working hours exist for this day -->
-                        @if (getDayWorkingHoursArray(dayIndex).length === 0) {
-                        <div class="flex flex-col items-center justify-center py-4 text-center">
-                            <i class="pi pi-calendar-times text-2xl mb-2 text-gray-400"></i>
-                            <div class="text-gray-500 italic">No working hours added for {{ day.label }}</div>
-                        </div>
-                        }
-                    </div>
-
-                    <!-- Add new working hour button for specific day -->
-                    <p-button label="Add Working Hour" icon="pi pi-plus" [outlined]="true" severity="primary"
-                        styleClass="w-full mt-2" (onClick)="addWorkingHour(dayIndex)" />
-
-                    <!-- Per-day Save / Cancel actions -->
-                    <div class="flex justify-end gap-2 mt-3">
-                        <p-button label="Cancel" [text]="true" severity="danger"
-                            pTooltip="This will clear all slots and cancel changes for this specific day"
-                            (onClick)="clearDay(dayIndex)" />
-                        <p-button label="Save" [outlined]="true" severity="success"
-                            [loading]="isSaving"
-                            (onClick)="saveClicked.emit()" />
-                    </div>
-                </p-accordion-content>
-            </p-accordion-panel>
+            <button type="button" class="day-tab" [class.active]="activeDayIndex === dayIndex"
+                [class.has-slots]="getDaySlotsCount(dayIndex) > 0"
+                [class.day-off]="getDaySlotsCount(dayIndex) === 0" (click)="selectDay(dayIndex)">
+                <div class="dt-name">{{ day.label }}</div>
+                @if (getDaySlotsCount(dayIndex) > 0) {
+                <div class="dt-status dt-ok">
+                    <i class="pi pi-check-circle text-xs mr-1"></i>
+                    {{ getDaySlotsCount(dayIndex) }} {{ getDaySlotsCount(dayIndex) === 1 ?
+                    'Slot' : 'Slots' }}
+                </div>
+                } @else {
+                <div class="dt-status dt-empty">
+                    Off
+                </div>
+                }
+            </button>
             }
             }
         </div>
-    </p-accordion>
+    </div>
+
+    <!-- DAY CONTENT EDITOR -->
+    <div formArrayName="days">
+        @for (day of weekDays; track day; let dayIndex = $index) {
+        @if (activeDayIndex === dayIndex && (!isEdit || (isEdit && day.value == selectedDayOfWeek))) {
+        <div [formGroupName]="dayIndex" class="day-content-card">
+            <!-- Day Title Bar -->
+            <div class="day-title-bar flex items-center justify-between mb-3 pb-2 border-b">
+                <div class="flex items-center gap-2">
+                    <h5 class="text-lg font-bold text-gray-800 m-0">
+                        {{ day.label }}
+                    </h5>
+                    @if (getDaySlotsCount(dayIndex) > 0) {
+                    <span class="badge-status badge-ok">
+                        {{ getDaySlotsCount(dayIndex) }} {{ getDaySlotsCount(dayIndex) === 1
+                        ? 'Slot' : 'Slots' }}
+                    </span>
+                    }
+                </div>
+
+                <div class="flex items-center gap-2">
+                    @if (getDayWorkingHoursArray(dayIndex).length > 0) {
+                    <button type="button" class="btn-clear-day" (click)="clearDay(dayIndex)"
+                        title="Clear all slots for this day">
+                        <i class="pi pi-trash text-xs"></i>
+                        <span>Clear Day</span>
+                    </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Currently Assigned Hours (if user already has hours) -->
+            @if (hasDoctorSelected && !isEdit) {
+            <div class="currently-assigned-container mb-4">
+                <div class="assigned-header-row">
+                    <div class="flex items-center gap-2">
+                        <div class="assigned-header-icon">
+                            <i class="pi pi-history"></i>
+                        </div>
+                        <div>
+                            <h6 class="assigned-title">Currently Assigned Hours</h6>
+                            <p class="assigned-subtitle">Active scheduled slots for {{ day.label }}</p>
+                        </div>
+                    </div>
+                    @if (!isLoadingHours && getGroupedAssignedHoursForDay(day.value).length > 0) {
+                    <span class="assigned-count-badge">
+                        {{ getGroupedAssignedHoursForDay(day.value).length }} Active {{
+                        getGroupedAssignedHoursForDay(day.value).length === 1 ? 'Slot' : 'Slots' }}
+                    </span>
+                    }
+                </div>
+
+                @if (isLoadingHours) {
+                <div class="assigned-loading-state">
+                    <p-progressSpinner styleClass="w-5 h-5" strokeWidth="4"></p-progressSpinner>
+                    <span>Loading assigned hours...</span>
+                </div>
+                } @else {
+                @if (getGroupedAssignedHoursForDay(day.value).length > 0) {
+                <div class="assigned-slots-grid">
+                    @for (slot of getGroupedAssignedHoursForDay(day.value); track slot.id) {
+                    <div class="assigned-slot-card">
+                        <div class="slot-card-top">
+                            <div class="slot-time-group">
+                                <i class="pi pi-clock slot-clock-icon"></i>
+                                <span class="slot-time-text">
+                                    {{ slot.startTime.substring(0, 5) }} — {{ slot.endTime.substring(0, 5) }}
+                                </span>
+                                @if (calculateDuration(slot.startTime, slot.endTime)) {
+                                <span class="slot-duration-pill">
+                                    {{ calculateDuration(slot.startTime, slot.endTime) }}
+                                </span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="slot-card-meta">
+                            <!-- Location / Branch -->
+                            <div class="slot-meta-item">
+                                <span class="meta-tag-label">
+                                    <i class="pi pi-map-marker text-rose-500"></i>
+                                    Branch:
+                                </span>
+                                <div class="meta-pill-group">
+                                    @for (loc of slot.locations; track loc) {
+                                    <span class="meta-location-pill">{{ loc }}</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <!-- Services -->
+                            <div class="slot-meta-item">
+                                <span class="meta-tag-label">
+                                    <i class="pi pi-briefcase text-blue-500"></i>
+                                    Services:
+                                </span>
+                                <div class="meta-pill-group">
+                                    @if (isLoadingServices) {
+                                    <span class="text-xs text-gray-400">Loading services...</span>
+                                    } @else {
+                                    @for (srv of slot.services; track srv) {
+                                    <span class="meta-service-pill" [title]="srv">{{ srv }}</span>
+                                    }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    }
+                </div>
+                } @else {
+                <div class="assigned-empty-state">
+                    <i class="pi pi-info-circle"></i>
+                    <span>No working hours currently assigned for <strong>{{ day.label }}</strong>.</span>
+                </div>
+                }
+                }
+            </div>
+            }
+
+            <!-- SLOTS FOR THIS DAY -->
+            <div formArrayName="workingHours" class="slots-container">
+                @for (workingHour of getDayWorkingHoursArray(dayIndex).controls; track workingHour; let workingHourIndex
+                = $index) {
+                <div class="time-slot" [formGroupName]="workingHourIndex">
+                    <!-- Slot Header -->
+                    <div class="ts-header">
+                        <div class="flex items-center gap-2">
+                            <span class="slot-dot" [style.backgroundColor]="getSlotColor(workingHourIndex)"></span>
+                            <span class="slot-title">{{ getSlotTitle(workingHourIndex) }}</span>
+                            @if (calculateDuration(getWorkingHourFormGroup(dayIndex,
+                            workingHourIndex).get('startTime')?.value, getWorkingHourFormGroup(dayIndex,
+                            workingHourIndex).get('endTime')?.value)) {
+                            <span class="slot-duration-pill">
+                                {{ calculateDuration(getWorkingHourFormGroup(dayIndex,
+                                workingHourIndex).get('startTime')?.value, getWorkingHourFormGroup(dayIndex,
+                                workingHourIndex).get('endTime')?.value) }}
+                            </span>
+                            }
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <button type="button" class="btn-slot-delete"
+                                (click)="removeWorkingHour(dayIndex, workingHourIndex)" title="Delete this slot">
+                                <i class="pi pi-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Slot Body -->
+                    <div class="ts-body">
+                        <!-- Time & Branch Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                            <!-- Time Range: From - To -->
+                            <div>
+                                <label class="ts-label mb-1 block">Time Range</label>
+                                <div class="flex items-center gap-2">
+                                    <div class="flex-1">
+                                        <p-select appendTo="body" formControlName="startTime"
+                                            [inputId]="'start-' + dayIndex + '-' + workingHourIndex"
+                                            [options]="durationOptions" optionLabel="label" optionValue="value"
+                                            placeholder="Start" styleClass="w-full"
+                                            (onChange)="onTimeChanged(dayIndex, workingHourIndex, true)">
+                                        </p-select>
+                                    </div>
+                                    <span class="text-gray-400 font-bold">—</span>
+                                    <div class="flex-1">
+                                        <p-select appendTo="body" formControlName="endTime"
+                                            [inputId]="'end-' + dayIndex + '-' + workingHourIndex"
+                                            [options]="getEndTimeOptions(getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.value)"
+                                            optionLabel="label" optionValue="value" placeholder="End"
+                                            styleClass="w-full" (onChange)="onTimeChanged(dayIndex, workingHourIndex)">
+                                        </p-select>
+                                    </div>
+                                </div>
+                                @if ((getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.invalid &&
+                                getWorkingHourFormGroup(dayIndex, workingHourIndex).get('startTime')?.touched) ||
+                                (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.invalid &&
+                                getWorkingHourFormGroup(dayIndex, workingHourIndex).get('endTime')?.touched)) {
+                                <small class="text-red-500 mt-1 block">Start and end times are required</small>
+                                }
+                            </div>
+
+                            <!-- Branch / Location -->
+                            <div>
+                                <label class="ts-label mb-1 block">Location / Branch</label>
+                                <p-select appendTo="body" formControlName="locationId"
+                                    [inputId]="'loc-' + dayIndex + '-' + workingHourIndex" [options]="locations"
+                                    optionLabel="name" optionValue="id" placeholder="Select location..."
+                                    styleClass="w-full" [filter]="true" filterBy="name"
+                                    (onChange)="onFieldChanged(dayIndex, workingHourIndex)">
+                                </p-select>
+                                @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('locationId')?.invalid &&
+                                getWorkingHourFormGroup(dayIndex, workingHourIndex).get('locationId')?.touched) {
+                                <small class="text-red-500 mt-1 block">Location is required</small>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Services Selection -->
+                        <div>
+                            <label class="ts-label mb-1 block">
+                                Available Services
+                                <span class="text-xs text-gray-500 font-normal mr-1">(Multiple selection
+                                    supported)</span>
+                            </label>
+                            <p-treeSelect appendTo="body" formControlName="serviceId"
+                                [inputId]="'srv-' + dayIndex + '-' + workingHourIndex" [options]="serviceCategories"
+                                selectionMode="checkbox" display="chip" placeholder="Select services..."
+                                styleClass="w-full" containerStyleClass="w-full" [filter]="true"
+                                (onNodeSelect)="onFieldChanged(dayIndex, workingHourIndex)"
+                                (onNodeUnselect)="onFieldChanged(dayIndex, workingHourIndex)">
+                            </p-treeSelect>
+                            @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).get('serviceId')?.invalid &&
+                            getWorkingHourFormGroup(dayIndex, workingHourIndex).get('serviceId')?.touched) {
+                            <small class="text-red-500 mt-1 block">At least one service is required</small>
+                            }
+                        </div>
+                        <!-- Group-level error (Start >= End) -->
+                        @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).errors?.['startAfterEnd'] &&
+                        getWorkingHourFormGroup(dayIndex, workingHourIndex).touched) {
+                        <div class="text-red-500 text-xs mt-2 flex items-center gap-1">
+                            <i class="pi pi-times-circle"></i>
+                            <span>Start time must be earlier than end time</span>
+                        </div>
+                        }
+
+                        <!-- Duplicate Times Error -->
+                        @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).errors?.['duplicateTimes']) {
+                        <div
+                            class="text-red-500 text-xs mt-2 flex items-center gap-1 font-medium bg-red-50 p-2 rounded border border-red-200">
+                            <i class="pi pi-exclamation-circle text-red-600"></i>
+                            <span>Duplicate time range: This start and end time is already used by another slot on {{
+                                day.label }}.</span>
+                        </div>
+                        }
+
+                        <!-- Overlapping Times Error -->
+                        @if (getWorkingHourFormGroup(dayIndex, workingHourIndex).errors?.['overlappingTimes'] &&
+                        !getWorkingHourFormGroup(dayIndex, workingHourIndex).errors?.['duplicateTimes']) {
+                        <div
+                            class="text-red-500 text-xs mt-2 flex items-center gap-1 font-medium bg-red-50 p-2 rounded border border-red-200">
+                            <i class="pi pi-exclamation-triangle text-red-600"></i>
+                            <span>Time overlap: This slot overlaps with another time slot on {{ day.label }}.</span>
+                        </div>
+                        }
+                    </div>
+                </div>
+                }
+
+                <!-- Add Slot Button under the defined slot(s) -->
+                @if (getDayWorkingHoursArray(dayIndex).length > 0) {
+                <div class="mt-3 mb-2">
+                    <button type="button" class="btn-add-slot-under" (click)="addWorkingHour(dayIndex)">
+                        <i class="pi pi-plus text-xs"></i>
+                        <span>Add Another Slot</span>
+                    </button>
+                </div>
+                }
+
+                <!-- Empty state when no working hours exist for this day -->
+                @if (getDayWorkingHoursArray(dayIndex).length === 0) {
+                <div
+                    class="empty-day-state py-5 px-4 text-center rounded-lg border border-dashed border-gray-300 bg-gray-50">
+                    <i class="pi pi-calendar-times text-2xl text-gray-400 mb-2 block"></i>
+                    <div class="font-semibold text-gray-700 text-sm">No working hours scheduled for {{ day.label }}
+                    </div>
+
+                    <button type="button" class="btn-add-slot-under" style="max-width: 220px; margin: 0 auto;"
+                        (click)="addWorkingHour(dayIndex)">
+                        <i class="pi pi-plus text-xs"></i>
+                        <span>Add Working Slot</span>
+                    </button>
+                </div>
+                }
+            </div>
+
+            <!-- Per-day Action Buttons -->
+            <div class="day-footer-actions flex justify-between items-center mt-4 pt-3 border-t">
+                <button type="button" class="btn-day-cancel" (click)="clearDay(dayIndex)"
+                    title="Clear changes for this day">
+                    <i class="pi pi-times text-xs"></i>
+                    <span>Clear Day Changes</span>
+                </button>
+                <button type="button" class="btn-day-save" [disabled]="isSaving || hasTimeConflicts(dayIndex)"
+                    [class.opacity-50]="hasTimeConflicts(dayIndex)" (click)="onSaveClicked(dayIndex)">
+                    @if (isSaving) {
+                    <i class="pi pi-spin pi-spinner text-xs mr-1"></i>
+                    <span>Saving...</span>
+                    } @else {
+                    <i class="pi pi-check text-xs mr-1"></i>
+                    <span>Save Schedule</span>
+                    }
+                </button>
+            </div>
+        </div>
+        }
+        }
+    </div>
 </form>

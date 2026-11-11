@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -82,6 +82,7 @@ export class WorkingHoursComponent implements OnInit {
     workingHoursToEdit: any[] = [];
     selectedUserId: any = null;
     flatDialogUserWorkingHours: any[] = [];
+    @ViewChild(AssingHoursComponent) assignHoursComponent?: AssingHoursComponent;
     carouselResponsiveOptions: any[] | undefined;
 
     constructor(
@@ -118,6 +119,7 @@ export class WorkingHoursComponent implements OnInit {
 
     //here is the function needed to open a dialog needed to add a new working hours
     openAddWorkingHours(): void {
+        this.hideDialog();
         this.showWorkingHoursDialog = true;
     }
     ngOnInit(): void {
@@ -164,6 +166,11 @@ export class WorkingHoursComponent implements OnInit {
 
     //here is the function needed to close the dialog and rese all needed data
     hideDialog(): void {
+        this.assignHoursComponent?.resetForm();
+        this.workingHoursToBeSent = [];
+        this.selectedDayOfWeek = null;
+        this.workingHoursForm.markAsPristine();
+        this.workingHoursForm.markAsUntouched();
         this.workingHoursForm.reset();
         this.isDelete = false;
         this.isEdit = false;
@@ -190,12 +197,13 @@ export class WorkingHoursComponent implements OnInit {
     getAllUsers(): void {
         this.userService.getAllUsers().subscribe({
             next: (users: any) => {
-                this.allUsers = users.data.map((user: any) => {
-                    return {
-                        id: user.id,
-                        name: user.nameEn
-                    };
-                });
+                this.allUsers = users.data.filter((user: any) => { return user.userType === 1 }).
+                    map((user: any) => {
+                        return {
+                            id: user.id,
+                            name: user.nameEn
+                        };
+                    });
             },
             error: (err) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch users.' });
@@ -276,9 +284,10 @@ export class WorkingHoursComponent implements OnInit {
             : this._workingHoursService.getWorkingHours();
 
         fetchObservable.subscribe({
-            next: (res: any[]) => {
+            next: (res: any) => {
+                const list = Array.isArray(res) ? res : (res?.data || []);
 
-                this.groupWorkingHours(res);
+                this.groupWorkingHours(list);
             },
             error: (error: any) => {
                 this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch Working hours' });
@@ -303,9 +312,10 @@ export class WorkingHoursComponent implements OnInit {
 
         // 1. Fetch Working Hours
         this._workingHoursService.getWorkingHoursByUserId(userId).subscribe({
-            next: (res: any[]) => {
-                this.dialogUserWorkingHours = this.groupWorkingHoursData(res);
-                this.flatDialogUserWorkingHours = res.map(item => {
+            next: (res: any) => {
+                const list = Array.isArray(res) ? res : (res?.data || []);
+                this.dialogUserWorkingHours = this.groupWorkingHoursData(list);
+                this.flatDialogUserWorkingHours = list.map((item: any) => {
                     const dayInfo = this.weekDays.find((d) => d.value == item.dayOfWeek);
                     return {
                         ...item,
@@ -629,9 +639,10 @@ export class WorkingHoursComponent implements OnInit {
 
         // 1. Fetch Working Hours for display
         this._workingHoursService.getWorkingHoursByUserId(item.doctorId).subscribe({
-            next: (res: any[]) => {
-                this.dialogUserWorkingHours = this.groupWorkingHoursData(res);
-                this.flatDialogUserWorkingHours = res.map(i => {
+            next: (res: any) => {
+                const list = Array.isArray(res) ? res : (res?.data || []);
+                this.dialogUserWorkingHours = this.groupWorkingHoursData(list);
+                this.flatDialogUserWorkingHours = list.map((i: any) => {
                     const dayInfo = this.weekDays.find((d) => d.value == i.dayOfWeek);
                     return { ...i, dayLabel: dayInfo ? dayInfo.label : '' };
                 });
