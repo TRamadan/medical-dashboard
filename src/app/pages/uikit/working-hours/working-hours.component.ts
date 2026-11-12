@@ -493,11 +493,30 @@ export class WorkingHoursComponent implements OnInit {
             next: (res: any) => {
                 this.isSaving = false;
                 this.getAllAddedWorkingHours();
-                this.hideDialog();
                 this.messageService.add({
                     severity: 'success',
                     summary: 'Success',
                     detail: 'Working hours created successfully.'
+                });
+                this.confirmationService.confirm({
+                    message: 'Would you like to add working hours for another day?',
+                    header: 'Add More Days?',
+                    icon: 'pi pi-calendar-plus',
+                    acceptLabel: 'Yes, Add More',
+                    rejectLabel: 'No, Done',
+                    acceptIcon: 'pi pi-check',
+                    rejectIcon: 'pi pi-times',
+                    acceptButtonStyleClass: 'p-button-primary',
+                    rejectButtonStyleClass: 'p-button-secondary p-button-outlined',
+                    accept: () => {
+                        // Stay in the dialog — reset only the slots so the user can configure another day
+                        this.assignHoursComponent?.resetForm();
+                        this.workingHoursToBeSent = [];
+                    },
+                    reject: () => {
+                        // User is done — close the dialog
+                        this.hideDialog();
+                    }
                 });
             },
             error: (error: any) => {
